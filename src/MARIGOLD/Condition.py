@@ -1,37 +1,39 @@
-#
-# This file contains the Condition class, which is an abstraction to handle local probe data
-#
-# Data is stored in the Condition.phi property. It's actually 3 layers of dictionary
-# phi [angle] gives a dictionary with the various r/R
-# phi [angle][r/R] gives a dictionary with the MIDAS output
-# The MIDAS output is itself a dictionary, with the keys listed in the "tab_keys" array
-# So phi[angle][r/R]['alpha'] should give you the void fraction at r/R for phi = angle
-# This structure is initialized with zeros for the MIDAS output at the pipe center and wall
-# 
-# Methods:
-#   pretty_print- Prints out the data in the condition in a more human-readable way
-#   mirror- Copies any data in the negative r/R for a given phi to the corresponding complementary angle. 
-#           Also copies data assuming some kind of symmetry. Ensures all angles (22.5° increments) are 
-#           represented with data, and that the data ranges from r/R 0-1. Data is guaranteed to exist for
-#           at least r/R = 0 and r/R = 1 (filled with zero_data if no data exists) for plotting
-#   approx_vf- calculates approximate vf based on a simple power law profile
-#   approx_vf_Kong- calculates approximate vf based on Kong's asymmetric method (TODO)
-#   calc_vr- calculates the relative velocity vg - vf
-#   grad-
-#   area_avg- 
-#   line_avg-
-#   line_dev-
-#   void_area_avg-
-#   calc_void_cov-
-#   calc_sigma_alpha-
-#   calc_mu3_alpha-
-#   top_bottom-
-#   plot_profiles- the 2D line plots we make 
-#   plot_contours- cool contour plots
-#   plot_surface- rad surface plots
-#   rough_FR_ID- rough flow regime identification
-#   TD_FR_ID- Flow regime identification from Taitel and Dukler (TODO)
-#
+"""
+This is the the Condition class, which is the main abstraction to handle local probe data
+
+Data is stored in the Condition.phi property. It's actually 3 layers of dictionary
+phi [angle] gives a dictionary with the various r/R
+phi [angle][r/R] gives a dictionary with the MIDAS output
+The MIDAS output is itself a dictionary, with the keys listed in the "tab_keys" array
+So phi[angle][r/R]['alpha'] should give you the void fraction at r/R for phi = angle
+This structure is initialized with zeros for the MIDAS output at the pipe center and wall
+
+Methods:
+  pretty_print- Prints out the data in the condition in a more human-readable way
+  mirror- Copies any data in the negative r/R for a given phi to the corresponding complementary angle. 
+          Also copies data assuming some kind of symmetry. Ensures all angles (22.5° increments) are 
+          represented with data, and that the data ranges from r/R 0-1. Data is guaranteed to exist for
+          at least r/R = 0 and r/R = 1 (filled with zero_data if no data exists) for plotting
+  approx_vf- calculates approximate vf based on a simple power law profile
+  approx_vf_Kong- calculates approximate vf based on Kong's asymmetric method (TODO)
+  calc_vr- calculates the relative velocity vg - vf
+  calc_vgj- calculate local vg - j
+  calc_grad- calculates gradient and saves the local information in self.phi[angle][r/R]['grad_"param name"_"direction"]
+             where direction can be "r", "phi", "total" or "y" as of now
+  area_avg- 
+  line_avg-
+  line_dev-
+  void_area_avg-
+  calc_void_cov-
+  calc_sigma_alpha-
+  calc_mu3_alpha-
+  top_bottom-
+  plot_profiles- the 2D line plots we make 
+  plot_contours- cool contour plots
+  plot_surface- rad surface plots
+  rough_FR_ID- rough flow regime identification
+  TD_FR_ID- Flow regime identification from Taitel and Dukler (TODO)
+"""
 
 from .config import *
 from scipy import interpolate
@@ -1105,7 +1107,7 @@ class Condition:
             ax = fake_ax.get_aux_axes(transform)
 
         else:
-            fig, ax = plt.subplots(figsize=(figsize, figsize), dpi=300)
+            fig, ax = plt.subplots(figsize=(figsize, figsize), dpi=300, layout='compressed')
             fake_ax = ax
 
         # Only show ticks on the left and bottom spines
@@ -1139,10 +1141,13 @@ class Condition:
                 vals = [var for _, var in sorted(zip(rs, vals))]
                 rs = sorted(rs)
                     
-                ax.plot(vals, rs, label=f'{angle}°', color=next(cs), marker=next(ms), linestyle = '--', markersize = 4)
+                ax.plot(vals, rs, label=f'{angle}°', color=next(cs), marker=next(ms), linestyle = '--')
             ax.set_ylim(-1, 1)
+            ax.set_xlim(self.min(param), self.max(param)*1.2)
+            ax.set_aspect('equal')
         
         elif x_axis == 'phi':
+            ax.plot([], [], label=r'$r/R$', color='white', linestyle = None)
             for rtarget in const_to_plot:
                 phis = []
                 vals = []
@@ -1155,9 +1160,9 @@ class Condition:
                 vals = [var for _, var in sorted(zip(phis, vals))]
                 phis = sorted(phis)
                 if rotate:
-                    ax.plot(vals, phis, label=f'{rtarget} [-]', color=next(cs), marker=next(ms), linestyle = '--', markersize = 4)
+                    ax.plot(vals, phis, label=f'{rtarget:0.1f}', color=next(cs), marker=next(ms), linestyle = '--')
                 else:
-                    ax.plot(phis, vals, label=f'{rtarget} [-]', color=next(cs), marker=next(ms), linestyle = '--', markersize = 4)
+                    ax.plot(phis, vals, label=f'{rtarget:0.1f}', color=next(cs), marker=next(ms), linestyle = '--')
             if rotate:
                 ax.set_ylim(0, 360)
                 ax.set_xlim(self.min(param), self.max(param))
@@ -1167,9 +1172,6 @@ class Condition:
         else:
             print(f"invalid axis for plot_profiles: {x_axis}. Current supported options are 'r' and 'phi'")
             return
-        
-        fake_ax.legend(bbox_to_anchor=(1.1, 1.1), loc='upper right', edgecolor="white")
-        
         
         if x_axis == 'r':
             if param == 'alpha':
@@ -1181,6 +1183,8 @@ class Condition:
             else:
                 fake_ax.set_xlabel(param)
             fake_ax.set_ylabel(r'$r/R$ [-]')
+            fake_ax.set_yticks(np.arange(-1, 1.01, 0.2))
+            #fake_ax.set_xticks(np.linspace(self.min(param), self.max(param), 7))
 
         elif x_axis == 'phi':
             if not rotate:
@@ -1195,7 +1199,7 @@ class Condition:
                 fake_ax.set_xlabel(r'$\varphi$ [-]')
 
                 fake_ax.set_xticks([0, 90, 180, 270, 360])
-                fake_ax.set_yticks(np.linspace(self.min(param), self.max(param), 7))
+                #fake_ax.set_yticks(np.linspace(self.min(param), self.max(param), 7))
             else:
                 if param == 'alpha':
                     fake_ax.set_xlabel(r'$\alpha$ [-]')
@@ -1207,29 +1211,30 @@ class Condition:
                     fake_ax.set_xlabel(param)
                 fake_ax.set_ylabel(r'$\varphi$ [-]')
                 
-                #fake_ax.set_xticks([0, 90, 180, 270, 360])
-                #fake_ax.set_yticks(np.linspace(self.min(param), self.max(param), 7))
+                fake_ax.set_yticks([0, 90, 180, 270, 360])
+                fake_ax.set_xticks(np.linspace(self.min(param), self.max(param), 7))
 
                 #fake_ax.tick_params(axis='both', labelrotation=-self.theta)
         
         if title:
-            ax.title(self.name)
+            ax.set_title(self.name)
 
         ax.spines['bottom'].set_position(('data', 0))
         ax.spines['top'].set_visible(False)
         ax.spines['right'].set_visible(False)
-
-        #
-        #
+        
         if rotate:
             fig.add_subplot(fake_ax)
+        fig.legend(loc='outside right lower', edgecolor='white')
 
-        else:
-            plt.tight_layout()
+        fake_ax.set_aspect('equal', adjustable='box')
+        ax.set_aspect('equal', adjustable='box')
+        
         if show:
             plt.show()
         else:
-            plt.savefig(os.path.join(save_dir, f'{param}_profile_{self.name}.png'))
+            plt.savefig(os.path.join(save_dir, f'{param}_profile_vs_{x_axis}_{self.name}.png'))
+            plt.close()
         return    
 
     def plot_contour(self, param:str, save_dir = '.', show=True, set_max = None, set_min = None, figsize = 4,
