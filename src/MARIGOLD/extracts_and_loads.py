@@ -573,7 +573,13 @@ def extractProbeDataFromDir(path, dump_file = 'database.dat', in_dir = [], requi
             ws = wb['1']
 
             jglocs = ['O16', 'O17', 'O18', 'O19', 'O20']
-            jgloc = ws[jglocs[int(re.findall(r'\d+', port)[0])]].value
+            try:
+                jgloc = ws[jglocs[int(re.findall(r'\d+', port)[0])]].value
+                #jgloc = ws[jglocs[int(port.strip('P'))]].value
+            except Exception as e:
+                print(e)
+                print(f"Warning: Could not identify port # for {file}, setting jgloc = jgP3")
+                jgloc = jgP3
 
             newCond = Condition(jgP3, jgloc, jf, theta, port, 'Ryan')
 
@@ -636,7 +642,7 @@ def extractProbeDataFromDir(path, dump_file = 'database.dat', in_dir = [], requi
                         if len(tab_keys) == len( midas_output ):
                             data = dict( zip( tab_keys, midas_output ))
                         else:
-                            print("Warning, tab_keys not the same length as midas_output")
+                            if debug: print("Warning, tab_keys not the same length as midas_output")
                             data = dict( zip( tab_keys, midas_output ))
                             if debug:
                                 print("tab_keys not the same length as midas_output", file=debugFID)
