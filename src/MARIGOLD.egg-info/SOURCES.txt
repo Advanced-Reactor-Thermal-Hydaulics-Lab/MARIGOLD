@@ -1,0 +1,15 @@
+LICENSE
+README.md
+pyproject.toml
+setup.cfg
+src/MARIGOLD/Condition.py
+src/MARIGOLD/Iskandrani_Condition.py
+src/MARIGOLD/Yang_Condition.py
+src/MARIGOLD/__init__.py
+src/MARIGOLD/config.py
+src/MARIGOLD/extracts_and_loads.py
+src/MARIGOLD.egg-info/PKG-INFO
+src/MARIGOLD.egg-info/SOURCES.txt
+src/MARIGOLD.egg-info/dependency_links.txt
+src/MARIGOLD.egg-info/requires.txt
+src/MARIGOLD.egg-info/top_level.txt

@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "MARIGOLD"
+version = "0.0.1"
+authors = [
+  { name="adix", email="adix@purdue.edu" },
+]
+description = "Library for handling Two-phase flow data"
+readme = "README.md"
+requires-python = ">=3.7"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "numpy", 
+    "matplotlib", 
+    "scipy", 
+    "openpyxl"
+]
