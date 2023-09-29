@@ -444,6 +444,7 @@ class Condition:
         return
     
     def fit_spline(self, param: str) -> None:
+        """Fits a LSQBivariateSpline for the given param. Can access later with self.spline_interp[param]"""
         try: dummy = self.spline_interp
         except:
             self.spline_interp = {}
@@ -451,12 +452,24 @@ class Condition:
         rs = []
         phis = []
         vals = []
+
+        r_knots = set()
+        phi_knots = set()
+
         for angle, r_dict in self.phi.items():
+            phi_knots.add(angle* np.pi / 180)
             for rstar, midas_dict in r_dict.items(): 
                 rs.append(rstar)
                 phis.append(angle * np.pi / 180)
                 vals.append(midas_dict[param])
-        spline_interpolant = interpolate.SmoothBivariateSpline(phis, rs, vals)
+                r_knots.add(rstar)
+        r_knots = list(r_knots)
+        r_knots.sort()
+
+        phi_knots = list(r_knots)
+        phi_knots.sort()
+        
+        spline_interpolant = interpolate.LSQBivariateSpline(phis, rs, vals, phi_knots, r_knots)
         self.spline_interp.update({param: spline_interpolant})
         return
     
