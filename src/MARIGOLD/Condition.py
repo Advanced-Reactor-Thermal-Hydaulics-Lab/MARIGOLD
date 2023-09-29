@@ -109,6 +109,12 @@ class Condition:
             self.marker_type = '$?$'
             self.marker_color = 'yellow'
 
+        # Empty dictionaries, filled when max or area avg is called
+        self.area_avgs = {}
+        self.circ_seg_area_avgs = {}
+        self.maxs = {}
+        self.mins = {}
+
     def __eq__(self, __o: object) -> bool:
         if isinstance(__o, Condition):
 
@@ -454,14 +460,16 @@ class Condition:
         self.spline_interp.update({param: spline_interpolant})
         return
     
-    def max(self, param: str) -> float:
+    def max(self, param: str, recalc=False) -> float:
+        if (param in self.maxs.keys()) and (not recalc):
+            return self.maxs(param) # why waste time 
         max = 0
         for angle, r_dict in self.phi.items():
             for rstar, midas_dict in r_dict.items():
                 if midas_dict[param] > max:
                     max = midas_dict[param]
                     location = rstar
-
+        self.maxs.update({param:max})
         return (max)
 
     def max_loc(self, param: str)-> tuple:
@@ -474,14 +482,16 @@ class Condition:
 
         return (location)
     
-    def min(self, param: str)-> float:
+    def min(self, param: str, recalc = False)-> float:
+        if (param in self.mins.keys()) and (not recalc):
+            return self.mins[param] # why waste time 
         min = 10**7
         for angle, r_dict in self.phi.items():
             for rstar, midas_dict in r_dict.items():
                 if midas_dict[param] < min:
                     min = midas_dict[param]
                     location = rstar
-
+        self.mins.update({param:min})
         return (min)
 
     def min_loc(self, param: str)-> float:
@@ -606,7 +616,7 @@ class Condition:
         print('Invalid method for find_h_pos')
         return np.NaN
 
-    def area_avg(self, param: str, even_opt='first') -> float:
+    def area_avg(self, param: str, even_opt='first', recalc = False) -> float:
         
         # Check that the parameter that the user requested exists
         try:
@@ -616,6 +626,9 @@ class Condition:
             if debug: print(self.phi, file=debugFID)
             print(f"Cound not area-average {param} for condition {self.name}")
             return
+        
+        if (param in self.area_avgs.keys()) and (not recalc):
+            return self.area_avgs[param] # why waste time, if we already calculated this don't do it again
         
         # We have to integrate twice, once with resepect to r, again with respect to phi
         # Start with r
@@ -656,6 +669,7 @@ class Condition:
         angles = sorted(angles)
 
         I = integrate.simpson(param_r, angles, even=even_opt) / np.pi # Integrate wrt theta, divide by normalized area
+        self.area_avgs.update({param: I})
         return I
 
     def circ_segment_area_avg(self, param:str, hstar:float, ngridr=25, ngridphi=25, int_err = 10**-4) -> float:
@@ -1080,7 +1094,7 @@ class Condition:
     
     def plot_profiles(self, param, save_dir = '.', show=True, x_axis='r', 
                       const_to_plot = [90, 67.5, 45, 22.5, 0], include_complement = True, 
-                      rotate=False, figsize=4, title=True) -> None:
+                      rotate=False, fig_size=4, title=True) -> None:
         """Plot profiles of param over x_axis, for const_to_plot, i.e. α over r/R for φ = [90, 67.5 ... 0]. include_complement will continue with the negative side if x_axis = 'r' """
         self.mirror()
         plt.rcParams.update({'font.size': 12})
@@ -1093,13 +1107,13 @@ class Condition:
             import matplotlib as mpl
             from matplotlib.transforms import Affine2D
             import mpl_toolkits.axisartist.floating_axes as floating_axes
-            fig = plt.figure(figsize=(figsize, figsize))
+            fig = plt.figure(figsize=(fig_size, fig_size))
             if x_axis == 'r':
                 plot_extents = self.min(param), self.max(param)*1.1, -1, 1
-                transform = Affine2D().scale(figsize / (self.max(param)*1.1 - self.min(param)), figsize / (1 - -1)).rotate_deg(self.theta)
+                transform = Affine2D().scale(fig_size / (self.max(param)*1.1 - self.min(param)), fig_size / (1 - -1)).rotate_deg(self.theta)
             else:
                 plot_extents = self.min(param), self.max(param)*1.1, 0, 360
-                transform = Affine2D().scale(figsize / (self.max(param)*1.1 - self.min(param)), figsize / (360-0)).rotate_deg(self.theta)
+                transform = Affine2D().scale(fig_size / (self.max(param)*1.1 - self.min(param)), fig_size / (360-0)).rotate_deg(self.theta)
             
             
             helper = floating_axes.GridHelperCurveLinear(transform, plot_extents)
@@ -1107,7 +1121,7 @@ class Condition:
             ax = fake_ax.get_aux_axes(transform)
 
         else:
-            fig, ax = plt.subplots(figsize=(figsize, figsize), dpi=300, layout='compressed')
+            fig, ax = plt.subplots(figsize=(fig_size, fig_size), dpi=300, layout='compressed')
             fake_ax = ax
 
         # Only show ticks on the left and bottom spines
@@ -1144,7 +1158,7 @@ class Condition:
                 ax.plot(vals, rs, label=f'{angle}°', color=next(cs), marker=next(ms), linestyle = '--')
             ax.set_ylim(-1, 1)
             ax.set_xlim(self.min(param), self.max(param)*1.2)
-            ax.set_aspect('equal')
+            
         
         elif x_axis == 'phi':
             ax.plot([], [], label=r'$r/R$', color='white', linestyle = None)
@@ -1166,9 +1180,11 @@ class Condition:
             if rotate:
                 ax.set_ylim(0, 360)
                 ax.set_xlim(self.min(param), self.max(param))
+                
             else:
                 ax.set_xlim(0, 360)
                 ax.set_ylim(self.min(param), self.max(param))
+                
         else:
             print(f"invalid axis for plot_profiles: {x_axis}. Current supported options are 'r' and 'phi'")
             return
@@ -1212,7 +1228,7 @@ class Condition:
                 fake_ax.set_ylabel(r'$\varphi$ [-]')
                 
                 fake_ax.set_yticks([0, 90, 180, 270, 360])
-                fake_ax.set_xticks(np.linspace(self.min(param), self.max(param), 7))
+                # fake_ax.set_xticks(np.linspace(self.min(param), self.max(param), 7))
 
                 #fake_ax.tick_params(axis='both', labelrotation=-self.theta)
         
@@ -1225,10 +1241,11 @@ class Condition:
         
         if rotate:
             fig.add_subplot(fake_ax)
-        fig.legend(loc='outside right lower', edgecolor='white')
+        ax.legend(loc='lower right', edgecolor='white')
 
-        fake_ax.set_aspect('equal', adjustable='box')
-        ax.set_aspect('equal', adjustable='box')
+        fake_ax.set_aspect('auto', adjustable='datalim', share=True)
+        ax.set_aspect('auto', adjustable='datalim', share=True)
+        #fake_ax.set_box_aspect(1)
         
         if show:
             plt.show()
@@ -1237,14 +1254,14 @@ class Condition:
             plt.close()
         return    
 
-    def plot_contour(self, param:str, save_dir = '.', show=True, set_max = None, set_min = None, figsize = 4,
+    def plot_contour(self, param:str, save_dir = '.', show=True, set_max = None, set_min = None, fig_size = 4,
                      rot_angle = 0, ngridr = 50, ngridphi = 50, colormap = 'viridis', num_levels = 100,
                      annotate_h = False, cartesian = False, h_star_kwargs = {'method': 'max_dsm', 'min_void': '0.05'}) -> None:
         
         if cartesian:
-            fig, ax = plt.subplots(figsize=(figsize, figsize), dpi=300)
+            fig, ax = plt.subplots(figsize=(fig_size, fig_size), dpi=300)
         else:
-            fig, ax = plt.subplots(figsize=(figsize, figsize), dpi=300, subplot_kw=dict(projection='polar'))
+            fig, ax = plt.subplots(figsize=(fig_size, fig_size), dpi=300, subplot_kw=dict(projection='polar'))
         plt.rcParams.update({'font.size': 12})
         plt.rcParams["font.family"] = "Times New Roman"
         plt.rcParams["mathtext.fontset"] = "cm"
@@ -1335,7 +1352,7 @@ class Condition:
             plt.show()
         else:
             plt.savefig( os.path.join(save_dir, f"{param}_contours_{self.name}.png") )
-
+            plt.close()
         return
 
     def plot_surface(self, param:str, save_dir = '.', show=True, rotate_gif=False, elev_angle = 145, 
@@ -2023,7 +2040,6 @@ def color_cycle():
                 '#007F7F',
                 '#7F007F',
                 '#7F7F7F',
-                '#FFFFFF',
                 '#000000']
     i = 0
     while True:
