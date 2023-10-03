@@ -990,6 +990,25 @@ class Condition:
 
         I = integrate.simpson(param_r, angles, even=even_opt) / np.pi / self.area_avg('alpha') # Integrate wrt theta, divide by normalized area
         return I
+    
+    def spline_area_avg(self, param):
+
+        def integrand(phi, r):
+            return self.spline_interp[param](phi * 180/np.pi, r) * r
+        
+        I = integrate.dblquad(integrand, 0, 1, 0, np.pi * 2)[0] / np.pi
+        return I
+
+    def spline_void_area_avg(self, param):
+
+        def integrand(phi, r):
+            return self.spline_interp[param](phi * 180/np.pi, r) * self.spline_interp['alpha'](phi * 180/np.pi, r) * r
+        
+        def integrand_denom(phi, r):
+            return self.spline_interp['alpha'](phi * 180/np.pi, r) * r
+        
+        I = integrate.dblquad(integrand, 0, 1, 0, np.pi * 2)[0] / integrate.dblquad(integrand_denom, 0, 1, 0, np.pi * 2)[0]
+        return I
 
     def calc_void_cov(self):
 
