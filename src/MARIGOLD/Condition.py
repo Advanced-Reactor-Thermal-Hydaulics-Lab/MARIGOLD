@@ -480,7 +480,7 @@ class Condition:
         for angle in phi_unique:
             for rstar in r_unique:
                 #print(angle, rstar, self.phi[angle][rstar][param])
-                vals.insert(0, self.phi[angle][rstar][param])
+                vals.append(self.phi[angle][rstar][param])
 
         #print(r_unique, phi_unique)
 
