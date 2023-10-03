@@ -235,7 +235,7 @@ class Condition:
             angles_with_data.append(360)
 
         # Now comes the actual mirroring step. Need data for every angle, incremements of 22.5° (self._angles)
-        if (self.theta == 90 or axisym) and (self.port != 'P4' and self.port != 'P5'): 
+        if (self.theta == 90 or axisym) and ('P4' not in self.port) and ('P5' not in self.port): 
             # axisymmetric
             for angle in self._angles:
                 if angle not in angles_with_data:
@@ -1347,6 +1347,7 @@ class Condition:
             plt.contourf(XI, YI, parami, levels = num_levels, vmin = set_min, vmax = set_max, cmap = colormap)
 
             x = np.linspace(-1, 1, 100)
+            # Make a circle to look nice
             plt.plot(x, np.sqrt(1- x**2), marker= None, linestyle = '-', color = 'black', linewidth = 1)
             plt.plot(x, -np.sqrt(1- x**2), marker= None, linestyle = '-', color = 'black', linewidth = 1)
         else:
