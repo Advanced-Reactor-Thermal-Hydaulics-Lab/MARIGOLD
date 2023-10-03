@@ -180,6 +180,7 @@ class Condition:
                     angles_with_data.append(angle)
                     break
         if debug: print('Angles with data: ', angles_with_data, file=debugFID)
+        num_angles_measured = len(angles_with_data) # the actual number of angles measured (r/R can be negative)
 
         # Next, take any negative values for the existing data and copy them to the 
         # +180 phi angle (the complementary angle)
@@ -318,10 +319,35 @@ class Condition:
         if uniform_rmesh:
             #print(all_rs)
             # Make sure all the angles have data for all the rpoints
+            self.all_rs = list(all_rs)
+            self.all_rs.sort()
+            
             for angle in self._angles:
                 for r in all_rs:
                     if r not in self.phi[angle].keys(): # This will break if there's data for 0.85 in some cases but not others
                         self.phi[angle].update({r: zero_data})
+            
+            # so go through and interpolate the points where we have data on either side
+            for angle in self._angles:
+                for i in range(len(self.all_rs) - 2):
+                    if (self.phi[angle][self.all_rs[i+2]]['alpha'] != 0) and (self.phi[angle][self.all_rs[i]]['alpha'] != 0) and (self.phi[angle][self.all_rs[i+1]]['alpha'] == 0):
+                        print(f"Warning: interpolating data for {angle}°, {self.all_rs[i+1]} to maintain uniform r/R mesh")
+                        for param in tab_keys:
+                            try:
+
+                                x = self.all_rs[i+1]
+                                x1 = self.all_rs[i+2]
+                                y1 = self.phi[angle][x1][param]
+                                x2 = self.all_rs[i]
+                                y2 = self.phi[angle][x2][param]
+
+                                interp = y1 + (y2-y1)/(x2-x1) * (x - x1)
+                                self.phi[angle][self.all_rs[i+1]][param] = interp
+                            
+                            except KeyError:
+                                print(f"{param} not found for {angle}°, {self.all_rs[i-1]}")
+                        
+                        self.phi[angle][self.all_rs[i+1]]['roverR'] = "interpolated"
 
 
         self.mirrored = True
