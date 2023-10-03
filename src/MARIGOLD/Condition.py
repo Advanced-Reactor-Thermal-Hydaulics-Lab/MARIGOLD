@@ -148,7 +148,7 @@ class Condition:
                     print("\t\t", midas_output)
         return
 
-    def mirror(self, sym90 = True, axisym = False) -> None:
+    def mirror(self, sym90 = True, axisym = False, uniform_rmesh = False) -> None:
         # Mirror data, so we have data for every angle
         #
         # Quadrant definitions:
@@ -185,6 +185,7 @@ class Condition:
         # +180 phi angle (the complementary angle)
         # Also delete the negative data from the existing phi, so all angles only have postive entries
         angles_to_add = []
+        all_rs = set()
         for angle in angles_with_data:
             if angle <= 180:
                 comp_angle = angle + 180
@@ -195,6 +196,7 @@ class Condition:
                 rs = list(deepcopy(self.phi[angle]).keys())
 
                 for r in rs:
+                    all_rs.add(r)
                     if r > 0:
                         data.pop(r)
                 
@@ -312,6 +314,15 @@ class Condition:
                     if angle > 360: continue
                     self.phi.update({angle: {}})
                     self.phi[angle].update( data )
+
+        if uniform_rmesh:
+            #print(all_rs)
+            # Make sure all the angles have data for all the rpoints
+            for angle in self._angles:
+                for r in all_rs:
+                    if r not in self.phi[angle].keys(): # This will break if there's data for 0.85 in some cases but not others
+                        self.phi[angle].update({r: zero_data})
+
 
         self.mirrored = True
         return
@@ -443,33 +454,42 @@ class Condition:
 
         return
     
-    def fit_spline(self, param: str) -> None:
-        """Fits a LSQBivariateSpline for the given param. Can access later with self.spline_interp[param]"""
+    def fit_spline(self, param: str, nphi = 100, nr = 100) -> None:
+        """Fits a RectBivariateSpline for the given param. Can access later with self.spline_interp[param]"""
         try: dummy = self.spline_interp
         except:
             self.spline_interp = {}
-        self.mirror()
+        self.mirror(uniform_rmesh=True)
         rs = []
         phis = []
         vals = []
 
-        r_knots = set()
-        phi_knots = set()
+        phi_unique = set()
+        r_unique = set()
 
         for angle, r_dict in self.phi.items():
-            phi_knots.add(angle* np.pi / 180)
-            for rstar, midas_dict in r_dict.items(): 
-                rs.append(rstar)
-                phis.append(angle * np.pi / 180)
-                vals.append(midas_dict[param])
-                r_knots.add(rstar)
-        r_knots = list(r_knots)
-        r_knots.sort()
+            phi_unique.add(angle)
+            for rstar, midas_dict in r_dict.items(): # TODO check for the 0.85 issue
+                r_unique.add(rstar)
 
-        phi_knots = list(r_knots)
-        phi_knots.sort()
+        r_unique = np.asarray(list(r_unique))
+        phi_unique = np.asarray(list(phi_unique))
+        r_unique.sort()
+        phi_unique.sort()
         
-        spline_interpolant = interpolate.LSQBivariateSpline(phis, rs, vals, phi_knots, r_knots)
+        for angle in phi_unique:
+            for rstar in r_unique:
+                #print(angle, rstar, self.phi[angle][rstar][param])
+                vals.insert(0, self.phi[angle][rstar][param])
+
+        #print(r_unique, phi_unique)
+
+        Phis, Rs = np.meshgrid(phis, rs)
+        Vals = np.asarray(vals).reshape((phi_unique.size, r_unique.size))
+        #print(Vals)
+
+        #print(phi_knots, r_knots)
+        spline_interpolant = interpolate.RectBivariateSpline(phi_unique, r_unique, Vals, kx=1)
         self.spline_interp.update({param: spline_interpolant})
         return
     
@@ -1268,7 +1288,7 @@ class Condition:
         return    
 
     def plot_contour(self, param:str, save_dir = '.', show=True, set_max = None, set_min = None, fig_size = 4,
-                     rot_angle = 0, ngridr = 50, ngridphi = 50, colormap = 'viridis', num_levels = 100,
+                     rot_angle = 0, ngridr = 50, ngridphi = 50, colormap = 'viridis', num_levels = 100, title = False,
                      annotate_h = False, cartesian = False, h_star_kwargs = {'method': 'max_dsm', 'min_void': '0.05'}) -> None:
         
         if cartesian:
@@ -1355,7 +1375,8 @@ class Condition:
             ax.set_xticklabels([])
 
         plt.colorbar(label=param)
-        plt.title(self.name)
+        if title:
+            plt.title(self.name)
 
         plt.tight_layout()
         
