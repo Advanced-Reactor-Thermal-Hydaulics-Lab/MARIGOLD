@@ -321,7 +321,7 @@ class Condition:
             # Make sure all the angles have data for all the rpoints
             self.all_rs = list(all_rs)
             self.all_rs.sort()
-            print(self.all_rs)
+            #print(self.all_rs)
             for angle in self._angles:
                 for r in all_rs:
                     if r not in self.phi[angle].keys(): # This will break if there's data for 0.85 in some cases but not others
@@ -330,7 +330,7 @@ class Condition:
             # so go through and interpolate the points where we have data on either side
             for angle in self._angles:
                 for i in range(len(self.all_rs) - 2):
-                    print(angle, self.all_rs[i+1])
+                    #print(angle, self.all_rs[i+1])
                     if (self.phi[angle][self.all_rs[i+2]]['alpha'] != 0) and (self.phi[angle][self.all_rs[i]]['alpha'] != 0) and (self.phi[angle][self.all_rs[i+1]]['alpha'] == 0):
                         print(f"Warning: interpolating data for {angle}°, {self.all_rs[i+1]} to maintain uniform r/R mesh")
                         for param in tab_keys:
@@ -462,15 +462,15 @@ class Condition:
 
                 r_dict[rs[i]].update( {grad_param_name+'_r': grad_r_param } )
                 r_dict[rs[i]].update( {grad_param_name+'_phi': grad_phi_param } )
-                r_dict[rs[i]].update( {grad_param_name+'_y': grad_r_param * np.sin(phi_angle) + np.cos(phi_angle)/rs[i]*grad_phi_param } )
-                r_dict[rs[i]].update( {grad_param_name+'_x': grad_r_param * np.cos(phi_angle) - np.sin(phi_angle)/rs[i]*grad_phi_param } )
+                r_dict[rs[i]].update( {grad_param_name+'_y': grad_r_param * np.sin(phi_angle) + np.cos(phi_angle)*rs[i]/(rs[i]**2+1e-6)*grad_phi_param } )
+                r_dict[rs[i]].update( {grad_param_name+'_x': grad_r_param * np.cos(phi_angle) - np.sin(phi_angle)*rs[i]/(rs[i]**2+1e-6)*grad_phi_param } )
                 r_dict[rs[i]].update( {grad_param_name+'_total': grad_r_param+grad_phi_param } )
 
             # Acount for not having data at 0, average value at r/R = 0.1 and r/R = -0.1
             r_dict[0.0].update( {grad_param_name+'_r': 0.5 * grad_r_param } )
             r_dict[0.0].update( {grad_param_name+'_phi': 0.5 * grad_phi_param } )
-            r_dict[0.0].update( {grad_param_name+'_y': 0.5 * (grad_r_param * np.sin(phi_angle) + np.cos(phi_angle)/rs[i]*grad_phi_param) } )
-            r_dict[0.0].update( {grad_param_name+'_x': 0.5 * (grad_r_param * np.cos(phi_angle) - np.sin(phi_angle)/rs[i]*grad_phi_param) } )
+            r_dict[0.0].update( {grad_param_name+'_y': 0.5 * (grad_r_param * np.sin(phi_angle) + np.cos(phi_angle)*rs[i]/(rs[i]**2+1e-6)*grad_phi_param) } )
+            r_dict[0.0].update( {grad_param_name+'_x': 0.5 * (grad_r_param * np.cos(phi_angle) - np.sin(phi_angle)*rs[i]/(rs[i]**2+1e-6)*grad_phi_param) } )
             r_dict[0.0].update( {grad_param_name+'_total': 0.5 * grad_r_param+grad_phi_param } )
             
             if phi_angle <= 180:
@@ -525,7 +525,7 @@ class Condition:
     
     def max(self, param: str, recalc=False) -> float:
         if (param in self.maxs.keys()) and (not recalc):
-            return self.maxs(param) # why waste time 
+            return self.maxs[param] # why waste time 
         max = 0
         for angle, r_dict in self.phi.items():
             for rstar, midas_dict in r_dict.items():
@@ -1008,6 +1008,31 @@ class Condition:
             return self.spline_interp['alpha'](phi * 180/np.pi, r) * r
         
         I = integrate.dblquad(integrand, 0, 1, 0, np.pi * 2)[0] / integrate.dblquad(integrand_denom, 0, 1, 0, np.pi * 2)[0]
+        return I
+    
+    def spline_circ_seg_area_avg(self, param):
+        """Function to integrate over """
+
+        def integrand(r, phi):
+            return self.spline_interp[param](phi * 180/np.pi, r) * r
+
+        def integrand_denom(r, phi):
+            return r
+
+        def lower_r_bound_pos(phi):
+            return max((1 - hstar) / np.sin(phi), 0)
+
+        def upper_r_bound_neg(phi):
+            if (phi <= 3*np.pi/2 - np.arccos(hstar-1)) or (phi >= 3*np.pi/2 + np.arccos(hstar-1)):
+                return 1
+            else:
+                return (1 - hstar) / np.sin(phi)
+
+        if hstar <= 1:
+            I = integrate.dblquad(integrand, np.pi/2 - np.arccos(1-hstar), np.pi/2 + np.arccos(1-hstar), lower_r_bound_pos, 1, epsabs=int_err )[0] / integrate.dblquad(integrand_denom, np.pi/2 - np.arccos(1-hstar), np.pi/2 + np.arccos(1-hstar), lower_r_bound_pos, 1, epsabs=int_err )[0]
+        elif hstar > 1:
+            I = integrate.dblquad(integrand, 0, 2*np.pi, 0, upper_r_bound_neg, epsabs=int_err )[0] / integrate.dblquad(integrand_denom, 0, 2*np.pi, 0, upper_r_bound_neg, epsabs=int_err )[0]
+
         return I
 
     def calc_void_cov(self):
