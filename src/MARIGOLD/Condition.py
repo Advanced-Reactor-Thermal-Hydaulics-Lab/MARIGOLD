@@ -186,7 +186,7 @@ class Condition:
         # +180 phi angle (the complementary angle)
         # Also delete the negative data from the existing phi, so all angles only have postive entries
         angles_to_add = []
-        all_rs = set()
+        all_rs = set([0.0])
         for angle in angles_with_data:
             if angle <= 180:
                 comp_angle = angle + 180
@@ -209,17 +209,17 @@ class Condition:
                     elif r == 0:
                         pass
                 
-                self.phi[angle].update({1.0: zero_data}) 
+                self.phi[angle].update({1.0: deepcopy(zero_data)}) 
 
                 # There should always be data at r/R 0 so we can plot contours
                 try: 
                     dummy = self.phi[angle][0.0]
                 except:
-                    self.phi[angle].update({0.0: zero_data})  # just in case
+                    self.phi[angle].update({0.0: deepcopy(zero_data)})  # just in case
 
 
                 self.phi.update({comp_angle: {}})
-                self.phi[comp_angle].update( {1.0: zero_data} )
+                self.phi[comp_angle].update( {1.0: deepcopy(zero_data)} )
                 self.phi[comp_angle].update( data )
                 
 
@@ -243,7 +243,7 @@ class Condition:
                     ref_angle = angles_with_data[0]
                     data = deepcopy( self.phi[ref_angle] )
                 
-                data.update({1.0: zero_data}) # Cuz it'll get popped in the second loop. Also paranoia
+                data.update({1.0: deepcopy(zero_data)}) # Cuz it'll get popped in the second loop. Also paranoia
                 self.phi.update({angle: {}})
                 self.phi[angle].update( data )
 
@@ -252,7 +252,7 @@ class Condition:
             for angle in self._angles:
                 if angle not in angles_with_data:
 
-                    data = {0.0: zero_data, 1.0: zero_data} # Fine if this gets overwritten, just need to make sure there's some data at 0 for plotting
+                    data = {0.0: deepcopy(zero_data), 1.0: deepcopy(zero_data)} # Fine if this gets overwritten, just need to make sure there's some data at 0 for plotting
 
                     if angle <= 90:
                         # Quadrant I, should usually have data here, but if we don't, try to copy data from Q2
@@ -261,7 +261,7 @@ class Condition:
                             data = deepcopy(self.phi[ref_angle])
                         except KeyError:
                             if debug: print(f"No data found for {angle} when mirroring {self.name}, defaulting to 0s")
-                            data = {0.0: zero_data}
+                            data = {0.0: deepcopy(zero_data)}
 
                     elif angle > 90 and angle <= 180:
                        # Quadrant II, mirror from Quadrant I
@@ -276,7 +276,7 @@ class Condition:
                             data = deepcopy(self.phi[ref_angle])
                         except KeyError:
                             if debug: print(f"No data found for {angle} when mirroring {self.name}, defaulting to 0s")
-                            data = {0.0: zero_data}
+                            data = {0.0: deepcopy(zero_data)}
 
                     elif angle > 270 and angle < 360:
                         # Quadrant IV, mirror from Quadrant III
@@ -287,13 +287,13 @@ class Condition:
                         ref_angle = 0
                         data = deepcopy(self.phi[ref_angle])
 
-                    data.update({1.0: zero_data}) # paranoia
+                    data.update({1.0: deepcopy(zero_data)}) # paranoia
                     
                     # Check if data exists at zero, and if not, just put some zero data in
                     try: 
                         dummy = data[0.0]
                     except:
-                        data.update({0.0: zero_data}) # just in case
+                        data.update({0.0: deepcopy(zero_data)}) # just in case
                     
                     if angle > 360: continue # Just in case
                     self.phi.update({angle: {}})
@@ -303,15 +303,15 @@ class Condition:
                 try: 
                     dummy = self.phi[angle][0.0]
                 except:
-                    self.phi[angle].update({0.0: zero_data}) # just in case
+                    self.phi[angle].update({0.0: deepcopy(zero_data)}) # just in case
 
 
         else:
             # No symmetry being assumed. But we still want data at every angle. If it doesn't exist, must be 0
             for angle in self._angles:
                 if angle not in angles_with_data:
-                    data = {0.0: zero_data}
-                    data.update({1.0: zero_data})
+                    data = {0.0: deepcopy(zero_data)}
+                    data.update({1.0: deepcopy(zero_data)})
                     if angle > 360: continue
                     self.phi.update({angle: {}})
                     self.phi[angle].update( data )
@@ -321,15 +321,16 @@ class Condition:
             # Make sure all the angles have data for all the rpoints
             self.all_rs = list(all_rs)
             self.all_rs.sort()
-            
+            print(self.all_rs)
             for angle in self._angles:
                 for r in all_rs:
                     if r not in self.phi[angle].keys(): # This will break if there's data for 0.85 in some cases but not others
-                        self.phi[angle].update({r: zero_data})
+                        self.phi[angle].update({r: deepcopy(zero_data)})
             
             # so go through and interpolate the points where we have data on either side
             for angle in self._angles:
                 for i in range(len(self.all_rs) - 2):
+                    print(angle, self.all_rs[i+1])
                     if (self.phi[angle][self.all_rs[i+2]]['alpha'] != 0) and (self.phi[angle][self.all_rs[i]]['alpha'] != 0) and (self.phi[angle][self.all_rs[i+1]]['alpha'] == 0):
                         print(f"Warning: interpolating data for {angle}°, {self.all_rs[i+1]} to maintain uniform r/R mesh")
                         for param in tab_keys:
@@ -345,9 +346,12 @@ class Condition:
                                 self.phi[angle][self.all_rs[i+1]][param] = interp
                             
                             except KeyError:
-                                print(f"{param} not found for {angle}°, {self.all_rs[i-1]}")
+                                print(f"{param} not found for {angle}°, {self.all_rs[i+1]}")
                         
-                        self.phi[angle][self.all_rs[i+1]]['roverR'] = "interpolated"
+                        self.phi[angle][self.all_rs[i+1]]['roverR'] = f"interpolated, {angle}, {i+1}"
+                    else:
+                        pass
+                        #print(f"I'm not interpolating for {angle}°, {self.all_rs[i+1]}")
 
 
         self.mirrored = True
@@ -515,7 +519,7 @@ class Condition:
         #print(Vals)
 
         #print(phi_knots, r_knots)
-        spline_interpolant = interpolate.RectBivariateSpline(phi_unique, r_unique, Vals, kx=1)
+        spline_interpolant = interpolate.RectBivariateSpline(phi_unique, r_unique, Vals, kx=3)
         self.spline_interp.update({param: spline_interpolant})
         return
     
