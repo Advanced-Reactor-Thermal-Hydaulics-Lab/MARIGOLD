@@ -65,7 +65,7 @@ class Condition:
 
         self.j = self.jgloc + self.jf
 
-        if 'D' in self.port:
+        if 'D' in self.port and 'P' not in self.port:
             self.LoverD = int(self.port.strip('D'))
         else: # Assume it's PITA
             if self.port == 'P1':
@@ -489,6 +489,11 @@ class Condition:
         try: dummy = self.spline_interp
         except:
             self.spline_interp = {}
+        
+        if param in self.spline_interp.keys():
+            print(f"{param} already has a fit spline")
+            return
+
         self.mirror(uniform_rmesh=True)
         rs = []
         phis = []
@@ -1362,7 +1367,7 @@ class Condition:
         return    
 
     def plot_contour(self, param:str, save_dir = '.', show=True, set_max = None, set_min = None, fig_size = 4,
-                     rot_angle = 0, ngridr = 50, ngridphi = 50, colormap = 'viridis', num_levels = 100, title = False,
+                     rot_angle = 0, ngridr = 50, ngridphi = 50, colormap = 'hot_r', num_levels = 100, title = False,
                      annotate_h = False, cartesian = False, h_star_kwargs = {'method': 'max_dsm', 'min_void': '0.05'}) -> None:
         
         if cartesian:
@@ -1553,6 +1558,87 @@ class Condition:
             rot_animation = animation.FuncAnimation(fig, rotate, frames=np.arange(0, 362, 2), interval=100)
             rot_animation.save(os.path.join(save_dir, f'{param}_surface_rotation_{self.name}.gif'), dpi=80)
 
+        return
+
+    def plot_spline_contour(self, param:str, save_dir = '.', show=True, set_max = None, set_min = None, fig_size = 4,
+                     rot_angle = 0, ngridr = 50, ngridphi = 50, colormap = 'hot_r', num_levels = 100, title = False,
+                     annotate_h = False, cartesian = False, h_star_kwargs = {'method': 'max_dsm', 'min_void': '0.05'},
+                     grad = 'None') -> None:
+        
+        if param not in self.spline_interp.keys():
+            print(f"Warning: {param} not found in spline_interp dict, running fit_spline")
+            self.fit_spline(param)
+
+        phii = np.linspace(0, 2*np.pi, 100)
+        phii_arg = phii* 180/np.pi + rot_angle
+        ri = np.linspace(0, 1, 100)
+
+        fig, ax = plt.subplots(figsize=(4, 4), dpi=300, subplot_kw=dict(projection='polar'))
+
+        PHII, RI = np.meshgrid(phii, ri)
+        XI = RI * np.cos(PHII)
+        YI = RI * np.sin(PHII)
+
+        if grad == 'None':
+            VALS = (self.spline_interp[param](phii_arg, ri)).T
+        elif grad == 'r':
+            VALS = (self.spline_interp[param](phii_arg, ri, dy=1)).T
+        elif grad == 'phi':
+            VALS = (self.spline_interp[param](phii_arg, ri, dx = 1)).T
+        else:
+            print(f"Error: unrecognized grad type {grad}")
+
+
+        if cartesian:
+            plt.contourf(XI, YI, VALS, levels = num_levels, vmin = set_min, vmax = set_max, cmap = colormap)
+
+            x = np.linspace(-1, 1, 100)
+            # Make a circle to look nice
+            plt.plot(x, np.sqrt(1- x**2), marker= None, linestyle = '-', color = 'black', linewidth = 1)
+            plt.plot(x, -np.sqrt(1- x**2), marker= None, linestyle = '-', color = 'black', linewidth = 1)
+        else:
+            plt.contourf(PHII, RI, VALS, levels = num_levels, vmin = set_min, vmax = set_max, cmap = colormap)
+
+        if annotate_h:
+            if not cartesian:
+                print("Warning: annotate_h assumes that we're plotting in Cartesian. Annotation may not be correct")
+            hstar = self.find_hstar_pos(**h_star_kwargs)
+            ax.annotate('h', 
+                    (-1,1-hstar), 
+                    (1,1-hstar),
+                    arrowprops=dict(color='r', width=3, headwidth=3),
+                    color='r',
+                    verticalalignment='center'
+        )
+            
+        ax.grid(False)
+        if cartesian:
+            plt.axis('square')
+            plt.xlabel (r'$x/R$ [-]')
+            plt.ylabel(r'$y/R$ [-]')
+            ax.grid(True)
+        else:
+            ax.set_yticklabels([])
+            ax.set_xticklabels([])
+
+        if grad == 'None':
+            param_label = param
+        else:
+            param_label = param + "_grad_" + grad 
+        plt.colorbar(label=param_label)
+        
+        if title:
+            plt.title(self.name)
+
+        plt.tight_layout()
+        
+        #cb = plt.colorbar(ticks = [0, 0.05, 0.1, 0.15, 0.2])
+
+        if show:
+            plt.show()
+        else:
+            plt.savefig( os.path.join(save_dir, f"{param_label}_spline_contours_{self.name}.png") )
+            plt.close()
         return
 
     def rough_FR_ID(self) -> None:
