@@ -996,7 +996,10 @@ class Condition:
         I = integrate.simpson(param_r, angles, even=even_opt) / np.pi / self.area_avg('alpha') # Integrate wrt theta, divide by normalized area
         return I
     
-    def spline_area_avg(self, param):
+    def spline_area_avg(self, param:str):
+
+        if param not in self.spline_interp.keys():
+            self.fit_spline(param)
 
         def integrand(phi, r):
             return self.spline_interp[param](phi * 180/np.pi, r) * r
@@ -1004,7 +1007,7 @@ class Condition:
         I = integrate.dblquad(integrand, 0, 1, 0, np.pi * 2)[0] / np.pi
         return I
 
-    def spline_void_area_avg(self, param):
+    def spline_void_area_avg(self, param:str):
 
         def integrand(phi, r):
             return self.spline_interp[param](phi * 180/np.pi, r) * self.spline_interp['alpha'](phi * 180/np.pi, r) * r
@@ -1015,8 +1018,8 @@ class Condition:
         I = integrate.dblquad(integrand, 0, 1, 0, np.pi * 2)[0] / integrate.dblquad(integrand_denom, 0, 1, 0, np.pi * 2)[0]
         return I
     
-    def spline_circ_seg_area_avg(self, param):
-        """Function to integrate over """
+    def spline_circ_seg_area_avg(self, param:str, hstar:float):
+        """Function to integrate over a circular segment, using the spline interpolation of param"""
 
         def integrand(r, phi):
             return self.spline_interp[param](phi * 180/np.pi, r) * r
@@ -1573,7 +1576,13 @@ class Condition:
         phii_arg = phii* 180/np.pi + rot_angle
         ri = np.linspace(0, 1, 100)
 
-        fig, ax = plt.subplots(figsize=(4, 4), dpi=300, subplot_kw=dict(projection='polar'))
+        if cartesian:
+            fig, ax = plt.subplots(figsize=(fig_size, fig_size), dpi=300)
+        else:
+            fig, ax = plt.subplots(figsize=(fig_size, fig_size), dpi=300, subplot_kw=dict(projection='polar'))
+        plt.rcParams.update({'font.size': 12})
+        plt.rcParams["font.family"] = "Times New Roman"
+        plt.rcParams["mathtext.fontset"] = "cm"
 
         PHII, RI = np.meshgrid(phii, ri)
         XI = RI * np.cos(PHII)
@@ -1585,6 +1594,8 @@ class Condition:
             VALS = (self.spline_interp[param](phii_arg, ri, dy=1)).T
         elif grad == 'phi':
             VALS = (self.spline_interp[param](phii_arg, ri, dx = 1)).T
+        elif grad == 'y':
+            VALS = (self.spline_interp['alpha'](phii_arg * 180/np.pi, ri, dx=1) * np.cos(phii_arg)*ri / (ri**2+1e-8) + self.spline_interp['alpha'](phii_arg * 180/np.pi, ri, dy=1) * np.cos(phii_arg)).T
         else:
             print(f"Error: unrecognized grad type {grad}")
 
