@@ -425,7 +425,7 @@ Methods:
         
         Stored in self's midas_dict as grad_param_r, grad_param_phi, etc.
         Will only be called once, unless recalc is True.
-        
+
         """
         
         if not self.mirrored: self.mirror()
@@ -472,8 +472,9 @@ Methods:
                 r_dict[rs[i]].update( {grad_param_name+'_r': grad_r_param } )
                 r_dict[rs[i]].update( {grad_param_name+'_phi': grad_phi_param } )
 
-                r_dict[rs[i]].update( {grad_param_name+'_y': grad_r_param * np.sin(phi_angle) + np.cos(phi_angle)/(rs[i])*grad_phi_param } )
-                r_dict[rs[i]].update( {grad_param_name+'_x': grad_r_param * np.cos(phi_angle) - np.sin(phi_angle)/(rs[i])*grad_phi_param } )
+                if rs[i] != 0:
+                    r_dict[rs[i]].update( {grad_param_name+'_y': grad_r_param * np.sin(phi_angle) + np.cos(phi_angle)/(rs[i])*grad_phi_param } )
+                    r_dict[rs[i]].update( {grad_param_name+'_x': grad_r_param * np.cos(phi_angle) - np.sin(phi_angle)/(rs[i])*grad_phi_param } )
 
                 r_dict[rs[i]].update( {grad_param_name+'_total': grad_r_param+grad_phi_param } )
                 
@@ -1083,7 +1084,7 @@ Methods:
                 self.calc_linear_interp(param)
 
             def integrand(phi, r):
-                return self.linear_interp[param](phi * 180/np.pi, r) * r
+                return self.linear_interp[param](phi, r) * r
         
         I = integrate.dblquad(integrand, 0, 1, 0, np.pi * 2)[0] / np.pi
         return I
