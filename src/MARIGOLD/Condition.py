@@ -1064,13 +1064,21 @@ class Condition:
         I = integrate.simpson(param_r, angles, even=even_opt) / np.pi / self.area_avg('alpha') # Integrate wrt theta, divide by normalized area
         return I
     
-    def spline_area_avg(self, param:str):
+    def interp_area_avg(self, param:str, interp_type = 'linear'):
 
-        if param not in self.spline_interp.keys():
-            self.fit_spline(param)
+        if interp_type == 'spline':
+            if param not in self.spline_interp.keys():
+                self.fit_spline(param)
 
-        def integrand(phi, r):
-            return self.spline_interp[param](phi * 180/np.pi, r) * r
+            def integrand(phi, r):
+                return self.spline_interp[param](phi * 180/np.pi, r) * r
+        
+        elif interp_type == 'linear':
+            if param not in self.linear_interp.keys():
+                self.calc_linear_interp(param)
+
+            def integrand(phi, r):
+                return self.linear_interp[param](phi * 180/np.pi, r) * r
         
         I = integrate.dblquad(integrand, 0, 1, 0, np.pi * 2)[0] / np.pi
         return I
