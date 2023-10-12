@@ -1018,7 +1018,7 @@ class Condition:
         I = integrate.dblquad(integrand, 0, 1, 0, np.pi * 2)[0] / integrate.dblquad(integrand_denom, 0, 1, 0, np.pi * 2)[0]
         return I
     
-    def spline_circ_seg_area_avg(self, param:str, hstar:float):
+    def spline_circ_seg_area_avg(self, param:str, hstar:float, int_err = 10**-4):
         """Function to integrate over a circular segment, using the spline interpolation of param"""
 
         def integrand(r, phi):
@@ -1370,7 +1370,7 @@ class Condition:
         return    
 
     def plot_contour(self, param:str, save_dir = '.', show=True, set_max = None, set_min = None, fig_size = 4,
-                     rot_angle = 0, ngridr = 50, ngridphi = 50, colormap = 'hot_r', num_levels = 100, title = False,
+                     rot_angle = 0, ngridr = 50, ngridphi = 50, colormap = 'hot_r', num_levels = 100, title = False, extra_text = '',
                      annotate_h = False, cartesian = False, h_star_kwargs = {'method': 'max_dsm', 'min_void': '0.05'}) -> None:
         
         if cartesian:
@@ -1468,7 +1468,7 @@ class Condition:
         if show:
             plt.show()
         else:
-            plt.savefig( os.path.join(save_dir, f"{param}_contours_{self.name}.png") )
+            plt.savefig( os.path.join(save_dir, f"{param}_contours_{self.name + extra_text}.png") )
             plt.close()
         return
 
