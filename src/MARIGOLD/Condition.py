@@ -104,7 +104,7 @@ class Condition:
             self.marker_color = 'purple'
 
         else:
-            print(f"Warning: Could not determine Dh for {cond.name}")
+            print(f"Warning: Could not determine Dh for {self.name}")
             self.Dh = np.NaN
             self.marker_type = '$?$'
             self.marker_color = 'yellow'
@@ -114,6 +114,7 @@ class Condition:
         self.circ_seg_area_avgs = {}
         self.maxs = {}
         self.mins = {}
+        self._grads_calced = []
 
     def __eq__(self, __o: object) -> bool:
         if isinstance(__o, Condition):
@@ -420,12 +421,15 @@ class Condition:
 
         return
 
-    def calc_grad(self, param: str) -> None:
-
+    def calc_grad(self, param: str, recalc = False) -> None:
+        """Calculates gradient of param based on the data in self. Stored in self's midas_dict as grad_param_r, grad_param_phi, etc.
+           Will only be called once, unless recalc is True."""
         if not self.mirrored: self.mirror()
 
-        # calculate gradient, return 
-        # stores grad_params in midas dict, along with their sum (d(param)/dr, d(param)/dφ)
+        if param in self._grads_calced and not recalc:
+            return
+        else:
+            self._grads_calced.append(param)
 
         grad_param_name = 'grad_' + param
 
@@ -513,9 +517,6 @@ class Condition:
                     r_dict[0.0].update( {grad_param_name+'_total': deepcopy(r_dict[0.0][grad_param_name+'_r'])} )
                     self.phi[comp_angle][0.0].update({grad_param_name+'_total': deepcopy(r_dict[0.0][grad_param_name+'_r']) })
                     
-                
-
-            # Acount for not having data at 0, average value at r/R = 0.1 and r/R = -0.1
 
         return
     
