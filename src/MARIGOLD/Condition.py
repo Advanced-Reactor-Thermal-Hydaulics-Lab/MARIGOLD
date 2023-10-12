@@ -346,7 +346,8 @@ class Condition:
                                 self.phi[angle][self.all_rs[i+1]][param] = interp
                             
                             except KeyError:
-                                print(f"{param} not found for {angle}°, {self.all_rs[i+1]}")
+                                #print(f"{param} not found for {angle}°, {self.all_rs[i+1]}")
+                                continue
                         
                         self.phi[angle][self.all_rs[i+1]]['roverR'] = f"interpolated, {angle}, {i+1}"
                     else:
@@ -463,24 +464,23 @@ class Condition:
                 r_dict[rs[i]].update( {grad_param_name+'_r': grad_r_param } )
                 r_dict[rs[i]].update( {grad_param_name+'_phi': grad_phi_param } )
 
-                if rs[i] != 0:
-                    r_dict[rs[i]].update( {grad_param_name+'_y': grad_r_param * np.sin(phi_angle) + np.cos(phi_angle)/(rs[i])*grad_phi_param } )
-                    r_dict[rs[i]].update( {grad_param_name+'_x': grad_r_param * np.cos(phi_angle) - np.sin(phi_angle)/(rs[i])*grad_phi_param } )
+                r_dict[rs[i]].update( {grad_param_name+'_y': grad_r_param * np.sin(phi_angle) + np.cos(phi_angle)/(rs[i])*grad_phi_param } )
+                r_dict[rs[i]].update( {grad_param_name+'_x': grad_r_param * np.cos(phi_angle) - np.sin(phi_angle)/(rs[i])*grad_phi_param } )
 
-                    r_dict[rs[i]].update( {grad_param_name+'_total': grad_r_param+grad_phi_param } )
+                r_dict[rs[i]].update( {grad_param_name+'_total': grad_r_param+grad_phi_param } )
                 
                 
-                if i == 0: # first point, also calculate derivative at 0, using grad_r_param
+                if i == 1: # first point, also calculate derivative at 0, using grad_r_param
                 
                     # x and y only a function of r, dψ/dφ = 0
-                    if rs[i] == 0 and phi_angle == 0:
-                        r_dict[0.0].update( {grad_param_name+'_x': grad_r_param * np.cos(phi_angle) } )
+                    if phi_angle == 0:
+                        # r_dict[0.0].update( {grad_param_name+'_x': grad_r_param * np.cos(phi_angle) } )
                         # Copy to all other angles
                         for temp_angle in self._angles:
                             self.phi[temp_angle][0.0].update({grad_param_name+'_x': grad_r_param * np.cos(phi_angle) } )
                     
-                    elif rs[i] == 0 and phi_angle == 90:
-                        r_dict[0.0].update( {grad_param_name+'_y': grad_r_param * np.sin(phi_angle) } )
+                    elif phi_angle == 90:
+                        # r_dict[0.0].update( {grad_param_name+'_y': grad_r_param * np.sin(phi_angle) } )
                         # Copy to all other angles
                         for temp_angle in self._angles:
                             self.phi[temp_angle][0.0].update({grad_param_name+'_y': grad_r_param * np.sin(phi_angle) } )
@@ -587,7 +587,10 @@ class Condition:
             for rstar, midas_dict in r_dict.items():
                 rs.append(rstar)
                 phis.append(angle *np.pi/180)
-                vals.append(midas_dict[param])
+                try:
+                    vals.append(midas_dict[param])
+                except KeyError:
+                    print(self.name, angle, rstar, "has no ", param)
 
         linear_interpolant = interpolate.LinearNDInterpolator(list(zip(phis, rs)), vals)
         self.linear_interp.update({param: linear_interpolant})
