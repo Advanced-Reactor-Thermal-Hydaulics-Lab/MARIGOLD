@@ -528,6 +528,37 @@ class Condition:
         self.spline_interp.update({param: spline_interpolant})
         return
     
+    def calc_linear_interp(self, param: str, nphi = 100, nr = 100) -> None:
+        """Makes a LinearNDInterpolator for the given param. Can access later with self.linear_interp[param]
+             * phi in radians
+             
+        """
+
+        try: dummy = self.linear_interp
+        except:
+            self.linear_interp = {}
+        
+        if param in self.spline_interp.keys():
+            if debug: print(f"{param} already has a linear interpolator")
+            return
+        
+        self.mirror()
+
+        rs = []
+        phis = []
+        vals = []
+
+        for angle, r_dict in self.phi.items():
+            for rstar, midas_dict in r_dict.items():
+                rs.append(rstar)
+                phis.append(angle *np.pi/180)
+                vals.append(midas_dict[param])
+
+        linear_interpolant = interpolate.LinearNDInterpolator(list(zip(phis, rs)), vals)
+        self.linear_interp.update({param: linear_interpolant})
+
+        return
+    
     def max(self, param: str, recalc=False) -> float:
         if (param in self.maxs.keys()) and (not recalc):
             return self.maxs[param] # why waste time 
@@ -1474,8 +1505,9 @@ class Condition:
 
     def plot_surface(self, param:str, save_dir = '.', show=True, rotate_gif=False, elev_angle = 145, 
                      azim_angle = 0, roll_angle = 180, title=True, ngridr = 50, ngridphi = 50, 
-                     plot_surface_kwargs = {}) -> None:
-
+                     plot_surface_kwargs = None, solid_color = False) -> None:
+        if plot_surface_kwargs is None:
+            plot_surface_kwargs = {}
         plt.rcParams.update({'font.size': 12})
         plt.rcParams["font.family"] = "Times New Roman"
         plt.rcParams["mathtext.fontset"] = "cm"
@@ -1521,7 +1553,7 @@ class Condition:
         if 'vmax' not in plot_surface_kwargs.keys(): 
             plot_surface_kwargs.update({'vmax': self.max(param)})
 
-        if 'cmap' not in plot_surface_kwargs.keys(): 
+        if 'cmap' not in plot_surface_kwargs.keys() and not solid_color: 
             plot_surface_kwargs.update({'cmap': 'viridis'})
 
         surf = ax.plot_surface(Xi, Yi, parami, **plot_surface_kwargs)
