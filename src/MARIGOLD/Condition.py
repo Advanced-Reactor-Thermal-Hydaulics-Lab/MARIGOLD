@@ -1,5 +1,8 @@
-"""
-This is the the Condition class, which is the main abstraction to handle local probe data
+from .config import *
+from scipy import interpolate
+
+class Condition:
+    """Class to handle the local probe data
 
 Data is stored in the Condition.phi property. It's actually 3 layers of dictionary
 phi [angle] gives a dictionary with the various r/R
@@ -35,10 +38,6 @@ Methods:
   TD_FR_ID- Flow regime identification from Taitel and Dukler (TODO)
 """
 
-from .config import *
-from scipy import interpolate
-
-class Condition:
     debugFID = None
     def __init__(self, jgP3:float, jgloc:float, jf:float, theta:int, port:str, database:str) -> None:
         
@@ -422,8 +421,13 @@ class Condition:
         return
 
     def calc_grad(self, param: str, recalc = False) -> None:
-        """Calculates gradient of param based on the data in self. Stored in self's midas_dict as grad_param_r, grad_param_phi, etc.
-           Will only be called once, unless recalc is True."""
+        """Calculates gradient of param based on the data in self. 
+        
+        Stored in self's midas_dict as grad_param_r, grad_param_phi, etc.
+        Will only be called once, unless recalc is True.
+        
+        """
+        
         if not self.mirrored: self.mirror()
 
         if param in self._grads_calced and not recalc:
