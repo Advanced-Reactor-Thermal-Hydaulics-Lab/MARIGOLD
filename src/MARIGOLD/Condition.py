@@ -466,29 +466,56 @@ class Condition:
                 if rs[i] != 0:
                     r_dict[rs[i]].update( {grad_param_name+'_y': grad_r_param * np.sin(phi_angle) + np.cos(phi_angle)/(rs[i])*grad_phi_param } )
                     r_dict[rs[i]].update( {grad_param_name+'_x': grad_r_param * np.cos(phi_angle) - np.sin(phi_angle)/(rs[i])*grad_phi_param } )
-                else:
-                    if rs[i] == 0 and phi_angle == 0:
-                        r_dict[rs[i]].update( {grad_param_name+'_x': grad_r_param * np.cos(phi_angle) - grad_phi_param } )
-                    elif rs[i] == 0 and phi_angle == 90:
-                        r_dict[rs[i]].update( {grad_param_name+'_y': grad_r_param * np.sin(phi_angle) - grad_phi_param } )
+
+                    r_dict[rs[i]].update( {grad_param_name+'_total': grad_r_param+grad_phi_param } )
                 
-                r_dict[rs[i]].update( {grad_param_name+'_total': grad_r_param+grad_phi_param } )
+                
+                if i == 0: # first point, also calculate derivative at 0, using grad_r_param
+                
+                    # x and y only a function of r, dψ/dφ = 0
+                    if rs[i] == 0 and phi_angle == 0:
+                        r_dict[0.0].update( {grad_param_name+'_x': grad_r_param * np.cos(phi_angle) } )
+                        # Copy to all other angles
+                        for temp_angle in self._angles:
+                            self.phi[temp_angle][0.0].update({grad_param_name+'_x': grad_r_param * np.cos(phi_angle) } )
+                    
+                    elif rs[i] == 0 and phi_angle == 90:
+                        r_dict[0.0].update( {grad_param_name+'_y': grad_r_param * np.sin(phi_angle) } )
+                        # Copy to all other angles
+                        for temp_angle in self._angles:
+                            self.phi[temp_angle][0.0].update({grad_param_name+'_y': grad_r_param * np.sin(phi_angle) } )
+
+
+                    if phi_angle <= 180:
+                        comp_angle = phi_angle + 180
+                    else:
+                        comp_angle = phi_angle - 180
+                    
+                    # Want to average dψ/dr between current phi angle and complementary angle
+
+                    if grad_param_name+'_r' in r_dict[0.0].keys():
+                        value = deepcopy(r_dict[0.0][grad_param_name+'_r']) + 0.5 * grad_r_param
+                        r_dict[0.0].update( {grad_param_name+'_r': value} )
+                    else:
+                        r_dict[0.0].update( {grad_param_name+'_r': 0.5 * grad_r_param} )
+
+                    
+                    if grad_param_name+'_r' in self.phi[comp_angle][0.0].keys():
+                        value = deepcopy(self.phi[comp_angle][0.0][grad_param_name+'_r']) + 0.5 * grad_r_param
+                        self.phi[comp_angle][0.0].update( {grad_param_name+'_r': value} )
+                    else:
+                        self.phi[comp_angle][0.0].update( {grad_param_name+'_r': 0.5 * grad_r_param} )
+                        
+                    
+                    r_dict[0.0].update( {grad_param_name+'_phi': 0 } )     
+                    self.phi[comp_angle][0.0].update({grad_param_name+'_phi': 0 })
+
+                    r_dict[0.0].update( {grad_param_name+'_total': deepcopy(r_dict[0.0][grad_param_name+'_r'])} )
+                    self.phi[comp_angle][0.0].update({grad_param_name+'_total': deepcopy(r_dict[0.0][grad_param_name+'_r']) })
+                    
+                
 
             # Acount for not having data at 0, average value at r/R = 0.1 and r/R = -0.1
-            r_dict[0.0].update( {grad_param_name+'_r': 0.5 * grad_r_param } )
-            r_dict[0.0].update( {grad_param_name+'_phi': 0.5 * grad_phi_param } )
-            r_dict[0.0].update( {grad_param_name+'_y': 0.5 * (grad_r_param * np.sin(phi_angle) + np.cos(phi_angle)*rs[i]/(rs[i]**2+1e-6)*grad_phi_param) } )
-            r_dict[0.0].update( {grad_param_name+'_x': 0.5 * (grad_r_param * np.cos(phi_angle) - np.sin(phi_angle)*rs[i]/(rs[i]**2+1e-6)*grad_phi_param) } )
-            r_dict[0.0].update( {grad_param_name+'_total': 0.5 * grad_r_param+grad_phi_param } )
-            
-            if phi_angle <= 180:
-                comp_angle = phi_angle + 180
-            else:
-                comp_angle = phi_angle - 180
-
-            self.phi[comp_angle][0.0].update({grad_param_name+'_r': 0.5 * grad_r_param })
-            self.phi[comp_angle][0.0].update({grad_param_name+'_phi': 0.5 * grad_phi_param })
-            self.phi[comp_angle][0.0].update({grad_param_name+'_total': 0.5 * grad_r_param+grad_phi_param })
 
         return
     
