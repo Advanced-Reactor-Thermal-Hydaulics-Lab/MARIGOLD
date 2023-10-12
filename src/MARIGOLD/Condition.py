@@ -448,6 +448,7 @@ Methods:
             #print(rs)
 
             for i in range(1, len(rs) ):
+                if rs[i] < 0: print(f'Warning: somehow we still have negative data.\n{self}\n{phi_angle=}\t{rs=}')
                 grad_r_param = (r_dict[rs[i]][param] - r_dict[rs[i-1]][param]) / (rs[i] - rs[i-1])
                 
                 
@@ -465,7 +466,7 @@ Methods:
                     lo = 0
 
                 if rs[i]> 0:
-                    grad_phi_param = 1./rs[i] * (hi - lo) / (2* (phis[(j+1) % maxj] - phis[(j-1) % maxj]) * np.pi/180)
+                    grad_phi_param = 1./rs[i] * (hi - lo) / ((phis[(j+1) % maxj] - phis[(j-1) % maxj]) * np.pi/180)
                 else:
                     grad_phi_param = 0 # I guess? Shouldn't actually come up
 
@@ -1676,7 +1677,7 @@ Methods:
         elif grad == 'r':
             VALS = (self.spline_interp[param](phii_arg, ri, dy=1)).T
         elif grad == 'phi':
-            VALS = (self.spline_interp[param](phii_arg, ri, dx = 1)).T
+            VALS = 1/ri * (self.spline_interp[param](phii_arg, ri, dx = 1)).T
         elif grad == 'y':
             VALS = (self.spline_interp['alpha'](phii_arg * 180/np.pi, ri, dx=1) * np.cos(phii_arg)*ri / (ri**2+1e-8) + self.spline_interp['alpha'](phii_arg * 180/np.pi, ri, dy=1) * np.cos(phii_arg)).T
         else:
