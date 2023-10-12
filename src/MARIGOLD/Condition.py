@@ -458,12 +458,20 @@ class Condition:
                 if rs[i]> 0:
                     grad_phi_param = 1./rs[i] * (hi - lo) / (2* (phis[(j+1) % maxj] - phis[(j-1) % maxj]) * np.pi/180)
                 else:
-                    grad_phi_param = 0 # I guess?
+                    grad_phi_param = 0 # I guess? Shouldn't actually come up
 
                 r_dict[rs[i]].update( {grad_param_name+'_r': grad_r_param } )
                 r_dict[rs[i]].update( {grad_param_name+'_phi': grad_phi_param } )
-                r_dict[rs[i]].update( {grad_param_name+'_y': grad_r_param * np.sin(phi_angle) + np.cos(phi_angle)*rs[i]/(rs[i]**2+1e-6)*grad_phi_param } )
-                r_dict[rs[i]].update( {grad_param_name+'_x': grad_r_param * np.cos(phi_angle) - np.sin(phi_angle)*rs[i]/(rs[i]**2+1e-6)*grad_phi_param } )
+
+                if rs[i] != 0:
+                    r_dict[rs[i]].update( {grad_param_name+'_y': grad_r_param * np.sin(phi_angle) + np.cos(phi_angle)/(rs[i])*grad_phi_param } )
+                    r_dict[rs[i]].update( {grad_param_name+'_x': grad_r_param * np.cos(phi_angle) - np.sin(phi_angle)/(rs[i])*grad_phi_param } )
+                else:
+                    if rs[i] == 0 and phi_angle == 0:
+                        r_dict[rs[i]].update( {grad_param_name+'_x': grad_r_param * np.cos(phi_angle) - grad_phi_param } )
+                    elif rs[i] == 0 and phi_angle == 90:
+                        r_dict[rs[i]].update( {grad_param_name+'_y': grad_r_param * np.sin(phi_angle) - grad_phi_param } )
+                
                 r_dict[rs[i]].update( {grad_param_name+'_total': grad_r_param+grad_phi_param } )
 
             # Acount for not having data at 0, average value at r/R = 0.1 and r/R = -0.1
@@ -538,7 +546,7 @@ class Condition:
         except:
             self.linear_interp = {}
         
-        if param in self.spline_interp.keys():
+        if param in self.linear_interp.keys():
             if debug: print(f"{param} already has a linear interpolator")
             return
         
@@ -828,7 +836,6 @@ class Condition:
         return I
 
     def circ_segment_void_area_avg(self, param:str, hstar:float, ngridr=25, ngridphi=25, int_err = 10**-4) -> float:
-        from scipy import interpolate
         # area averages over the circular segment with height h
         # For the bubble layer region
         # to smooth it out, integrate over an interpolated mesh
