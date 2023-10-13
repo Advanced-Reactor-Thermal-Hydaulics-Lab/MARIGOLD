@@ -448,7 +448,8 @@ Methods:
             #print(rs)
 
             for i in range(1, len(rs) ):
-                if rs[i] < 0: print(f'Warning: somehow we still have negative data.\n{self}\n{phi_angle=}\t{rs=}')
+                if rs[i] < 0: 
+                    if debug: print(f'Warning: somehow we still have negative data.\n{self}\n{phi_angle=}\t{rs=}')
                 grad_r_param = (r_dict[rs[i]][param] - r_dict[rs[i-1]][param]) / (rs[i] - rs[i-1])
                 
                 
@@ -474,8 +475,8 @@ Methods:
                 r_dict[rs[i]].update( {grad_param_name+'_phi': grad_phi_param } )
 
                 if rs[i] != 0:
-                    r_dict[rs[i]].update( {grad_param_name+'_y': grad_r_param * np.sin(phi_angle) + np.cos(phi_angle)/(rs[i])*grad_phi_param } )
-                    r_dict[rs[i]].update( {grad_param_name+'_x': grad_r_param * np.cos(phi_angle) - np.sin(phi_angle)/(rs[i])*grad_phi_param } )
+                    r_dict[rs[i]].update( {grad_param_name+'_y': grad_r_param * np.sin(phi_angle*180/np.pi) + np.cos(phi_angle*180/np.pi)/(rs[i])*grad_phi_param } )
+                    r_dict[rs[i]].update( {grad_param_name+'_x': grad_r_param * np.cos(phi_angle*180/np.pi) - np.sin(phi_angle*180/np.pi)/(rs[i])*grad_phi_param } )
 
                 r_dict[rs[i]].update( {grad_param_name+'_total': grad_r_param+grad_phi_param } )
                 
@@ -487,13 +488,13 @@ Methods:
                         # r_dict[0.0].update( {grad_param_name+'_x': grad_r_param * np.cos(phi_angle) } )
                         # Copy to all other angles
                         for temp_angle in self._angles:
-                            self.phi[temp_angle][0.0].update({grad_param_name+'_x': grad_r_param * np.cos(phi_angle) } )
+                            self.phi[temp_angle][0.0].update({grad_param_name+'_x': grad_r_param * np.cos(phi_angle*180/np.pi) } )
                     
                     elif phi_angle == 90:
                         # r_dict[0.0].update( {grad_param_name+'_y': grad_r_param * np.sin(phi_angle) } )
                         # Copy to all other angles
                         for temp_angle in self._angles:
-                            self.phi[temp_angle][0.0].update({grad_param_name+'_y': grad_r_param * np.sin(phi_angle) } )
+                            self.phi[temp_angle][0.0].update({grad_param_name+'_y': grad_r_param * np.sin(phi_angle*180/np.pi) } )
 
 
                     if phi_angle <= 180:
@@ -1677,9 +1678,9 @@ Methods:
         elif grad == 'r':
             VALS = (self.spline_interp[param](phii_arg, ri, dy=1)).T
         elif grad == 'phi':
-            VALS = 1/ri * (self.spline_interp[param](phii_arg, ri, dx = 1)).T
+            VALS =  (1./RI *self.spline_interp[param](phii_arg, ri, dx = 1)).T
         elif grad == 'y':
-            VALS = (self.spline_interp['alpha'](phii_arg * 180/np.pi, ri, dx=1) * np.cos(phii_arg)*ri / (ri**2+1e-8) + self.spline_interp['alpha'](phii_arg * 180/np.pi, ri, dy=1) * np.cos(phii_arg)).T
+            VALS = (self.spline_interp['alpha'](phii_arg, ri, dx=1) * np.cos(phii_arg)*ri / (ri**2+1e-8) + self.spline_interp['alpha'](phii_arg, ri, dy=1) * np.sin(phii_arg)).T
         else:
             print(f"Error: unrecognized grad type {grad}")
 
@@ -1719,7 +1720,7 @@ Methods:
         if grad == 'None':
             param_label = param
         else:
-            param_label = param + "_grad_" + grad 
+            param_label = "grad_" + param + "_" + grad 
         plt.colorbar(label=param_label)
         
         if title:
