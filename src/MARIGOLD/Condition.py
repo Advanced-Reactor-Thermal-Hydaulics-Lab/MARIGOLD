@@ -128,6 +128,26 @@ Methods:
     def __repr__(self) -> str:
         return self.name
 
+    def __call__(self, r:float, phi:float, param:str, interp_method='None') -> float:
+        """Returns the value of param at (r, phi). Can get raw data, linear interp, or spline interp"""
+        if interp_method == 'None':
+            return self.phis[phi][r][param]
+        elif interp_method == 'spline':
+            try:
+                return self.spline_interp(phi, r)[0][0]
+            except:
+                self.mirror(uniform_rmesh=True)
+                self.fit_spline(param)
+                return self.spline_interp(phi, r)[0][0]
+        elif interp_method == 'linear':
+            try:
+                return self.linear_interp(phi, r)
+            except:
+                self.calc_linear_interp(param)
+                return self.linear_interp(phi, r)
+        else:
+            raise NameError(f"{interp_method} not regonized. Accepted arguments are 'None', 'spline' or 'linear")
+
     def pretty_print(self, print_to_file= True, FID=debugFID, mirror=False) -> None:
         print(f"jf = {self.jf}\tjg = {self.jgp3}\ttheta = {self.theta}\t{self.port}\t{self.database}", file=FID)
         
@@ -566,12 +586,11 @@ Methods:
 
         #print(r_unique, phi_unique)
 
-        Phis, Rs = np.meshgrid(phis, rs)
         Vals = np.asarray(vals).reshape((phi_unique.size, r_unique.size))
         #print(Vals)
 
         #print(phi_knots, r_knots)
-        spline_interpolant = interpolate.RectBivariateSpline(phi_unique, r_unique, Vals, kx=3)
+        spline_interpolant = interpolate.RectBivariateSpline(phi_unique* np.pi/180, r_unique, Vals, kx=3)
         self.spline_interp.update({param: spline_interpolant})
         return
     
@@ -1662,7 +1681,7 @@ Methods:
             self.fit_spline(param)
 
         phii = np.linspace(0, 2*np.pi, 100)
-        phii_arg = phii* 180/np.pi + rot_angle
+        phii_arg = phii + rot_angle * np.pi/180
         ri = np.linspace(0, 1, 100)
 
         if cartesian:
