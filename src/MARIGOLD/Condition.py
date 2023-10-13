@@ -130,6 +130,7 @@ Methods:
 
     def __call__(self, r:float, phi:float, param:str, interp_method='None') -> float:
         """Returns the value of param at (r, phi). Can get raw data, linear interp, or spline interp"""
+        # TODO make this work with numpy arrays
         if interp_method == 'None':
             return self.phis[phi][r][param]
         elif interp_method == 'spline':
@@ -474,20 +475,33 @@ Methods:
                 
                 
                 j = phis.index(phi_angle)
+                if j < maxj-1:
+                    hi_phi = phis[(j+1)]
+                else:
+                    hi_phi = phis[1] # use 22.5
+                
+                lo_phi = phis[(j-1) ]
+
+                if j == 0:
+                    lo_phi = phis[(j-2) ] # use 347.5, not 360
+                    #print(hi_phi, lo_phi)
+
+                # print(phis[j], hi_phi, lo_phi)
+                
                 try:
-                    hi = self.phi[phis[(j+1) % maxj]][rs[i]][param]
+                    hi = self.phi[hi_phi][rs[i]][param]
                 except KeyError as e:
                     if debug: print(f"Key error found when indexing {e} for hi. Likely a case of the data being zero for the adjacent point, setting to 0...", file=debugFID)
                     hi = 0
 
                 try:
-                    lo = self.phi[phis[(j-1) % maxj]][rs[i]][param]
+                    lo = self.phi[lo_phi][rs[i]][param]
                 except KeyError as e:
                     if debug: print(f"Key error found when indexing {e} for lo. Likely a case of the data being zero for the adjacent point, setting to 0...", file=debugFID)
                     lo = 0
 
                 if rs[i]> 0:
-                    grad_phi_param = 1./rs[i] * (hi - lo) / ((phis[(j+1) % maxj] - phis[(j-1) % maxj]) * np.pi/180)
+                    grad_phi_param = 1./rs[i] * (hi - lo) / ((hi_phi - lo_phi) * np.pi/180)
                 else:
                     grad_phi_param = 0 # I guess? Shouldn't actually come up
 
