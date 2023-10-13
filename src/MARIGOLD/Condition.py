@@ -128,18 +128,27 @@ Methods:
     def __repr__(self) -> str:
         return self.name
 
-    def __call__(self, r:float, phi:float, param:str, interp_method='None') -> float:
-        """Returns the value of param at (r, phi). Can get raw data, linear interp, or spline interp"""
+    def __call__(self, r:np.ndarray, phi:np.ndarray, param:str, interp_method='None') -> float:
+        """Returns the value of param at (r, phi). Can get raw data, linear interp, or spline interp
+           phi in radians
+        """
         # TODO make this work with numpy arrays
         if interp_method == 'None':
-            return self.phis[phi][r][param]
+            try:
+                param_values = np.zeros(r.size, phi.size)
+                for i, r_val in r:
+                    for j, phi_val in phi:
+                        param_values[i,j] = self.phis[round(phi_val * np.pi / 180, 2)][r_val][param]
+            except:
+                param_values = self.phis[round(phi * np.pi / 180, 2)][r][param]
+            return param_values
         elif interp_method == 'spline':
             try:
-                return self.spline_interp(phi, r)[0][0]
+                return self.spline_interp(phi, r)
             except:
                 self.mirror(uniform_rmesh=True)
                 self.fit_spline(param)
-                return self.spline_interp(phi, r)[0][0]
+                return self.spline_interp(phi, r)
         elif interp_method == 'linear':
             try:
                 return self.linear_interp(phi, r)
