@@ -473,6 +473,7 @@ Methods:
 
                 r_dict[rs[i]].update( {grad_param_name+'_r': grad_r_param } )
                 r_dict[rs[i]].update( {grad_param_name+'_phi': grad_phi_param } )
+                r_dict[rs[i]].update( {grad_param_name+'_phinor': grad_phi_param*rs[i] } )
 
                 if rs[i] != 0:
                     r_dict[rs[i]].update( {grad_param_name+'_y': grad_r_param * np.sin(phi_angle*180/np.pi) + np.cos(phi_angle*180/np.pi)/(rs[i])*grad_phi_param } )
@@ -520,6 +521,9 @@ Methods:
                     
                     r_dict[0.0].update( {grad_param_name+'_phi': 0 } )     
                     self.phi[comp_angle][0.0].update({grad_param_name+'_phi': 0 })
+
+                    r_dict[0.0].update( {grad_param_name+'_phinor': 0 } )     
+                    self.phi[comp_angle][0.0].update({grad_param_name+'_phinor': 0 })
 
                     r_dict[0.0].update( {grad_param_name+'_total': deepcopy(r_dict[0.0][grad_param_name+'_r'])} )
                     self.phi[comp_angle][0.0].update({grad_param_name+'_total': deepcopy(r_dict[0.0][grad_param_name+'_r']) })
@@ -1677,8 +1681,12 @@ Methods:
             VALS = (self.spline_interp[param](phii_arg, ri)).T
         elif grad == 'r':
             VALS = (self.spline_interp[param](phii_arg, ri, dy=1)).T
+        elif grad == 'r':
+            VALS = (self.spline_interp[param](phii_arg, ri, dy=1)).T
         elif grad == 'phi':
             VALS =  (1./RI *self.spline_interp[param](phii_arg, ri, dx = 1)).T
+        elif grad == 'phinor':
+            VALS =  (self.spline_interp[param](phii_arg, ri, dx = 1)).T
         elif grad == 'y':
             VALS = (self.spline_interp['alpha'](phii_arg, ri, dx=1) * np.cos(phii_arg)*ri / (ri**2+1e-8) + self.spline_interp['alpha'](phii_arg, ri, dy=1) * np.sin(phii_arg)).T
         else:
