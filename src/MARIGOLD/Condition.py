@@ -128,11 +128,11 @@ Methods:
     def __repr__(self) -> str:
         return self.name
 
-    def __call__(self, r:np.ndarray, phi:np.ndarray, param:str, interp_method='None') -> float:
+    def __call__(self, r:np.ndarray, phi:np.ndarray, param:str, interp_method='None') -> np.ndarray:
         """Returns the value of param at (r, phi). Can get raw data, linear interp, or spline interp
            phi in radians
         """
-        # TODO make this work with numpy arrays
+        
         if interp_method == 'None':
             try:
                 param_values = np.zeros(r.size, phi.size)
