@@ -86,21 +86,25 @@ Methods:
             self.Dh = 0.0254 # m, for Ryan
             self.marker_type = 'o'
             self.marker_color = 'r'
+            self.line_style = 'solid'
 
         elif database == 'Kong':
             self.Dh = 0.1016
             self.marker_type = 's'
             self.marker_color = 'b'
+            self.line_style = 'dotted'
 
         elif database == 'Talley':
             self.Dh = 0.0381
             self.marker_type = '^'
             self.marker_color = 'g'
+            self.line_style = 'dashed'
 
         elif database == 'Yadav':
             self.Dh = 0.0508
             self.marker_type = 'D'
             self.marker_color = 'purple'
+            self.line_style = 'dashdot'
 
         else:
             print(f"Warning: Could not determine Dh for {self.name}")
@@ -128,35 +132,50 @@ Methods:
     def __repr__(self) -> str:
         return self.name
 
-    def __call__(self, r:np.ndarray, phi:np.ndarray, param:str, interp_method='None') -> np.ndarray:
-        """Returns the value of param at (r, phi). Can get raw data, linear interp, or spline interp
+    def __call__(self, phi_in:np.ndarray, r_in:np.ndarray, param:str, interp_method='None') -> np.ndarray:
+        """Returns the value of param at (phi, r). Can get raw data, linear interp, or spline interp
            phi in radians
+
+           Can also return the value at (x, y) if linear_xy is selected as the interp method. phi -> x, r -> y
+           
         """
         
         if interp_method == 'None':
             try:
-                param_values = np.zeros(r.size, phi.size)
-                for i, r_val in r:
-                    for j, phi_val in phi:
-                        param_values[i,j] = self.phis[round(phi_val * np.pi / 180, 2)][r_val][param]
+                param_values = np.zeros(r_in.size, phi_in.size)
+                for i, r_val in enumerate(r_in):
+                    for j, phi_val in enumerate(phi_in):
+                        param_values[i,j] = self.phi[round(phi_val * 180 / np.pi, 2)][r_val][param]
             except:
-                param_values = self.phis[round(phi * np.pi / 180, 2)][r][param]
+                param_values = self.phi[round(phi_in * 180 / np.pi, 2)][r_in][param]
             return param_values
+        
         elif interp_method == 'spline':
             try:
-                return self.spline_interp(phi, r)
+                return self.spline_interp(phi_in, r_in)
             except:
                 self.mirror(uniform_rmesh=True)
                 self.fit_spline(param)
-                return self.spline_interp(phi, r)
+                return self.spline_interp[param](phi_in, r_in)
+        
         elif interp_method == 'linear':
             try:
-                return self.linear_interp(phi, r)
+                return self.linear_interp[param](phi_in, r_in)
             except:
                 self.calc_linear_interp(param)
-                return self.linear_interp(phi, r)
+                return self.linear_interp[param](phi_in, r_in)
+            
+        elif interp_method == 'linear_xy':
+            x = phi_in
+            y = r_in
+            try:
+                return self.linear_xy_interp[param](x, y)
+            except:
+                self.calc_linear_xy_interp(param)
+                return self.linear_xy_interp[param](x, y)
+        
         else:
-            raise NameError(f"{interp_method} not regonized. Accepted arguments are 'None', 'spline' or 'linear")
+            raise NameError(f"{interp_method} not regonized. Accepted arguments are 'None', 'spline', 'linear' or 'linear_xy'")
 
     def pretty_print(self, print_to_file= True, FID=debugFID, mirror=False) -> None:
         print(f"jf = {self.jf}\tjg = {self.jgp3}\ttheta = {self.theta}\t{self.port}\t{self.database}", file=FID)
@@ -179,7 +198,17 @@ Methods:
         return
 
     def mirror(self, sym90 = True, axisym = False, uniform_rmesh = False) -> None:
-        # Mirror data, so we have data for every angle
+        """ Mirror data, so we have data for every angle
+
+            First finds all the angles with data, copies anything negative to the 
+            other side (deleting the negative entries in the original). Then goes
+            though each of the angles in _angles (22.5° increments) and makes sure
+            each has data. Either copying, assuming some kind of symmetry (either
+            axisym or sym90) or just filling in zeros. 
+        
+        
+        """ 
+
         #
         # Quadrant definitions:
         #
@@ -617,7 +646,7 @@ Methods:
         self.spline_interp.update({param: spline_interpolant})
         return
     
-    def calc_linear_interp(self, param: str, nphi = 100, nr = 100) -> None:
+    def calc_linear_interp(self, param: str) -> None:
         """Makes a LinearNDInterpolator for the given param. Can access later with self.linear_interp[param]
              * phi in radians
              
@@ -648,6 +677,39 @@ Methods:
 
         linear_interpolant = interpolate.LinearNDInterpolator(list(zip(phis, rs)), vals)
         self.linear_interp.update({param: linear_interpolant})
+
+        return
+    
+    def calc_linear_xy_interp(self, param: str) -> None:
+        """Makes a LinearNDInterpolator for the given param in x y coords. Can access later with self.linear_xy_interp[param]
+                          
+        """
+
+        try: dummy = self.linear_xy_interp
+        except:
+            self.linear_xy_interp = {}
+        
+        if param in self.linear_xy_interp.keys():
+            if debug: print(f"{param} already has a linear interpolator in xy space")
+            return
+        
+        self.mirror()
+
+        xs = []
+        ys = []
+        vals = []
+
+        for angle, r_dict in self.phi.items():
+            for rstar, midas_dict in r_dict.items():
+                xs.append(rstar * np.cos(angle * np.pi / 180))
+                ys.append(rstar * np.sin(angle * np.pi / 180))
+                try:
+                    vals.append(midas_dict[param])
+                except KeyError:
+                    print(self.name, angle, rstar, "has no ", param)
+
+        linear_interpolant = interpolate.LinearNDInterpolator(list(zip(xs, ys)), vals)
+        self.linear_xy_interp.update({param: linear_interpolant})
 
         return
     
@@ -1497,7 +1559,32 @@ Methods:
         else:
             plt.savefig(os.path.join(save_dir, f'{param}_profile_vs_{x_axis}_{self.name}.png'))
             plt.close()
-        return    
+        return   
+
+    def plot_isoline(self, param:str, iso_axis:str, iso_val:float, fig_size=4, plot_res=100) -> None:
+
+        fig, ax = plt.subplots(figsize=(fig_size, fig_size), dpi=300, layout='compressed')
+
+        plt.rcParams.update({'font.size': 12})
+        plt.rcParams["font.family"] = "Times New Roman"
+        plt.rcParams["mathtext.fontset"] = "cm"
+
+        self.mirror()
+
+        lim = np.sqrt(1 - iso_val**2)
+
+        if iso_axis == 'x':
+            
+            ys = np.linspace(-lim, lim, plot_res)
+            xs = iso_val * np.ones(ys.size)
+            plt.plot(ys, self(xs, ys, param, interp_method = 'linear_xy'), color = self.marker_color, marker=None, linestyle= self.line_style)
+
+            plt.xlim(-1, 1)
+            plt.xlabel(r'$y/R$ [-]')
+            plt.ylabel(param)
+            plt.show()
+        
+        return
 
     def plot_contour(self, param:str, save_dir = '.', show=True, set_max = None, set_min = None, fig_size = 4,
                      rot_angle = 0, ngridr = 50, ngridphi = 50, colormap = 'hot_r', num_levels = 100, title = False, extra_text = '',
