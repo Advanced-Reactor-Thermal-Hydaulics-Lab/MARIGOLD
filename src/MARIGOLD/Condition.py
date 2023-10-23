@@ -1397,7 +1397,31 @@ Methods:
         I = integrate.simpson(param_r, angles, even=even_opt) / np.pi # Integrate wrt theta, divide by normalized area
         return I
 
-    
+    def calc_dpdz(self, method = 'LM', rho_f = 998, rho_g = 1.225, mu_f = 0.001, mu_g = 1.18e-5, LM_C = 25):
+        """
+        Calculates the pressure gradient, dp/dz, according to various methods. Can access later with self.dpdz
+
+        'LM' -> Lockhart Martinelli, assuming turbulent-turbulent, C = LM_C
+
+           """
+        if method == 'LM':
+            Re_f = rho_f * self.jf * self.Dh / mu_f
+            Re_g = rho_g * self.jg * self.Dh / mu_g
+
+            f_f = 0.316 / Re_f**0.25 
+            f_g = 0.316 / Re_g**0.25
+
+            dpdz_f = f_f * 1/self.Dh * rho_f * self.jf**2 / 2
+            dpdz_g = f_g * 1/self.Dh * rho_g * self.jg**2 / 2
+            chi2 = dpdz_f / dpdz_g 
+            phi_f2 = 1 + LM_C/np.sqrt(chi2) + 1 / chi2
+            dpdz = phi_f2 * dpdz_f
+        else:
+            raise NotImplementedError(f'{method} is not a valid option for calc_dpdz. Try "LM" ')
+        
+        self.dpdz = dpdz
+
+        return dpdz
 
     def calc_vwvg(self):
         print("This guy needs work, probably don't want to use it")
@@ -1680,11 +1704,8 @@ Methods:
                     if r < 0:
                         measured_rs[i] = - measured_rs[i]
                         measured_thetas[i] = (measured_thetas[i] + np.pi) % (2*np.pi)
-                        
+
                 ax.plot( measured_thetas, measured_rs, marker='o', fillstyle = 'none', mec = 'black', linewidth = 0, ms = 2)
-
-
-
 
         if annotate_h:
             if not cartesian:
