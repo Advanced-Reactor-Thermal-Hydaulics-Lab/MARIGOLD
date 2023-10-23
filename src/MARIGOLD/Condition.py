@@ -233,15 +233,16 @@ Methods:
         # Have a record of actual measurement locations
 
         # First step is to find the phi angles that have data        
-        angles_with_data = []
+        angles_with_data = set()
         self.original_mesh = []
 
         for angle, rdict in self.phi.items():
             for rstar, midas_data in rdict.items():
                 if any(midas_data.values()):
-                    angles_with_data.append(angle)
+                    angles_with_data.add(angle)
                     self.original_mesh.append( (angle, rstar) )
-                    break
+
+        angles_with_data = list(angles_with_data)
         if debug: print('Angles with data: ', angles_with_data, file=debugFID)
         num_angles_measured = len(angles_with_data) # the actual number of angles measured (r/R can be negative)
 
@@ -1607,7 +1608,7 @@ Methods:
 
     def plot_contour(self, param:str, save_dir = '.', show=True, set_max = None, set_min = None, fig_size = 4,
                      rot_angle = 0, ngridr = 50, ngridphi = 50, colormap = 'hot_r', num_levels = 100, title = False, extra_text = '',
-                     annotate_h = False, cartesian = False, h_star_kwargs = {'method': 'max_dsm', 'min_void': '0.05'}, plot_data_points = False) -> None:
+                     annotate_h = False, cartesian = False, h_star_kwargs = {'method': 'max_dsm', 'min_void': '0.05'}, plot_measured_points = False) -> None:
         
         if cartesian:
             fig, ax = plt.subplots(figsize=(fig_size, fig_size), dpi=300)
@@ -1670,9 +1671,20 @@ Methods:
             plt.plot(x, -np.sqrt(1- x**2), marker= None, linestyle = '-', color = 'black', linewidth = 1)
         else:
             plt.contourf(PHII, RI, parami, levels = num_levels, vmin = set_min, vmax = set_max, cmap = colormap)
-            if plot_data_points: 
-                for phi, r in self.original_mesh:
-                    plt.scatter(phi, r)
+            if plot_measured_points: 
+                # print(np.asarray(self.original_mesh)[:,0]* np.pi/180 , np.asarray(self.original_mesh)[:,1])
+                measured_thetas = np.asarray(self.original_mesh)[:,0]* np.pi/180
+                measured_rs = np.asarray(self.original_mesh)[:,1]
+
+                for i, r in enumerate(np.asarray(self.original_mesh)[:,1]):
+                    if r < 0:
+                        measured_rs[i] = - measured_rs[i]
+                        measured_thetas[i] = (measured_thetas[i] + np.pi) % (2*np.pi)
+                        
+                ax.plot( measured_thetas, measured_rs, marker='o', fillstyle = 'none', mec = 'black', linewidth = 0, ms = 2)
+
+
+
 
         if annotate_h:
             if not cartesian:
