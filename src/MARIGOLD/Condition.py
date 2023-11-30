@@ -865,7 +865,7 @@ Methods:
                 dummy = self.Ref
             except:
                 print(f'Condition {self.name} has no Ref value, calculating assuming water')
-                self.Ref = 998 * cond.jf * cond.Dh / 0.001
+                self.Ref = 998 * self.jf * self.Dh / 0.001
             
             self.roverRend = 1.3 - 1.57e-5 * self.Ref
             h_star = 1 - self.roverRend
@@ -957,7 +957,7 @@ Methods:
                     vals.append(midas_dict[param] * r_star) # Don't forget r dr dθ
                 except:
                     vals.append(np.NaN * r_star) # Don't forget r dr dθ
-                    print(f"Could not find {param} for φ = {phi_angle}, r = {r_star}. Substituting NaN")
+                    print(f"Could not find {param} for φ = {angle}, r = {r_star}. Substituting NaN")
 
         # Set up interpolation
         rs = np.asarray(rs)
@@ -1014,7 +1014,7 @@ Methods:
                     vals.append(midas_dict[param] * r_star * midas_dict['alpha']) # Don't forget r dr dθ
                 except:
                     vals.append(np.NaN * r_star) # Don't forget r dr dθ
-                    print(f"Could not find {param} for φ = {phi_angle}, r = {r_star}. Substituting NaN")
+                    print(f"Could not find {param} for φ = {angle}, r = {r_star}. Substituting NaN")
 
         # Set up interpolation
         rs = np.asarray(rs)
@@ -1404,6 +1404,7 @@ Methods:
         'LM' -> Lockhart Martinelli, assuming turbulent-turbulent, C = LM_C
 
            """
+        
         if method == 'LM':
             Re_f = rho_f * self.jf * self.Dh / mu_f
             Re_g = rho_g * self.jg * self.Dh / mu_g
