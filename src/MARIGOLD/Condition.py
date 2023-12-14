@@ -133,7 +133,9 @@ Methods:
         return self.name
 
     def __call__(self, phi_in:np.ndarray, r_in:np.ndarray, param:str, interp_method='None') -> np.ndarray:
-        """Returns the value of param at (phi, r). Can get raw data, linear interp, or spline interp
+        """
+
+        Returns the value of param at (phi, r). Can get raw data, linear interp, or spline interp
            phi in radians
 
            Can also return the value at (x, y) if linear_xy is selected as the interp method. phi -> x, r -> y
@@ -142,7 +144,7 @@ Methods:
         
         if interp_method == 'None':
             try:
-                param_values = np.zeros(r_in.size, phi_in.size)
+                param_values = np.zeros(r_in.size, phi_in.size) # TODO check if r_in and phi_in actually exist
                 for i, r_val in enumerate(r_in):
                     for j, phi_val in enumerate(phi_in):
                         param_values[i,j] = self.phi[round(phi_val * 180 / np.pi, 2)][r_val][param]
