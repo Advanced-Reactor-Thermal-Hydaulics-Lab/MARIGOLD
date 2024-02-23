@@ -1432,10 +1432,57 @@ Methods:
         self.vwvg = self.jgloc / self.area_avg('alpha')
         return
     
+    def calc_W(self):
+        """
+
+        Calculates the wake deficit function, W, from the experimental data
+
+        """
+
+        for angle, r_dict in self.phi.items():
+            for rstar, midas_dict in r_dict.items():
+                try:
+                    dummy = midas_dict['vf']
+                except KeyError:
+                    self.approx_vf()
+                midas_dict.update({
+                    'W' : self.vf / self.ug1 - 1
+                })
+
+        return
+    
+    def calc_mu_eff(self, method='Ishii', mu_f = 0.001, mu_g = 18.03e-6, alpha_max = 0.7):
+        """
+        
+        Method for calculating effective viscosity. Also calculates mixture viscosity, stored in 
+        μ_eff and μ_m, resepectively. 
+
+        Right now the only method implemented is Ishii's
+
+        """
+                
+        for angle, r_dict in self.phi.items():
+            for rstar, midas_dict in r_dict.items():
+
+                if method == 'Ishii':
+                    mu_m = mu_f * (1 - self.alpha / alpha_max)**(-2.5*alpha_max * (mu_g + 0.4*mu_f) / (mu_g + mu_f)  )
+                    mu_eff = mu_m
+
+                    midas_dict.update({'mu_m': mu_eff})
+
+                midas_dict.update({'mu_eff': mu_eff})
+
+        return
+    
     def plot_profiles(self, param, save_dir = '.', show=True, x_axis='r', 
                       const_to_plot = [90, 67.5, 45, 22.5, 0], include_complement = True, 
                       rotate=False, fig_size=4, title=True) -> None:
-        """Plot profiles of param over x_axis, for const_to_plot, i.e. α over r/R for φ = [90, 67.5 ... 0]. include_complement will continue with the negative side if x_axis = 'r' """
+        """ 
+        
+        Plot profiles of param over x_axis, for const_to_plot, i.e. α over r/R for φ = [90, 67.5 ... 0]. 
+        Include_complement will continue with the negative side if x_axis = 'r' 
+        
+        """
         self.mirror()
         plt.rcParams.update({'font.size': 12})
         plt.rcParams["font.family"] = "Times New Roman"
