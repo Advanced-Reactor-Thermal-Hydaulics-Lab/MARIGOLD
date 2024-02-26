@@ -1442,12 +1442,21 @@ Methods:
         for angle, r_dict in self.phi.items():
             for rstar, midas_dict in r_dict.items():
                 try:
-                    dummy = midas_dict['vf']
+                    vfp = midas_dict['vf']
                 except KeyError:
-                    self.approx_vf()
-                midas_dict.update({
-                    'W' : self.vf / self.ug1 - 1
-                })
+                    self.calc_vr()
+
+                if vfp == 0:
+                    if midas_dict['vr'] != 0:
+                        print("Warning, vf = 0 but vr != 0. Defaulting to W = 0")
+                    midas_dict.update({
+                            'W' : 0
+                        })
+                else:
+
+                    midas_dict.update({
+                        'W' : midas_dict['vr'] / vfp
+                    })
 
         return
     
