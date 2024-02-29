@@ -200,34 +200,37 @@ Methods:
         return
 
     def mirror(self, sym90 = True, axisym = False, uniform_rmesh = False, force_remirror=False) -> None:
-        """ Mirror data, so we have data for every angle
-
-            First finds all the angles with data, copies anything negative to the 
-            other side (deleting the negative entries in the original). Then goes
-            though each of the angles in _angles (22.5° increments) and makes sure
-            each has data. Either copying, assuming some kind of symmetry (either
-            axisym or sym90) or just filling in zeros. 
-
-            Force_remirror is untested, no clue if it's safe or not
-        
         """ 
+        Mirror data, so we have data for every angle
 
-        #
-        # Quadrant definitions:
-        #
-        #             phi =  90
-        #              , - ~ ~ ~ - ,
-        #          , '       |        ' ,
-        #        ,           |            ,
-        #       ,     II     |    I        ,
-        #      ,             |             ,
-        #  180 ,-------------|-------------, 0
-        #      ,             |             ,
-        #       ,    III     |   IV       ,
-        #        ,           |           ,
-        #          ,         |        , '
-        #            ' - , _ _ _ ,  '
-        #                   270
+        First finds all the angles with data, copies anything negative to the 
+        other side (deleting the negative entries in the original). Then goes
+        though each of the angles in _angles (22.5° increments) and makes sure
+        each has data. Either copying, assuming some kind of symmetry (either
+        axisym or sym90) or just filling in zeros. 
+
+        Force_remirror is untested, no clue if it's safe or not
+        
+        
+
+        
+        Quadrant definitions:
+        
+                    phi =  90
+                     , - ~ ~ ~ - ,
+                 , '       |        ' ,
+               ,           |            ,
+              ,     II     |    I        ,
+             ,             |             ,
+         180 ,-------------|-------------, 0
+             ,             |             ,
+              ,    III     |   IV       ,
+               ,           |           ,
+                 ,         |        , '
+                   ' - , _ _ _ ,  '
+                          270
+
+        """
 
         # Only ever call this function once
         if self.mirrored and not force_remirror:
@@ -426,7 +429,15 @@ Methods:
         return
     
     def approx_vf(self, n=7):
-        # If necessary, approximate vf using power law relation
+
+        """
+        
+        Method for approximating vf with power-law relation. 
+
+        vf_approx = (n+1)*(2*n+1) / (2*n*n) * (jf / (1-self.area_avg('alpha'))) * (1 - abs(rstar))**(1/n)
+
+        """
+
         self.mirror()
 
         for angle, r_dict in self.phi.items():
@@ -452,14 +463,27 @@ Methods:
         return
     
     def calc_vr(self):
+
+        """
+        
+        Method for calculating relative velocity. Will approximate vf if it cannot be found.
+
+        Note that if vg = 0, then this method says vr = 0.
+
+        """
+
         self.mirror()
+
+        warn = True
 
         for angle, r_dict in self.phi.items():
             for rstar, midas_dict in r_dict.items():
                 try:
                     dummy = midas_dict['vf']
                 except:
-                    print("Warning: Approximating vf in calculating vr, since no data found")
+                    if warn:
+                        print("Warning: Approximating vf in calculating vr, since no data found")
+                        warn = False
                     self.approx_vf()
                 vg = midas_dict['ug1']
                 if vg == 0: # should be the same as α = 0, could maybe switch this to that
@@ -488,7 +512,9 @@ Methods:
         return
 
     def calc_grad(self, param: str, recalc = False) -> None:
-        """Calculates gradient of param based on the data in self. 
+        
+        """
+        Calculates gradient of param based on the data in self. 
         
         Stored in self's midas_dict as grad_param_r, grad_param_phi, etc.
         Will only be called once, unless recalc is True.
@@ -689,7 +715,9 @@ Methods:
         return
     
     def calc_linear_xy_interp(self, param: str) -> None:
-        """Makes a LinearNDInterpolator for the given param in x y coords. Can access later with self.linear_xy_interp[param]
+        """
+    
+        Makes a LinearNDInterpolator for the given param in x y coords. Can access later with self.linear_xy_interp[param]
                           
         """
 
@@ -794,8 +822,9 @@ Methods:
         return (max)
     
     def find_hstar_pos(self, method='max_dsm', void_criteria = 0.05) -> float:
-        """ Returns the vertical distance from the top of the pipe to the bubble layer interface, as determined by the selected method.
-            Void criteria = minimum void for "zero_void" mode, or % of maximum void on line for "percent_void" mode """
+        """ 
+        Returns the vertical distance from the top of the pipe to the bubble layer interface, as determined by the selected method.
+        Void criteria = minimum void for "zero_void" mode, or % of maximum void on line for "percent_void" mode """
 
         if method == 'max_dsm':
             r_max, phi_max = self.max_loc('Dsm1')
@@ -878,6 +907,16 @@ Methods:
         return np.NaN
 
     def area_avg(self, param: str, even_opt='first', recalc = False) -> float:
+
+        """
+        
+        Method for calculating the area-average of a parameter, "param". Can be anything MIDAS outputs, but usually of 
+        interest are "alpha" or "alphaug1
+
+        Uses Simpson's rule for integration, even_opt passed to that. Will save the previously calculated area averages 
+        in Condition.area_avgs[param], and won't recalculate unless recalc = True
+
+        """
         
         # Check that the parameter that the user requested exists
         try:
@@ -1473,6 +1512,9 @@ Methods:
         for angle, r_dict in self.phi.items():
             for rstar, midas_dict in r_dict.items():
 
+                if 'mu_eff' in midas_dict.keys():
+                    continue
+
                 if method == 'Ishii':
                     mu_m = mu_f * (1 - self.alpha / alpha_max)**(-2.5*alpha_max * (mu_g + 0.4*mu_f) / (mu_g + mu_f)  )
                     mu_eff = mu_m
@@ -1482,6 +1524,45 @@ Methods:
                 midas_dict.update({'mu_eff': mu_eff})
 
         return
+    
+    def calc_cd(self, method='Ishii-Zuber', rho_f = 998):
+        """
+        
+        Method for calculating drag coefficient 
+
+        Options are Ishii-Zuber and Schiller-Naumann, but both use
+        Reb = midas_dict['Dsm1'] * rho_f * midas_dict['vr'] / midas_dict['mu_m']\
+        
+        vr from calc_vr()
+        mu_m from calc_mu_eff()
+
+        """
+
+        self.calc_vr()
+        self.calc_mu_eff()
+
+        for angle, r_dict in self.phi.items():
+            for rstar, midas_dict in r_dict.items():
+
+                Reb = midas_dict['Dsm1'] * rho_f * midas_dict['vr'] / midas_dict['mu_m']
+
+                if method == 'Ishii-Zuber' or method == 'IZ' or method == 'Ishii':
+
+                    cd = max(0.44, 24/Reb * (1 + 0.1*Reb**0.75))
+
+                    midas_dict.update(
+                        {'cd': cd}
+                    )
+
+                elif method == 'Schiller-Naumann':
+                    cd = max(0.44, 24/Reb * (1 + 0.15*Reb**0.687))
+
+                    midas_dict.update(
+                        {'cd': cd}
+                    )
+
+        return
+
     
     def plot_profiles(self, param, save_dir = '.', show=True, x_axis='r', 
                       const_to_plot = [90, 67.5, 45, 22.5, 0], include_complement = True, 
