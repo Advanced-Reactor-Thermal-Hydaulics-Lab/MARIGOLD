@@ -1513,11 +1513,8 @@ Methods:
         for angle, r_dict in self.phi.items():
             for rstar, midas_dict in r_dict.items():
 
-                if 'mu_eff' in midas_dict.keys():
-                    continue
-
                 if method == 'Ishii':
-                    mu_m = mu_f * (1 - self.alpha / alpha_max)**(-2.5*alpha_max * (mu_g + 0.4*mu_f) / (mu_g + mu_f)  )
+                    mu_m = mu_f * (1 - midas_dict['alpha'] / alpha_max)**(-2.5*alpha_max * (mu_g + 0.4*mu_f) / (mu_g + mu_f)  )
                     mu_eff = mu_m
 
                     midas_dict.update({'mu_m': mu_eff})
@@ -1529,7 +1526,7 @@ Methods:
     def calc_cd(self, method='Ishii-Zuber', rho_f = 998):
         """
         
-        Method for calculating drag coefficient 
+        Method for calculating drag coefficient. If vr = 0, assume cd = 0
 
         Options are Ishii-Zuber and Schiller-Naumann, but both use
         Reb = midas_dict['Dsm1'] * rho_f * midas_dict['vr'] / midas_dict['mu_m']\
@@ -1545,11 +1542,14 @@ Methods:
         for angle, r_dict in self.phi.items():
             for rstar, midas_dict in r_dict.items():
 
-                Reb = midas_dict['Dsm1'] * rho_f * midas_dict['vr'] / midas_dict['mu_m']
+                Reb = midas_dict['Dsm1'] * rho_f * abs(midas_dict['vr']) / midas_dict['mu_m']
 
                 if method == 'Ishii-Zuber' or method == 'IZ' or method == 'Ishii':
 
-                    cd = max(0.44, 24/Reb * (1 + 0.1*Reb**0.75))
+                    if Reb > 0:
+                        cd = max(0.44, 24/Reb * (1 + 0.1*Reb**0.75))
+                    else:
+                        cd = 0
 
                     midas_dict.update(
                         {'cd': cd}
@@ -1598,9 +1598,11 @@ Methods:
         Stores:
          - error, "eps_param1_param2", param1 - param2
          - relative, "eps_rel_param1_param2", (param1 - param2) / param2
-         - absolute, "eps_abs_rel_param1_param2", |param1 - param2| / param2
+         - absolute relative, "eps_abs_rel_param1_param2", |param1 - param2| / param2
          - square, "eps_sq_param1_param2", (param1 - param2)**2
          - relative square, "eps_rel_sq_param1_param2", ((param1 - param2)/param2)**2
+
+         If param2 = 0, relative errors are considered 0
         
         """
 
@@ -1612,11 +1614,17 @@ Methods:
 
         for angle, r_dict in self.phi.items():
             for rstar, midas_dict in r_dict.items():
-                midas_dict[param_error_name] = param1 - param2
-                midas_dict[param_rel_error_name] = (param1 - param2) / param2
-                midas_dict[param_abs_rel_error_name] = abs(param1 - param2) / param2
-                midas_dict[param_sq_error_name] = (param1 - param2)**2
-                midas_dict[param_rel_sq_error_name] = ((param1 - param2) / param2)**2
+                midas_dict[param_error_name] = midas_dict[param1] - midas_dict[param2]
+                midas_dict[param_sq_error_name] = (midas_dict[param1] - midas_dict[param2])**2
+
+                if midas_dict[param2] != 0:
+                    midas_dict[param_rel_error_name] = (midas_dict[param1] - midas_dict[param2]) / midas_dict[param2]
+                    midas_dict[param_rel_sq_error_name] = ((midas_dict[param1] - midas_dict[param2]) / midas_dict[param2])**2
+                    midas_dict[param_abs_rel_error_name] = abs(midas_dict[param1] - midas_dict[param2]) / midas_dict[param2]
+                else:
+                    midas_dict[param_rel_error_name] = 0
+                    midas_dict[param_rel_sq_error_name] = 0
+                    midas_dict[param_abs_rel_error_name] = 0
 
         return
 
