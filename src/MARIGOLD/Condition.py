@@ -1618,7 +1618,7 @@ Methods:
                 midas_dict[param_sq_error_name] = (param1 - param2)**2
                 midas_dict[param_rel_sq_error_name] = ((param1 - param2) / param2)**2
 
-    return
+        return
 
     
     def plot_profiles(self, param, save_dir = '.', show=True, x_axis='r', 
