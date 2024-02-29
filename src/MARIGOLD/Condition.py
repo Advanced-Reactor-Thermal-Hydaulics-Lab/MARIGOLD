@@ -2,7 +2,8 @@ from .config import *
 from scipy import interpolate
 
 class Condition:
-    """Class to handle the local probe data
+    """
+    Class to handle the local probe data
 
 Data is stored in the Condition.phi property. It's actually 3 layers of dictionary
 phi [angle] gives a dictionary with the various r/R
@@ -1562,6 +1563,62 @@ Methods:
                     )
 
         return
+
+    def calc_vr_pred(self, method='wake_1', c3 = 1, n=1):
+
+        """
+        
+        Method for calculating relative velocity based on models
+        Stored under "vr_method" in midas_dict
+
+        TODO implement Ishii-Chawla
+
+        Implemented options:
+        - "wake_1" vr = - c3 * (1-midas_dict['alpha'])**n * midas_dict['vf'] * midas_dict['cd']**(1./3)
+
+
+        """
+
+        self.calc_cd()
+
+        vr_name = "vr_" + method
+
+        if method == 'wake_1':
+            for angle, r_dict in self.phi.items():
+                for rstar, midas_dict in r_dict.items():
+                    midas_dict[vr_name] = - c3 * (1-midas_dict['alpha'])**n * midas_dict['vf'] * midas_dict['cd']**(1./3)
+        else:
+            print(f"{method} not implemented")
+        return
+    
+    def calc_errors(self, param1:str, param2:str):
+        """ 
+        
+        Calculates the errors, ε, between two parameters (param1 - param2) in midas_dict
+        Stores:
+         - error, "eps_param1_param2", param1 - param2
+         - relative, "eps_rel_param1_param2", (param1 - param2) / param2
+         - absolute, "eps_abs_rel_param1_param2", |param1 - param2| / param2
+         - square, "eps_sq_param1_param2", (param1 - param2)**2
+         - relative square, "eps_rel_sq_param1_param2", ((param1 - param2)/param2)**2
+        
+        """
+
+        param_error_name = "eps_" + param1 + "_" + param2
+        param_rel_error_name = "eps_rel_" + param1 + "_" + param2
+        param_abs_rel_error_name = "eps_abs_rel_" + param1 + "_" + param2
+        param_sq_error_name = "eps_sq_" + param1 + "_" + param2
+        param_rel_sq_error_name = "eps_rel_sq_" + param1 + "_" + param2
+
+        for angle, r_dict in self.phi.items():
+            for rstar, midas_dict in r_dict.items():
+                midas_dict[param_error_name] = param1 - param2
+                midas_dict[param_rel_error_name] = (param1 - param2) / param2
+                midas_dict[param_abs_rel_error_name] = abs(param1 - param2) / param2
+                midas_dict[param_sq_error_name] = (param1 - param2)**2
+                midas_dict[param_rel_sq_error_name] = ((param1 - param2) / param2)**2
+
+    return
 
     
     def plot_profiles(self, param, save_dir = '.', show=True, x_axis='r', 
