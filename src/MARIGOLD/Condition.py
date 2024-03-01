@@ -1523,7 +1523,7 @@ Methods:
 
         return
     
-    def calc_cd(self, method='Ishii-Zuber', rho_f = 998):
+    def calc_cd(self, method='Ishii-Zuber', rho_f = 998, vr_cheat = False):
         """
         
         Method for calculating drag coefficient. If vr = 0, assume cd = 0
@@ -1536,13 +1536,22 @@ Methods:
 
         """
 
-        self.calc_vr()
         self.calc_mu_eff()
 
         for angle, r_dict in self.phi.items():
             for rstar, midas_dict in r_dict.items():
 
-                Reb = midas_dict['Dsm1'] * rho_f * abs(midas_dict['vr']) / midas_dict['mu_m']
+                if vr_cheat:
+                    Reb = midas_dict['Dsm1'] * rho_f * abs(midas_dict['vr']) / midas_dict['mu_m']
+                else:
+
+                    if 'vr_model' not in midas_dict.keys(): # Initialize for iteration
+                        midas_dict.update(
+                            {'vr_model': -1}
+                        )
+
+                    Reb = midas_dict['Dsm1'] * rho_f * abs(midas_dict['vr_model']) / midas_dict['mu_m']
+
 
                 if method == 'Ishii-Zuber' or method == 'IZ' or method == 'Ishii':
 
@@ -1564,12 +1573,12 @@ Methods:
 
         return
 
-    def calc_vr_pred(self, method='wake_1', c3 = 1, n=1):
+    def calc_vr_model(self, method='wake_1', c3 = 1, n=1, iterate_cd = True):
 
         """
         
         Method for calculating relative velocity based on models
-        Stored under "vr_method" in midas_dict
+        Stored under "vr_method" in midas_dict as well as "vr_model"
 
         TODO implement Ishii-Chawla
 
@@ -1579,17 +1588,50 @@ Methods:
 
         """
 
-        self.calc_cd()
+        MAX_ITERATIONS = 10000
+        iterations = 0
+        initialize_vr = True
 
-        vr_name = "vr_" + method
+        while True:
+            if iterate_cd:
+                
+                if initialize_vr:
+                    for angle, r_dict in self.phi.items():
+                        for rstar, midas_dict in r_dict.items():
+                            midas_dict.update(
+                                {'vr_model': -10}
+                            )
+                    initialize_vr = False
 
-        if method == 'wake_1':
-            for angle, r_dict in self.phi.items():
-                for rstar, midas_dict in r_dict.items():
-                    midas_dict[vr_name] = - c3 * (1-midas_dict['alpha'])**n * midas_dict['vf'] * midas_dict['cd']**(1./3)
-        else:
-            print(f"{method} not implemented")
-        return
+                self.calc_cd(vr_cheat=False)
+            else:
+                self.calc_cd(vr_cheat=True)
+
+            old_vr = self.area_avg('vr_model', recalc=True)
+
+            vr_name = "vr_" + method
+
+            if method == 'wake_1':
+                for angle, r_dict in self.phi.items():
+                    for rstar, midas_dict in r_dict.items():
+                        midas_dict[vr_name] = - c3 * (1-midas_dict['alpha'])**n * midas_dict['vf'] * midas_dict['cd']**(1./3)
+                        midas_dict['vr_model'] = - c3 * (1-midas_dict['alpha'])**n * midas_dict['vf'] * midas_dict['cd']**(1./3)
+            else:
+                print(f"{method} not implemented")
+
+            iterations += 1
+
+            if abs(old_vr - self.area_avg('vr_model', recalc=True)) / abs(old_vr) < 0.001:
+                print(f"vr_model converged in {iterations} iterations")
+                print(old_vr, self.area_avg('vr_model', recalc=True))
+                return
+            
+            if iterations > MAX_ITERATIONS:
+                print("Warning, max iterations exceeded in calculating vr_model")
+                print(f"{old_vr - self.area_avg('vr_model', recalc=True)}")
+                return
+
+            
     
     def calc_errors(self, param1:str, param2:str):
         """ 
