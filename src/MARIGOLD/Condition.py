@@ -1504,11 +1504,13 @@ Methods:
         """
         
         Method for calculating effective viscosity. Also calculates mixture viscosity, stored in 
-        μ_eff and μ_m, resepectively. 
+        μ_eff and μ_m, resepectively. Note that this fuction does mirror the data
 
         Right now the only method implemented is Ishii's
 
         """
+
+        self.mirror()
                 
         for angle, r_dict in self.phi.items():
             for rstar, midas_dict in r_dict.items():
@@ -1670,6 +1672,25 @@ Methods:
 
         return
 
+    def calc_avg_lat_sep(self):
+
+        """
+        
+        Calculates average lateral separation distance between bubbles, by doing
+        λ = ugl / f
+
+        stores in midas dict under lambda
+
+        Mirrors the data
+
+        """
+        self.mirror()
+
+        for angle, r_dict in self.phi.items():
+            for rstar, midas_dict in r_dict.items():
+                midas_dict['lambda'] = midas_dict['ug1'] / midas_dict['frequency']
+
+        return
     
     def plot_profiles(self, param, save_dir = '.', show=True, x_axis='r', 
                       const_to_plot = [90, 67.5, 45, 22.5, 0], include_complement = True, 
