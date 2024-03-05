@@ -772,12 +772,16 @@ Methods:
 
         return (location)
     
-    def min(self, param: str, recalc = False)-> float:
+    def min(self, param: str, recalc = False, nonzero=False)-> float:
         if (param in self.mins.keys()) and (not recalc):
             return self.mins[param] # why waste time 
         min = 10**7
         for angle, r_dict in self.phi.items():
             for rstar, midas_dict in r_dict.items():
+                
+                if nonzero and midas_dict[param] == 0:
+                    continue
+                
                 if midas_dict[param] < min:
                     min = midas_dict[param]
                     location = rstar
@@ -1698,7 +1702,7 @@ Methods:
     
     def plot_profiles(self, param, save_dir = '.', show=True, x_axis='r', 
                       const_to_plot = [90, 67.5, 45, 22.5, 0], include_complement = True, 
-                      rotate=False, fig_size=4, title=True, log_x = False) -> None:
+                      rotate=False, fig_size=4, title=True) -> None:
         
         """ 
         
@@ -1706,10 +1710,13 @@ Methods:
         Include_complement will continue with the negative side if x_axis = 'r' 
         
         """
+
         self.mirror()
         plt.rcParams.update({'font.size': 12})
         plt.rcParams["font.family"] = "Times New Roman"
         plt.rcParams["mathtext.fontset"] = "dejavuserif"
+
+        log_x = False # This breaks, so I removed it from the arguments to the function
 
         if rotate:
 
@@ -1850,7 +1857,9 @@ Methods:
         ax.spines['right'].set_visible(False)
 
         if log_x:
+            ax.set_xlim(self.min(param, nonzero=True), self.max(param)*1.2)
             ax.set_xscale('log')
+            fake_ax.set_xscale('log')
         
         if rotate:
             fig.add_subplot(fake_ax)
