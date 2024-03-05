@@ -1698,7 +1698,8 @@ Methods:
     
     def plot_profiles(self, param, save_dir = '.', show=True, x_axis='r', 
                       const_to_plot = [90, 67.5, 45, 22.5, 0], include_complement = True, 
-                      rotate=False, fig_size=4, title=True) -> None:
+                      rotate=False, fig_size=4, title=True, log_x = False) -> None:
+        
         """ 
         
         Plot profiles of param over x_axis, for const_to_plot, i.e. α over r/R for φ = [90, 67.5 ... 0]. 
@@ -1847,6 +1848,9 @@ Methods:
         ax.spines['bottom'].set_position(('data', 0))
         ax.spines['top'].set_visible(False)
         ax.spines['right'].set_visible(False)
+
+        if log_x:
+            ax.set_xscale('log')
         
         if rotate:
             fig.add_subplot(fake_ax)
