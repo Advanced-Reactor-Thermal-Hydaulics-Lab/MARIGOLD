@@ -1579,7 +1579,7 @@ Methods:
 
         return
 
-    def calc_vr_model(self, method='wake_1', c3 = 1, n=1, iterate_cd = True):
+    def calc_vr_model(self, method='wake_1', c3 = -0.15, iterate_cd = True):
 
         """
         
@@ -1638,6 +1638,18 @@ Methods:
                 return
 
             
+    def calc_vgj_model(self):
+
+        for angle, r_dict in self.phi.items():
+            for rstar, midas_dict in r_dict.items():
+
+                if 'vr_model' not in midas_dict.keys():
+                    print(f"Warning: vr_model not found for {angle}, {rstar}, calling calc_vr_model with default inputs")
+                    self.calc_vr_model()
+
+                midas_dict['vgj_model'] = (1 - midas_dict['alpha']) * midas_dict['vr_model']
+
+        return
     
     def calc_errors(self, param1:str, param2:str):
         """ 
