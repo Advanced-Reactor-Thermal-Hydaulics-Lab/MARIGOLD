@@ -1688,7 +1688,11 @@ Methods:
 
         for angle, r_dict in self.phi.items():
             for rstar, midas_dict in r_dict.items():
-                midas_dict['lambda'] = midas_dict['ug1'] / midas_dict['frequency']
+                
+                try:
+                    midas_dict['lambda'] = midas_dict['ug1'] / midas_dict['bub_freq']
+                except ZeroDivisionError:
+                    midas_dict['lambda'] = 0
 
         return
     
