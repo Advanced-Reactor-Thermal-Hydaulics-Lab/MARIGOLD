@@ -1535,7 +1535,7 @@ Methods:
         Method for calculating drag coefficient. If vr = 0, assume cd = 0
 
         Options are Ishii-Zuber and Schiller-Naumann, but both use
-        Reb = midas_dict['Dsm1'] * rho_f * midas_dict['vr'] / midas_dict['mu_m']\
+        Reb = (1 - midas_dict['alpha']) * midas_dict['Dsm1'] * rho_f * midas_dict['vr'] / midas_dict['mu_m']\
         
         vr from calc_vr()
         mu_m from calc_mu_eff()
@@ -1548,7 +1548,7 @@ Methods:
             for rstar, midas_dict in r_dict.items():
 
                 if vr_cheat:
-                    Reb = midas_dict['Dsm1'] * rho_f * abs(midas_dict['vr']) / midas_dict['mu_m']
+                    Reb = (1 - midas_dict['alpha']) * midas_dict['Dsm1'] * rho_f * abs(midas_dict['vr']) / midas_dict['mu_m']
                 else:
 
                     if 'vr_model' not in midas_dict.keys(): # Initialize for iteration
@@ -1556,7 +1556,7 @@ Methods:
                             {'vr_model': -1}
                         )
 
-                    Reb = midas_dict['Dsm1'] * rho_f * abs(midas_dict['vr_model']) / midas_dict['mu_m']
+                    Reb = (1 - midas_dict['alpha']) * midas_dict['Dsm1'] * rho_f * abs(midas_dict['vr_model']) / midas_dict['mu_m']
 
 
                 if method == 'Ishii-Zuber' or method == 'IZ' or method == 'Ishii':
@@ -1620,8 +1620,8 @@ Methods:
             if method == 'wake_1':
                 for angle, r_dict in self.phi.items():
                     for rstar, midas_dict in r_dict.items():
-                        midas_dict[vr_name] = - c3 * (1-midas_dict['alpha'])**n * midas_dict['vf'] * midas_dict['cd']**(1./3)
-                        midas_dict['vr_model'] = - c3 * (1-midas_dict['alpha'])**n * midas_dict['vf'] * midas_dict['cd']**(1./3)
+                        midas_dict[vr_name] = c3  * midas_dict['vf'] * midas_dict['cd']**(1./3)
+                        midas_dict['vr_model'] = c3  * midas_dict['vf'] * midas_dict['cd']**(1./3)
             else:
                 print(f"{method} not implemented")
 
