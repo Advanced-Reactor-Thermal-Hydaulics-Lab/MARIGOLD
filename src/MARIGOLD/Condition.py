@@ -1504,7 +1504,7 @@ Methods:
 
         return
     
-    def calc_mu_eff(self, method='Ishii', mu_f = 0.001, mu_g = 18.03e-6, alpha_max = 0.7):
+    def calc_mu_eff(self, method='Ishii', mu_f = 0.001, mu_g = 18.03e-6, alpha_max = 1.0):
         """
         
         Method for calculating effective viscosity. Also calculates mixture viscosity, stored in 
@@ -1563,6 +1563,17 @@ Methods:
                     )
 
                 if method == 'Ishii-Zuber' or method == 'IZ' or method == 'Ishii':
+
+                    if Reb > 0:
+                        cd = 24/Reb * (1 + 0.1*Reb**0.75)
+                    else:
+                        cd = 0
+
+                    midas_dict.update(
+                        {'cd': cd}
+                    )
+
+                elif method == 'Ishii-Zuber-limited':
 
                     if Reb > 0:
                         cd = max(0.44, 24/Reb * (1 + 0.1*Reb**0.75))
@@ -1637,6 +1648,12 @@ Methods:
                 return -1
 
             iterations += 1
+
+            if old_vr == 0:
+                if not quiet:
+                    print(f"vr_model calculated as 0 after {iterations} iterations")
+                    print(old_vr, self.area_avg('vr_model', recalc=True))
+                return
 
             if abs(old_vr - self.area_avg('vr_model', recalc=True)) / abs(old_vr) < 0.001:
                 if not quiet:
