@@ -1558,6 +1558,9 @@ Methods:
 
                     Reb = (1 - midas_dict['alpha']) * midas_dict['Dsm1'] * rho_f * abs(midas_dict['vr_model']) / midas_dict['mu_m']
 
+                midas_dict.update(
+                        {'Reb': Reb}
+                    )
 
                 if method == 'Ishii-Zuber' or method == 'IZ' or method == 'Ishii':
 
@@ -1579,7 +1582,7 @@ Methods:
 
         return
 
-    def calc_vr_model(self, method='wake_1', c3 = -0.15, iterate_cd = True):
+    def calc_vr_model(self, method='wake_1', c3 = -0.15, n=1, iterate_cd = True, quiet = True):
 
         """
         
@@ -1622,14 +1625,23 @@ Methods:
                     for rstar, midas_dict in r_dict.items():
                         midas_dict[vr_name] = c3  * midas_dict['vf'] * midas_dict['cd']**(1./3)
                         midas_dict['vr_model'] = c3  * midas_dict['vf'] * midas_dict['cd']**(1./3)
+
+            elif method == 'wake_alpha':
+                for angle, r_dict in self.phi.items():
+                    for rstar, midas_dict in r_dict.items():
+                        midas_dict[vr_name] = c3  * (1 - midas_dict['alpha'])**n * midas_dict['vf'] * midas_dict['cd']**(1./3)
+                        midas_dict['vr_model'] = c3  * (1 - midas_dict['alpha'])**n * midas_dict['vf'] * midas_dict['cd']**(1./3)
+
             else:
                 print(f"{method} not implemented")
+                return -1
 
             iterations += 1
 
             if abs(old_vr - self.area_avg('vr_model', recalc=True)) / abs(old_vr) < 0.001:
-                print(f"vr_model converged in {iterations} iterations")
-                print(old_vr, self.area_avg('vr_model', recalc=True))
+                if not quiet:
+                    print(f"vr_model converged in {iterations} iterations")
+                    print(old_vr, self.area_avg('vr_model', recalc=True))
                 return
             
             if iterations > MAX_ITERATIONS:
@@ -1680,7 +1692,7 @@ Methods:
                 if midas_dict[param2] != 0:
                     midas_dict[param_rel_error_name] = (midas_dict[param1] - midas_dict[param2]) / midas_dict[param2]
                     midas_dict[param_rel_sq_error_name] = ((midas_dict[param1] - midas_dict[param2]) / midas_dict[param2])**2
-                    midas_dict[param_abs_rel_error_name] = abs(midas_dict[param1] - midas_dict[param2]) / midas_dict[param2]
+                    midas_dict[param_abs_rel_error_name] = abs(midas_dict[param1] - midas_dict[param2]) / abs(midas_dict[param2])
                 else:
                     midas_dict[param_rel_error_name] = 0
                     midas_dict[param_rel_sq_error_name] = 0
