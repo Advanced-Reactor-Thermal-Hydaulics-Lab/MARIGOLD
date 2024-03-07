@@ -1719,12 +1719,14 @@ Methods:
 
     def calc_avg_lat_sep(self):
 
-        """
+        """ Calculates average lateral separation distance between bubbles
         
-        Calculates average lateral separation distance between bubbles, by doing
+        Average lateral separation, λ given by
         λ = ugl / f
 
-        stores in midas dict under lambda
+        stores in midas dict under lambda. Also estimates α based on λ,
+
+        α ~ Db / λ
 
         Mirrors the data
 
@@ -1736,8 +1738,10 @@ Methods:
                 
                 try:
                     midas_dict['lambda'] = midas_dict['ug1'] / midas_dict['bub_freq']
+                    midas_dict['alpha_lambda'] = midas_dict['Dsm1'] / midas_dict['lambda']
                 except ZeroDivisionError:
                     midas_dict['lambda'] = 0
+                    midas_dict['alpha_lambda'] = 0
 
         return
     
