@@ -212,7 +212,7 @@ Methods:
 
         Force_remirror is untested, no clue if it's safe or not
         
-        
+        Also saves the original mesh (r, φ) pairs under self.original_mesh
 
         
         Quadrant definitions:
@@ -1738,9 +1738,11 @@ Methods:
                 
                 try:
                     midas_dict['lambda'] = midas_dict['ug1'] / midas_dict['bub_freq']
-                    midas_dict['alpha_lambda'] = midas_dict['Dsm1'] / midas_dict['lambda']
+                    midas_dict['lambda*'] = midas_dict['lambda'] / (midas_dict['Dsm1']/1000)
+                    midas_dict['alpha_lambda'] = midas_dict['Dsm1']/1000 / midas_dict['lambda']
                 except ZeroDivisionError:
                     midas_dict['lambda'] = 0
+                    midas_dict['lambda*'] = 0
                     midas_dict['alpha_lambda'] = 0
 
         return
@@ -1961,10 +1963,25 @@ Methods:
             plt.close()
         return
 
-    def plot_contour(self, param:str, save_dir = '.', show=True, set_max = None, set_min = None, fig_size = 4,
+    def plot_contour(self, param:str, save_dir = '.', show=True, set_max = None, set_min = None, fig_size = 4, label_str = None,
                      rot_angle = 0, ngridr = 50, ngridphi = 50, colormap = 'hot_r', num_levels = 100, title = False, extra_text = '',
                      annotate_h = False, cartesian = False, h_star_kwargs = {'method': 'max_dsm', 'min_void': '0.05'}, plot_measured_points = False) -> None:
         
+        """ Method to plot contour of a given param
+        
+        Generates a contour plot of any parameter in midas_dict, e.g. 'alpha', 'ai', etc. By default, just shows the figure,
+        but if a save_dir is specified, it will save it there instead. label_str can adjust the label of the colorbar. Can accept Latex format, e.g.
+        r"$\alpha$ [-]"
+
+        set_max and set_min set the bounds of the contour plot, and the colormap option allows for any colors that matplotlib supports. ngridr, ngridphi,
+        num_levels, all adjust how fine the contour plot is generated.
+
+        annotate_h is an option to draw a horizontal line at some given position. This was implemented when investigating where the bubble layer typically
+        stops. h_star_kwargs and cartesian are optinos related to this.
+
+        plot_measured points is neat, it plots circles where original data was detected (determined prior to mirroring)
+        
+        """ 
         if cartesian:
             fig, ax = plt.subplots(figsize=(fig_size, fig_size), dpi=300)
         else:
@@ -2017,15 +2034,36 @@ Methods:
             print('Alpha exceeds 1.0!\nSaving problematic array')
             return
         
+        extend_min = True
+        extend_max = True
+        
+        if set_min == None:
+            set_min = np.min(parami)
+            extend_min = False
+
+        if set_max == None:
+            set_max = np.max(parami)
+            extend_max = False
+
+        if extend_max and extend_min:
+            extend_opt = 'both'
+        elif extend_min and not extend_max:
+            extend_opt = 'min'
+        elif extend_max and not extend_min:
+            extend_opt = 'max'
+        elif not extend_min and not extend_max:
+            extend_opt = 'neither'
+        
         if cartesian:
-            plt.contourf(XI, YI, parami, levels = num_levels, vmin = set_min, vmax = set_max, cmap = colormap)
+            mpbl = ax.contourf(XI, YI, parami, levels = num_levels, vmin = set_min, vmax = set_max, cmap = colormap)
 
             x = np.linspace(-1, 1, 100)
             # Make a circle to look nice
             plt.plot(x, np.sqrt(1- x**2), marker= None, linestyle = '-', color = 'black', linewidth = 1)
             plt.plot(x, -np.sqrt(1- x**2), marker= None, linestyle = '-', color = 'black', linewidth = 1)
         else:
-            plt.contourf(PHII, RI, parami, levels = num_levels, vmin = set_min, vmax = set_max, cmap = colormap)
+            mpbl = ax.contourf(PHII, RI, parami, levels = np.linspace(set_min, set_max, num_levels), 
+                               vmin = set_min, vmax = set_max, cmap = colormap, extend=extend_opt)
             if plot_measured_points: 
                 # print(np.asarray(self.original_mesh)[:,0]* np.pi/180 , np.asarray(self.original_mesh)[:,1])
                 measured_thetas = np.asarray(self.original_mesh)[:,0]* np.pi/180
@@ -2060,7 +2098,13 @@ Methods:
             ax.set_yticklabels([])
             ax.set_xticklabels([])
 
-        plt.colorbar(label=param)
+        #plt.clim(vmin=set_min, vmax=set_max)
+        
+        if label_str == None:
+            label_str = param
+
+        fig.colorbar(mpbl, label=label_str)
+        
         if title:
             plt.title(self.name)
 
