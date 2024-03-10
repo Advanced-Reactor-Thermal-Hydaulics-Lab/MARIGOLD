@@ -2034,20 +2034,24 @@ Methods:
             print('Alpha exceeds 1.0!\nSaving problematic array')
             return
         
-        extend_min = True
-        extend_max = True
+        extend_min = False
+        extend_max = False
         
         if set_min == None:
             set_min = np.min(parami)
-            extend_min = False
 
         if set_max == None:
             set_max = np.max(parami)
-            extend_max = False
+
+        if set_min > np.min(parami):
+            extend_min = True
+
+        if set_max < np.max(parami):
+            extend_max = True
 
         if extend_max and extend_min:
             extend_opt = 'both'
-        elif extend_min and not extend_max:
+        elif extend_min and not extend_max and set_min > np.min(parami):
             extend_opt = 'min'
         elif extend_max and not extend_min:
             extend_opt = 'max'
