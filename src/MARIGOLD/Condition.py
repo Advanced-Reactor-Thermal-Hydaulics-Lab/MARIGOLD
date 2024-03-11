@@ -435,6 +435,14 @@ Methods:
 
 
         self.mirrored = True
+
+        # clean up nones
+        for angle, r_dict in self.phi.items():
+            for rstar, midas_dict in r_dict.items():
+                if midas_dict[param] is None:
+                    print(f"Warning: 'None' value for {param} at {rstar}. Setting to 0")
+                    midas_dict.update( {param : 0})
+
         return
     
     def approx_vf(self, n=7):
@@ -923,7 +931,7 @@ Methods:
 
         """Method for calculating the area-average of a parameter, "param". 
         
-        param can be anything MIDAS outputs, but usually of interest are "alpha" or "alphaug1"
+        param can be anything MIDAS outputs, but usually of interest are "alpha" or "alpha_ug"
         If you're not sure what somethings named, try Condition.phi[90][1.0].keys()
 
         Uses Simpson's rule for integration, even_opt passed to that. Will save the previously calculated area averages 
