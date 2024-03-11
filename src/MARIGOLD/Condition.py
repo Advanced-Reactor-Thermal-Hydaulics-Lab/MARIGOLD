@@ -256,13 +256,13 @@ Methods:
         for angle, rdict in self.phi.items():
             for rstar, midas_data in rdict.items():
                 if any(midas_data.values()):
-                    if (abs(midas_data['num_spherical']) - 1894 < 0.01) and (abs(midas_data['num_cap'] - 11) < 0.01):
+                    if (abs(midas_data['num_spherical'] - 1894) < 0.01) and (abs(midas_data['num_cap'] - 11) < 0.01):
                         # this is dummy data, ignore
                         continue
-                    if (abs(midas_data['num_spherical']) - 302 < 0.01) and (abs(midas_data['ai_distorted'] - 1.25) < 0.01):
+                    if (abs(midas_data['num_spherical'] - 302) < 0.01) and (abs(midas_data['ai_distorted'] - 1.25) < 0.01):
                         # this is dummy data, ignore
                         continue
-                    if (abs(midas_data['num_spherical']) - 157 < 0.01) and (abs(midas_data['ai_distorted'] - 0.88) < 0.01):
+                    if (abs(midas_data['num_spherical'] - 157) < 0.01) and (abs(midas_data['ai_distorted'] - 0.88) < 0.01):
                         # this is dummy data, ignore
                         continue
 
