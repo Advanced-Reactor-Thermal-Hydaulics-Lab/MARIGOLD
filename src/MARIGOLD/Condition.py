@@ -449,9 +449,10 @@ Methods:
         # clean up nones
         for angle, r_dict in self.phi.items():
             for rstar, midas_dict in r_dict.items():
-                if midas_dict[param] is None:
-                    print(f"Warning: 'None' value for {param} at {rstar}. Setting to 0")
-                    midas_dict.update( {param : 0})
+                for param, value in midas_dict.items():
+                    if value is None:
+                        print(f"Warning: 'None' value for {param} at {rstar}. Setting to 0")
+                        midas_dict.update( {param : 0})
 
         return
     
