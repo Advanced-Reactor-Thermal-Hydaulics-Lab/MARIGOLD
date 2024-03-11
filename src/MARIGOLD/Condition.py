@@ -262,6 +262,9 @@ Methods:
                     if (abs(midas_data['num_spherical']) - 302 < 0.01) and (abs(midas_data['ai_distorted'] - 1.25) < 0.01):
                         # this is dummy data, ignore
                         continue
+                    if (abs(midas_data['num_spherical']) - 157 < 0.01) and (abs(midas_data['ai_distorted'] - 0.88) < 0.01):
+                        # this is dummy data, ignore
+                        continue
 
                     angles_with_data.add(angle)
                     self.original_mesh.append( (angle, rstar) )
