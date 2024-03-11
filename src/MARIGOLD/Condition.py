@@ -74,6 +74,16 @@ Methods:
                 self.LoverD = 66
             elif self.port == 'P3':
                 self.LoverD = 110
+            elif self.port == 'P4':
+                self.LoverD = 130
+            elif self.port == 'P5A':
+                self.LoverD = 146
+            elif self.port == 'P5B':
+                self.LoverD = 154
+            elif self.port == 'P6':
+                self.LoverD = 190
+            elif self.port == 'P7':
+                self.LoverD = 226
             else:
                 self.LoverD = -1
                 print(f"Warning: Could not determine port L/D for {self}")
