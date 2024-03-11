@@ -246,10 +246,18 @@ Methods:
         for angle, rdict in self.phi.items():
             for rstar, midas_data in rdict.items():
                 if any(midas_data.values()):
+                    if (abs(midas_data['num_spherical']) - 1894 < 0.01) and (abs(midas_data['num_cap'] - 11) < 0.01):
+                        # this is dummy data, ignore
+                        continue
+                    if (abs(midas_data['num_spherical']) - 302 < 0.01) and (abs(midas_data['ai_distorted'] - 1.25) < 0.01):
+                        # this is dummy data, ignore
+                        continue
+
                     angles_with_data.add(angle)
                     self.original_mesh.append( (angle, rstar) )
 
         angles_with_data = list(angles_with_data)
+        # print(angles_with_data)
         if debug: print('Angles with data: ', angles_with_data, file=debugFID)
         num_angles_measured = len(angles_with_data) # the actual number of angles measured (r/R can be negative)
 
@@ -311,10 +319,10 @@ Methods:
             # axisymmetric
             for angle in self._angles:
                 if angle not in angles_with_data:
-                    ref_angle = angles_with_data[0]
+                    ref_angle = angles_with_data[-1]
                     data = deepcopy( self.phi[ref_angle] )
                 
-                data.update({1.0: deepcopy(zero_data)}) # Cuz it'll get popped in the second loop. Also paranoia
+                data.update({1.0: deepcopy(zero_data)}) 
                 self.phi.update({angle: {}})
                 self.phi[angle].update( data )
 
@@ -913,13 +921,15 @@ Methods:
 
     def area_avg(self, param: str, even_opt='first', recalc = False) -> float:
 
-        """
+        """Method for calculating the area-average of a parameter, "param". 
         
-        Method for calculating the area-average of a parameter, "param". Can be anything MIDAS outputs, but usually of 
-        interest are "alpha" or "alphaug1
+        param can be anything MIDAS outputs, but usually of interest are "alpha" or "alphaug1"
+        If you're not sure what somethings named, try Condition.phi[90][1.0].keys()
 
         Uses Simpson's rule for integration, even_opt passed to that. Will save the previously calculated area averages 
         in Condition.area_avgs[param], and won't recalculate unless recalc = True
+
+        Returns the area-averaged parameter, or None if the method failed
 
         """
         
@@ -930,7 +940,7 @@ Methods:
             print(f"KeyError: {e}")
             if debug: print(self.phi, file=debugFID)
             print(f"Cound not area-average {param} for condition {self.name}")
-            return
+            return None
         
         if (param in self.area_avgs.keys()) and (not recalc):
             return self.area_avgs[param] # why waste time, if we already calculated this don't do it again
