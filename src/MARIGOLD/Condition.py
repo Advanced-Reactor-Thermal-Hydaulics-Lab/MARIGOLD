@@ -212,7 +212,7 @@ Methods:
 
     def mirror(self, sym90 = True, axisym = False, uniform_rmesh = False, force_remirror=False) -> None:
         """ 
-        Mirror data, so we have data for every angle
+        Mirrors data, so we have data for every angle
 
         First finds all the angles with data, copies anything negative to the 
         other side (deleting the negative entries in the original). Then goes
@@ -254,17 +254,18 @@ Methods:
         self.original_mesh = []
 
         for angle, rdict in self.phi.items():
-            for rstar, midas_data in rdict.items():
-                if any(midas_data.values()):
-                    if (abs(midas_data['num_spherical'] - 1894) < 0.01) and (abs(midas_data['num_cap'] - 11) < 0.01):
-                        # this is dummy data, ignore
-                        continue
-                    if (abs(midas_data['num_spherical'] - 302) < 0.01) and (abs(midas_data['ai_distorted'] - 1.25) < 0.01):
-                        # this is dummy data, ignore
-                        continue
-                    if (abs(midas_data['num_spherical'] - 157) < 0.01) and (abs(midas_data['ai_distorted'] - 0.88) < 0.01):
-                        # this is dummy data, ignore
-                        continue
+            for rstar, midas_dict in rdict.items():
+                if any(midas_dict.values()):
+                    if 'num_spherical' in midas_dict.keys():
+                        if (abs(midas_dict['num_spherical'] - 1894) < 0.01) and (abs(midas_dict['num_cap'] - 11) < 0.01):
+                            # this is dummy data, ignore
+                            continue
+                        if (abs(midas_dict['num_spherical'] - 302) < 0.01) and (abs(midas_dict['ai_distorted'] - 1.25) < 0.01):
+                            # this is dummy data, ignore
+                            continue
+                        if (abs(midas_dict['num_spherical'] - 157) < 0.01) and (abs(midas_dict['ai_distorted'] - 0.88) < 0.01):
+                            # this is dummy data, ignore
+                            continue
 
                     angles_with_data.add(angle)
                     self.original_mesh.append( (angle, rstar) )
@@ -1635,7 +1636,9 @@ Methods:
         TODO implement Ishii-Chawla
 
         Implemented options:
-        - "wake_1" vr = - c3 * (1-midas_dict['alpha'])**n * midas_dict['vf'] * midas_dict['cd']**(1./3)
+        - "wake_1" vr = - c3 * vf * Cd**(1./3)
+        - "wake_alpha" vr = - c3 * (1-α)^n * vf * Cd**(1./3)
+        - "wake_alpha2" vr = - c3 * c3 * α*(1-α)^n * vf * Cd**(1./3)
 
 
         """
@@ -1674,6 +1677,12 @@ Methods:
                     for rstar, midas_dict in r_dict.items():
                         midas_dict[vr_name] = c3  * (1 - midas_dict['alpha'])**n * midas_dict['vf'] * midas_dict['cd']**(1./3)
                         midas_dict['vr_model'] = c3  * (1 - midas_dict['alpha'])**n * midas_dict['vf'] * midas_dict['cd']**(1./3)
+
+            elif method == 'wake_alpha2':
+                for angle, r_dict in self.phi.items():
+                    for rstar, midas_dict in r_dict.items():
+                        midas_dict[vr_name] = c3  * midas_dict['alpha']*(1 - midas_dict['alpha'])**n * midas_dict['vf'] * midas_dict['cd']**(1./3)
+                        midas_dict['vr_model'] = c3  * midas_dict['alpha']*(1 - midas_dict['alpha'])**n * midas_dict['vf'] * midas_dict['cd']**(1./3)
 
             else:
                 print(f"{method} not implemented")
