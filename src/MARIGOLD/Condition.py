@@ -1638,7 +1638,7 @@ Methods:
         Implemented options:
         - "wake_1" vr = - c3 * vf * Cd**(1./3)
         - "wake_alpha" vr = - c3 * (1-α)^n * vf * Cd**(1./3)
-        - "wake_alpha2" vr = - c3 * c3 * α*(1-α)^n * vf * Cd**(1./3)
+        - "wake_alpha2" vr = - c3 * c3 * (α*(1-α))^n * vf * Cd**(1./3)
 
 
         """
@@ -1681,9 +1681,23 @@ Methods:
             elif method == 'wake_alpha2':
                 for angle, r_dict in self.phi.items():
                     for rstar, midas_dict in r_dict.items():
-                        midas_dict[vr_name] = c3  * midas_dict['alpha']*(1 - midas_dict['alpha'])**n * midas_dict['vf'] * midas_dict['cd']**(1./3)
-                        midas_dict['vr_model'] = c3  * midas_dict['alpha']*(1 - midas_dict['alpha'])**n * midas_dict['vf'] * midas_dict['cd']**(1./3)
+                        if abs(midas_dict['alpha']-1) > 0.01 and abs(midas_dict['alpha']) > 0.0:
+                            midas_dict[vr_name] = c3  * (midas_dict['alpha']*(1 - midas_dict['alpha']))**n * midas_dict['vf'] * midas_dict['cd']**(1./3)
+                            midas_dict['vr_model'] = c3  * (midas_dict['alpha']*(1 - midas_dict['alpha']))**n * midas_dict['vf'] * midas_dict['cd']**(1./3)
+                        else:
+                            midas_dict[vr_name] = 0
+                            midas_dict['vr_model'] = 0
 
+            elif method == 'wake_lambda':
+                self.calc_avg_lat_sep()
+                for angle, r_dict in self.phi.items():
+                    for rstar, midas_dict in r_dict.items():
+                        if abs(midas_dict['lambda']) > 10**-6:
+                            midas_dict[vr_name] = c3  * midas_dict['vf'] * midas_dict['cd']**(1./3) * midas_dict['Dsm1']**(2/3) * midas_dict['lambda']**(-2./3)
+                            midas_dict['vr_model'] = c3  * midas_dict['vf'] * midas_dict['cd']**(1./3) * midas_dict['Dsm1']**(2/3) * midas_dict['lambda']**(-2./3)
+                        else:
+                            midas_dict[vr_name] = 0
+                            midas_dict['vr_model'] = 0 
             else:
                 print(f"{method} not implemented")
                 return -1
