@@ -942,7 +942,7 @@ Methods:
         print('Invalid method for find_h_pos')
         return np.NaN
 
-    def area_avg(self, param: str, even_opt='first', recalc = False) -> float:
+    def area_avg(self, param: str, even_opt='first', recalc = True) -> float:
 
         """Method for calculating the area-average of a parameter, "param". 
         
