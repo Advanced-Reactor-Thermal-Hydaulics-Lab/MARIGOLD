@@ -9,9 +9,9 @@ from matplotlib import cm
 import matplotlib.pyplot as plt
 import matplotlib.tri as tri
 import matplotlib as mpl
-from openpyxl import load_workbook
+import openpyxl as op
 
 debug = False
 debugFID = None
 
-__all__ = ['os', 'np', 'datetime', 'pickle', 'integrate', 'deepcopy', 'cm', 'plt', 'tri', 'load_workbook', 'debug', 'debugFID']
+__all__ = ['os', 'np', 'datetime', 'pickle', 'integrate', 'deepcopy', 'cm', 'plt', 'tri', 'op', 'debug', 'debugFID']

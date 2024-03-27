@@ -40,16 +40,16 @@ Methods:
 """
 
     debugFID = None
-    def __init__(self, jgP3:float, jgloc:float, jf:float, theta:int, port:str, database:str) -> None:
+    def __init__(self, jgref:float, jgloc:float, jf:float, theta:int, port:str, database:str) -> None:
         
-        self.jgp3 = jgP3
+        self.jgref = jgref
         self.jf = jf
         self.jgloc = jgloc
         self.theta = theta
         self.port = port
         self.database = database
 
-        self.name = f"jf={self.jf}_jgloc={self.jgp3}_theta={self.theta}_port={self.port}_{self.database}"
+        self.name = f"jf={self.jf}_jgloc={self.jgref}_theta={self.theta}_port={self.port}_{self.database}"
 
         # Data is stored in this phi array. 3 layers of dictionary
         # phi [angle] gives a dictionary with the various r/R
@@ -93,7 +93,7 @@ Methods:
 
         self.area_avg_void_sheet = -1
 
-        if database == 'Ryan':
+        if database == 'Ryan' or database == 'adix':
             self.Dh = 0.0254 # m, for Ryan
             self.marker_type = 'o'
             self.marker_color = 'r'
@@ -133,7 +133,7 @@ Methods:
     def __eq__(self, __o: object) -> bool:
         if isinstance(__o, Condition):
 
-            return ((self.jf == __o.jf) and (self.jgp3 == __o.jgp3) and (self.theta == __o.theta) and (self.port == __o.port) and self.database == __o.database)
+            return ((self.jf == __o.jf) and (self.jgref == __o.jgref) and (self.theta == __o.theta) and (self.port == __o.port) and self.database == __o.database)
         
         return False
 
@@ -191,7 +191,7 @@ Methods:
             raise NameError(f"{interp_method} not regonized. Accepted arguments are 'None', 'spline', 'linear' or 'linear_xy'")
 
     def pretty_print(self, print_to_file= True, FID=debugFID, mirror=False) -> None:
-        print(f"jf = {self.jf}\tjg = {self.jgp3}\ttheta = {self.theta}\t{self.port}\t{self.database}", file=FID)
+        print(f"jf = {self.jf}\tjg = {self.jgref}\ttheta = {self.theta}\t{self.port}\t{self.database}", file=FID)
         
         if mirror:
             self.mirror()
@@ -1860,7 +1860,14 @@ Methods:
                 vals = []
                 for r, midas_output in r_dict.items():
                     rs.append(r)
-                    vals.append( midas_output[param])
+                    try:
+                        vals.append(midas_output[param])
+                    except:
+                        if abs(r - 1) < 0.0001:
+                            vals.append(0.0)
+                        else:
+                            vals.append(0.0)
+                            print(f"Could not find {param} for φ = {angle}, r = {r}. Substituting 0")
 
                 if include_complement:
                     if angle > 180:
@@ -1869,7 +1876,14 @@ Methods:
                         r_dict = self.phi[angle+180]
                         for r, midas_output in r_dict.items():
                             rs.append(-r)
-                            vals.append( midas_output[param])
+                            try:
+                                vals.append(midas_output[param])
+                            except:
+                                if abs(r - 1) < 0.0001:
+                                    vals.append(0.0)
+                                else:
+                                    vals.append(0.0)
+                                    print(f"Could not find {param} for φ = {angle}, r = {r}. Substituting 0")
 
                 vals = [var for _, var in sorted(zip(rs, vals))]
                 rs = sorted(rs)
@@ -1888,7 +1902,14 @@ Methods:
                     for rstar, midas_output in r_dict.items():
                         if abs(rstar - rtarget) < 0.001:
                             phis.append(angle)
-                            vals.append( midas_output[param])
+                            try:
+                                vals.append(midas_output[param])
+                            except:
+                                if abs(r - 1) < 0.0001:
+                                    vals.append(0.0)
+                                else:
+                                    vals.append(0.0)
+                                    print(f"Could not find {param} for φ = {angle}, r = {r}. Substituting 0")
 
                 vals = [var for _, var in sorted(zip(phis, vals))]
                 phis = sorted(phis)
@@ -2059,8 +2080,11 @@ Methods:
                     try:
                         vals.append(midas_output[param])
                     except:
-                        vals.append(np.NaN)
-                        print(f"Could not find {param} for φ = {phi_angle}, r = {r}. Substituting NaN")
+                        if abs(r - 1) < 0.0001:
+                            vals.append(0.0)
+                        else:
+                            vals.append(0.0)
+                            print(f"Could not find {param} for φ = {phi_angle}, r = {r}. Substituting 0")
 
         rs = np.asarray(rs)
         phis = (np.asarray(phis) + rot_angle) * np.pi / 180 
@@ -3028,7 +3052,11 @@ tab_keys = [
     'r13',
     'r23',
     'vf',
-    'jf_loc'
+    'jf_loc',
+    'jf',
+    'delta_p',
+    'sigma_delta_p',
+    'vr'
 ]
 
 old_tab_keys = [

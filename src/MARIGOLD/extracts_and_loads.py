@@ -37,7 +37,7 @@ def extractProbeData(dump_file = 'database.dat', in_dir = [], require_terms = No
                 #if debug: print(path, file=debugFID)
                 
                 try:
-                    wb = load_workbook(filename=os.path.join(path, file), data_only=True)
+                    wb = op.load_workbook(filename=os.path.join(path, file), data_only=True)
                 except:
                     print(f"Error reading wb: {file}\nSkipping...")
                     continue
@@ -154,7 +154,7 @@ def extractProbeData(dump_file = 'database.dat', in_dir = [], require_terms = No
                 #if debug: print(path, file=debugFID)
                 
                 try:
-                    wb = load_workbook(filename=os.path.join(path, file), data_only=True)
+                    wb = op.load_workbook(filename=os.path.join(path, file), data_only=True)
                 except:
                     print(f"Error reading wb: {file}\nSkipping...")
                     continue
@@ -281,7 +281,7 @@ def extractProbeData(dump_file = 'database.dat', in_dir = [], require_terms = No
                 #if debug: print(path, file=debugFID)
                 
                 try:
-                    wb = load_workbook(filename=os.path.join(path, file), data_only=True)
+                    wb = op.load_workbook(filename=os.path.join(path, file), data_only=True)
                 except:
                     print(f"Error reading wb: {file}\nSkipping...")
                     continue
@@ -403,7 +403,7 @@ def extractProbeData(dump_file = 'database.dat', in_dir = [], require_terms = No
                 #if debug: print(path, file=debugFID)
                 
                 try:
-                    wb = load_workbook(filename=os.path.join(path, file), data_only=True)
+                    wb = op.load_workbook(filename=os.path.join(path, file), data_only=True)
                 except:
                     print(f"Error reading wb: {file}\nSkipping...")
                     continue
@@ -524,25 +524,73 @@ def extractProbeData(dump_file = 'database.dat', in_dir = [], require_terms = No
         pickle.dump(all_conditions, g)
     return
 
-def extractProbeDataFromDir(path, dump_file = 'database.dat', in_dir = [], require_terms = ['jf'], skip_terms = ['CFD', 'Copy'], sheet_type = 'dix_template', append_to_json = None) -> None:
+def extractLocalDataFromdDir(path, dump_file = 'database.dat', in_dir = [], require_terms = ['jf'], 
+                            skip_terms = ['CFD', 'Copy'], sheet_type = 'adix_template', append_to_json = None,
+                            custom_ranges = None, custom_starts_and_ends = None
+                            ) -> None:
+    
+    """Function for getting all local data from spreadhseets in a directory
+    
+    
+    """
     all_conditions = []
 
-    if sheet_type == 'ryan':
-        Q1_ranges = list(zip([90, 67.5, 45, 22.5, 0], [ [i for i in range(8, 33)], [i for i in range(57, 82)], [i for i in range(108, 133)], [i for i in range(157, 182)], [i for i in range(208, 233)] ]))
-        Q2_ranges = list(zip([112.5, 135, 157.5], [ [i for i in range(57, 82)], [i for i in range(108, 133)], [i for i in range(157, 182)] ]))
-    elif sheet_type == 'dix_template':
-        Q1_ranges = list(zip([90, 67.5, 45, 22.5, 0], [ [i for i in range(8, 29)], [i for i in range(53, 74)], [i for i in range(100, 121)], [i for i in range(145, 166)], [i for i in range(192, 213)] ]))
-        Q2_ranges = list(zip([112.5, 135, 157.5], [ [i for i in range(53, 74)], [i for i in range(100, 121)], [i for i in range(145, 166)] ]))
-    else:
-        print("Error: Unknown sheet type")
-        return
-
-
-    #print(Q1_ranges, Q2_ranges)
-
     for file in os.listdir(path):
+    
         if debug: print(file, file=debugFID)
-        if file.split('.')[-1] == 'xlsx':
+        if file.split('.')[-1] == 'xlsx' or file.split('.')[-1] == 'xlsm':
+
+            if sheet_type == 'infer':
+                if file.split('.')[-1] == 'xlsm' or 'adix' in file:
+                    sheet_type = 'adix_template4'
+                elif '60deg' in file or '30deg' in file or '80deg' in file or 'Ryan' in file:
+                    sheet_type = 'ryan_template'
+                elif 'P4' in file or 'P5' in file or 'P6' in file or 'P7' in file:
+                    sheet_type = 'adix_template' # Might rename this Quan template
+                else:
+                    sheet_type = 'adix_template'
+
+            if sheet_type == 'ryan_template':
+                Q1_ranges = list(zip([90, 67.5, 45, 22.5, 0], [ [i for i in range(8, 33)], [i for i in range(57, 82)], [i for i in range(108, 133)], [i for i in range(157, 182)], [i for i in range(208, 233)] ]))
+                Q2_ranges = list(zip([112.5, 135, 157.5], [ [i for i in range(57, 82)], [i for i in range(108, 133)], [i for i in range(157, 182)] ]))
+                Q2_start = 'CQ'
+                Q2_end = 'ES'
+                Q1_start = 'B'
+                Q1_end = 'BD'
+            
+            elif sheet_type == 'adix_template':
+                Q1_ranges = list(zip([90, 67.5, 45, 22.5, 0], [ [i for i in range(8, 29)], [i for i in range(53, 74)], [i for i in range(100, 121)], [i for i in range(145, 166)], [i for i in range(192, 213)] ]))
+                Q2_ranges = list(zip([112.5, 135, 157.5], [ [i for i in range(53, 74)], [i for i in range(100, 121)], [i for i in range(145, 166)] ]))
+                Q2_start = 'CQ'
+                Q2_end = 'ES'
+                Q1_start = 'B'
+                Q1_end = 'BD'
+            
+            elif sheet_type == 'adix_template4':
+                Q1_ranges = list(zip([90, 67.5, 45, 22.5, 0], [ [i for i in range(8, 29)], [i for i in range(53, 74)], [i for i in range(100, 121)], [i for i in range(145, 166)], [i for i in range(192, 213)] ]))
+                Q2_ranges = list(zip([112.5, 135, 157.5], [ [i for i in range(53, 74)], [i for i in range(100, 121)], [i for i in range(145, 166)] ]))
+                Q2_start = 'CR'
+                Q2_end = 'ET'
+                Q1_start = 'B'
+                Q1_end = 'BD'
+                pitot_start = 'CG'
+                pitot_end = 'CO'
+
+            elif sheet_type == 'custom' or sheet_type == 'Custom':
+                Q1_ranges = custom_ranges[0]
+                Q2_ranges = custom_ranges[1]
+
+                Q1_start = custom_starts_and_ends[0]
+                Q1_end =   custom_starts_and_ends[1]
+                Q2_start = custom_starts_and_ends[2]
+                Q2_end =   custom_starts_and_ends[3]
+
+                pitot_start = custom_starts_and_ends[4]
+                pitot_end = custom_starts_and_ends[5]
+            
+            else:
+                print("Error: Unknown sheet type")
+                return
             
             # Check if the file has any skipped/required terms
             if any(term in file for term in skip_terms):
@@ -556,15 +604,15 @@ def extractProbeDataFromDir(path, dump_file = 'database.dat', in_dir = [], requi
             #if debug: print(path, file=debugFID)
             
             try:
-                wb = load_workbook(filename=os.path.join(path, file), data_only=True)
+                wb = op.load_workbook(filename=os.path.join(path, file), data_only=True)
             except:
                 print(f"Error reading wb: {file}\nSkipping...")
                 continue
             
             try:
                 jf = float(file.split('_')[1].strip('jf'))
-                jgP3 = float(file.split('_')[2].strip('jg'))
-                port = file.split('_')[3].strip('.xlsx')
+                jgref = float(file.split('_')[2].strip('jg'))
+                port = file.split('_')[3].strip('.xlsx').strip('.xlsm')
                 theta = float(file.split('_')[0].strip('deg'))
             except:
                 print(f'Warning: Non-standard excel file name {file}. Skipping...')
@@ -578,10 +626,10 @@ def extractProbeDataFromDir(path, dump_file = 'database.dat', in_dir = [], requi
                 #jgloc = ws[jglocs[int(port.strip('P'))]].value
             except Exception as e:
                 print(e)
-                print(f"Warning: Could not identify port # for {file}, setting jgloc = jgP3")
-                jgloc = jgP3
+                print(f"Warning: Could not identify port # for {file}, setting jgloc = jgref")
+                jgloc = jgref
 
-            newCond = Condition(jgP3, jgloc, jf, theta, port, 'Ryan')
+            newCond = Condition(jgref, jgloc, jf, theta, port, sheet_type.split('_')[0])
 
             if newCond not in all_conditions:
                 all_conditions.append(newCond)
@@ -598,13 +646,13 @@ def extractProbeDataFromDir(path, dump_file = 'database.dat', in_dir = [], requi
                     if ws[f'K{i}'].value:
 
                         try:
-                            roverR = float(ws[f'A{i}'].value)
+                            roverR = float(ws[f'{Q1_start}{i}'].value)
                         except:
-                            if debug: print(f'Warning: data found in row {i} in sheet {file}, but column A could not be floatified. Skipping...', file=debugFID)
+                            if debug: print(f'Warning: data found in row {i} in sheet {file}, but column {Q1_start} could not be floatified. Skipping...', file=debugFID)
                             continue
                         
                         midas_output = []
-                        for cell in ws[f'B{i}':f'BD{i}'][0]:
+                        for cell in ws[f'{Q1_start}{i}':f'{Q1_end}{i}'][0]:
                             midas_output.append(cell.value)
                         
                         if len(tab_keys) == len( midas_output ):
@@ -615,7 +663,7 @@ def extractProbeDataFromDir(path, dump_file = 'database.dat', in_dir = [], requi
                             if debug:
                                 print("tab_keys not the same length as midas_output", file=debugFID)
                                 print(tab_keys, midas_output, file=debugFID)
-
+                        
                         try:
                             cond.phi[phi].update({roverR: data})
                         except KeyError:
@@ -624,19 +672,49 @@ def extractProbeDataFromDir(path, dump_file = 'database.dat', in_dir = [], requi
                             #cond.phi[phi_val].update({0.0: zero_data}) # Cuz I'm paranoid
                             cond.phi[phi].update({roverR: data})
 
+            
+            if sheet_type == 'adix_template4':
+                for phi, indices in Q1_ranges:
+                    for i in indices:
+                        if ws[f'CJ{i}'].value:
+
+                            try:
+                                roverR = float(ws[f'CF{i}'].value)
+                            except:
+                                if debug: print(f'Warning: data found in row {i} in sheet {file}, but column {Q1_start} could not be floatified. Skipping...')
+                                continue
+
+                            pitot_output = []
+                            for cell in ws[f'{pitot_start}{i}':f'{pitot_end}{i}'][0]:
+                                pitot_output.append(cell.value)
+
+                            if len(pitot_keys2) == len( pitot_output ):
+                                pitot_data = dict( zip( pitot_keys2, pitot_output ))
+                            else:
+                                if debug: print("Warning, pitot_keys2 not the same length as pitot_output", file=debugFID)
+                                pitot_data = dict( zip( pitot_keys2, pitot_output ))
+                                if debug:
+                                    print("pitot_keys2 not the same length as pitot_output", file=debugFID)
+                                    print(pitot_keys2, pitot_output, file=debugFID)
+
+                            try:
+                                cond.phi[phi][roverR].update(pitot_data)
+                            except KeyError:
+                                cond.phi[phi].update({roverR: zero_data})
+                                cond.phi[phi].update({roverR: pitot_data})
 
             for phi, indices in Q2_ranges:
                 for i in indices:
                     if ws[f'DC{i}'].value:
 
                         try:
-                            roverR = float(ws[f'CP{i}'].value)
+                            roverR = float(ws[f'{Q2_start}{i}'].value)
                         except:
-                            if debug: print(f'Warning: data found in row {i} in sheet {file}, but column A could not be floatified. Skipping...')
+                            if debug: print(f'Warning: data found in row {i} in sheet {file}, but column {Q2_start} could not be floatified. Skipping...')
                             continue
                         
                         midas_output = []
-                        for cell in ws[f'CQ{i}':f'ES{i}'][0]:
+                        for cell in ws[f'{Q2_start}{i}':f'{Q2_end}{i}'][0]:
                             midas_output.append(cell.value)
                         
                         if len(tab_keys) == len( midas_output ):
@@ -665,7 +743,7 @@ def extractProbeDataFromDir(path, dump_file = 'database.dat', in_dir = [], requi
         with open(append_to_json, 'rb') as g: # pickle works with binary data, hence rb
             data = pickle.load(g)
         
-        all_conditions = data + all_conditions # In theory could produce a database with nonuniform conditions, if messing with source code
+        all_conditions = data + all_conditions # In theory could produce a database with heterogeneous Condition objects, if messing with source code
     
     with open(dump_file, 'wb') as g:
         pickle.dump(all_conditions, g)
@@ -745,6 +823,11 @@ def dump_data_from_tabs(dump_file = 'PITA_Database.dat', skip_dir = "") -> None:
 
     return
 
+def loadData(data_file) -> list:
+    with open(data_file, 'rb') as g: # pickle works with binary data, hence rb
+        data = pickle.load(g)
+    return data
+
 def loadProbeData(data_file = 'PITA_Database.dat') -> list:
     with open(data_file, 'rb') as g: # pickle works with binary data, hence rb
         data = pickle.load(g)
@@ -773,7 +856,7 @@ def extractPitotData(dump_file = 'Pitot_Database.dat', in_dir = [], require_term
             #if debug: print(path, file=debugFID)
             
             try:
-                wb = load_workbook(filename=os.path.join(path, file), data_only=True)
+                wb = op.load_workbook(filename=os.path.join(path, file), data_only=True)
             except:
                 print(f"Error reading wb: {file}\nSkipping...")
                 continue
@@ -846,7 +929,7 @@ def loadPitotData(data_file = 'Pitot_Database.dat') -> list:
 
 def extractIskandraniData(dump_file='Iskandrani_Database.dat') -> None:
     try:
-        wb = load_workbook("Z:\\TRSL\\PITA\Data\\LocalData\\Iskandrani_Local_Velocity.xlsx")
+        wb = op.load_workbook("Z:\\TRSL\\PITA\Data\\LocalData\\Iskandrani_Local_Velocity.xlsx")
     except IOError as e:
         print(e)
         print("The path to the Iskandrani data is hardcoded, maybe the file moved?")
@@ -881,7 +964,7 @@ def loadIskandraniData(data_file = 'Iskandrani_Database.dat') -> list:
 def extractYangData(dump_file='Yang_Database.dat') -> list:
 
     try:
-        wb = load_workbook("Z:\\TRSL\\PITA\Data\\LocalData\\Yang_et_al_mean_velocity_profiles.xlsx")
+        wb = op.load_workbook("Z:\\TRSL\\PITA\Data\\LocalData\\Yang_et_al_mean_velocity_profiles.xlsx")
     except IOError as e:
         print(e)
         print("The path to the Yang data is hardcoded, maybe the file moved?")
@@ -1021,3 +1104,15 @@ pitot_keys = [
     'delta_p',
     'sigma_delta_p',
     'vf']
+
+pitot_keys2 = [
+    'roverR',
+    'time',
+    'frequency',
+    'delta_p',
+    'sigma_delta_p',
+    'vf_naive',
+    'vf',
+    'jf',
+    'vr'
+]

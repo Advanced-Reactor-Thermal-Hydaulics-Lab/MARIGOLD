@@ -17,7 +17,7 @@ class Yang_Condition(Condition):
     def __eq__(self, __o: object) -> bool:
         if isinstance(__o, Yang_Condition):
 
-            return ((self.jf == __o.jf) and (self.jgp3 == __o.jg))
+            return ((self.jf == __o.jf) and (self.jgref == __o.jg))
         
         return False
 
