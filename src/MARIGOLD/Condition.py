@@ -44,12 +44,12 @@ Methods:
         
         self.jgref = jgref
         self.jf = jf
-        self.jgloc = jgloc
+        self.jgloc =jgloc
         self.theta = theta
         self.port = port
         self.database = database
 
-        self.name = f"jf={self.jf}_jgloc={self.jgref}_theta={self.theta}_port={self.port}_{self.database}"
+        self.name = f"jf={self.jf}_jgloc={self.jgloc:0.2f}_theta={self.theta}_port={self.port}_{self.database}"
 
         # Data is stored in this phi array. 3 layers of dictionary
         # phi [angle] gives a dictionary with the various r/R
@@ -997,8 +997,15 @@ Methods:
             rs = sorted(rs_temp)
 
             if debug: print("Arrays to integrate", angle, rs, vars, file=debugFID)
+
+            if len(rs) != len(vars):
+                ValueError( f"rs to integrate over {rs} must be the same length as params {vars}, occured at {angle}" )
                 
-            param_r.append( integrate.simpson(vars, rs, even=even_opt) ) # Integrate wrt r
+            try:
+                param_r.append( integrate.simpson(vars, rs, even=even_opt) ) # Integrate wrt r
+            except Exception as e:
+                print(e)
+                print(rs, vars)
             if debug: print("calculated integral:", integrate.simpson(vars, rs, even=even_opt), file=debugFID)
                 #I = 2 * np.pi
         if debug: print("Integrated wrt r", param_r, file=debugFID)

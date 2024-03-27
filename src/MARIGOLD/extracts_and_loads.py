@@ -524,14 +524,38 @@ def extractProbeData(dump_file = 'database.dat', in_dir = [], require_terms = No
         pickle.dump(all_conditions, g)
     return
 
-def extractLocalDataFromdDir(path, dump_file = 'database.dat', in_dir = [], require_terms = ['jf'], 
+def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], require_terms = ['jf'], 
                             skip_terms = ['CFD', 'Copy'], sheet_type = 'adix_template', append_to_json = None,
-                            custom_ranges = None, custom_starts_and_ends = None
-                            ) -> None:
+                            pitot_sheet = False,
+                            **kwargs) -> None:
     
-    """Function for getting all local data from spreadhseets in a directory
+    """Function for getting all local data from spreadsheets in a directory, path
+
+       Does not recursively descend, only checks in the path given
     
-    
+       Still under construction, but should support sheet types
+       'adix_template4'
+       'ryan_template'
+       'adix_template' (maybe rename this quan_template)
+
+       Also can try to infer the sheet type, xlsm will be adix_template4, if it has P5, 6, or 7 it will
+       be classified as an adix_template, different angles ryan, etc. The inference can also be made by 
+       appending _adix or _quan or _ryan to the excel sheets being processed
+
+       Custom sheet types may be supported, but they still have to generally follow the classic template
+       structure. The setup information has to be in sheet '1' and all the local data in sheet '2'. Ranges
+       must be specified as a list of lists
+
+       Q1_ranges = [[angle1, [index1, index2.,..]], [angle2, [index1, index2.,..]], ...]
+
+       with the starts and ends
+
+       [Q1_start, Q1_end, Q2_start, ...]
+
+       Add on pitot starts/ends if pitot_sheet = True
+
+       Need to specify Q1_check, Q2_check, etc. as well
+
     """
     all_conditions = []
 
@@ -543,9 +567,9 @@ def extractLocalDataFromdDir(path, dump_file = 'database.dat', in_dir = [], requ
             if sheet_type == 'infer':
                 if file.split('.')[-1] == 'xlsm' or 'adix' in file:
                     sheet_type = 'adix_template4'
-                elif '60deg' in file or '30deg' in file or '80deg' in file or 'Ryan' in file:
+                elif '60deg' in file or '30deg' in file or '80deg' in file or 'Ryan' in file or 'ryan' in file:
                     sheet_type = 'ryan_template'
-                elif 'P4' in file or 'P5' in file or 'P6' in file or 'P7' in file:
+                elif 'P4' in file or 'P5' in file or 'P6' in file or 'P7' in file or 'Quan' in file or 'quan' in file:
                     sheet_type = 'adix_template' # Might rename this Quan template
                 else:
                     sheet_type = 'adix_template'
@@ -553,40 +577,45 @@ def extractLocalDataFromdDir(path, dump_file = 'database.dat', in_dir = [], requ
             if sheet_type == 'ryan_template':
                 Q1_ranges = list(zip([90, 67.5, 45, 22.5, 0], [ [i for i in range(8, 33)], [i for i in range(57, 82)], [i for i in range(108, 133)], [i for i in range(157, 182)], [i for i in range(208, 233)] ]))
                 Q2_ranges = list(zip([112.5, 135, 157.5], [ [i for i in range(57, 82)], [i for i in range(108, 133)], [i for i in range(157, 182)] ]))
-                Q2_start = 'CQ'
+                Q2_start = 'CP'
                 Q2_end = 'ES'
-                Q1_start = 'B'
+                Q1_start = 'A'
                 Q1_end = 'BD'
+
+                Q1_check = 'K'
+                Q2_check = 'DA'
             
             elif sheet_type == 'adix_template':
                 Q1_ranges = list(zip([90, 67.5, 45, 22.5, 0], [ [i for i in range(8, 29)], [i for i in range(53, 74)], [i for i in range(100, 121)], [i for i in range(145, 166)], [i for i in range(192, 213)] ]))
                 Q2_ranges = list(zip([112.5, 135, 157.5], [ [i for i in range(53, 74)], [i for i in range(100, 121)], [i for i in range(145, 166)] ]))
-                Q2_start = 'CQ'
+                Q2_start = 'CP'
                 Q2_end = 'ES'
-                Q1_start = 'B'
+                Q1_start = 'A'
                 Q1_end = 'BD'
+
+                Q1_check = 'K'
+                Q2_check = 'DA'
             
             elif sheet_type == 'adix_template4':
+                pitot_sheet = True
                 Q1_ranges = list(zip([90, 67.5, 45, 22.5, 0], [ [i for i in range(8, 29)], [i for i in range(53, 74)], [i for i in range(100, 121)], [i for i in range(145, 166)], [i for i in range(192, 213)] ]))
                 Q2_ranges = list(zip([112.5, 135, 157.5], [ [i for i in range(53, 74)], [i for i in range(100, 121)], [i for i in range(145, 166)] ]))
                 Q2_start = 'CR'
                 Q2_end = 'ET'
-                Q1_start = 'B'
+                Q1_start = 'A'
                 Q1_end = 'BD'
-                pitot_start = 'CG'
-                pitot_end = 'CO'
+                Q1_pitot_start = 'CF'
+                Q1_pitot_end = 'CO'
+                Q2_pitot_start = 'FV'
+                Q2_pitot_end = 'GE'
+
+                Q1_check = 'K'
+                Q2_check = 'DA'
+                Q1_pitot_check = 'CJ'
+                Q2_pitot_check = 'FZ'
 
             elif sheet_type == 'custom' or sheet_type == 'Custom':
-                Q1_ranges = custom_ranges[0]
-                Q2_ranges = custom_ranges[1]
-
-                Q1_start = custom_starts_and_ends[0]
-                Q1_end =   custom_starts_and_ends[1]
-                Q2_start = custom_starts_and_ends[2]
-                Q2_end =   custom_starts_and_ends[3]
-
-                pitot_start = custom_starts_and_ends[4]
-                pitot_end = custom_starts_and_ends[5]
+                print('Hopefully you specified all the ranges, starts, ends, and checks')
             
             else:
                 print("Error: Unknown sheet type")
@@ -622,7 +651,7 @@ def extractLocalDataFromdDir(path, dump_file = 'database.dat', in_dir = [], requ
 
             jglocs = ['O16', 'O17', 'O18', 'O19', 'O20']
             try:
-                jgloc = ws[jglocs[int(re.findall(r'\d+', port)[0])]].value
+                jgloc = ws[jglocs[int(re.findall(r'\d+', port)[0])-1]].value
                 #jgloc = ws[jglocs[int(port.strip('P'))]].value
             except Exception as e:
                 print(e)
@@ -643,7 +672,7 @@ def extractLocalDataFromdDir(path, dump_file = 'database.dat', in_dir = [], requ
             
             for phi, indices in Q1_ranges:
                 for i in indices:
-                    if ws[f'K{i}'].value:
+                    if ws[f'{Q1_check}{i}'].value:
 
                         try:
                             roverR = float(ws[f'{Q1_start}{i}'].value)
@@ -668,24 +697,24 @@ def extractLocalDataFromdDir(path, dump_file = 'database.dat', in_dir = [], requ
                             cond.phi[phi].update({roverR: data})
                         except KeyError:
                             cond.phi.update( {phi:{}} )
-                            cond.phi[phi].update({1.0: zero_data})
+                            cond.phi[phi].update({1.0: deepcopy(zero_data)})
                             #cond.phi[phi_val].update({0.0: zero_data}) # Cuz I'm paranoid
                             cond.phi[phi].update({roverR: data})
 
             
-            if sheet_type == 'adix_template4':
+            if pitot_sheet: # Pitot data for Q1
                 for phi, indices in Q1_ranges:
                     for i in indices:
-                        if ws[f'CJ{i}'].value:
+                        if ws[f'{Q1_pitot_check}{i}'].value:
 
                             try:
-                                roverR = float(ws[f'CF{i}'].value)
+                                roverR = float(ws[f'{Q1_pitot_start}{i}'].value)
                             except:
                                 if debug: print(f'Warning: data found in row {i} in sheet {file}, but column {Q1_start} could not be floatified. Skipping...')
                                 continue
 
                             pitot_output = []
-                            for cell in ws[f'{pitot_start}{i}':f'{pitot_end}{i}'][0]:
+                            for cell in ws[f'{Q1_pitot_start}{i}':f'{Q1_pitot_end}{i}'][0]:
                                 pitot_output.append(cell.value)
 
                             if len(pitot_keys2) == len( pitot_output ):
@@ -700,12 +729,12 @@ def extractLocalDataFromdDir(path, dump_file = 'database.dat', in_dir = [], requ
                             try:
                                 cond.phi[phi][roverR].update(pitot_data)
                             except KeyError:
-                                cond.phi[phi].update({roverR: zero_data})
-                                cond.phi[phi].update({roverR: pitot_data})
+                                cond.phi[phi].update({roverR: deepcopy(zero_data)})
+                                cond.phi[phi][roverR].update(pitot_data)
 
             for phi, indices in Q2_ranges:
                 for i in indices:
-                    if ws[f'DC{i}'].value:
+                    if ws[f'{Q2_check}{i}'].value:
 
                         try:
                             roverR = float(ws[f'{Q2_start}{i}'].value)
@@ -733,7 +762,37 @@ def extractLocalDataFromdDir(path, dump_file = 'database.dat', in_dir = [], requ
                             cond.phi[phi].update({1.0: zero_data})
                             #cond.phi[phi_val].update({0.0: zero_data}) # Cuz I'm paranoid
                             cond.phi[phi].update({roverR: data}) 
-    
+
+            if pitot_sheet: # Pitot data for Q2
+                for phi, indices in Q2_ranges:
+                    for i in indices:
+                        if ws[f'{Q2_pitot_check}{i}'].value:
+
+                            try:
+                                roverR = float(ws[f'{Q2_pitot_start}{i}'].value)
+                            except:
+                                if debug: print(f'Warning: data found in row {i} in sheet {file}, but column {Q2_pitot_start} could not be floatified. Skipping...')
+                                continue
+
+                            pitot_output = []
+                            for cell in ws[f'{Q2_pitot_start}{i}':f'{Q2_pitot_end}{i}'][0]:
+                                pitot_output.append(cell.value)
+
+                            if len(pitot_keys2) == len( pitot_output ):
+                                pitot_data = dict( zip( pitot_keys2, pitot_output ))
+                            else:
+                                if debug: print("Warning, pitot_keys2 not the same length as pitot_output", file=debugFID)
+                                pitot_data = dict( zip( pitot_keys2, pitot_output ))
+                                if debug:
+                                    print("pitot_keys2 not the same length as pitot_output", file=debugFID)
+                                    print(pitot_keys2, pitot_output, file=debugFID)
+
+                            try:
+                                cond.phi[phi][roverR].update(pitot_data)
+                            except KeyError:
+                                cond.phi[phi].update({roverR: deepcopy(zero_data)})
+                                cond.phi[phi][roverR].update(pitot_data)
+
     if debug and False:
         for cond in all_conditions:
             cond.pretty_print()
@@ -1006,6 +1065,7 @@ def loadYangData(data_file = 'Yang_Database.dat') -> list:
     return data
 
 tab_keys = [
+    'signed_roverR',
     'roverR',
     'time',
     'frequency',
@@ -1106,6 +1166,7 @@ pitot_keys = [
     'vf']
 
 pitot_keys2 = [
+    'signed_roverR',
     'roverR',
     'time',
     'frequency',
