@@ -1,0 +1,46 @@
+MARIGOLD package
+================
+
+Submodules
+----------
+
+MARIGOLD.Condition module
+-------------------------
+
+.. automodule:: MARIGOLD.Condition
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+MARIGOLD.Iskandrani\_Condition module
+-------------------------------------
+
+.. automodule:: MARIGOLD.Iskandrani_Condition
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+MARIGOLD.Yang\_Condition module
+-------------------------------
+
+.. automodule:: MARIGOLD.Yang_Condition
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+
+MARIGOLD.extracts\_and\_loads module
+------------------------------------
+
+.. automodule:: MARIGOLD.extracts_and_loads
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: MARIGOLD
+   :members:
+   :undoc-members:
+   :show-inheritance:

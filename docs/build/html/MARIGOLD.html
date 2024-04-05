@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MARIGOLD package &mdash; MARIGOLD 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=d45e8c67"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            MARIGOLD
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="modules/MARIGOLD.Condition.html">MARIGOLD.Condition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules/MARIGOLD.extracts_and_loads.html">MARIGOLD.extracts_and_loads</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">MARIGOLD</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">MARIGOLD package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/MARIGOLD.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="marigold-package">
+<h1>MARIGOLD package<a class="headerlink" href="#marigold-package" title="Link to this heading"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+</section>
+<section id="module-MARIGOLD.Condition">
+<span id="marigold-condition-module"></span><h2>MARIGOLD.Condition module<a class="headerlink" href="#module-MARIGOLD.Condition" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="MARIGOLD.Condition.Condition">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">MARIGOLD.Condition.</span></span><span class="sig-name descname"><span class="pre">Condition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">jgref</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jgloc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">database</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class to handle the local probe data</p>
+<p>Data is stored in the Condition.phi property. It’s actually 3 layers of dictionary
+phi [angle] gives a dictionary with the various r/R
+phi [angle][r/R] gives a dictionary with the MIDAS output
+The MIDAS output is itself a dictionary, with the keys listed in the “tab_keys” array
+So phi[angle][r/R][‘alpha’] should give you the void fraction at r/R for phi = angle
+This structure is initialized with zeros for the MIDAS output at the pipe center and wall</p>
+<p>Methods:
+pretty_print- Prints out the data in the condition in a more human-readable way
+mirror- Copies any data in the negative r/R for a given phi to the corresponding complementary angle.</p>
+<blockquote>
+<div><p>Also copies data assuming some kind of symmetry. Ensures all angles (22.5° increments) are
+represented with data, and that the data ranges from r/R 0-1. Data is guaranteed to exist for
+at least r/R = 0 and r/R = 1 (filled with zero_data if no data exists) for plotting</p>
+</div></blockquote>
+<p>approx_vf- calculates approximate vf based on a simple power law profile
+approx_vf_Kong- calculates approximate vf based on Kong’s asymmetric method (TODO)
+calc_vr- calculates the relative velocity vg - vf
+calc_vgj- calculate local vg - j
+calc_grad- calculates gradient and saves the local information in self.phi[angle][r/R][’<a href="#id5"><span class="problematic" id="id6">grad_</span></a>”param name”_”direction”]
+area_avg-
+line_avg-
+line_dev-
+void_area_avg-
+calc_void_cov-
+calc_sigma_alpha-
+calc_mu3_alpha-
+top_bottom-
+plot_profiles- the 2D line plots we make
+plot_contours- cool contour plots
+plot_surface- rad surface plots
+rough_FR_ID- rough flow regime identification
+TD_FR_ID- Flow regime identification from Taitel and Dukler (TODO)</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.TD_FR_ID">
+<span class="sig-name descname"><span class="pre">TD_FR_ID</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.TD_FR_ID"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.TD_FR_ID" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.approx_vf">
+<span class="sig-name descname"><span class="pre">approx_vf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">7</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.approx_vf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.approx_vf" title="Link to this definition"></a></dt>
+<dd><p>Method for approximating vf with power-law relation.</p>
+<p>vf_approx = (n+1)*(2*n+1) / (2*n*n) * (jf / (1-self.area_avg(‘alpha’))) * (1 - abs(rstar))**(1/n)</p>
+<p>Will not overwrite vf data if it already exists, but will always store data in
+midas_dict[‘vf_approx’] even if midas_dict[‘vf’] has data</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.approx_vf_Kong">
+<span class="sig-name descname"><span class="pre">approx_vf_Kong</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">7</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.approx_vf_Kong"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.approx_vf_Kong" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.area_avg">
+<span class="sig-name descname"><span class="pre">area_avg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">param</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">even_opt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'first'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recalc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.area_avg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.area_avg" title="Link to this definition"></a></dt>
+<dd><p>Method for calculating the area-average of a parameter, “param”.</p>
+<p>param can be anything MIDAS outputs, but usually of interest are “alpha” or “alpha_ug”
+If you’re not sure what somethings named, try Condition.phi[90][1.0].keys()</p>
+<p>Uses Simpson’s rule for integration, even_opt passed to that. Will save the previously calculated area averages
+in Condition.area_avgs[param], and won’t recalculate unless recalc = True</p>
+<p>Returns the area-averaged parameter, or None if the method failed</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.calc_W">
+<span class="sig-name descname"><span class="pre">calc_W</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.calc_W"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.calc_W" title="Link to this definition"></a></dt>
+<dd><p>Calculates the wake deficit function, W, from the experimental data</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.calc_avg_lat_sep">
+<span class="sig-name descname"><span class="pre">calc_avg_lat_sep</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.calc_avg_lat_sep"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.calc_avg_lat_sep" title="Link to this definition"></a></dt>
+<dd><p>Calculates average lateral separation distance between bubbles</p>
+<p>Average lateral separation, λ given by
+λ = ugl / f</p>
+<p>stores in midas dict under lambda. Also estimates α based on λ,</p>
+<p>α ~ Db / λ</p>
+<p>Mirrors the data</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.calc_cd">
+<span class="sig-name descname"><span class="pre">calc_cd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Ishii-Zuber'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rho_f</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">998</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vr_cheat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu_f</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.calc_cd"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.calc_cd" title="Link to this definition"></a></dt>
+<dd><p>Method for calculating drag coefficient. If vr = 0, assume cd = 0</p>
+<p>Options are Ishii-Zuber and Schiller-Naumann, but both use
+Reb = (1 - midas_dict[‘alpha’]) * midas_dict[‘Dsm1’] * rho_f * midas_dict[‘vr’] / midas_dict[‘mu_m’]
+vr from calc_vr()
+mu_m from calc_mu_eff()</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.calc_dpdz">
+<span class="sig-name descname"><span class="pre">calc_dpdz</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'LM'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rho_f</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">998</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rho_g</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.225</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu_f</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu_g</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.18e-05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">LM_C</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">25</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.calc_dpdz"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.calc_dpdz" title="Link to this definition"></a></dt>
+<dd><p>Calculates the pressure gradient, dp/dz, according to various methods. Can access later with self.dpdz</p>
+<p>‘LM’ -&gt; Lockhart Martinelli, assuming turbulent-turbulent, C = LM_C</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.calc_errors">
+<span class="sig-name descname"><span class="pre">calc_errors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">param1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.calc_errors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.calc_errors" title="Link to this definition"></a></dt>
+<dd><p>Calculates the errors, ε, between two parameters (param1 - param2) in midas_dict</p>
+<dl>
+<dt>Stores:</dt><dd><ul class="simple">
+<li><p>error, “eps_param1_param2”, param1 - param2</p></li>
+<li><p>relative, “eps_rel_param1_param2”, (param1 - param2) / param2</p></li>
+<li><p>absolute relative, “eps_abs_rel_param1_param2”, <a href="#id3"><span class="problematic" id="id4">|param1 - param2|</span></a> / param2</p></li>
+<li><p>square, “eps_sq_param1_param2”, (param1 - param2)**2</p></li>
+<li><p>relative square, “eps_rel_sq_param1_param2”, ((param1 - param2)/param2)**2</p></li>
+</ul>
+<p>If param2 = 0, relative errors are considered 0</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.calc_grad">
+<span class="sig-name descname"><span class="pre">calc_grad</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">param</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recalc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.calc_grad"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.calc_grad" title="Link to this definition"></a></dt>
+<dd><p>Calculates gradient of param based on the data in self.</p>
+<p>Stored in self’s midas_dict as grad_param_r, grad_param_phi, etc.
+Will only be called once, unless recalc is True.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.calc_linear_interp">
+<span class="sig-name descname"><span class="pre">calc_linear_interp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">param</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.calc_linear_interp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.calc_linear_interp" title="Link to this definition"></a></dt>
+<dd><p>Makes a LinearNDInterpolator for the given param. Can access later with self.linear_interp[param]
+* phi in radians</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.calc_linear_xy_interp">
+<span class="sig-name descname"><span class="pre">calc_linear_xy_interp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">param</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.calc_linear_xy_interp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.calc_linear_xy_interp" title="Link to this definition"></a></dt>
+<dd><p>Makes a LinearNDInterpolator for the given param in x y coords. Can access later with self.linear_xy_interp[param]</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.calc_mu3_alpha">
+<span class="sig-name descname"><span class="pre">calc_mu3_alpha</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.calc_mu3_alpha"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.calc_mu3_alpha" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.calc_mu_eff">
+<span class="sig-name descname"><span class="pre">calc_mu_eff</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Ishii'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu_f</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu_g</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.803e-05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha_max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.calc_mu_eff"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.calc_mu_eff" title="Link to this definition"></a></dt>
+<dd><p>Method for calculating effective viscosity. Also calculates mixture viscosity, stored in
+μ_eff and μ_m, resepectively. Note that this fuction does mirror the data</p>
+<p>Right now the only method implemented is Ishii’s</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.calc_sigma_alpha">
+<span class="sig-name descname"><span class="pre">calc_sigma_alpha</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.calc_sigma_alpha"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.calc_sigma_alpha" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.calc_vgj">
+<span class="sig-name descname"><span class="pre">calc_vgj</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">warn_approx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.calc_vgj"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.calc_vgj" title="Link to this definition"></a></dt>
+<dd><p>Method for calculating Vgj, by doing</p>
+<p>j_local = midas_dict[‘alpha’] * midas_dict[‘ug1’] + (1 - midas_dict[‘alpha’]) * midas_dict[‘vf’]
+vgj = midas_dict[‘ug1’] - j_local</p>
+<p>stored in midas_dict[‘vgj’]</p>
+<p>warn_approx is a flag to print out a warning statement if vf is being approximated, which will
+happen if not found</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.calc_vgj_model">
+<span class="sig-name descname"><span class="pre">calc_vgj_model</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.calc_vgj_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.calc_vgj_model" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.calc_void_cov">
+<span class="sig-name descname"><span class="pre">calc_void_cov</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.calc_void_cov"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.calc_void_cov" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.calc_vr">
+<span class="sig-name descname"><span class="pre">calc_vr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">warn_approx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.calc_vr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.calc_vr" title="Link to this definition"></a></dt>
+<dd><p>Method for calculating relative velocity. Will approximate vf if it cannot be found.</p>
+<p>Note that if vg = 0, then this method says vr = 0. This will happen when no data is present,
+such as in the bottom of the pipe in horizontal, when this is not necessarily true</p>
+<p>warn_approx is a flag to print out a warning statement if vf is being approximated</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.calc_vr_model">
+<span class="sig-name descname"><span class="pre">calc_vr_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'wake_1'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c3</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-0.15</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iterate_cd</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quiet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.calc_vr_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.calc_vr_model" title="Link to this definition"></a></dt>
+<dd><p>Method for calculating relative velocity based on models
+Stored under “vr_method” in midas_dict as well as “vr_model”</p>
+<p>TODO implement Ishii-Chawla</p>
+<p>Implemented options:
+- “wake_1” vr = - c3 * vf * Cd**(1./3)
+- “wake_alpha” vr = - c3 * (1-α)^n * vf * Cd**(1./3)
+- “wake_alpha2” vr = - c3 *  (α*(1-α))^n * vf * Cd**(1./3)
+- “wake_lambda” = - c3 * vf * Cd**(1./3) * Db**(2./3) * λ**(-2./3)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.calc_vwvg">
+<span class="sig-name descname"><span class="pre">calc_vwvg</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.calc_vwvg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.calc_vwvg" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.circ_segment_area_avg">
+<span class="sig-name descname"><span class="pre">circ_segment_area_avg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">param</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hstar</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ngridr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">25</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ngridphi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">25</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">int_err</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0001</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.circ_segment_area_avg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.circ_segment_area_avg" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.circ_segment_void_area_avg">
+<span class="sig-name descname"><span class="pre">circ_segment_void_area_avg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">param</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hstar</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ngridr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">25</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ngridphi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">25</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">int_err</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0001</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.circ_segment_void_area_avg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.circ_segment_void_area_avg" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.debugFID">
+<span class="sig-name descname"><span class="pre">debugFID</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#MARIGOLD.Condition.Condition.debugFID" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.find_hstar_pos">
+<span class="sig-name descname"><span class="pre">find_hstar_pos</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'max_dsm'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">void_criteria</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.find_hstar_pos"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.find_hstar_pos" title="Link to this definition"></a></dt>
+<dd><p>Returns the vertical distance from the top of the pipe to the bubble layer interface, as determined by the selected method.
+Void criteria = minimum void for “zero_void” mode, or % of maximum void on line for “percent_void” mode</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.fit_spline">
+<span class="sig-name descname"><span class="pre">fit_spline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">param</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nphi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.fit_spline"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.fit_spline" title="Link to this definition"></a></dt>
+<dd><p>Fits a RectBivariateSpline for the given param. Can access later with self.spline_interp[param]</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.interp_area_avg">
+<span class="sig-name descname"><span class="pre">interp_area_avg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">param</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interp_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'linear'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.interp_area_avg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.interp_area_avg" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.line_avg">
+<span class="sig-name descname"><span class="pre">line_avg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">param</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi_angle</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">even_opt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'first'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.line_avg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.line_avg" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.line_avg_dev">
+<span class="sig-name descname"><span class="pre">line_avg_dev</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">param</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi_angle</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">even_opt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'first'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.line_avg_dev"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.line_avg_dev" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.max">
+<span class="sig-name descname"><span class="pre">max</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">param</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recalc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.max"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.max" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.max_line">
+<span class="sig-name descname"><span class="pre">max_line</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">param</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">angle</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.max_line"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.max_line" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.max_line_loc">
+<span class="sig-name descname"><span class="pre">max_line_loc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">param</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">angle</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.max_line_loc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.max_line_loc" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.max_loc">
+<span class="sig-name descname"><span class="pre">max_loc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">param</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span></span></span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.max_loc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.max_loc" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.min">
+<span class="sig-name descname"><span class="pre">min</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">param</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recalc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nonzero</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.min"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.min" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.min_loc">
+<span class="sig-name descname"><span class="pre">min_loc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">param</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.min_loc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.min_loc" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.min_nonzero">
+<span class="sig-name descname"><span class="pre">min_nonzero</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">param</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.min_nonzero"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.min_nonzero" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.mirror">
+<span class="sig-name descname"><span class="pre">mirror</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sym90</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axisym</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uniform_rmesh</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force_remirror</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.mirror"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.mirror" title="Link to this definition"></a></dt>
+<dd><p>Mirrors data, so we have data for every angle</p>
+<p>First finds all the angles with data, copies anything negative to the
+other side (deleting the negative entries in the original). Then goes
+though each of the angles in _angles (22.5° increments) and makes sure
+each has data. Either copying, assuming some kind of symmetry (either
+axisym or sym90) or just filling in zeros.</p>
+<p>uniform_rmesh will ensure every angle has data for every r/R point. Will
+linearly interpolate when data on either side is available</p>
+<p>Force_remirror is untested, no clue if it’s safe or not</p>
+<p>Also saves the original mesh (r, φ) pairs under self.original_mesh</p>
+<p>Quadrant definitions:</p>
+<blockquote>
+<div><blockquote>
+<div><blockquote>
+<div><blockquote>
+<div><blockquote>
+<div><blockquote>
+<div><dl class="simple">
+<dt>phi =  90</dt><dd><p>, - ~ ~ ~ - ,</p>
+</dd>
+</dl>
+</div></blockquote>
+<p>, ‘       |        ‘ ,</p>
+</div></blockquote>
+<p>,           |            ,</p>
+</div></blockquote>
+<p>,     II     |    I        ,</p>
+</div></blockquote>
+<p>,             |             ,</p>
+</div></blockquote>
+<dl class="simple">
+<dt>180 ,————-<a href="#id1"><span class="problematic" id="id2">|</span></a>————-, 0</dt><dd><dl class="simple">
+<dt>,             |             ,</dt><dd><dl class="simple">
+<dt>,    III     |   IV       ,</dt><dd><dl class="simple">
+<dt>,           |           ,</dt><dd><dl class="simple">
+<dt>,         |        , ‘</dt><dd><dl class="simple">
+<dt>‘ - , _ _ _ ,  ‘</dt><dd><p>270</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.plot_contour">
+<span class="sig-name descname"><span class="pre">plot_contour</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">param</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">set_max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">set_min</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_str</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rot_angle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ngridr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ngridphi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colormap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'hot_r'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_levels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title_str</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extra_text</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotate_h</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cartesian</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">h_star_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{'method':</span> <span class="pre">'max_dsm',</span> <span class="pre">'min_void':</span> <span class="pre">'0.05'}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_measured_points</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.plot_contour"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.plot_contour" title="Link to this definition"></a></dt>
+<dd><p>Method to plot contour of a given param</p>
+<p>Generates a contour plot of any parameter in midas_dict, e.g. ‘alpha’, ‘ai’, etc. By default, just shows the figure,
+but if a save_dir is specified, it will save it there instead. label_str can adjust the label of the colorbar. Can accept Latex format, e.g.
+r”$lpha$ [-]”</p>
+<p>set_max and set_min set the bounds of the contour plot, and the colormap option allows for any colors that matplotlib supports. ngridr, ngridphi,
+num_levels, all adjust how fine the contour plot is generated.</p>
+<p>annotate_h is an option to draw a horizontal line at some given position. This was implemented when investigating where the bubble layer typically
+stops. h_star_kwargs and cartesian are optinos related to this.</p>
+<p>plot_measured points is neat, it plots circles where original data was detected (determined prior to mirroring)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.plot_isoline">
+<span class="sig-name descname"><span class="pre">plot_isoline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">param</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iso_axis</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iso_val</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_res</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extra_text</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.plot_isoline"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.plot_isoline" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.plot_profiles">
+<span class="sig-name descname"><span class="pre">plot_profiles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">param</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'r'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">const_to_plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[90,</span> <span class="pre">67.5,</span> <span class="pre">45,</span> <span class="pre">22.5,</span> <span class="pre">0]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_complement</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rotate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.plot_profiles"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.plot_profiles" title="Link to this definition"></a></dt>
+<dd><p>Plot profiles of param over x_axis, for const_to_plot, i.e. α over r/R for φ = [90, 67.5 … 0].
+Include_complement will continue with the negative side if x_axis = ‘r’</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.plot_spline_contour">
+<span class="sig-name descname"><span class="pre">plot_spline_contour</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">param</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">set_max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">set_min</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rot_angle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ngridr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ngridphi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colormap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'hot_r'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_levels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotate_h</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cartesian</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">h_star_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{'method':</span> <span class="pre">'max_dsm',</span> <span class="pre">'min_void':</span> <span class="pre">'0.05'}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grad</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'None'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.plot_spline_contour"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.plot_spline_contour" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.plot_surface">
+<span class="sig-name descname"><span class="pre">plot_surface</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">param</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rotate_gif</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elev_angle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">145</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">azim_angle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">roll_angle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">180</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ngridr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ngridphi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_surface_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">solid_color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.plot_surface"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.plot_surface" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.pretty_print">
+<span class="sig-name descname"><span class="pre">pretty_print</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">print_to_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">FID</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mirror</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.pretty_print"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.pretty_print" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.rough_FR_ID">
+<span class="sig-name descname"><span class="pre">rough_FR_ID</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.rough_FR_ID"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.rough_FR_ID" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.spline_circ_seg_area_avg">
+<span class="sig-name descname"><span class="pre">spline_circ_seg_area_avg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">param</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hstar</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">int_err</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0001</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.spline_circ_seg_area_avg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.spline_circ_seg_area_avg" title="Link to this definition"></a></dt>
+<dd><p>Function to integrate over a circular segment, using the spline interpolation of param</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.spline_void_area_avg">
+<span class="sig-name descname"><span class="pre">spline_void_area_avg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">param</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.spline_void_area_avg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.spline_void_area_avg" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.top_bottom">
+<span class="sig-name descname"><span class="pre">top_bottom</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">param</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">even_opt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'first'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.top_bottom"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.top_bottom" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.void_area_avg">
+<span class="sig-name descname"><span class="pre">void_area_avg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">param</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">even_opt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'first'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.void_area_avg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.void_area_avg" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="MARIGOLD.Condition.color_cycle">
+<span class="sig-prename descclassname"><span class="pre">MARIGOLD.Condition.</span></span><span class="sig-name descname"><span class="pre">color_cycle</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#color_cycle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.color_cycle" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="MARIGOLD.Condition.marker_cycle">
+<span class="sig-prename descclassname"><span class="pre">MARIGOLD.Condition.</span></span><span class="sig-name descname"><span class="pre">marker_cycle</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#marker_cycle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.marker_cycle" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-MARIGOLD.Iskandrani_Condition">
+<span id="marigold-iskandrani-condition-module"></span><h2>MARIGOLD.Iskandrani_Condition module<a class="headerlink" href="#module-MARIGOLD.Iskandrani_Condition" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="MARIGOLD.Iskandrani_Condition.Iskandrani_Condition">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">MARIGOLD.Iskandrani_Condition.</span></span><span class="sig-name descname"><span class="pre">Iskandrani_Condition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">jf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jg</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/MARIGOLD/Iskandrani_Condition.html#Iskandrani_Condition"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Iskandrani_Condition.Iskandrani_Condition" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="MARIGOLD.Iskandrani_Condition.Iskandrani_Condition.area_avg">
+<span class="sig-name descname"><span class="pre">area_avg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">param</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/MARIGOLD/Iskandrani_Condition.html#Iskandrani_Condition.area_avg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Iskandrani_Condition.Iskandrani_Condition.area_avg" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-MARIGOLD.Yang_Condition">
+<span id="marigold-yang-condition-module"></span><h2>MARIGOLD.Yang_Condition module<a class="headerlink" href="#module-MARIGOLD.Yang_Condition" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="MARIGOLD.Yang_Condition.Yang_Condition">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">MARIGOLD.Yang_Condition.</span></span><span class="sig-name descname"><span class="pre">Yang_Condition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">jf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jg</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/MARIGOLD/Yang_Condition.html#Yang_Condition"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Yang_Condition.Yang_Condition" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#MARIGOLD.Condition.Condition" title="MARIGOLD.Condition.Condition"><code class="xref py py-class docutils literal notranslate"><span class="pre">Condition</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="MARIGOLD.Yang_Condition.Yang_Condition.pretty_print">
+<span class="sig-name descname"><span class="pre">pretty_print</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/MARIGOLD/Yang_Condition.html#Yang_Condition.pretty_print"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Yang_Condition.Yang_Condition.pretty_print" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-MARIGOLD.extracts_and_loads">
+<span id="marigold-extracts-and-loads-module"></span><h2>MARIGOLD.extracts_and_loads module<a class="headerlink" href="#module-MARIGOLD.extracts_and_loads" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="MARIGOLD.extracts_and_loads.dump_data_from_tabs">
+<span class="sig-prename descclassname"><span class="pre">MARIGOLD.extracts_and_loads.</span></span><span class="sig-name descname"><span class="pre">dump_data_from_tabs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dump_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'PITA_Database.dat'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/MARIGOLD/extracts_and_loads.html#dump_data_from_tabs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.extracts_and_loads.dump_data_from_tabs" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="MARIGOLD.extracts_and_loads.extractIskandraniData">
+<span class="sig-prename descclassname"><span class="pre">MARIGOLD.extracts_and_loads.</span></span><span class="sig-name descname"><span class="pre">extractIskandraniData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dump_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Iskandrani_Database.dat'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/MARIGOLD/extracts_and_loads.html#extractIskandraniData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.extracts_and_loads.extractIskandraniData" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="MARIGOLD.extracts_and_loads.extractLocalDataFromDir">
+<span class="sig-prename descclassname"><span class="pre">MARIGOLD.extracts_and_loads.</span></span><span class="sig-name descname"><span class="pre">extractLocalDataFromDir</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dump_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'database.dat'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">in_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">require_terms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">['jf']</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_terms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">['CFD',</span> <span class="pre">'Copy']</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sheet_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'adix_template'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">append_to_json</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pitot_sheet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/MARIGOLD/extracts_and_loads.html#extractLocalDataFromDir"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.extracts_and_loads.extractLocalDataFromDir" title="Link to this definition"></a></dt>
+<dd><p>Function for getting all local data from spreadsheets in a directory, path</p>
+<p>Does not recursively descend, only checks in the path given</p>
+<p>Still under construction, but should support sheet types
+‘adix_template4’
+‘ryan_template’
+‘adix_template’ (maybe rename this quan_template)</p>
+<p>Also can try to infer the sheet type, xlsm will be adix_template4, if it has P5, 6, or 7 it will
+be classified as an adix_template, different angles ryan, etc. The inference can also be made by
+appending _adix or _quan or _ryan to the excel sheets being processed</p>
+<p>Custom sheet types may be supported, but they still have to generally follow the classic template
+structure. The setup information has to be in sheet ‘1’ and all the local data in sheet ‘2’. Ranges
+must be specified as a list of lists</p>
+<p>Q1_ranges = [[angle1, [index1, index2.,..]], [angle2, [index1, index2.,..]], …]</p>
+<p>with the starts and ends</p>
+<p>[Q1_start, Q1_end, Q2_start, …]</p>
+<p>Add on pitot starts/ends if pitot_sheet = True</p>
+<p>Need to specify Q1_check, Q2_check, etc. as well</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="MARIGOLD.extracts_and_loads.extractPitotData">
+<span class="sig-prename descclassname"><span class="pre">MARIGOLD.extracts_and_loads.</span></span><span class="sig-name descname"><span class="pre">extractPitotData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dump_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Pitot_Database.dat'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">in_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">require_terms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_terms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">['CFD',</span> <span class="pre">'Copy']</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/MARIGOLD/extracts_and_loads.html#extractPitotData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.extracts_and_loads.extractPitotData" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="MARIGOLD.extracts_and_loads.extractProbeData">
+<span class="sig-prename descclassname"><span class="pre">MARIGOLD.extracts_and_loads.</span></span><span class="sig-name descname"><span class="pre">extractProbeData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dump_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'database.dat'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">in_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">require_terms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_terms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">['CFD',</span> <span class="pre">'Copy']</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/MARIGOLD/extracts_and_loads.html#extractProbeData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.extracts_and_loads.extractProbeData" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="MARIGOLD.extracts_and_loads.extractYangData">
+<span class="sig-prename descclassname"><span class="pre">MARIGOLD.extracts_and_loads.</span></span><span class="sig-name descname"><span class="pre">extractYangData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dump_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Yang_Database.dat'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="_modules/MARIGOLD/extracts_and_loads.html#extractYangData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.extracts_and_loads.extractYangData" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="MARIGOLD.extracts_and_loads.loadData">
+<span class="sig-prename descclassname"><span class="pre">MARIGOLD.extracts_and_loads.</span></span><span class="sig-name descname"><span class="pre">loadData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_file</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="_modules/MARIGOLD/extracts_and_loads.html#loadData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.extracts_and_loads.loadData" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="MARIGOLD.extracts_and_loads.loadIskandraniData">
+<span class="sig-prename descclassname"><span class="pre">MARIGOLD.extracts_and_loads.</span></span><span class="sig-name descname"><span class="pre">loadIskandraniData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Iskandrani_Database.dat'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="_modules/MARIGOLD/extracts_and_loads.html#loadIskandraniData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.extracts_and_loads.loadIskandraniData" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="MARIGOLD.extracts_and_loads.loadPitotData">
+<span class="sig-prename descclassname"><span class="pre">MARIGOLD.extracts_and_loads.</span></span><span class="sig-name descname"><span class="pre">loadPitotData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Pitot_Database.dat'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="_modules/MARIGOLD/extracts_and_loads.html#loadPitotData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.extracts_and_loads.loadPitotData" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="MARIGOLD.extracts_and_loads.loadProbeData">
+<span class="sig-prename descclassname"><span class="pre">MARIGOLD.extracts_and_loads.</span></span><span class="sig-name descname"><span class="pre">loadProbeData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'PITA_Database.dat'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="_modules/MARIGOLD/extracts_and_loads.html#loadProbeData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.extracts_and_loads.loadProbeData" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="MARIGOLD.extracts_and_loads.loadYangData">
+<span class="sig-prename descclassname"><span class="pre">MARIGOLD.extracts_and_loads.</span></span><span class="sig-name descname"><span class="pre">loadYangData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Yang_Database.dat'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="_modules/MARIGOLD/extracts_and_loads.html#loadYangData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.extracts_and_loads.loadYangData" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-MARIGOLD">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-MARIGOLD" title="Link to this heading"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, adix.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

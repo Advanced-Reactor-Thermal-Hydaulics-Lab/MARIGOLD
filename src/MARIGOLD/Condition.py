@@ -2,41 +2,15 @@ from .config import *
 from scipy import interpolate
 
 class Condition:
-    """
-    Class to handle the local probe data
+    """ Class to handle the local probe data
 
-Data is stored in the Condition.phi property. It's actually 3 layers of dictionary
-phi [angle] gives a dictionary with the various r/R
-phi [angle][r/R] gives a dictionary with the MIDAS output
-The MIDAS output is itself a dictionary, with the keys listed in the "tab_keys" array
-So phi[angle][r/R]['alpha'] should give you the void fraction at r/R for phi = angle
-This structure is initialized with zeros for the MIDAS output at the pipe center and wall
+    Data is stored in the Condition.phi property. It's actually 3 layers of dictionary
+    phi [angle] gives a dictionary with the various r/R
+    phi [angle][r/R] gives a dictionary with the MIDAS output
+    The MIDAS output is itself a dictionary, with the keys listed in the "tab_keys" array
+    So phi[angle][r/R]['alpha'] should give you the void fraction at r/R for phi = angle
+    This structure is initialized with zeros for the MIDAS output at the pipe center and wall
 
-Methods:
-  pretty_print- Prints out the data in the condition in a more human-readable way
-  mirror- Copies any data in the negative r/R for a given phi to the corresponding complementary angle. 
-          Also copies data assuming some kind of symmetry. Ensures all angles (22.5° increments) are 
-          represented with data, and that the data ranges from r/R 0-1. Data is guaranteed to exist for
-          at least r/R = 0 and r/R = 1 (filled with zero_data if no data exists) for plotting
-  approx_vf- calculates approximate vf based on a simple power law profile
-  approx_vf_Kong- calculates approximate vf based on Kong's asymmetric method (TODO)
-  calc_vr- calculates the relative velocity vg - vf
-  calc_vgj- calculate local vg - j
-  calc_grad- calculates gradient and saves the local information in self.phi[angle][r/R]['grad_"param name"_"direction"]
-             where direction can be "r", "phi", "total" or "y" as of now
-  area_avg- 
-  line_avg-
-  line_dev-
-  void_area_avg-
-  calc_void_cov-
-  calc_sigma_alpha-
-  calc_mu3_alpha-
-  top_bottom-
-  plot_profiles- the 2D line plots we make 
-  plot_contours- cool contour plots
-  plot_surface- rad surface plots
-  rough_FR_ID- rough flow regime identification
-  TD_FR_ID- Flow regime identification from Taitel and Dukler (TODO)
 """
 
     debugFID = None
@@ -190,7 +164,17 @@ Methods:
         else:
             raise NameError(f"{interp_method} not regonized. Accepted arguments are 'None', 'spline', 'linear' or 'linear_xy'")
 
-    def pretty_print(self, print_to_file= True, FID=debugFID, mirror=False) -> None:
+    def pretty_print(self, print_to_file= False, FID=debugFID, mirror=False) -> None:
+        """Prints out all the information in a Condition in a structured way 
+
+        Specifically, everything in the Condition.phi dictionary, which has angles
+        and r/Rs.
+
+        Can either print to a file (specified by FID) or to stdout. Option to mirror the 
+        data, if that hasn't already been done
+
+        """
+
         print(f"jf = {self.jf}\tjg = {self.jgref}\ttheta = {self.theta}\t{self.port}\t{self.database}", file=FID)
         
         if mirror:
@@ -211,8 +195,7 @@ Methods:
         return
 
     def mirror(self, sym90 = True, axisym = False, uniform_rmesh = False, force_remirror=False) -> None:
-        """ 
-        Mirrors data, so we have data for every angle
+        """ Mirrors data, so we have data for every angle
 
         First finds all the angles with data, copies anything negative to the 
         other side (deleting the negative entries in the original). Then goes
@@ -230,19 +213,19 @@ Methods:
         
         Quadrant definitions:
         
-                    phi =  90
-                     , - ~ ~ ~ - ,
-                 , '       |        ' ,
-               ,           |            ,
-              ,     II     |    I        ,
-             ,             |             ,
-         180 ,-------------|-------------, 0
-             ,             |             ,
-              ,    III     |   IV       ,
-               ,           |           ,
-                 ,         |        , '
-                   ' - , _ _ _ ,  '
-                          270
+                          phi =  90
+                        , - ~ ~ ~ - ,
+                    , '       |        ' ,
+                  ,           |            ,
+                 ,     II     |    I        ,
+                ,             |             ,
+            180 ,-------------|-------------, 0
+                ,             |             ,
+                 ,    III     |   IV       ,
+                  ,           |           ,
+                    ,         |        , '
+                      ' - , _ _ _ ,  '
+                             270
 
         """
 
@@ -489,7 +472,12 @@ Methods:
         return
     
     def approx_vf_Kong(self, n=7) -> None:
-        # TODO
+        """Method for approximating vf from Kong. TODO 
+
+        Not currently implemented
+
+        """
+
         self.mirror()
 
         for angle, r_dict in self.phi.items():
@@ -684,8 +672,13 @@ Methods:
 
         return
     
-    def fit_spline(self, param: str, nphi = 100, nr = 100) -> None:
-        """Fits a RectBivariateSpline for the given param. Can access later with self.spline_interp[param]"""
+    def fit_spline(self, param: str) -> None:
+        """Fits a RectBivariateSpline for the given param. 
+
+           Can access later with self.spline_interp[param]. Must specify the 'param' to fit
+        
+        """
+        
         try: dummy = self.spline_interp
         except:
             self.spline_interp = {}
@@ -728,8 +721,9 @@ Methods:
         return
     
     def calc_linear_interp(self, param: str) -> None:
-        """Makes a LinearNDInterpolator for the given param. Can access later with self.linear_interp[param]
-             * phi in radians
+        """Makes a LinearNDInterpolator for the given param. 
+        
+            Access with self.linear_interp[param], phi in radians
              
         """
 
@@ -762,9 +756,9 @@ Methods:
         return
     
     def calc_linear_xy_interp(self, param: str) -> None:
-        """
-    
-        Makes a LinearNDInterpolator for the given param in x y coords. Can access later with self.linear_xy_interp[param]
+        """ Makes a LinearNDInterpolator for the given param in x y coords
+        
+        Can access  with self.linear_xy_interp[param]
                           
         """
 
@@ -797,6 +791,13 @@ Methods:
         return
     
     def max(self, param: str, recalc=False) -> float:
+        """ Return maximum value of param in the Condition
+        
+        By default, saves the data to a dictionary, Condition.maxs
+        for future reference, unless recalc=True
+                          
+        """
+        
         if (param in self.maxs.keys()) and (not recalc):
             return self.maxs[param] # why waste time 
         max = 0
@@ -809,6 +810,11 @@ Methods:
         return (max)
 
     def max_loc(self, param: str)-> tuple:
+        """ Return location of maximum param in the Condition
+        
+        returns in the form (r/R, angle in degrees)
+                          
+        """
         max = 0
         for angle, r_dict in self.phi.items():
             for rstar, midas_dict in r_dict.items():
@@ -819,6 +825,15 @@ Methods:
         return (location)
     
     def min(self, param: str, recalc = False, nonzero=False)-> float:
+        """ Return minimum value of param in the Condition
+        
+        By default, saves the data to a dictionary, Condition.mins
+        for future reference, unless recalc=True
+
+        nonzero=True will find the smallest nonzero value.
+                          
+        """
+
         if (param in self.mins.keys()) and (not recalc):
             return self.mins[param] # why waste time 
         min = 10**7
@@ -835,6 +850,14 @@ Methods:
         return (min)
 
     def min_loc(self, param: str)-> float:
+        """ Return minimum value of param in the Condition
+        
+        By default, saves the data to a dictionary, Condition.mins
+        for future reference, unless recalc=True
+
+        nonzero option not implemented, TODO
+                          
+        """
         min = 10**7
         for angle, r_dict in self.phi.items():
             for rstar, midas_dict in r_dict.items():
@@ -843,18 +866,11 @@ Methods:
                     location = (rstar, angle)
 
         return (location)
-
-    def min_nonzero(self, param: str)-> float:
-        min = 10**7
-        for angle, r_dict in self.phi.items():
-            for rstar, midas_dict in r_dict.items():
-                if (midas_dict[param] < min) and (midas_dict[param] != 0):
-                    min = midas_dict[param]
-                    location = rstar
-
-        return (min)
     
-    def max_line_loc(self, param: str, angle) -> float:
+    def max_line_loc(self, param: str, angle:float) -> float:
+        """ Return r/R location of maximum value of param at a given angle
+                          
+        """
         max = 0
         for rstar, midas_dict in self.phi[angle].items():
             if midas_dict[param] > max:
@@ -863,7 +879,10 @@ Methods:
 
         return (location)
     
-    def max_line(self, param: str, angle) -> float:
+    def max_line(self, param: str, angle:float) -> float:
+        """ Return maximum value of param at a given angle
+                          
+        """
         max = 0
         for rstar, midas_dict in self.phi[angle].items():
             if midas_dict[param] > max:
@@ -873,9 +892,18 @@ Methods:
         return (max)
     
     def find_hstar_pos(self, method='max_dsm', void_criteria = 0.05) -> float:
-        """ 
-        Returns the vertical distance from the top of the pipe to the bubble layer interface, as determined by the selected method.
-        Void criteria = minimum void for "zero_void" mode, or % of maximum void on line for "percent_void" mode """
+        """ Returns the vertical distance from the top of the pipe to the bubble layer interface
+        
+        Methods for determining bubble layer interface
+        - max_dsm
+        - min_grad_y
+        - max_grad_y
+        - max_mag_grad_y
+        - zero_void
+        - percent_void, search down the phi = 90 line, find largest value of rstar where alpha < min_void
+        - Ryan_Ref, uses 1.3 - 1.57e-5 * Ref, proposed by Ryan (2022)
+        
+        """
 
         if method == 'max_dsm':
             r_max, phi_max = self.max_loc('Dsm1')
@@ -958,8 +986,7 @@ Methods:
         return np.NaN
 
     def area_avg(self, param: str, even_opt='first', recalc = True) -> float:
-
-        """Method for calculating the area-average of a parameter, "param". 
+        """Method for calculating the area-average of a parameter, "param"
         
         param can be anything MIDAS outputs, but usually of interest are "alpha" or "alpha_ug"
         If you're not sure what somethings named, try Condition.phi[90][1.0].keys()
@@ -1033,10 +1060,16 @@ Methods:
         return I
 
     def circ_segment_area_avg(self, param:str, hstar:float, ngridr=25, ngridphi=25, int_err = 10**-4) -> float:
-        from scipy import interpolate
-        # area averages over the circular segment with height h
-        # For the bubble layer region
-        # to smooth it out, integrate over an interpolated mesh
+        """Method for calculating the area-average of a parameter, "param" over the circular segment defined by h
+        
+        Basically, if you slice the pipe at h, area average everything above h
+
+        to smooth it out, integrate over an interpolated mesh
+
+        returns integrand result
+
+        """
+
         # Check that the parameter that the user requested exists
         try:
             dummy = self.phi[90][1.0][param]
@@ -1089,9 +1122,16 @@ Methods:
         return I
 
     def circ_segment_void_area_avg(self, param:str, hstar:float, ngridr=25, ngridphi=25, int_err = 10**-4) -> float:
-        # area averages over the circular segment with height h
-        # For the bubble layer region
-        # to smooth it out, integrate over an interpolated mesh
+        """Method for calculating the void-weighted area-average of a parameter over the circular segment defined by h
+        
+        Basically, if you slice the pipe at h, void-weighted area average everything above h
+        
+        to smooth it out, integrate over an interpolated mesh
+
+        returns integrand result
+
+        """
+
         # Check that the parameter that the user requested exists
         try:
             dummy = self.phi[90][1.0][param]
@@ -1145,6 +1185,13 @@ Methods:
         return I
 
     def line_avg(self, param:str, phi_angle:float, even_opt='first') -> float:
+        """Line average of param over line defined by phi_angle
+        
+        Also includes the complementary angle, so the line is a diameter of the pipe
+
+        returns integrand result
+
+        """
 
         # Check that the parameter that the user requested exists
         self.mirror()
@@ -1190,6 +1237,15 @@ Methods:
         return I
 
     def line_avg_dev(self, param:str, phi_angle:float, even_opt='first') -> float:
+        """Second moment of param over line defined by phi_angle
+        
+        Also includes the complementary angle, so the line is a diameter of the pipe
+
+        < param - <param>^2 > / <param>^2
+
+        returns integrand result
+
+        """
 
         # Check that the parameter that the user requested exists
         self.mirror()
@@ -1236,7 +1292,12 @@ Methods:
 
 
     def void_area_avg(self, param: str, even_opt='first') -> float:
+        """Method for calculating the void-weighted area-average of a parameter
         
+        <alpha * param> / <alpha>
+
+        """
+
         # Check that the parameter that the user requested exists
         try:
             dummy = self.phi[90][1.0][param]
@@ -1288,6 +1349,11 @@ Methods:
         return I
     
     def interp_area_avg(self, param:str, interp_type = 'linear') -> float:
+        """Function to area-average param, using the spline interpolation of param
+
+        Returns the intengrand result. May be computationally expensive
+        
+        """
 
         if interp_type == 'spline':
             if param not in self.spline_interp.keys():
@@ -1307,6 +1373,11 @@ Methods:
         return I
 
     def spline_void_area_avg(self, param:str) -> float:
+        """Function to void-weighted area-average param over a circular segment defined by h, using the spline interpolation of param
+
+        Returns the intengrand result. May be computationally expensive
+        
+        """
 
         def integrand(phi, r):
             return self.spline_interp[param](phi * 180/np.pi, r) * self.spline_interp['alpha'](phi * 180/np.pi, r) * r
@@ -1318,7 +1389,11 @@ Methods:
         return I
     
     def spline_circ_seg_area_avg(self, param:str, hstar:float, int_err = 10**-4) -> float:
-        """Function to integrate over a circular segment, using the spline interpolation of param"""
+        """Function to area-average over a circular segment defined by h, using the spline interpolation of param
+
+        Returns the intengrand result. May be computationally expensive
+        
+        """
 
         def integrand(r, phi):
             return self.spline_interp[param](phi * 180/np.pi, r) * r
@@ -1509,13 +1584,13 @@ Methods:
         
         if method == 'LM':
             Re_f = rho_f * self.jf * self.Dh / mu_f
-            Re_g = rho_g * self.jg * self.Dh / mu_g
+            Re_g = rho_g * self.jgloc * self.Dh / mu_g
 
             f_f = 0.316 / Re_f**0.25 
             f_g = 0.316 / Re_g**0.25
 
             dpdz_f = f_f * 1/self.Dh * rho_f * self.jf**2 / 2
-            dpdz_g = f_g * 1/self.Dh * rho_g * self.jg**2 / 2
+            dpdz_g = f_g * 1/self.Dh * rho_g * self.jgloc**2 / 2
             chi2 = dpdz_f / dpdz_g 
             phi_f2 = 1 + LM_C/np.sqrt(chi2) + 1 / chi2
             dpdz = phi_f2 * dpdz_f
@@ -1759,9 +1834,8 @@ Methods:
         return
     
     def calc_errors(self, param1:str, param2:str):
-        """ 
+        """ Calculates the errors, ε, between two parameters (param1 - param2) in midas_dict
         
-        Calculates the errors, ε, between two parameters (param1 - param2) in midas_dict
         Stores:
          - error, "eps_param1_param2", param1 - param2
          - relative, "eps_rel_param1_param2", (param1 - param2) / param2
