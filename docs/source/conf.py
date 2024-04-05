@@ -15,17 +15,16 @@ release = '0.0.1'
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
 extensions = [
-    'sphinx.ext.autodoc',
-    'sphinx.ext.autosummary',
     'sphinx.ext.intersphinx',
     'sphinx.ext.viewcode',
-    'sphinx.ext.napoleon'
+    'sphinx.ext.napoleon',
+    'sphinx_automodapi.automodapi'
 ]
 
 templates_path = ['_templates']
 exclude_patterns = []
 
-autosummary_generate = True
+numpydoc_show_class_members = False
 
 napoleon_google_docstring = False
 napoleon_use_param = False

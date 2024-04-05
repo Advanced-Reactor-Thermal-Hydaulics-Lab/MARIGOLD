@@ -12,11 +12,8 @@ Welcome to MARIGOLD's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-.. autosummary::
-   :toctree: modules
-
-   MARIGOLD.Condition
-   MARIGOLD.extracts_and_loads
+.. automodapi:: MARIGOLD
+   :no-inheritance-diagram
 
 
 Indices and tables

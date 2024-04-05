@@ -1,0 +1,5 @@
+\babel@toc {english}{}\relax 
+\contentsline {chapter}{\numberline {1}MARIGOLD.Condition}{3}{chapter.1}%
+\contentsline {chapter}{\numberline {2}MARIGOLD.extracts\_and\_loads}{7}{chapter.2}%
+\contentsline {chapter}{\numberline {3}Indices and tables}{9}{chapter.3}%
+\contentsline {chapter}{Python Module Index}{11}{section*.5}%

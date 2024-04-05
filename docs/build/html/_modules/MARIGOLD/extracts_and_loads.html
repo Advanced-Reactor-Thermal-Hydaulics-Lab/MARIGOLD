@@ -6,6 +6,7 @@
   <title>MARIGOLD.extracts_and_loads &mdash; MARIGOLD 0.0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=eafc0fe6" />
 
   
   <!--[if lt IE 9]>
@@ -41,8 +42,27 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <!-- Local TOC -->
-              <div class="local-toc"></div>
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api/MARIGOLD.color_cycle.html">color_cycle</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/MARIGOLD.dump_data_from_tabs.html">dump_data_from_tabs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/MARIGOLD.extractIskandraniData.html">extractIskandraniData</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/MARIGOLD.extractLocalDataFromDir.html">extractLocalDataFromDir</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/MARIGOLD.extractPitotData.html">extractPitotData</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/MARIGOLD.extractProbeData.html">extractProbeData</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/MARIGOLD.extractYangData.html">extractYangData</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/MARIGOLD.loadData.html">loadData</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/MARIGOLD.loadIskandraniData.html">loadIskandraniData</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/MARIGOLD.loadPitotData.html">loadPitotData</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/MARIGOLD.loadProbeData.html">loadProbeData</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/MARIGOLD.loadYangData.html">loadYangData</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/MARIGOLD.marker_cycle.html">marker_cycle</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api/MARIGOLD.Condition.html">Condition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/MARIGOLD.Iskandrani_Condition.html">Iskandrani_Condition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/MARIGOLD.Yang_Condition.html">Yang_Condition</a></li>
+</ul>
+
         </div>
       </div>
     </nav>
@@ -77,7 +97,7 @@
 <span class="kn">import</span> <span class="nn">re</span>
 
 <div class="viewcode-block" id="extractProbeData">
-<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.extracts_and_loads.extractProbeData">[docs]</a>
+<a class="viewcode-back" href="../../api/MARIGOLD.extractProbeData.html#MARIGOLD.extractProbeData">[docs]</a>
 <span class="k">def</span> <span class="nf">extractProbeData</span><span class="p">(</span><span class="n">dump_file</span> <span class="o">=</span> <span class="s1">&#39;database.dat&#39;</span><span class="p">,</span> <span class="n">in_dir</span> <span class="o">=</span> <span class="p">[],</span> <span class="n">require_terms</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">skip_terms</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;CFD&#39;</span><span class="p">,</span> <span class="s1">&#39;Copy&#39;</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
     <span class="n">all_conditions</span> <span class="o">=</span> <span class="p">[]</span>
 
@@ -598,7 +618,7 @@
 
 
 <div class="viewcode-block" id="extractLocalDataFromDir">
-<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.extracts_and_loads.extractLocalDataFromDir">[docs]</a>
+<a class="viewcode-back" href="../../api/MARIGOLD.extractLocalDataFromDir.html#MARIGOLD.extractLocalDataFromDir">[docs]</a>
 <span class="k">def</span> <span class="nf">extractLocalDataFromDir</span><span class="p">(</span><span class="n">path</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">dump_file</span> <span class="o">=</span> <span class="s1">&#39;database.dat&#39;</span><span class="p">,</span> <span class="n">in_dir</span> <span class="o">=</span> <span class="p">[],</span> <span class="n">require_terms</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;jf&#39;</span><span class="p">],</span> 
                             <span class="n">skip_terms</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;CFD&#39;</span><span class="p">,</span> <span class="s1">&#39;Copy&#39;</span><span class="p">],</span> <span class="n">sheet_type</span> <span class="o">=</span> <span class="s1">&#39;adix_template&#39;</span><span class="p">,</span> <span class="n">append_to_json</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                             <span class="n">pitot_sheet</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
@@ -887,7 +907,7 @@
 
 
 <div class="viewcode-block" id="dump_data_from_tabs">
-<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.extracts_and_loads.dump_data_from_tabs">[docs]</a>
+<a class="viewcode-back" href="../../api/MARIGOLD.dump_data_from_tabs.html#MARIGOLD.dump_data_from_tabs">[docs]</a>
 <span class="k">def</span> <span class="nf">dump_data_from_tabs</span><span class="p">(</span><span class="n">dump_file</span> <span class="o">=</span> <span class="s1">&#39;PITA_Database.dat&#39;</span><span class="p">,</span> <span class="n">skip_dir</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
     <span class="n">all_conditions</span> <span class="o">=</span> <span class="p">[]</span>
     
@@ -963,7 +983,7 @@
 
 
 <div class="viewcode-block" id="loadData">
-<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.extracts_and_loads.loadData">[docs]</a>
+<a class="viewcode-back" href="../../api/MARIGOLD.loadData.html#MARIGOLD.loadData">[docs]</a>
 <span class="k">def</span> <span class="nf">loadData</span><span class="p">(</span><span class="n">data_file</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">data_file</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">g</span><span class="p">:</span> <span class="c1"># pickle works with binary data, hence rb</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">g</span><span class="p">)</span>
@@ -971,7 +991,7 @@
 
 
 <div class="viewcode-block" id="loadProbeData">
-<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.extracts_and_loads.loadProbeData">[docs]</a>
+<a class="viewcode-back" href="../../api/MARIGOLD.loadProbeData.html#MARIGOLD.loadProbeData">[docs]</a>
 <span class="k">def</span> <span class="nf">loadProbeData</span><span class="p">(</span><span class="n">data_file</span> <span class="o">=</span> <span class="s1">&#39;PITA_Database.dat&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">data_file</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">g</span><span class="p">:</span> <span class="c1"># pickle works with binary data, hence rb</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">g</span><span class="p">)</span>
@@ -979,7 +999,7 @@
 
 
 <div class="viewcode-block" id="extractPitotData">
-<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.extracts_and_loads.extractPitotData">[docs]</a>
+<a class="viewcode-back" href="../../api/MARIGOLD.extractPitotData.html#MARIGOLD.extractPitotData">[docs]</a>
 <span class="k">def</span> <span class="nf">extractPitotData</span><span class="p">(</span><span class="n">dump_file</span> <span class="o">=</span> <span class="s1">&#39;Pitot_Database.dat&#39;</span><span class="p">,</span> <span class="n">in_dir</span> <span class="o">=</span> <span class="p">[],</span> <span class="n">require_terms</span> <span class="o">=</span> <span class="p">[],</span> <span class="n">skip_terms</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;CFD&#39;</span><span class="p">,</span> <span class="s1">&#39;Copy&#39;</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
     <span class="n">Q1_ranges</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">([</span><span class="mi">90</span><span class="p">,</span> <span class="mf">67.5</span><span class="p">,</span> <span class="mi">45</span><span class="p">,</span> <span class="mf">22.5</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">33</span><span class="p">)],</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">57</span><span class="p">,</span> <span class="mi">82</span><span class="p">)],</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">108</span><span class="p">,</span> <span class="mi">133</span><span class="p">)],</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">157</span><span class="p">,</span> <span class="mi">182</span><span class="p">)],</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">208</span><span class="p">,</span> <span class="mi">233</span><span class="p">)]</span> <span class="p">]))</span>
 
@@ -1071,7 +1091,7 @@
 
 
 <div class="viewcode-block" id="loadPitotData">
-<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.extracts_and_loads.loadPitotData">[docs]</a>
+<a class="viewcode-back" href="../../api/MARIGOLD.loadPitotData.html#MARIGOLD.loadPitotData">[docs]</a>
 <span class="k">def</span> <span class="nf">loadPitotData</span><span class="p">(</span><span class="n">data_file</span> <span class="o">=</span> <span class="s1">&#39;Pitot_Database.dat&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">data_file</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">g</span><span class="p">:</span> <span class="c1"># pickle works with binary data, hence rb</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">g</span><span class="p">)</span>
@@ -1079,7 +1099,7 @@
 
 
 <div class="viewcode-block" id="extractIskandraniData">
-<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.extracts_and_loads.extractIskandraniData">[docs]</a>
+<a class="viewcode-back" href="../../api/MARIGOLD.extractIskandraniData.html#MARIGOLD.extractIskandraniData">[docs]</a>
 <span class="k">def</span> <span class="nf">extractIskandraniData</span><span class="p">(</span><span class="n">dump_file</span><span class="o">=</span><span class="s1">&#39;Iskandrani_Database.dat&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">wb</span> <span class="o">=</span> <span class="n">op</span><span class="o">.</span><span class="n">load_workbook</span><span class="p">(</span><span class="s2">&quot;Z:</span><span class="se">\\</span><span class="s2">TRSL</span><span class="se">\\</span><span class="s2">PITA\Data</span><span class="se">\\</span><span class="s2">LocalData</span><span class="se">\\</span><span class="s2">Iskandrani_Local_Velocity.xlsx&quot;</span><span class="p">)</span>
@@ -1111,7 +1131,7 @@
 
 
 <div class="viewcode-block" id="loadIskandraniData">
-<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.extracts_and_loads.loadIskandraniData">[docs]</a>
+<a class="viewcode-back" href="../../api/MARIGOLD.loadIskandraniData.html#MARIGOLD.loadIskandraniData">[docs]</a>
 <span class="k">def</span> <span class="nf">loadIskandraniData</span><span class="p">(</span><span class="n">data_file</span> <span class="o">=</span> <span class="s1">&#39;Iskandrani_Database.dat&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">data_file</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">g</span><span class="p">:</span> <span class="c1"># pickle works with binary data, hence rb</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">g</span><span class="p">)</span>
@@ -1119,7 +1139,7 @@
 
 
 <div class="viewcode-block" id="extractYangData">
-<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.extracts_and_loads.extractYangData">[docs]</a>
+<a class="viewcode-back" href="../../api/MARIGOLD.extractYangData.html#MARIGOLD.extractYangData">[docs]</a>
 <span class="k">def</span> <span class="nf">extractYangData</span><span class="p">(</span><span class="n">dump_file</span><span class="o">=</span><span class="s1">&#39;Yang_Database.dat&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
 
     <span class="k">try</span><span class="p">:</span>
@@ -1161,7 +1181,7 @@
 
 
 <div class="viewcode-block" id="loadYangData">
-<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.extracts_and_loads.loadYangData">[docs]</a>
+<a class="viewcode-back" href="../../api/MARIGOLD.loadYangData.html#MARIGOLD.loadYangData">[docs]</a>
 <span class="k">def</span> <span class="nf">loadYangData</span><span class="p">(</span><span class="n">data_file</span> <span class="o">=</span> <span class="s1">&#39;Yang_Database.dat&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">data_file</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">g</span><span class="p">:</span> <span class="c1"># pickle works with binary data, hence rb</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">g</span><span class="p">)</span>

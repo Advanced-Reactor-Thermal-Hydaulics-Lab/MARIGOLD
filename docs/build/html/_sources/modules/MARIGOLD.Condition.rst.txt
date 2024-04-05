@@ -1,4 +1,4 @@
-﻿MARIGOLD.Condition
+MARIGOLD.Condition
 ==================
 
 .. currentmodule:: MARIGOLD

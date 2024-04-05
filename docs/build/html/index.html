@@ -7,6 +7,7 @@
   <title>Welcome to MARIGOLD’s documentation! &mdash; MARIGOLD 0.0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=eafc0fe6" />
 
   
   <!--[if lt IE 9]>
@@ -21,7 +22,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="MARIGOLD.Condition" href="modules/MARIGOLD.Condition.html" /> 
+    <link rel="next" title="color_cycle" href="api/MARIGOLD.color_cycle.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -44,8 +45,24 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
-<li class="toctree-l1"><a class="reference internal" href="modules/MARIGOLD.Condition.html">MARIGOLD.Condition</a></li>
-<li class="toctree-l1"><a class="reference internal" href="modules/MARIGOLD.extracts_and_loads.html">MARIGOLD.extracts_and_loads</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/MARIGOLD.color_cycle.html">color_cycle</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/MARIGOLD.dump_data_from_tabs.html">dump_data_from_tabs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/MARIGOLD.extractIskandraniData.html">extractIskandraniData</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/MARIGOLD.extractLocalDataFromDir.html">extractLocalDataFromDir</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/MARIGOLD.extractPitotData.html">extractPitotData</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/MARIGOLD.extractProbeData.html">extractProbeData</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/MARIGOLD.extractYangData.html">extractYangData</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/MARIGOLD.loadData.html">loadData</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/MARIGOLD.loadIskandraniData.html">loadIskandraniData</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/MARIGOLD.loadPitotData.html">loadPitotData</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/MARIGOLD.loadProbeData.html">loadProbeData</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/MARIGOLD.loadYangData.html">loadYangData</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/MARIGOLD.marker_cycle.html">marker_cycle</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api/MARIGOLD.Condition.html">Condition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/MARIGOLD.Iskandrani_Condition.html">Iskandrani_Condition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/MARIGOLD.Yang_Condition.html">Yang_Condition</a></li>
 </ul>
 
         </div>
@@ -74,19 +91,83 @@
              
   <section id="welcome-to-marigold-s-documentation">
 <h1>Welcome to MARIGOLD’s documentation!<a class="headerlink" href="#welcome-to-marigold-s-documentation" title="Link to this heading"></a></h1>
-<p><a href="#id1"><span class="problematic" id="id2">**</span></a>M**ultiphase <a href="#id3"><span class="problematic" id="id4">**</span></a>A**nalysis of <a href="#id5"><span class="problematic" id="id6">**</span></a>R**aw <a href="#id7"><span class="problematic" id="id8">**</span></a>I**nformation for <a href="#id9"><span class="problematic" id="id10">**</span></a>G**lobal <a href="#id11"><span class="problematic" id="id12">**</span></a>O**r <a href="#id13"><span class="problematic" id="id14">**</span></a>L**ocal <a href="#id15"><span class="problematic" id="id16">**</span></a>D**ata</p>
+<p><a href="#id1"><span class="problematic" id="id2">*</span></a>M*ultiphase <a href="#id3"><span class="problematic" id="id4">*</span></a>A*nalysis of <a href="#id5"><span class="problematic" id="id6">*</span></a>R*aw <a href="#id7"><span class="problematic" id="id8">*</span></a>I*nformation for <a href="#id9"><span class="problematic" id="id10">*</span></a>G*lobal <a href="#id11"><span class="problematic" id="id12">*</span></a>O*r <a href="#id13"><span class="problematic" id="id14">*</span></a>L*ocal <a href="#id15"><span class="problematic" id="id16">*</span></a>D*ata</p>
 <div class="toctree-wrapper compound">
 </div>
+<section id="module-MARIGOLD">
+<span id="marigold-package"></span><h2>MARIGOLD Package<a class="headerlink" href="#module-MARIGOLD" title="Link to this heading"></a></h2>
+<section id="functions">
+<h3>Functions<a class="headerlink" href="#functions" title="Link to this heading"></a></h3>
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="modules/MARIGOLD.Condition.html#MARIGOLD.Condition" title="MARIGOLD.Condition"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MARIGOLD.Condition</span></code></a>(jgref, jgloc, jf, theta, ...)</p></td>
-<td><p>Class to handle the local probe data</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/MARIGOLD.color_cycle.html#MARIGOLD.color_cycle" title="MARIGOLD.color_cycle"><code class="xref py py-obj docutils literal notranslate"><span class="pre">color_cycle</span></code></a>()</p></td>
+<td><p>Custom generator for colors</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="modules/MARIGOLD.extracts_and_loads.html#module-MARIGOLD.extracts_and_loads" title="MARIGOLD.extracts_and_loads"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MARIGOLD.extracts_and_loads</span></code></a></p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">deepcopy</span></code>(x[, memo, _nil])</p></td>
+<td><p>Deep copy operation on arbitrary Python objects.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/MARIGOLD.dump_data_from_tabs.html#MARIGOLD.dump_data_from_tabs" title="MARIGOLD.dump_data_from_tabs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dump_data_from_tabs</span></code></a>([dump_file, skip_dir])</p></td>
 <td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="api/MARIGOLD.extractIskandraniData.html#MARIGOLD.extractIskandraniData" title="MARIGOLD.extractIskandraniData"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extractIskandraniData</span></code></a>([dump_file])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/MARIGOLD.extractLocalDataFromDir.html#MARIGOLD.extractLocalDataFromDir" title="MARIGOLD.extractLocalDataFromDir"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extractLocalDataFromDir</span></code></a>(path[, dump_file, ...])</p></td>
+<td><p>Function for getting all local data from spreadsheets in a directory, path</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="api/MARIGOLD.extractPitotData.html#MARIGOLD.extractPitotData" title="MARIGOLD.extractPitotData"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extractPitotData</span></code></a>([dump_file, in_dir, ...])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/MARIGOLD.extractProbeData.html#MARIGOLD.extractProbeData" title="MARIGOLD.extractProbeData"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extractProbeData</span></code></a>([dump_file, in_dir, ...])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="api/MARIGOLD.extractYangData.html#MARIGOLD.extractYangData" title="MARIGOLD.extractYangData"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extractYangData</span></code></a>([dump_file])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/MARIGOLD.loadData.html#MARIGOLD.loadData" title="MARIGOLD.loadData"><code class="xref py py-obj docutils literal notranslate"><span class="pre">loadData</span></code></a>(data_file)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="api/MARIGOLD.loadIskandraniData.html#MARIGOLD.loadIskandraniData" title="MARIGOLD.loadIskandraniData"><code class="xref py py-obj docutils literal notranslate"><span class="pre">loadIskandraniData</span></code></a>([data_file])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/MARIGOLD.loadPitotData.html#MARIGOLD.loadPitotData" title="MARIGOLD.loadPitotData"><code class="xref py py-obj docutils literal notranslate"><span class="pre">loadPitotData</span></code></a>([data_file])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="api/MARIGOLD.loadProbeData.html#MARIGOLD.loadProbeData" title="MARIGOLD.loadProbeData"><code class="xref py py-obj docutils literal notranslate"><span class="pre">loadProbeData</span></code></a>([data_file])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/MARIGOLD.loadYangData.html#MARIGOLD.loadYangData" title="MARIGOLD.loadYangData"><code class="xref py py-obj docutils literal notranslate"><span class="pre">loadYangData</span></code></a>([data_file])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="api/MARIGOLD.marker_cycle.html#MARIGOLD.marker_cycle" title="MARIGOLD.marker_cycle"><code class="xref py py-obj docutils literal notranslate"><span class="pre">marker_cycle</span></code></a>()</p></td>
+<td><p>Custom generator for markers</p></td>
 </tr>
 </tbody>
 </table>
+</section>
+<section id="classes">
+<h3>Classes<a class="headerlink" href="#classes" title="Link to this heading"></a></h3>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="modules/MARIGOLD.Condition.html#MARIGOLD.Condition" title="MARIGOLD.Condition"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Condition</span></code></a>(jgref, jgloc, jf, theta, port, ...)</p></td>
+<td><p>Class to handle the local probe data</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="api/MARIGOLD.Iskandrani_Condition.html#MARIGOLD.Iskandrani_Condition" title="MARIGOLD.Iskandrani_Condition"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Iskandrani_Condition</span></code></a>(jf, jg)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/MARIGOLD.Yang_Condition.html#MARIGOLD.Yang_Condition" title="MARIGOLD.Yang_Condition"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Yang_Condition</span></code></a>(jf, jg)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">datetime</span></code>(year, month, day[, hour[, minute[, ...)</p></td>
+<td><p>The year, month and day arguments are required.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="class-inheritance-diagram">
+<h3>Class Inheritance Diagram<a class="headerlink" href="#class-inheritance-diagram" title="Link to this heading"></a></h3>
+</section>
+</section>
 </section>
 <section id="indices-and-tables">
 <h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Link to this heading"></a></h1>
@@ -101,7 +182,7 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="modules/MARIGOLD.Condition.html" class="btn btn-neutral float-right" title="MARIGOLD.Condition" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="api/MARIGOLD.color_cycle.html" class="btn btn-neutral float-right" title="color_cycle" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
