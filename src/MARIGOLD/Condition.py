@@ -3178,6 +3178,12 @@ def marker_cycle():
         yield var_list[ i % len(var_list)]
         i += 1
 
+def print_tab_keys() -> None:
+    """Convenience function in case you forget a tab key
+    """
+
+    print(tab_keys)
+    return
 
 tab_keys = [
     'roverR',

@@ -89,6 +89,12 @@
 {\color{red}\bfseries{}*}M*ultiphase {\color{red}\bfseries{}*}A*nalysis of {\color{red}\bfseries{}*}R*aw {\color{red}\bfseries{}*}I*nformation for {\color{red}\bfseries{}*}G*lobal {\color{red}\bfseries{}*}O*r {\color{red}\bfseries{}*}L*ocal {\color{red}\bfseries{}*}D*ata
 
 
+\chapter{MARIGOLD Package}
+\label{\detokenize{index:module-MARIGOLD}}\label{\detokenize{index:marigold-package}}\index{module@\spxentry{module}!MARIGOLD@\spxentry{MARIGOLD}}\index{MARIGOLD@\spxentry{MARIGOLD}!module@\spxentry{module}}
+
+\section{Functions}
+\label{\detokenize{index:functions}}
+
 \begin{savenotes}\sphinxattablestart
 \sphinxthistablewithglobalstyle
 \sphinxthistablewithnovlinesstyle
@@ -97,17 +103,101 @@
 \sphinxtoprule
 \sphinxtableatstartofbodyhook
 \sphinxAtStartPar
-{\hyperref[\detokenize{modules/MARIGOLD.Condition:MARIGOLD.Condition}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{MARIGOLD.Condition}}}}}(jgref, jgloc, jf, theta, ...)
+{\hyperref[\detokenize{api/MARIGOLD.color_cycle:MARIGOLD.color_cycle}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{color\_cycle}}}}}()
 &
 \sphinxAtStartPar
-Class to handle the local probe data
+Custom generator for colors
 \\
 \sphinxhline
 \sphinxAtStartPar
-{\hyperref[\detokenize{modules/MARIGOLD.extracts_and_loads:module-MARIGOLD.extracts_and_loads}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{MARIGOLD.extracts\_and\_loads}}}}}
+\sphinxcode{\sphinxupquote{deepcopy}}(x{[}, memo, \_nil{]})
+&
+\sphinxAtStartPar
+Deep copy operation on arbitrary Python objects.
+\\
+\sphinxhline
+\sphinxAtStartPar
+{\hyperref[\detokenize{api/MARIGOLD.dump_data_from_tabs:MARIGOLD.dump_data_from_tabs}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{dump\_data\_from\_tabs}}}}}({[}dump\_file, skip\_dir{]})
 &
 \sphinxAtStartPar
 
+\\
+\sphinxhline
+\sphinxAtStartPar
+{\hyperref[\detokenize{api/MARIGOLD.extractIskandraniData:MARIGOLD.extractIskandraniData}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{extractIskandraniData}}}}}({[}dump\_file{]})
+&
+\sphinxAtStartPar
+
+\\
+\sphinxhline
+\sphinxAtStartPar
+{\hyperref[\detokenize{api/MARIGOLD.extractLocalDataFromDir:MARIGOLD.extractLocalDataFromDir}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{extractLocalDataFromDir}}}}}(path{[}, dump\_file, ...{]})
+&
+\sphinxAtStartPar
+Function for getting all local data from spreadsheets in a directory, path
+\\
+\sphinxhline
+\sphinxAtStartPar
+{\hyperref[\detokenize{api/MARIGOLD.extractPitotData:MARIGOLD.extractPitotData}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{extractPitotData}}}}}({[}dump\_file, in\_dir, ...{]})
+&
+\sphinxAtStartPar
+
+\\
+\sphinxhline
+\sphinxAtStartPar
+{\hyperref[\detokenize{api/MARIGOLD.extractProbeData:MARIGOLD.extractProbeData}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{extractProbeData}}}}}({[}dump\_file, in\_dir, ...{]})
+&
+\sphinxAtStartPar
+
+\\
+\sphinxhline
+\sphinxAtStartPar
+{\hyperref[\detokenize{api/MARIGOLD.extractYangData:MARIGOLD.extractYangData}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{extractYangData}}}}}({[}dump\_file{]})
+&
+\sphinxAtStartPar
+
+\\
+\sphinxhline
+\sphinxAtStartPar
+{\hyperref[\detokenize{api/MARIGOLD.loadData:MARIGOLD.loadData}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{loadData}}}}}(data\_file)
+&
+\sphinxAtStartPar
+
+\\
+\sphinxhline
+\sphinxAtStartPar
+{\hyperref[\detokenize{api/MARIGOLD.loadIskandraniData:MARIGOLD.loadIskandraniData}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{loadIskandraniData}}}}}({[}data\_file{]})
+&
+\sphinxAtStartPar
+
+\\
+\sphinxhline
+\sphinxAtStartPar
+{\hyperref[\detokenize{api/MARIGOLD.loadPitotData:MARIGOLD.loadPitotData}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{loadPitotData}}}}}({[}data\_file{]})
+&
+\sphinxAtStartPar
+
+\\
+\sphinxhline
+\sphinxAtStartPar
+{\hyperref[\detokenize{api/MARIGOLD.loadProbeData:MARIGOLD.loadProbeData}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{loadProbeData}}}}}({[}data\_file{]})
+&
+\sphinxAtStartPar
+
+\\
+\sphinxhline
+\sphinxAtStartPar
+{\hyperref[\detokenize{api/MARIGOLD.loadYangData:MARIGOLD.loadYangData}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{loadYangData}}}}}({[}data\_file{]})
+&
+\sphinxAtStartPar
+
+\\
+\sphinxhline
+\sphinxAtStartPar
+{\hyperref[\detokenize{api/MARIGOLD.marker_cycle:MARIGOLD.marker_cycle}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{marker\_cycle}}}}}()
+&
+\sphinxAtStartPar
+Custom generator for markers
 \\
 \sphinxbottomrule
 \end{tabulary}
@@ -117,14 +207,285 @@ Class to handle the local probe data
 \sphinxstepscope
 
 
-\chapter{MARIGOLD.Condition}
-\label{\detokenize{modules/MARIGOLD.Condition:marigold-condition}}\label{\detokenize{modules/MARIGOLD.Condition::doc}}\index{Condition (class in MARIGOLD)@\spxentry{Condition}\spxextra{class in MARIGOLD}}
+\subsection{color\_cycle}
+\label{\detokenize{api/MARIGOLD.color_cycle:color-cycle}}\label{\detokenize{api/MARIGOLD.color_cycle::doc}}\index{color\_cycle() (in module MARIGOLD)@\spxentry{color\_cycle()}\spxextra{in module MARIGOLD}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{modules/MARIGOLD.Condition:MARIGOLD.Condition}}
+\phantomsection\label{\detokenize{api/MARIGOLD.color_cycle:MARIGOLD.color_cycle}}
+\pysigstartsignatures
+\pysiglinewithargsret{\sphinxcode{\sphinxupquote{MARIGOLD.}}\sphinxbfcode{\sphinxupquote{color\_cycle}}}{}{}
+\pysigstopsignatures
+\sphinxAtStartPar
+Custom generator for colors
+
+\end{fulllineitems}
+
+
+\sphinxstepscope
+
+
+\subsection{dump\_data\_from\_tabs}
+\label{\detokenize{api/MARIGOLD.dump_data_from_tabs:dump-data-from-tabs}}\label{\detokenize{api/MARIGOLD.dump_data_from_tabs::doc}}\index{dump\_data\_from\_tabs() (in module MARIGOLD)@\spxentry{dump\_data\_from\_tabs()}\spxextra{in module MARIGOLD}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{api/MARIGOLD.dump_data_from_tabs:MARIGOLD.dump_data_from_tabs}}
+\pysigstartsignatures
+\pysiglinewithargsret{\sphinxcode{\sphinxupquote{MARIGOLD.}}\sphinxbfcode{\sphinxupquote{dump\_data\_from\_tabs}}}{\sphinxparam{\DUrole{n}{dump\_file}\DUrole{o}{=}\DUrole{default_value}{\textquotesingle{}PITA\_Database.dat\textquotesingle{}}}\sphinxparamcomma \sphinxparam{\DUrole{n}{skip\_dir}\DUrole{o}{=}\DUrole{default_value}{\textquotesingle{}\textquotesingle{}}}}{{ $\rightarrow$ None}}
+\pysigstopsignatures
+\end{fulllineitems}
+
+
+\sphinxstepscope
+
+
+\subsection{extractIskandraniData}
+\label{\detokenize{api/MARIGOLD.extractIskandraniData:extractiskandranidata}}\label{\detokenize{api/MARIGOLD.extractIskandraniData::doc}}\index{extractIskandraniData() (in module MARIGOLD)@\spxentry{extractIskandraniData()}\spxextra{in module MARIGOLD}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{api/MARIGOLD.extractIskandraniData:MARIGOLD.extractIskandraniData}}
+\pysigstartsignatures
+\pysiglinewithargsret{\sphinxcode{\sphinxupquote{MARIGOLD.}}\sphinxbfcode{\sphinxupquote{extractIskandraniData}}}{\sphinxparam{\DUrole{n}{dump\_file}\DUrole{o}{=}\DUrole{default_value}{\textquotesingle{}Iskandrani\_Database.dat\textquotesingle{}}}}{{ $\rightarrow$ None}}
+\pysigstopsignatures
+\end{fulllineitems}
+
+
+\sphinxstepscope
+
+
+\subsection{extractLocalDataFromDir}
+\label{\detokenize{api/MARIGOLD.extractLocalDataFromDir:extractlocaldatafromdir}}\label{\detokenize{api/MARIGOLD.extractLocalDataFromDir::doc}}\index{extractLocalDataFromDir() (in module MARIGOLD)@\spxentry{extractLocalDataFromDir()}\spxextra{in module MARIGOLD}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{api/MARIGOLD.extractLocalDataFromDir:MARIGOLD.extractLocalDataFromDir}}
+\pysigstartsignatures
+\pysiglinewithargsret{\sphinxcode{\sphinxupquote{MARIGOLD.}}\sphinxbfcode{\sphinxupquote{extractLocalDataFromDir}}}{\sphinxparam{\DUrole{n}{path}\DUrole{p}{:}\DUrole{w}{ }\DUrole{n}{str}}\sphinxparamcomma \sphinxparam{\DUrole{n}{dump\_file}\DUrole{o}{=}\DUrole{default_value}{\textquotesingle{}database.dat\textquotesingle{}}}\sphinxparamcomma \sphinxparam{\DUrole{n}{in\_dir}\DUrole{o}{=}\DUrole{default_value}{{[}{]}}}\sphinxparamcomma \sphinxparam{\DUrole{n}{require\_terms}\DUrole{o}{=}\DUrole{default_value}{{[}\textquotesingle{}jf\textquotesingle{}{]}}}\sphinxparamcomma \sphinxparam{\DUrole{n}{skip\_terms}\DUrole{o}{=}\DUrole{default_value}{{[}\textquotesingle{}CFD\textquotesingle{}, \textquotesingle{}Copy\textquotesingle{}{]}}}\sphinxparamcomma \sphinxparam{\DUrole{n}{sheet\_type}\DUrole{o}{=}\DUrole{default_value}{\textquotesingle{}adix\_template\textquotesingle{}}}\sphinxparamcomma \sphinxparam{\DUrole{n}{append\_to\_json}\DUrole{o}{=}\DUrole{default_value}{None}}\sphinxparamcomma \sphinxparam{\DUrole{n}{pitot\_sheet}\DUrole{o}{=}\DUrole{default_value}{False}}\sphinxparamcomma \sphinxparam{\DUrole{o}{**}\DUrole{n}{kwargs}}}{{ $\rightarrow$ None}}
+\pysigstopsignatures
+\sphinxAtStartPar
+Function for getting all local data from spreadsheets in a directory, path
+
+\sphinxAtStartPar
+Does not recursively descend, only checks in the path given
+
+\sphinxAtStartPar
+Still under construction, but should support sheet types
+‘adix\_template4’
+‘ryan\_template’
+‘adix\_template’ (maybe rename this quan\_template)
+
+\sphinxAtStartPar
+Also can try to infer the sheet type, xlsm will be adix\_template4, if it has P5, 6, or 7 it will
+be classified as an adix\_template, different angles ryan, etc. The inference can also be made by
+appending \_adix or \_quan or \_ryan to the excel sheets being processed
+
+\sphinxAtStartPar
+Custom sheet types may be supported, but they still have to generally follow the classic template
+structure. The setup information has to be in sheet ‘1’ and all the local data in sheet ‘2’. Ranges
+must be specified as a list of lists
+
+\sphinxAtStartPar
+Q1\_ranges = {[}{[}angle1, {[}index1, index2.,..{]}{]}, {[}angle2, {[}index1, index2.,..{]}{]}, …{]}
+
+\sphinxAtStartPar
+with the starts and ends
+
+\sphinxAtStartPar
+{[}Q1\_start, Q1\_end, Q2\_start, …{]}
+
+\sphinxAtStartPar
+Add on pitot starts/ends if pitot\_sheet = True
+
+\sphinxAtStartPar
+Need to specify Q1\_check, Q2\_check, etc. as well
+
+\end{fulllineitems}
+
+
+\sphinxstepscope
+
+
+\subsection{extractPitotData}
+\label{\detokenize{api/MARIGOLD.extractPitotData:extractpitotdata}}\label{\detokenize{api/MARIGOLD.extractPitotData::doc}}\index{extractPitotData() (in module MARIGOLD)@\spxentry{extractPitotData()}\spxextra{in module MARIGOLD}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{api/MARIGOLD.extractPitotData:MARIGOLD.extractPitotData}}
+\pysigstartsignatures
+\pysiglinewithargsret{\sphinxcode{\sphinxupquote{MARIGOLD.}}\sphinxbfcode{\sphinxupquote{extractPitotData}}}{\sphinxparam{\DUrole{n}{dump\_file}\DUrole{o}{=}\DUrole{default_value}{\textquotesingle{}Pitot\_Database.dat\textquotesingle{}}}\sphinxparamcomma \sphinxparam{\DUrole{n}{in\_dir}\DUrole{o}{=}\DUrole{default_value}{{[}{]}}}\sphinxparamcomma \sphinxparam{\DUrole{n}{require\_terms}\DUrole{o}{=}\DUrole{default_value}{{[}{]}}}\sphinxparamcomma \sphinxparam{\DUrole{n}{skip\_terms}\DUrole{o}{=}\DUrole{default_value}{{[}\textquotesingle{}CFD\textquotesingle{}, \textquotesingle{}Copy\textquotesingle{}{]}}}}{{ $\rightarrow$ None}}
+\pysigstopsignatures
+\end{fulllineitems}
+
+
+\sphinxstepscope
+
+
+\subsection{extractProbeData}
+\label{\detokenize{api/MARIGOLD.extractProbeData:extractprobedata}}\label{\detokenize{api/MARIGOLD.extractProbeData::doc}}\index{extractProbeData() (in module MARIGOLD)@\spxentry{extractProbeData()}\spxextra{in module MARIGOLD}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{api/MARIGOLD.extractProbeData:MARIGOLD.extractProbeData}}
+\pysigstartsignatures
+\pysiglinewithargsret{\sphinxcode{\sphinxupquote{MARIGOLD.}}\sphinxbfcode{\sphinxupquote{extractProbeData}}}{\sphinxparam{\DUrole{n}{dump\_file}\DUrole{o}{=}\DUrole{default_value}{\textquotesingle{}database.dat\textquotesingle{}}}\sphinxparamcomma \sphinxparam{\DUrole{n}{in\_dir}\DUrole{o}{=}\DUrole{default_value}{{[}{]}}}\sphinxparamcomma \sphinxparam{\DUrole{n}{require\_terms}\DUrole{o}{=}\DUrole{default_value}{None}}\sphinxparamcomma \sphinxparam{\DUrole{n}{skip\_terms}\DUrole{o}{=}\DUrole{default_value}{{[}\textquotesingle{}CFD\textquotesingle{}, \textquotesingle{}Copy\textquotesingle{}{]}}}}{{ $\rightarrow$ None}}
+\pysigstopsignatures
+\end{fulllineitems}
+
+
+\sphinxstepscope
+
+
+\subsection{extractYangData}
+\label{\detokenize{api/MARIGOLD.extractYangData:extractyangdata}}\label{\detokenize{api/MARIGOLD.extractYangData::doc}}\index{extractYangData() (in module MARIGOLD)@\spxentry{extractYangData()}\spxextra{in module MARIGOLD}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{api/MARIGOLD.extractYangData:MARIGOLD.extractYangData}}
+\pysigstartsignatures
+\pysiglinewithargsret{\sphinxcode{\sphinxupquote{MARIGOLD.}}\sphinxbfcode{\sphinxupquote{extractYangData}}}{\sphinxparam{\DUrole{n}{dump\_file}\DUrole{o}{=}\DUrole{default_value}{\textquotesingle{}Yang\_Database.dat\textquotesingle{}}}}{{ $\rightarrow$ list}}
+\pysigstopsignatures
+\end{fulllineitems}
+
+
+\sphinxstepscope
+
+
+\subsection{loadData}
+\label{\detokenize{api/MARIGOLD.loadData:loaddata}}\label{\detokenize{api/MARIGOLD.loadData::doc}}\index{loadData() (in module MARIGOLD)@\spxentry{loadData()}\spxextra{in module MARIGOLD}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{api/MARIGOLD.loadData:MARIGOLD.loadData}}
+\pysigstartsignatures
+\pysiglinewithargsret{\sphinxcode{\sphinxupquote{MARIGOLD.}}\sphinxbfcode{\sphinxupquote{loadData}}}{\sphinxparam{\DUrole{n}{data\_file}}}{{ $\rightarrow$ list}}
+\pysigstopsignatures
+\end{fulllineitems}
+
+
+\sphinxstepscope
+
+
+\subsection{loadIskandraniData}
+\label{\detokenize{api/MARIGOLD.loadIskandraniData:loadiskandranidata}}\label{\detokenize{api/MARIGOLD.loadIskandraniData::doc}}\index{loadIskandraniData() (in module MARIGOLD)@\spxentry{loadIskandraniData()}\spxextra{in module MARIGOLD}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{api/MARIGOLD.loadIskandraniData:MARIGOLD.loadIskandraniData}}
+\pysigstartsignatures
+\pysiglinewithargsret{\sphinxcode{\sphinxupquote{MARIGOLD.}}\sphinxbfcode{\sphinxupquote{loadIskandraniData}}}{\sphinxparam{\DUrole{n}{data\_file}\DUrole{o}{=}\DUrole{default_value}{\textquotesingle{}Iskandrani\_Database.dat\textquotesingle{}}}}{{ $\rightarrow$ list}}
+\pysigstopsignatures
+\end{fulllineitems}
+
+
+\sphinxstepscope
+
+
+\subsection{loadPitotData}
+\label{\detokenize{api/MARIGOLD.loadPitotData:loadpitotdata}}\label{\detokenize{api/MARIGOLD.loadPitotData::doc}}\index{loadPitotData() (in module MARIGOLD)@\spxentry{loadPitotData()}\spxextra{in module MARIGOLD}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{api/MARIGOLD.loadPitotData:MARIGOLD.loadPitotData}}
+\pysigstartsignatures
+\pysiglinewithargsret{\sphinxcode{\sphinxupquote{MARIGOLD.}}\sphinxbfcode{\sphinxupquote{loadPitotData}}}{\sphinxparam{\DUrole{n}{data\_file}\DUrole{o}{=}\DUrole{default_value}{\textquotesingle{}Pitot\_Database.dat\textquotesingle{}}}}{{ $\rightarrow$ list}}
+\pysigstopsignatures
+\end{fulllineitems}
+
+
+\sphinxstepscope
+
+
+\subsection{loadProbeData}
+\label{\detokenize{api/MARIGOLD.loadProbeData:loadprobedata}}\label{\detokenize{api/MARIGOLD.loadProbeData::doc}}\index{loadProbeData() (in module MARIGOLD)@\spxentry{loadProbeData()}\spxextra{in module MARIGOLD}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{api/MARIGOLD.loadProbeData:MARIGOLD.loadProbeData}}
+\pysigstartsignatures
+\pysiglinewithargsret{\sphinxcode{\sphinxupquote{MARIGOLD.}}\sphinxbfcode{\sphinxupquote{loadProbeData}}}{\sphinxparam{\DUrole{n}{data\_file}\DUrole{o}{=}\DUrole{default_value}{\textquotesingle{}PITA\_Database.dat\textquotesingle{}}}}{{ $\rightarrow$ list}}
+\pysigstopsignatures
+\end{fulllineitems}
+
+
+\sphinxstepscope
+
+
+\subsection{loadYangData}
+\label{\detokenize{api/MARIGOLD.loadYangData:loadyangdata}}\label{\detokenize{api/MARIGOLD.loadYangData::doc}}\index{loadYangData() (in module MARIGOLD)@\spxentry{loadYangData()}\spxextra{in module MARIGOLD}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{api/MARIGOLD.loadYangData:MARIGOLD.loadYangData}}
+\pysigstartsignatures
+\pysiglinewithargsret{\sphinxcode{\sphinxupquote{MARIGOLD.}}\sphinxbfcode{\sphinxupquote{loadYangData}}}{\sphinxparam{\DUrole{n}{data\_file}\DUrole{o}{=}\DUrole{default_value}{\textquotesingle{}Yang\_Database.dat\textquotesingle{}}}}{{ $\rightarrow$ list}}
+\pysigstopsignatures
+\end{fulllineitems}
+
+
+\sphinxstepscope
+
+
+\subsection{marker\_cycle}
+\label{\detokenize{api/MARIGOLD.marker_cycle:marker-cycle}}\label{\detokenize{api/MARIGOLD.marker_cycle::doc}}\index{marker\_cycle() (in module MARIGOLD)@\spxentry{marker\_cycle()}\spxextra{in module MARIGOLD}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{api/MARIGOLD.marker_cycle:MARIGOLD.marker_cycle}}
+\pysigstartsignatures
+\pysiglinewithargsret{\sphinxcode{\sphinxupquote{MARIGOLD.}}\sphinxbfcode{\sphinxupquote{marker\_cycle}}}{}{}
+\pysigstopsignatures
+\sphinxAtStartPar
+Custom generator for markers
+
+\end{fulllineitems}
+
+
+
+\section{Classes}
+\label{\detokenize{index:classes}}
+
+\begin{savenotes}\sphinxattablestart
+\sphinxthistablewithglobalstyle
+\sphinxthistablewithnovlinesstyle
+\centering
+\begin{tabulary}{\linewidth}[t]{\X{1}{2}\X{1}{2}}
+\sphinxtoprule
+\sphinxtableatstartofbodyhook
+\sphinxAtStartPar
+\sphinxcode{\sphinxupquote{Condition}}(jgref, jgloc, jf, theta, port, ...)
+&
+\sphinxAtStartPar
+Class to handle the local probe data
+\\
+\sphinxhline
+\sphinxAtStartPar
+{\hyperref[\detokenize{api/MARIGOLD.Iskandrani_Condition:MARIGOLD.Iskandrani_Condition}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{Iskandrani\_Condition}}}}}(jf, jg)
+&
+\sphinxAtStartPar
+
+\\
+\sphinxhline
+\sphinxAtStartPar
+{\hyperref[\detokenize{api/MARIGOLD.Yang_Condition:MARIGOLD.Yang_Condition}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{Yang\_Condition}}}}}(jf, jg)
+&
+\sphinxAtStartPar
+
+\\
+\sphinxhline
+\sphinxAtStartPar
+\sphinxcode{\sphinxupquote{datetime}}(year, month, day{[}, hour{[}, minute{[}, ...)
+&
+\sphinxAtStartPar
+The year, month and day arguments are required.
+\\
+\sphinxbottomrule
+\end{tabulary}
+\sphinxtableafterendhook\par
+\sphinxattableend\end{savenotes}
+
+\sphinxstepscope
+
+
+\subsection{Condition}
+\label{\detokenize{api/MARIGOLD.Condition:condition}}\label{\detokenize{api/MARIGOLD.Condition::doc}}\index{Condition (class in MARIGOLD)@\spxentry{Condition}\spxextra{class in MARIGOLD}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{api/MARIGOLD.Condition:MARIGOLD.Condition}}
 \pysigstartsignatures
 \pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{class\DUrole{w}{ }}}\sphinxcode{\sphinxupquote{MARIGOLD.}}\sphinxbfcode{\sphinxupquote{Condition}}}{\sphinxparam{\DUrole{n}{jgref}\DUrole{p}{:}\DUrole{w}{ }\DUrole{n}{float}}\sphinxparamcomma \sphinxparam{\DUrole{n}{jgloc}\DUrole{p}{:}\DUrole{w}{ }\DUrole{n}{float}}\sphinxparamcomma \sphinxparam{\DUrole{n}{jf}\DUrole{p}{:}\DUrole{w}{ }\DUrole{n}{float}}\sphinxparamcomma \sphinxparam{\DUrole{n}{theta}\DUrole{p}{:}\DUrole{w}{ }\DUrole{n}{int}}\sphinxparamcomma \sphinxparam{\DUrole{n}{port}\DUrole{p}{:}\DUrole{w}{ }\DUrole{n}{str}}\sphinxparamcomma \sphinxparam{\DUrole{n}{database}\DUrole{p}{:}\DUrole{w}{ }\DUrole{n}{str}}}{}
 \pysigstopsignatures
+\sphinxAtStartPar
+Bases: \sphinxcode{\sphinxupquote{object}}
+
 \sphinxAtStartPar
 Class to handle the local probe data
 
@@ -135,16 +496,27 @@ phi {[}angle{]}{[}r/R{]} gives a dictionary with the MIDAS output
 The MIDAS output is itself a dictionary, with the keys listed in the “tab\_keys” array
 So phi{[}angle{]}{[}r/R{]}{[}‘alpha’{]} should give you the void fraction at r/R for phi = angle
 This structure is initialized with zeros for the MIDAS output at the pipe center and wall
-\index{\_\_init\_\_() (MARIGOLD.Condition method)@\spxentry{\_\_init\_\_()}\spxextra{MARIGOLD.Condition method}}
+\subsubsection*{Attributes Summary}
 
-\begin{fulllineitems}
-\phantomsection\label{\detokenize{modules/MARIGOLD.Condition:MARIGOLD.Condition.__init__}}
-\pysigstartsignatures
-\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{\_\_init\_\_}}}{\sphinxparam{\DUrole{n}{jgref}\DUrole{p}{:}\DUrole{w}{ }\DUrole{n}{float}}\sphinxparamcomma \sphinxparam{\DUrole{n}{jgloc}\DUrole{p}{:}\DUrole{w}{ }\DUrole{n}{float}}\sphinxparamcomma \sphinxparam{\DUrole{n}{jf}\DUrole{p}{:}\DUrole{w}{ }\DUrole{n}{float}}\sphinxparamcomma \sphinxparam{\DUrole{n}{theta}\DUrole{p}{:}\DUrole{w}{ }\DUrole{n}{int}}\sphinxparamcomma \sphinxparam{\DUrole{n}{port}\DUrole{p}{:}\DUrole{w}{ }\DUrole{n}{str}}\sphinxparamcomma \sphinxparam{\DUrole{n}{database}\DUrole{p}{:}\DUrole{w}{ }\DUrole{n}{str}}}{{ $\rightarrow$ None}}
-\pysigstopsignatures
-\end{fulllineitems}
 
-\subsubsection*{Methods}
+\begin{savenotes}\sphinxattablestart
+\sphinxthistablewithglobalstyle
+\sphinxthistablewithnovlinesstyle
+\centering
+\begin{tabulary}{\linewidth}[t]{\X{1}{2}\X{1}{2}}
+\sphinxtoprule
+\sphinxtableatstartofbodyhook
+\sphinxAtStartPar
+\sphinxcode{\sphinxupquote{debugFID}}
+&
+\sphinxAtStartPar
+
+\\
+\sphinxbottomrule
+\end{tabulary}
+\sphinxtableafterendhook\par
+\sphinxattableend\end{savenotes}
+\subsubsection*{Methods Summary}
 
 
 \begin{savenotes}
@@ -182,10 +554,10 @@ This structure is initialized with zeros for the MIDAS output at the pipe center
 \\
 \sphinxhline
 \sphinxAtStartPar
-\sphinxcode{\sphinxupquote{\_\_init\_\_}}(jgref, jgloc, jf, theta, port, database)
+\sphinxcode{\sphinxupquote{\_\_call\_\_}}(phi\_in, r\_in, param{[}, interp\_method{]})
 &
 \sphinxAtStartPar
-
+Returns the value of param at (phi, r). Can get raw data, linear interp, or spline interp
 \\
 \sphinxhline
 \sphinxAtStartPar
@@ -507,26 +879,948 @@ Method for calculating the void\sphinxhyphen{}weighted area\sphinxhyphen{}averag
 \sphinxtableafterendhook
 \sphinxatlongtableend
 \end{savenotes}
-\subsubsection*{Attributes}
+\subsubsection*{Attributes Documentation}
+\index{debugFID (MARIGOLD.Condition attribute)@\spxentry{debugFID}\spxextra{MARIGOLD.Condition attribute}}
 
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{api/MARIGOLD.Condition:MARIGOLD.Condition.debugFID}}
+\pysigstartsignatures
+\pysigline{\sphinxbfcode{\sphinxupquote{debugFID}}\sphinxbfcode{\sphinxupquote{\DUrole{w}{ }\DUrole{p}{=}\DUrole{w}{ }None}}}
+\pysigstopsignatures
+\end{fulllineitems}
 
-\begin{savenotes}\sphinxattablestart
-\sphinxthistablewithglobalstyle
-\sphinxthistablewithnovlinesstyle
-\centering
-\begin{tabulary}{\linewidth}[t]{\X{1}{2}\X{1}{2}}
-\sphinxtoprule
-\sphinxtableatstartofbodyhook
+\subsubsection*{Methods Documentation}
+\index{TD\_FR\_ID() (MARIGOLD.Condition method)@\spxentry{TD\_FR\_ID()}\spxextra{MARIGOLD.Condition method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{api/MARIGOLD.Condition:MARIGOLD.Condition.TD_FR_ID}}
+\pysigstartsignatures
+\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{TD\_FR\_ID}}}{}{{ $\rightarrow$ None}}
+\pysigstopsignatures
+\end{fulllineitems}
+
+\index{\_\_call\_\_() (MARIGOLD.Condition method)@\spxentry{\_\_call\_\_()}\spxextra{MARIGOLD.Condition method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{api/MARIGOLD.Condition:MARIGOLD.Condition.__call__}}
+\pysigstartsignatures
+\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{\_\_call\_\_}}}{\sphinxparam{\DUrole{n}{phi\_in}\DUrole{p}{:}\DUrole{w}{ }\DUrole{n}{ndarray}}\sphinxparamcomma \sphinxparam{\DUrole{n}{r\_in}\DUrole{p}{:}\DUrole{w}{ }\DUrole{n}{ndarray}}\sphinxparamcomma \sphinxparam{\DUrole{n}{param}\DUrole{p}{:}\DUrole{w}{ }\DUrole{n}{str}}\sphinxparamcomma \sphinxparam{\DUrole{n}{interp\_method}\DUrole{o}{=}\DUrole{default_value}{\textquotesingle{}None\textquotesingle{}}}}{{ $\rightarrow$ ndarray}}
+\pysigstopsignatures\begin{description}
+\sphinxlineitem{Returns the value of param at (phi, r). Can get raw data, linear interp, or spline interp}
 \sphinxAtStartPar
-\sphinxcode{\sphinxupquote{debugFID}}
-&
-\sphinxAtStartPar
+phi in radians
 
-\\
-\sphinxbottomrule
-\end{tabulary}
-\sphinxtableafterendhook\par
-\sphinxattableend\end{savenotes}
+\sphinxAtStartPar
+Can also return the value at (x, y) if linear\_xy is selected as the interp method. phi \sphinxhyphen{}\textgreater{} x, r \sphinxhyphen{}\textgreater{} y
+
+\end{description}
+
+\end{fulllineitems}
+
+\index{approx\_vf() (MARIGOLD.Condition method)@\spxentry{approx\_vf()}\spxextra{MARIGOLD.Condition method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{api/MARIGOLD.Condition:MARIGOLD.Condition.approx_vf}}
+\pysigstartsignatures
+\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{approx\_vf}}}{\sphinxparam{\DUrole{n}{n}\DUrole{o}{=}\DUrole{default_value}{7}}}{{ $\rightarrow$ None}}
+\pysigstopsignatures
+\sphinxAtStartPar
+Method for approximating vf with power\sphinxhyphen{}law relation.
+
+\sphinxAtStartPar
+vf\_approx = (n+1)*(2*n+1) / (2*n*n) * (jf / (1\sphinxhyphen{}self.area\_avg(‘alpha’))) * (1 \sphinxhyphen{} abs(rstar))**(1/n)
+
+\sphinxAtStartPar
+Will not overwrite vf data if it already exists, but will always store data in
+midas\_dict{[}‘vf\_approx’{]} even if midas\_dict{[}‘vf’{]} has data
+
+\end{fulllineitems}
+
+\index{approx\_vf\_Kong() (MARIGOLD.Condition method)@\spxentry{approx\_vf\_Kong()}\spxextra{MARIGOLD.Condition method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{api/MARIGOLD.Condition:MARIGOLD.Condition.approx_vf_Kong}}
+\pysigstartsignatures
+\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{approx\_vf\_Kong}}}{\sphinxparam{\DUrole{n}{n}\DUrole{o}{=}\DUrole{default_value}{7}}}{{ $\rightarrow$ None}}
+\pysigstopsignatures
+\sphinxAtStartPar
+Method for approximating vf from Kong. TODO
+
+\sphinxAtStartPar
+Not currently implemented
+
+\end{fulllineitems}
+
+\index{area\_avg() (MARIGOLD.Condition method)@\spxentry{area\_avg()}\spxextra{MARIGOLD.Condition method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{api/MARIGOLD.Condition:MARIGOLD.Condition.area_avg}}
+\pysigstartsignatures
+\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{area\_avg}}}{\sphinxparam{\DUrole{n}{param}\DUrole{p}{:}\DUrole{w}{ }\DUrole{n}{str}}\sphinxparamcomma \sphinxparam{\DUrole{n}{even\_opt}\DUrole{o}{=}\DUrole{default_value}{\textquotesingle{}first\textquotesingle{}}}\sphinxparamcomma \sphinxparam{\DUrole{n}{recalc}\DUrole{o}{=}\DUrole{default_value}{True}}}{{ $\rightarrow$ float}}
+\pysigstopsignatures
+\sphinxAtStartPar
+Method for calculating the area\sphinxhyphen{}average of a parameter, “param”
+
+\sphinxAtStartPar
+param can be anything MIDAS outputs, but usually of interest are “alpha” or “alpha\_ug”
+If you’re not sure what somethings named, try Condition.phi{[}90{]}{[}1.0{]}.keys()
+
+\sphinxAtStartPar
+Uses Simpson’s rule for integration, even\_opt passed to that. Will save the previously calculated area averages
+in Condition.area\_avgs{[}param{]}, and won’t recalculate unless recalc = True
+
+\sphinxAtStartPar
+Returns the area\sphinxhyphen{}averaged parameter, or None if the method failed
+
+\end{fulllineitems}
+
+\index{calc\_W() (MARIGOLD.Condition method)@\spxentry{calc\_W()}\spxextra{MARIGOLD.Condition method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{api/MARIGOLD.Condition:MARIGOLD.Condition.calc_W}}
+\pysigstartsignatures
+\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{calc\_W}}}{}{}
+\pysigstopsignatures
+\sphinxAtStartPar
+Calculates the wake deficit function, W, from the experimental data
+
+\end{fulllineitems}
+
+\index{calc\_avg\_lat\_sep() (MARIGOLD.Condition method)@\spxentry{calc\_avg\_lat\_sep()}\spxextra{MARIGOLD.Condition method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{api/MARIGOLD.Condition:MARIGOLD.Condition.calc_avg_lat_sep}}
+\pysigstartsignatures
+\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{calc\_avg\_lat\_sep}}}{}{}
+\pysigstopsignatures
+\sphinxAtStartPar
+Calculates average lateral separation distance between bubbles
+
+\sphinxAtStartPar
+Average lateral separation, λ given by
+λ = ugl / f
+
+\sphinxAtStartPar
+stores in midas dict under lambda. Also estimates α based on λ,
+
+\sphinxAtStartPar
+α \textasciitilde{} Db / λ
+
+\sphinxAtStartPar
+Mirrors the data
+
+\end{fulllineitems}
+
+\index{calc\_cd() (MARIGOLD.Condition method)@\spxentry{calc\_cd()}\spxextra{MARIGOLD.Condition method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{api/MARIGOLD.Condition:MARIGOLD.Condition.calc_cd}}
+\pysigstartsignatures
+\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{calc\_cd}}}{\sphinxparam{\DUrole{n}{method}\DUrole{o}{=}\DUrole{default_value}{\textquotesingle{}Ishii\sphinxhyphen{}Zuber\textquotesingle{}}}\sphinxparamcomma \sphinxparam{\DUrole{n}{rho\_f}\DUrole{o}{=}\DUrole{default_value}{998}}\sphinxparamcomma \sphinxparam{\DUrole{n}{vr\_cheat}\DUrole{o}{=}\DUrole{default_value}{False}}\sphinxparamcomma \sphinxparam{\DUrole{n}{mu\_f}\DUrole{o}{=}\DUrole{default_value}{0.001}}}{}
+\pysigstopsignatures
+\sphinxAtStartPar
+Method for calculating drag coefficient
+
+\sphinxAtStartPar
+If vr = 0, assume cd = 0
+
+\sphinxAtStartPar
+Options are Ishii\sphinxhyphen{}Zuber and Schiller\sphinxhyphen{}Naumann, but both use
+Reb = (1 \sphinxhyphen{} midas\_dict{[}‘alpha’{]}) * midas\_dict{[}‘Dsm1’{]} * rho\_f * midas\_dict{[}‘vr’{]} / midas\_dict{[}‘mu\_m’{]}
+vr from calc\_vr()
+mu\_m from calc\_mu\_eff()
+
+\end{fulllineitems}
+
+\index{calc\_dpdz() (MARIGOLD.Condition method)@\spxentry{calc\_dpdz()}\spxextra{MARIGOLD.Condition method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{api/MARIGOLD.Condition:MARIGOLD.Condition.calc_dpdz}}
+\pysigstartsignatures
+\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{calc\_dpdz}}}{\sphinxparam{\DUrole{n}{method}\DUrole{o}{=}\DUrole{default_value}{\textquotesingle{}LM\textquotesingle{}}}\sphinxparamcomma \sphinxparam{\DUrole{n}{rho\_f}\DUrole{o}{=}\DUrole{default_value}{998}}\sphinxparamcomma \sphinxparam{\DUrole{n}{rho\_g}\DUrole{o}{=}\DUrole{default_value}{1.225}}\sphinxparamcomma \sphinxparam{\DUrole{n}{mu\_f}\DUrole{o}{=}\DUrole{default_value}{0.001}}\sphinxparamcomma \sphinxparam{\DUrole{n}{mu\_g}\DUrole{o}{=}\DUrole{default_value}{1.18e\sphinxhyphen{}05}}\sphinxparamcomma \sphinxparam{\DUrole{n}{LM\_C}\DUrole{o}{=}\DUrole{default_value}{25}}}{}
+\pysigstopsignatures
+\sphinxAtStartPar
+Calculates the pressure gradient, dp/dz, according to various methods. Can access later with self.dpdz
+
+\sphinxAtStartPar
+‘LM’ \sphinxhyphen{}\textgreater{} Lockhart Martinelli, assuming turbulent\sphinxhyphen{}turbulent, C = LM\_C
+
+\end{fulllineitems}
+
+\index{calc\_errors() (MARIGOLD.Condition method)@\spxentry{calc\_errors()}\spxextra{MARIGOLD.Condition method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{api/MARIGOLD.Condition:MARIGOLD.Condition.calc_errors}}
+\pysigstartsignatures
+\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{calc\_errors}}}{\sphinxparam{\DUrole{n}{param1}\DUrole{p}{:}\DUrole{w}{ }\DUrole{n}{str}}\sphinxparamcomma \sphinxparam{\DUrole{n}{param2}\DUrole{p}{:}\DUrole{w}{ }\DUrole{n}{str}}}{}
+\pysigstopsignatures
+\sphinxAtStartPar
+Calculates the errors, ε, between two parameters (param1 \sphinxhyphen{} param2) in midas\_dict
+\begin{description}
+\sphinxlineitem{Stores:}\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+error, “eps\_param1\_param2”, param1 \sphinxhyphen{} param2
+
+\item {} 
+\sphinxAtStartPar
+relative, “eps\_rel\_param1\_param2”, (param1 \sphinxhyphen{} param2) / param2
+
+\item {} 
+\sphinxAtStartPar
+absolute relative, “eps\_abs\_rel\_param1\_param2”, {\color{red}\bfseries{}|param1 \sphinxhyphen{} param2|} / param2
+
+\item {} 
+\sphinxAtStartPar
+square, “eps\_sq\_param1\_param2”, (param1 \sphinxhyphen{} param2)**2
+
+\item {} 
+\sphinxAtStartPar
+relative square, “eps\_rel\_sq\_param1\_param2”, ((param1 \sphinxhyphen{} param2)/param2)**2
+
+\end{itemize}
+
+\sphinxAtStartPar
+If param2 = 0, relative errors are considered 0
+
+\end{description}
+
+\end{fulllineitems}
+
+\index{calc\_grad() (MARIGOLD.Condition method)@\spxentry{calc\_grad()}\spxextra{MARIGOLD.Condition method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{api/MARIGOLD.Condition:MARIGOLD.Condition.calc_grad}}
+\pysigstartsignatures
+\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{calc\_grad}}}{\sphinxparam{\DUrole{n}{param}\DUrole{p}{:}\DUrole{w}{ }\DUrole{n}{str}}\sphinxparamcomma \sphinxparam{\DUrole{n}{recalc}\DUrole{o}{=}\DUrole{default_value}{False}}}{{ $\rightarrow$ None}}
+\pysigstopsignatures
+\sphinxAtStartPar
+Calculates gradient of param based on the data in self.
+
+\sphinxAtStartPar
+Stored in self’s midas\_dict as grad\_param\_r, grad\_param\_phi, etc.
+Will only be called once, unless recalc is True.
+
+\end{fulllineitems}
+
+\index{calc\_linear\_interp() (MARIGOLD.Condition method)@\spxentry{calc\_linear\_interp()}\spxextra{MARIGOLD.Condition method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{api/MARIGOLD.Condition:MARIGOLD.Condition.calc_linear_interp}}
+\pysigstartsignatures
+\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{calc\_linear\_interp}}}{\sphinxparam{\DUrole{n}{param}\DUrole{p}{:}\DUrole{w}{ }\DUrole{n}{str}}}{{ $\rightarrow$ None}}
+\pysigstopsignatures
+\sphinxAtStartPar
+Makes a LinearNDInterpolator for the given param.
+
+\sphinxAtStartPar
+Access with self.linear\_interp{[}param{]}, phi in radians
+
+\end{fulllineitems}
+
+\index{calc\_linear\_xy\_interp() (MARIGOLD.Condition method)@\spxentry{calc\_linear\_xy\_interp()}\spxextra{MARIGOLD.Condition method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{api/MARIGOLD.Condition:MARIGOLD.Condition.calc_linear_xy_interp}}
+\pysigstartsignatures
+\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{calc\_linear\_xy\_interp}}}{\sphinxparam{\DUrole{n}{param}\DUrole{p}{:}\DUrole{w}{ }\DUrole{n}{str}}}{{ $\rightarrow$ None}}
+\pysigstopsignatures
+\sphinxAtStartPar
+Makes a LinearNDInterpolator for the given param in x y coords
+
+\sphinxAtStartPar
+Can access  with self.linear\_xy\_interp{[}param{]}
+
+\end{fulllineitems}
+
+\index{calc\_mu3\_alpha() (MARIGOLD.Condition method)@\spxentry{calc\_mu3\_alpha()}\spxextra{MARIGOLD.Condition method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{api/MARIGOLD.Condition:MARIGOLD.Condition.calc_mu3_alpha}}
+\pysigstartsignatures
+\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{calc\_mu3\_alpha}}}{}{}
+\pysigstopsignatures
+\sphinxAtStartPar
+Calculates the third moment of alpha
+
+\sphinxAtStartPar
+Returns \textless{}(alpha\sphinxhyphen{}\textless{}alpha\textgreater{})\textasciicircum{}3\textgreater{}/\textless{}alpha\textgreater{}\textasciicircum{}3
+
+\sphinxAtStartPar
+Stored in self.mu3\_alpha
+
+\end{fulllineitems}
+
+\index{calc\_mu\_eff() (MARIGOLD.Condition method)@\spxentry{calc\_mu\_eff()}\spxextra{MARIGOLD.Condition method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{api/MARIGOLD.Condition:MARIGOLD.Condition.calc_mu_eff}}
+\pysigstartsignatures
+\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{calc\_mu\_eff}}}{\sphinxparam{\DUrole{n}{method}\DUrole{o}{=}\DUrole{default_value}{\textquotesingle{}Ishii\textquotesingle{}}}\sphinxparamcomma \sphinxparam{\DUrole{n}{mu\_f}\DUrole{o}{=}\DUrole{default_value}{0.001}}\sphinxparamcomma \sphinxparam{\DUrole{n}{mu\_g}\DUrole{o}{=}\DUrole{default_value}{1.803e\sphinxhyphen{}05}}\sphinxparamcomma \sphinxparam{\DUrole{n}{alpha\_max}\DUrole{o}{=}\DUrole{default_value}{1.0}}}{}
+\pysigstopsignatures
+\sphinxAtStartPar
+Method for calculating effective viscosity.
+
+\sphinxAtStartPar
+Also calculates mixture viscosity, stored in μ\_eff and μ\_m, resepectively.
+Note that this fuction does mirror the data
+
+\sphinxAtStartPar
+Right now the only method implemented is Ishii’s
+
+\end{fulllineitems}
+
+\index{calc\_sigma\_alpha() (MARIGOLD.Condition method)@\spxentry{calc\_sigma\_alpha()}\spxextra{MARIGOLD.Condition method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{api/MARIGOLD.Condition:MARIGOLD.Condition.calc_sigma_alpha}}
+\pysigstartsignatures
+\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{calc\_sigma\_alpha}}}{}{}
+\pysigstopsignatures
+\sphinxAtStartPar
+Calculates the second moment of alpha
+
+\sphinxAtStartPar
+Returns \textless{}(alpha\sphinxhyphen{}\textless{}alpha\textgreater{})\textasciicircum{}2\textgreater{}/\textless{}alpha\textgreater{}\textasciicircum{}2
+
+\sphinxAtStartPar
+Stored in self.sigma\_alpha
+
+\end{fulllineitems}
+
+\index{calc\_vgj() (MARIGOLD.Condition method)@\spxentry{calc\_vgj()}\spxextra{MARIGOLD.Condition method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{api/MARIGOLD.Condition:MARIGOLD.Condition.calc_vgj}}
+\pysigstartsignatures
+\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{calc\_vgj}}}{\sphinxparam{\DUrole{n}{warn\_approx}\DUrole{o}{=}\DUrole{default_value}{True}}}{{ $\rightarrow$ None}}
+\pysigstopsignatures
+\sphinxAtStartPar
+Method for calculating Vgj, by doing
+
+\sphinxAtStartPar
+j\_local = midas\_dict{[}‘alpha’{]} * midas\_dict{[}‘ug1’{]} + (1 \sphinxhyphen{} midas\_dict{[}‘alpha’{]}) * midas\_dict{[}‘vf’{]}
+vgj = midas\_dict{[}‘ug1’{]} \sphinxhyphen{} j\_local
+
+\sphinxAtStartPar
+stored in midas\_dict{[}‘vgj’{]}
+
+\sphinxAtStartPar
+warn\_approx is a flag to print out a warning statement if vf is being approximated, which will
+happen if not found
+
+\end{fulllineitems}
+
+\index{calc\_vgj\_model() (MARIGOLD.Condition method)@\spxentry{calc\_vgj\_model()}\spxextra{MARIGOLD.Condition method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{api/MARIGOLD.Condition:MARIGOLD.Condition.calc_vgj_model}}
+\pysigstartsignatures
+\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{calc\_vgj\_model}}}{}{}
+\pysigstopsignatures
+\sphinxAtStartPar
+Method for calculating Vgj based on models
+
+\sphinxAtStartPar
+midas\_dict{[}‘vgj\_model’{]} = (1 \sphinxhyphen{} midas\_dict{[}‘alpha’{]}) * midas\_dict{[}‘vr\_model’{]}
+
+\end{fulllineitems}
+
+\index{calc\_void\_cov() (MARIGOLD.Condition method)@\spxentry{calc\_void\_cov()}\spxextra{MARIGOLD.Condition method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{api/MARIGOLD.Condition:MARIGOLD.Condition.calc_void_cov}}
+\pysigstartsignatures
+\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{calc\_void\_cov}}}{}{}
+\pysigstopsignatures
+\sphinxAtStartPar
+Calculates the void covariance
+
+\sphinxAtStartPar
+Returns \textless{}alpha\textasciicircum{}2\textgreater{}/\textless{}alpha\textgreater{}\textasciicircum{}2
+
+\sphinxAtStartPar
+Stored in self.void\_cov
+
+\end{fulllineitems}
+
+\index{calc\_vr() (MARIGOLD.Condition method)@\spxentry{calc\_vr()}\spxextra{MARIGOLD.Condition method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{api/MARIGOLD.Condition:MARIGOLD.Condition.calc_vr}}
+\pysigstartsignatures
+\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{calc\_vr}}}{\sphinxparam{\DUrole{n}{warn\_approx}\DUrole{o}{=}\DUrole{default_value}{True}}}{{ $\rightarrow$ None}}
+\pysigstopsignatures
+\sphinxAtStartPar
+Method for calculating relative velocity. Will approximate vf if it cannot be found.
+
+\sphinxAtStartPar
+Note that if vg = 0, then this method says vr = 0. This will happen when no data is present,
+such as in the bottom of the pipe in horizontal, when this is not necessarily true
+
+\sphinxAtStartPar
+warn\_approx is a flag to print out a warning statement if vf is being approximated
+
+\end{fulllineitems}
+
+\index{calc\_vr\_model() (MARIGOLD.Condition method)@\spxentry{calc\_vr\_model()}\spxextra{MARIGOLD.Condition method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{api/MARIGOLD.Condition:MARIGOLD.Condition.calc_vr_model}}
+\pysigstartsignatures
+\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{calc\_vr\_model}}}{\sphinxparam{\DUrole{n}{method}\DUrole{o}{=}\DUrole{default_value}{\textquotesingle{}wake\_1\textquotesingle{}}}\sphinxparamcomma \sphinxparam{\DUrole{n}{c3}\DUrole{o}{=}\DUrole{default_value}{\sphinxhyphen{}0.15}}\sphinxparamcomma \sphinxparam{\DUrole{n}{n}\DUrole{o}{=}\DUrole{default_value}{1}}\sphinxparamcomma \sphinxparam{\DUrole{n}{iterate\_cd}\DUrole{o}{=}\DUrole{default_value}{True}}\sphinxparamcomma \sphinxparam{\DUrole{n}{quiet}\DUrole{o}{=}\DUrole{default_value}{True}}}{}
+\pysigstopsignatures
+\sphinxAtStartPar
+Method for calculating relative velocity based on models
+
+\sphinxAtStartPar
+Stored under “vr\_method” in midas\_dict as well as “vr\_model”
+
+\sphinxAtStartPar
+TODO implement Ishii\sphinxhyphen{}Chawla
+
+\sphinxAtStartPar
+Implemented options:
+\sphinxhyphen{} “wake\_1” vr = \sphinxhyphen{} c3 * vf * Cd**(1./3)
+\sphinxhyphen{} “wake\_alpha” vr = \sphinxhyphen{} c3 * (1\sphinxhyphen{}α)\textasciicircum{}n * vf * Cd**(1./3)
+\sphinxhyphen{} “wake\_alpha2” vr = \sphinxhyphen{} c3 *  (α*(1\sphinxhyphen{}α))\textasciicircum{}n * vf * Cd**(1./3)
+\sphinxhyphen{} “wake\_lambda” = \sphinxhyphen{} c3 * vf * Cd**(1./3) * Db**(2./3) * λ**(\sphinxhyphen{}2./3)
+
+\end{fulllineitems}
+
+\index{calc\_vwvg() (MARIGOLD.Condition method)@\spxentry{calc\_vwvg()}\spxextra{MARIGOLD.Condition method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{api/MARIGOLD.Condition:MARIGOLD.Condition.calc_vwvg}}
+\pysigstartsignatures
+\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{calc\_vwvg}}}{}{{ $\rightarrow$ None}}
+\pysigstopsignatures
+\sphinxAtStartPar
+Calculates void weighted Vgj
+
+\sphinxAtStartPar
+uses self.jgloc / self.area\_avg(‘alpha’), which is not a great method
+
+\end{fulllineitems}
+
+\index{circ\_segment\_area\_avg() (MARIGOLD.Condition method)@\spxentry{circ\_segment\_area\_avg()}\spxextra{MARIGOLD.Condition method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{api/MARIGOLD.Condition:MARIGOLD.Condition.circ_segment_area_avg}}
+\pysigstartsignatures
+\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{circ\_segment\_area\_avg}}}{\sphinxparam{\DUrole{n}{param}\DUrole{p}{:}\DUrole{w}{ }\DUrole{n}{str}}\sphinxparamcomma \sphinxparam{\DUrole{n}{hstar}\DUrole{p}{:}\DUrole{w}{ }\DUrole{n}{float}}\sphinxparamcomma \sphinxparam{\DUrole{n}{ngridr}\DUrole{o}{=}\DUrole{default_value}{25}}\sphinxparamcomma \sphinxparam{\DUrole{n}{ngridphi}\DUrole{o}{=}\DUrole{default_value}{25}}\sphinxparamcomma \sphinxparam{\DUrole{n}{int\_err}\DUrole{o}{=}\DUrole{default_value}{0.0001}}}{{ $\rightarrow$ float}}
+\pysigstopsignatures
+\sphinxAtStartPar
+Method for calculating the area\sphinxhyphen{}average of a parameter, “param” over the circular segment defined by h
+
+\sphinxAtStartPar
+Basically, if you slice the pipe at h, area average everything above h
+
+\sphinxAtStartPar
+to smooth it out, integrate over an interpolated mesh
+
+\sphinxAtStartPar
+returns integrand result
+
+\end{fulllineitems}
+
+\index{circ\_segment\_void\_area\_avg() (MARIGOLD.Condition method)@\spxentry{circ\_segment\_void\_area\_avg()}\spxextra{MARIGOLD.Condition method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{api/MARIGOLD.Condition:MARIGOLD.Condition.circ_segment_void_area_avg}}
+\pysigstartsignatures
+\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{circ\_segment\_void\_area\_avg}}}{\sphinxparam{\DUrole{n}{param}\DUrole{p}{:}\DUrole{w}{ }\DUrole{n}{str}}\sphinxparamcomma \sphinxparam{\DUrole{n}{hstar}\DUrole{p}{:}\DUrole{w}{ }\DUrole{n}{float}}\sphinxparamcomma \sphinxparam{\DUrole{n}{ngridr}\DUrole{o}{=}\DUrole{default_value}{25}}\sphinxparamcomma \sphinxparam{\DUrole{n}{ngridphi}\DUrole{o}{=}\DUrole{default_value}{25}}\sphinxparamcomma \sphinxparam{\DUrole{n}{int\_err}\DUrole{o}{=}\DUrole{default_value}{0.0001}}}{{ $\rightarrow$ float}}
+\pysigstopsignatures
+\sphinxAtStartPar
+Method for calculating the void\sphinxhyphen{}weighted area\sphinxhyphen{}average of a parameter over the circular segment defined by h
+
+\sphinxAtStartPar
+Basically, if you slice the pipe at h, void\sphinxhyphen{}weighted area average everything above h
+
+\sphinxAtStartPar
+to smooth it out, integrate over an interpolated mesh
+
+\sphinxAtStartPar
+returns integrand result
+
+\end{fulllineitems}
+
+\index{find\_hstar\_pos() (MARIGOLD.Condition method)@\spxentry{find\_hstar\_pos()}\spxextra{MARIGOLD.Condition method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{api/MARIGOLD.Condition:MARIGOLD.Condition.find_hstar_pos}}
+\pysigstartsignatures
+\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{find\_hstar\_pos}}}{\sphinxparam{\DUrole{n}{method}\DUrole{o}{=}\DUrole{default_value}{\textquotesingle{}max\_dsm\textquotesingle{}}}\sphinxparamcomma \sphinxparam{\DUrole{n}{void\_criteria}\DUrole{o}{=}\DUrole{default_value}{0.05}}}{{ $\rightarrow$ float}}
+\pysigstopsignatures
+\sphinxAtStartPar
+Returns the vertical distance from the top of the pipe to the bubble layer interface
+
+\sphinxAtStartPar
+Methods for determining bubble layer interface
+\sphinxhyphen{} max\_dsm
+\sphinxhyphen{} min\_grad\_y
+\sphinxhyphen{} max\_grad\_y
+\sphinxhyphen{} max\_mag\_grad\_y
+\sphinxhyphen{} zero\_void
+\sphinxhyphen{} percent\_void, search down the phi = 90 line, find largest value of rstar where alpha \textless{} min\_void
+\sphinxhyphen{} Ryan\_Ref, uses 1.3 \sphinxhyphen{} 1.57e\sphinxhyphen{}5 * Ref, proposed by Ryan (2022)
+
+\end{fulllineitems}
+
+\index{fit\_spline() (MARIGOLD.Condition method)@\spxentry{fit\_spline()}\spxextra{MARIGOLD.Condition method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{api/MARIGOLD.Condition:MARIGOLD.Condition.fit_spline}}
+\pysigstartsignatures
+\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{fit\_spline}}}{\sphinxparam{\DUrole{n}{param}\DUrole{p}{:}\DUrole{w}{ }\DUrole{n}{str}}}{{ $\rightarrow$ None}}
+\pysigstopsignatures
+\sphinxAtStartPar
+Fits a RectBivariateSpline for the given param.
+
+\sphinxAtStartPar
+Can access later with self.spline\_interp{[}param{]}. Must specify the ‘param’ to fit
+
+\end{fulllineitems}
+
+\index{interp\_area\_avg() (MARIGOLD.Condition method)@\spxentry{interp\_area\_avg()}\spxextra{MARIGOLD.Condition method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{api/MARIGOLD.Condition:MARIGOLD.Condition.interp_area_avg}}
+\pysigstartsignatures
+\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{interp\_area\_avg}}}{\sphinxparam{\DUrole{n}{param}\DUrole{p}{:}\DUrole{w}{ }\DUrole{n}{str}}\sphinxparamcomma \sphinxparam{\DUrole{n}{interp\_type}\DUrole{o}{=}\DUrole{default_value}{\textquotesingle{}linear\textquotesingle{}}}}{{ $\rightarrow$ float}}
+\pysigstopsignatures
+\sphinxAtStartPar
+Function to area\sphinxhyphen{}average param, using the spline interpolation of param
+
+\sphinxAtStartPar
+Returns the intengrand result. May be computationally expensive
+
+\end{fulllineitems}
+
+\index{line\_avg() (MARIGOLD.Condition method)@\spxentry{line\_avg()}\spxextra{MARIGOLD.Condition method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{api/MARIGOLD.Condition:MARIGOLD.Condition.line_avg}}
+\pysigstartsignatures
+\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{line\_avg}}}{\sphinxparam{\DUrole{n}{param}\DUrole{p}{:}\DUrole{w}{ }\DUrole{n}{str}}\sphinxparamcomma \sphinxparam{\DUrole{n}{phi\_angle}\DUrole{p}{:}\DUrole{w}{ }\DUrole{n}{float}}\sphinxparamcomma \sphinxparam{\DUrole{n}{even\_opt}\DUrole{o}{=}\DUrole{default_value}{\textquotesingle{}first\textquotesingle{}}}}{{ $\rightarrow$ float}}
+\pysigstopsignatures
+\sphinxAtStartPar
+Line average of param over line defined by phi\_angle
+
+\sphinxAtStartPar
+Also includes the complementary angle, so the line is a diameter of the pipe
+
+\sphinxAtStartPar
+returns integrand result
+
+\end{fulllineitems}
+
+\index{line\_avg\_dev() (MARIGOLD.Condition method)@\spxentry{line\_avg\_dev()}\spxextra{MARIGOLD.Condition method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{api/MARIGOLD.Condition:MARIGOLD.Condition.line_avg_dev}}
+\pysigstartsignatures
+\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{line\_avg\_dev}}}{\sphinxparam{\DUrole{n}{param}\DUrole{p}{:}\DUrole{w}{ }\DUrole{n}{str}}\sphinxparamcomma \sphinxparam{\DUrole{n}{phi\_angle}\DUrole{p}{:}\DUrole{w}{ }\DUrole{n}{float}}\sphinxparamcomma \sphinxparam{\DUrole{n}{even\_opt}\DUrole{o}{=}\DUrole{default_value}{\textquotesingle{}first\textquotesingle{}}}}{{ $\rightarrow$ float}}
+\pysigstopsignatures
+\sphinxAtStartPar
+Second moment of param over line defined by phi\_angle
+
+\sphinxAtStartPar
+Also includes the complementary angle, so the line is a diameter of the pipe
+
+\sphinxAtStartPar
+\textless{} param \sphinxhyphen{} \textless{}param\textgreater{}\textasciicircum{}2 \textgreater{} / \textless{}param\textgreater{}\textasciicircum{}2
+
+\sphinxAtStartPar
+returns integrand result
+
+\end{fulllineitems}
+
+\index{max() (MARIGOLD.Condition method)@\spxentry{max()}\spxextra{MARIGOLD.Condition method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{api/MARIGOLD.Condition:MARIGOLD.Condition.max}}
+\pysigstartsignatures
+\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{max}}}{\sphinxparam{\DUrole{n}{param}\DUrole{p}{:}\DUrole{w}{ }\DUrole{n}{str}}\sphinxparamcomma \sphinxparam{\DUrole{n}{recalc}\DUrole{o}{=}\DUrole{default_value}{False}}}{{ $\rightarrow$ float}}
+\pysigstopsignatures
+\sphinxAtStartPar
+Return maximum value of param in the Condition
+
+\sphinxAtStartPar
+By default, saves the data to a dictionary, Condition.maxs
+for future reference, unless recalc=True
+
+\end{fulllineitems}
+
+\index{max\_line() (MARIGOLD.Condition method)@\spxentry{max\_line()}\spxextra{MARIGOLD.Condition method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{api/MARIGOLD.Condition:MARIGOLD.Condition.max_line}}
+\pysigstartsignatures
+\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{max\_line}}}{\sphinxparam{\DUrole{n}{param}\DUrole{p}{:}\DUrole{w}{ }\DUrole{n}{str}}\sphinxparamcomma \sphinxparam{\DUrole{n}{angle}\DUrole{p}{:}\DUrole{w}{ }\DUrole{n}{float}}}{{ $\rightarrow$ float}}
+\pysigstopsignatures
+\sphinxAtStartPar
+Return maximum value of param at a given angle
+
+\end{fulllineitems}
+
+\index{max\_line\_loc() (MARIGOLD.Condition method)@\spxentry{max\_line\_loc()}\spxextra{MARIGOLD.Condition method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{api/MARIGOLD.Condition:MARIGOLD.Condition.max_line_loc}}
+\pysigstartsignatures
+\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{max\_line\_loc}}}{\sphinxparam{\DUrole{n}{param}\DUrole{p}{:}\DUrole{w}{ }\DUrole{n}{str}}\sphinxparamcomma \sphinxparam{\DUrole{n}{angle}\DUrole{p}{:}\DUrole{w}{ }\DUrole{n}{float}}}{{ $\rightarrow$ float}}
+\pysigstopsignatures
+\sphinxAtStartPar
+Return r/R location of maximum value of param at a given angle
+
+\end{fulllineitems}
+
+\index{max\_loc() (MARIGOLD.Condition method)@\spxentry{max\_loc()}\spxextra{MARIGOLD.Condition method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{api/MARIGOLD.Condition:MARIGOLD.Condition.max_loc}}
+\pysigstartsignatures
+\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{max\_loc}}}{\sphinxparam{\DUrole{n}{param}\DUrole{p}{:}\DUrole{w}{ }\DUrole{n}{str}}}{{ $\rightarrow$ tuple}}
+\pysigstopsignatures
+\sphinxAtStartPar
+Return location of maximum param in the Condition
+
+\sphinxAtStartPar
+returns in the form (r/R, angle in degrees)
+
+\end{fulllineitems}
+
+\index{min() (MARIGOLD.Condition method)@\spxentry{min()}\spxextra{MARIGOLD.Condition method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{api/MARIGOLD.Condition:MARIGOLD.Condition.min}}
+\pysigstartsignatures
+\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{min}}}{\sphinxparam{\DUrole{n}{param}\DUrole{p}{:}\DUrole{w}{ }\DUrole{n}{str}}\sphinxparamcomma \sphinxparam{\DUrole{n}{recalc}\DUrole{o}{=}\DUrole{default_value}{False}}\sphinxparamcomma \sphinxparam{\DUrole{n}{nonzero}\DUrole{o}{=}\DUrole{default_value}{False}}}{{ $\rightarrow$ float}}
+\pysigstopsignatures
+\sphinxAtStartPar
+Return minimum value of param in the Condition
+
+\sphinxAtStartPar
+By default, saves the data to a dictionary, Condition.mins
+for future reference, unless recalc=True
+
+\sphinxAtStartPar
+nonzero=True will find the smallest nonzero value.
+
+\end{fulllineitems}
+
+\index{min\_loc() (MARIGOLD.Condition method)@\spxentry{min\_loc()}\spxextra{MARIGOLD.Condition method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{api/MARIGOLD.Condition:MARIGOLD.Condition.min_loc}}
+\pysigstartsignatures
+\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{min\_loc}}}{\sphinxparam{\DUrole{n}{param}\DUrole{p}{:}\DUrole{w}{ }\DUrole{n}{str}}}{{ $\rightarrow$ float}}
+\pysigstopsignatures
+\sphinxAtStartPar
+Return minimum value of param in the Condition
+
+\sphinxAtStartPar
+By default, saves the data to a dictionary, Condition.mins
+for future reference, unless recalc=True
+
+\sphinxAtStartPar
+nonzero option not implemented, TODO
+
+\end{fulllineitems}
+
+\index{mirror() (MARIGOLD.Condition method)@\spxentry{mirror()}\spxextra{MARIGOLD.Condition method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{api/MARIGOLD.Condition:MARIGOLD.Condition.mirror}}
+\pysigstartsignatures
+\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{mirror}}}{\sphinxparam{\DUrole{n}{sym90}\DUrole{o}{=}\DUrole{default_value}{True}}\sphinxparamcomma \sphinxparam{\DUrole{n}{axisym}\DUrole{o}{=}\DUrole{default_value}{False}}\sphinxparamcomma \sphinxparam{\DUrole{n}{uniform\_rmesh}\DUrole{o}{=}\DUrole{default_value}{False}}\sphinxparamcomma \sphinxparam{\DUrole{n}{force\_remirror}\DUrole{o}{=}\DUrole{default_value}{False}}}{{ $\rightarrow$ None}}
+\pysigstopsignatures
+\sphinxAtStartPar
+Mirrors data, so we have data for every angle
+
+\sphinxAtStartPar
+First finds all the angles with data, copies anything negative to the
+other side (deleting the negative entries in the original). Then goes
+though each of the angles in \_angles (22.5° increments) and makes sure
+each has data. Either copying, assuming some kind of symmetry (either
+axisym or sym90) or just filling in zeros.
+
+\sphinxAtStartPar
+uniform\_rmesh will ensure every angle has data for every r/R point. Will
+linearly interpolate when data on either side is available
+
+\sphinxAtStartPar
+Force\_remirror is untested, no clue if it’s safe or not
+
+\sphinxAtStartPar
+Also saves the original mesh (r, φ) pairs under self.original\_mesh
+
+\sphinxAtStartPar
+Quadrant definitions:
+\begin{quote}
+\begin{quote}
+\begin{quote}
+\begin{quote}
+\begin{quote}
+\begin{quote}
+\begin{quote}
+
+\sphinxAtStartPar
+phi =  90
+\end{quote}
+
+\sphinxAtStartPar
+, \sphinxhyphen{} \textasciitilde{} \textasciitilde{} \textasciitilde{} \sphinxhyphen{} ,
+\end{quote}
+
+\sphinxAtStartPar
+, ‘       |        ‘ ,
+\end{quote}
+
+\sphinxAtStartPar
+,           |            ,
+\end{quote}
+
+\sphinxAtStartPar
+,     II     |    I        ,
+\end{quote}
+
+\sphinxAtStartPar
+,             |             ,
+\end{quote}
+\begin{description}
+\sphinxlineitem{180 ,————\sphinxhyphen{}{\color{red}\bfseries{}|}————\sphinxhyphen{}, 0}\begin{description}
+\sphinxlineitem{,             |             ,}\begin{description}
+\sphinxlineitem{,    III     |   IV       ,}\begin{description}
+\sphinxlineitem{,           |           ,}\begin{description}
+\sphinxlineitem{,         |        , ‘}\begin{description}
+\sphinxlineitem{‘ \sphinxhyphen{} , \_ \_ \_ ,  ‘}
+\sphinxAtStartPar
+270
+
+\end{description}
+
+\end{description}
+
+\end{description}
+
+\end{description}
+
+\end{description}
+
+\end{description}
+\end{quote}
+
+\end{fulllineitems}
+
+\index{plot\_contour() (MARIGOLD.Condition method)@\spxentry{plot\_contour()}\spxextra{MARIGOLD.Condition method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{api/MARIGOLD.Condition:MARIGOLD.Condition.plot_contour}}
+\pysigstartsignatures
+\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{plot\_contour}}}{\sphinxparam{\DUrole{n}{param}\DUrole{p}{:}\DUrole{w}{ }\DUrole{n}{str}}\sphinxparamcomma \sphinxparam{\DUrole{n}{save\_dir}\DUrole{o}{=}\DUrole{default_value}{\textquotesingle{}.\textquotesingle{}}}\sphinxparamcomma \sphinxparam{\DUrole{n}{show}\DUrole{o}{=}\DUrole{default_value}{True}}\sphinxparamcomma \sphinxparam{\DUrole{n}{set\_max}\DUrole{o}{=}\DUrole{default_value}{None}}\sphinxparamcomma \sphinxparam{\DUrole{n}{set\_min}\DUrole{o}{=}\DUrole{default_value}{None}}\sphinxparamcomma \sphinxparam{\DUrole{n}{fig\_size}\DUrole{o}{=}\DUrole{default_value}{4}}\sphinxparamcomma \sphinxparam{\DUrole{n}{label\_str}\DUrole{o}{=}\DUrole{default_value}{None}}\sphinxparamcomma \sphinxparam{\DUrole{n}{rot\_angle}\DUrole{o}{=}\DUrole{default_value}{0}}\sphinxparamcomma \sphinxparam{\DUrole{n}{ngridr}\DUrole{o}{=}\DUrole{default_value}{50}}\sphinxparamcomma \sphinxparam{\DUrole{n}{ngridphi}\DUrole{o}{=}\DUrole{default_value}{50}}\sphinxparamcomma \sphinxparam{\DUrole{n}{colormap}\DUrole{o}{=}\DUrole{default_value}{\textquotesingle{}hot\_r\textquotesingle{}}}\sphinxparamcomma \sphinxparam{\DUrole{n}{num\_levels}\DUrole{o}{=}\DUrole{default_value}{100}}\sphinxparamcomma \sphinxparam{\DUrole{n}{title}\DUrole{o}{=}\DUrole{default_value}{False}}\sphinxparamcomma \sphinxparam{\DUrole{n}{title\_str}\DUrole{o}{=}\DUrole{default_value}{\textquotesingle{}\textquotesingle{}}}\sphinxparamcomma \sphinxparam{\DUrole{n}{extra\_text}\DUrole{o}{=}\DUrole{default_value}{\textquotesingle{}\textquotesingle{}}}\sphinxparamcomma \sphinxparam{\DUrole{n}{annotate\_h}\DUrole{o}{=}\DUrole{default_value}{False}}\sphinxparamcomma \sphinxparam{\DUrole{n}{cartesian}\DUrole{o}{=}\DUrole{default_value}{False}}\sphinxparamcomma \sphinxparam{\DUrole{n}{h\_star\_kwargs}\DUrole{o}{=}\DUrole{default_value}{\{\textquotesingle{}method\textquotesingle{}: \textquotesingle{}max\_dsm\textquotesingle{}, \textquotesingle{}min\_void\textquotesingle{}: \textquotesingle{}0.05\textquotesingle{}\}}}\sphinxparamcomma \sphinxparam{\DUrole{n}{plot\_measured\_points}\DUrole{o}{=}\DUrole{default_value}{False}}}{{ $\rightarrow$ None}}
+\pysigstopsignatures
+\sphinxAtStartPar
+Method to plot contour of a given param
+
+\sphinxAtStartPar
+Generates a contour plot of any parameter in midas\_dict, e.g. ‘alpha’, ‘ai’, etc. By default, just shows the figure,
+but if a save\_dir is specified, it will save it there instead. label\_str can adjust the label of the colorbar. Can accept Latex format, e.g.
+r”\$lpha\$ {[}\sphinxhyphen{}{]}”
+
+\sphinxAtStartPar
+set\_max and set\_min set the bounds of the contour plot, and the colormap option allows for any colors that matplotlib supports. ngridr, ngridphi,
+num\_levels, all adjust how fine the contour plot is generated.
+
+\sphinxAtStartPar
+annotate\_h is an option to draw a horizontal line at some given position. This was implemented when investigating where the bubble layer typically
+stops. h\_star\_kwargs and cartesian are optinos related to this.
+
+\sphinxAtStartPar
+plot\_measured points is neat, it plots circles where original data was detected (determined prior to mirroring)
+
+\end{fulllineitems}
+
+\index{plot\_isoline() (MARIGOLD.Condition method)@\spxentry{plot\_isoline()}\spxextra{MARIGOLD.Condition method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{api/MARIGOLD.Condition:MARIGOLD.Condition.plot_isoline}}
+\pysigstartsignatures
+\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{plot\_isoline}}}{\sphinxparam{\DUrole{n}{param}\DUrole{p}{:}\DUrole{w}{ }\DUrole{n}{str}}\sphinxparamcomma \sphinxparam{\DUrole{n}{iso\_axis}\DUrole{p}{:}\DUrole{w}{ }\DUrole{n}{str}}\sphinxparamcomma \sphinxparam{\DUrole{n}{iso\_val}\DUrole{p}{:}\DUrole{w}{ }\DUrole{n}{float}}\sphinxparamcomma \sphinxparam{\DUrole{n}{fig\_size}\DUrole{o}{=}\DUrole{default_value}{4}}\sphinxparamcomma \sphinxparam{\DUrole{n}{plot\_res}\DUrole{o}{=}\DUrole{default_value}{100}}\sphinxparamcomma \sphinxparam{\DUrole{n}{save\_dir}\DUrole{o}{=}\DUrole{default_value}{\textquotesingle{}.\textquotesingle{}}}\sphinxparamcomma \sphinxparam{\DUrole{n}{show}\DUrole{o}{=}\DUrole{default_value}{True}}\sphinxparamcomma \sphinxparam{\DUrole{n}{extra\_text}\DUrole{o}{=}\DUrole{default_value}{\textquotesingle{}\textquotesingle{}}}}{{ $\rightarrow$ None}}
+\pysigstopsignatures
+\sphinxAtStartPar
+Plot profiles of param over iso\_axis at iso\_val
+
+\sphinxAtStartPar
+Based on interpolation, so plot\_res changes the resolution
+
+\end{fulllineitems}
+
+\index{plot\_profiles() (MARIGOLD.Condition method)@\spxentry{plot\_profiles()}\spxextra{MARIGOLD.Condition method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{api/MARIGOLD.Condition:MARIGOLD.Condition.plot_profiles}}
+\pysigstartsignatures
+\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{plot\_profiles}}}{\sphinxparam{\DUrole{n}{param}}\sphinxparamcomma \sphinxparam{\DUrole{n}{save\_dir}\DUrole{o}{=}\DUrole{default_value}{\textquotesingle{}.\textquotesingle{}}}\sphinxparamcomma \sphinxparam{\DUrole{n}{show}\DUrole{o}{=}\DUrole{default_value}{True}}\sphinxparamcomma \sphinxparam{\DUrole{n}{x\_axis}\DUrole{o}{=}\DUrole{default_value}{\textquotesingle{}r\textquotesingle{}}}\sphinxparamcomma \sphinxparam{\DUrole{n}{const\_to\_plot}\DUrole{o}{=}\DUrole{default_value}{{[}90, 67.5, 45, 22.5, 0{]}}}\sphinxparamcomma \sphinxparam{\DUrole{n}{include\_complement}\DUrole{o}{=}\DUrole{default_value}{True}}\sphinxparamcomma \sphinxparam{\DUrole{n}{rotate}\DUrole{o}{=}\DUrole{default_value}{False}}\sphinxparamcomma \sphinxparam{\DUrole{n}{fig\_size}\DUrole{o}{=}\DUrole{default_value}{4}}\sphinxparamcomma \sphinxparam{\DUrole{n}{title}\DUrole{o}{=}\DUrole{default_value}{True}}}{{ $\rightarrow$ None}}
+\pysigstopsignatures
+\sphinxAtStartPar
+Plot profiles of param over x\_axis, for const\_to\_plot, i.e. α over r/R for φ = {[}90, 67.5 … 0{]}.
+
+\sphinxAtStartPar
+Include\_complement will continue with the negative side if x\_axis = ‘r’
+
+\sphinxAtStartPar
+Also has an option to rotate the graph based on self.theta, but it’s a little sketchy
+
+\end{fulllineitems}
+
+\index{plot\_spline\_contour() (MARIGOLD.Condition method)@\spxentry{plot\_spline\_contour()}\spxextra{MARIGOLD.Condition method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{api/MARIGOLD.Condition:MARIGOLD.Condition.plot_spline_contour}}
+\pysigstartsignatures
+\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{plot\_spline\_contour}}}{\sphinxparam{\DUrole{n}{param}\DUrole{p}{:}\DUrole{w}{ }\DUrole{n}{str}}\sphinxparamcomma \sphinxparam{\DUrole{n}{save\_dir}\DUrole{o}{=}\DUrole{default_value}{\textquotesingle{}.\textquotesingle{}}}\sphinxparamcomma \sphinxparam{\DUrole{n}{show}\DUrole{o}{=}\DUrole{default_value}{True}}\sphinxparamcomma \sphinxparam{\DUrole{n}{set\_max}\DUrole{o}{=}\DUrole{default_value}{None}}\sphinxparamcomma \sphinxparam{\DUrole{n}{set\_min}\DUrole{o}{=}\DUrole{default_value}{None}}\sphinxparamcomma \sphinxparam{\DUrole{n}{fig\_size}\DUrole{o}{=}\DUrole{default_value}{4}}\sphinxparamcomma \sphinxparam{\DUrole{n}{rot\_angle}\DUrole{o}{=}\DUrole{default_value}{0}}\sphinxparamcomma \sphinxparam{\DUrole{n}{ngridr}\DUrole{o}{=}\DUrole{default_value}{50}}\sphinxparamcomma \sphinxparam{\DUrole{n}{ngridphi}\DUrole{o}{=}\DUrole{default_value}{50}}\sphinxparamcomma \sphinxparam{\DUrole{n}{colormap}\DUrole{o}{=}\DUrole{default_value}{\textquotesingle{}hot\_r\textquotesingle{}}}\sphinxparamcomma \sphinxparam{\DUrole{n}{num\_levels}\DUrole{o}{=}\DUrole{default_value}{100}}\sphinxparamcomma \sphinxparam{\DUrole{n}{title}\DUrole{o}{=}\DUrole{default_value}{False}}\sphinxparamcomma \sphinxparam{\DUrole{n}{annotate\_h}\DUrole{o}{=}\DUrole{default_value}{False}}\sphinxparamcomma \sphinxparam{\DUrole{n}{cartesian}\DUrole{o}{=}\DUrole{default_value}{False}}\sphinxparamcomma \sphinxparam{\DUrole{n}{h\_star\_kwargs}\DUrole{o}{=}\DUrole{default_value}{\{\textquotesingle{}method\textquotesingle{}: \textquotesingle{}max\_dsm\textquotesingle{}, \textquotesingle{}min\_void\textquotesingle{}: \textquotesingle{}0.05\textquotesingle{}\}}}\sphinxparamcomma \sphinxparam{\DUrole{n}{grad}\DUrole{o}{=}\DUrole{default_value}{\textquotesingle{}None\textquotesingle{}}}}{{ $\rightarrow$ None}}
+\pysigstopsignatures
+\sphinxAtStartPar
+Plots a contour from a spline interpolation
+
+\sphinxAtStartPar
+Will fit the spline if necessary.
+
+\end{fulllineitems}
+
+\index{plot\_surface() (MARIGOLD.Condition method)@\spxentry{plot\_surface()}\spxextra{MARIGOLD.Condition method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{api/MARIGOLD.Condition:MARIGOLD.Condition.plot_surface}}
+\pysigstartsignatures
+\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{plot\_surface}}}{\sphinxparam{\DUrole{n}{param}\DUrole{p}{:}\DUrole{w}{ }\DUrole{n}{str}}\sphinxparamcomma \sphinxparam{\DUrole{n}{save\_dir}\DUrole{o}{=}\DUrole{default_value}{\textquotesingle{}.\textquotesingle{}}}\sphinxparamcomma \sphinxparam{\DUrole{n}{show}\DUrole{o}{=}\DUrole{default_value}{True}}\sphinxparamcomma \sphinxparam{\DUrole{n}{rotate\_gif}\DUrole{o}{=}\DUrole{default_value}{False}}\sphinxparamcomma \sphinxparam{\DUrole{n}{elev\_angle}\DUrole{o}{=}\DUrole{default_value}{145}}\sphinxparamcomma \sphinxparam{\DUrole{n}{azim\_angle}\DUrole{o}{=}\DUrole{default_value}{0}}\sphinxparamcomma \sphinxparam{\DUrole{n}{roll\_angle}\DUrole{o}{=}\DUrole{default_value}{180}}\sphinxparamcomma \sphinxparam{\DUrole{n}{title}\DUrole{o}{=}\DUrole{default_value}{True}}\sphinxparamcomma \sphinxparam{\DUrole{n}{ngridr}\DUrole{o}{=}\DUrole{default_value}{50}}\sphinxparamcomma \sphinxparam{\DUrole{n}{ngridphi}\DUrole{o}{=}\DUrole{default_value}{50}}\sphinxparamcomma \sphinxparam{\DUrole{n}{plot\_surface\_kwargs}\DUrole{o}{=}\DUrole{default_value}{None}}\sphinxparamcomma \sphinxparam{\DUrole{n}{solid\_color}\DUrole{o}{=}\DUrole{default_value}{False}}\sphinxparamcomma \sphinxparam{\DUrole{n}{label\_str}\DUrole{o}{=}\DUrole{default_value}{None}}\sphinxparamcomma \sphinxparam{\DUrole{n}{title\_str}\DUrole{o}{=}\DUrole{default_value}{\textquotesingle{}\textquotesingle{}}}}{{ $\rightarrow$ None}}
+\pysigstopsignatures
+\sphinxAtStartPar
+Method to plot a surface of a given param
+
+\sphinxAtStartPar
+Can save a static image or rotating gif, starting at elev\_angle, azim\_angle, roll\_angle. These angles also
+the viewing angle for the static image.
+
+\sphinxAtStartPar
+Can specify a label or title str.
+
+\sphinxAtStartPar
+Plot\_surface\_kwargs is how to specify vmin, vmax, colormap, etc.
+
+\end{fulllineitems}
+
+\index{pretty\_print() (MARIGOLD.Condition method)@\spxentry{pretty\_print()}\spxextra{MARIGOLD.Condition method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{api/MARIGOLD.Condition:MARIGOLD.Condition.pretty_print}}
+\pysigstartsignatures
+\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{pretty\_print}}}{\sphinxparam{\DUrole{n}{print\_to\_file}\DUrole{o}{=}\DUrole{default_value}{False}}\sphinxparamcomma \sphinxparam{\DUrole{n}{FID}\DUrole{o}{=}\DUrole{default_value}{None}}\sphinxparamcomma \sphinxparam{\DUrole{n}{mirror}\DUrole{o}{=}\DUrole{default_value}{False}}}{{ $\rightarrow$ None}}
+\pysigstopsignatures
+\sphinxAtStartPar
+Prints out all the information in a Condition in a structured way
+
+\sphinxAtStartPar
+Specifically, everything in the Condition.phi dictionary, which has angles
+and r/Rs.
+
+\sphinxAtStartPar
+Can either print to a file (specified by FID) or to stdout. Option to mirror the
+data, if that hasn’t already been done
+
+\end{fulllineitems}
+
+\index{rough\_FR\_ID() (MARIGOLD.Condition method)@\spxentry{rough\_FR\_ID()}\spxextra{MARIGOLD.Condition method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{api/MARIGOLD.Condition:MARIGOLD.Condition.rough_FR_ID}}
+\pysigstartsignatures
+\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{rough\_FR\_ID}}}{}{{ $\rightarrow$ None}}
+\pysigstopsignatures
+\sphinxAtStartPar
+Identifies the flow regime for the given condition, by some rough methods
+
+\sphinxAtStartPar
+First checks if it matches any given by previous researchers, or the hierarchical
+clustering algorithm results
+
+\sphinxAtStartPar
+Stored in self.FR
+
+\sphinxAtStartPar
+1 = bubbly
+2 = plug
+3 = slug
+4 = churn
+5 = stratified
+6 = stratified wavy
+7 = annular
+
+\end{fulllineitems}
+
+\index{spline\_circ\_seg\_area\_avg() (MARIGOLD.Condition method)@\spxentry{spline\_circ\_seg\_area\_avg()}\spxextra{MARIGOLD.Condition method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{api/MARIGOLD.Condition:MARIGOLD.Condition.spline_circ_seg_area_avg}}
+\pysigstartsignatures
+\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{spline\_circ\_seg\_area\_avg}}}{\sphinxparam{\DUrole{n}{param}\DUrole{p}{:}\DUrole{w}{ }\DUrole{n}{str}}\sphinxparamcomma \sphinxparam{\DUrole{n}{hstar}\DUrole{p}{:}\DUrole{w}{ }\DUrole{n}{float}}\sphinxparamcomma \sphinxparam{\DUrole{n}{int\_err}\DUrole{o}{=}\DUrole{default_value}{0.0001}}}{{ $\rightarrow$ float}}
+\pysigstopsignatures
+\sphinxAtStartPar
+Function to area\sphinxhyphen{}average over a circular segment defined by h, using the spline interpolation of param
+
+\sphinxAtStartPar
+Returns the intengrand result. May be computationally expensive
+
+\end{fulllineitems}
+
+\index{spline\_void\_area\_avg() (MARIGOLD.Condition method)@\spxentry{spline\_void\_area\_avg()}\spxextra{MARIGOLD.Condition method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{api/MARIGOLD.Condition:MARIGOLD.Condition.spline_void_area_avg}}
+\pysigstartsignatures
+\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{spline\_void\_area\_avg}}}{\sphinxparam{\DUrole{n}{param}\DUrole{p}{:}\DUrole{w}{ }\DUrole{n}{str}}}{{ $\rightarrow$ float}}
+\pysigstopsignatures
+\sphinxAtStartPar
+Function to void\sphinxhyphen{}weighted area\sphinxhyphen{}average param over a circular segment defined by h, using the spline interpolation of param
+
+\sphinxAtStartPar
+Returns the intengrand result. May be computationally expensive
+
+\end{fulllineitems}
+
+\index{top\_bottom() (MARIGOLD.Condition method)@\spxentry{top\_bottom()}\spxextra{MARIGOLD.Condition method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{api/MARIGOLD.Condition:MARIGOLD.Condition.top_bottom}}
+\pysigstartsignatures
+\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{top\_bottom}}}{\sphinxparam{\DUrole{n}{param}}\sphinxparamcomma \sphinxparam{\DUrole{n}{even\_opt}\DUrole{o}{=}\DUrole{default_value}{\textquotesingle{}first\textquotesingle{}}}}{{ $\rightarrow$ float}}
+\pysigstopsignatures
+\sphinxAtStartPar
+Honestly, I forgot what this does
+
+\sphinxAtStartPar
+I think it area\sphinxhyphen{}averages the way Bottin did, which is not
+a good way of doing so.
+
+\end{fulllineitems}
+
+\index{void\_area\_avg() (MARIGOLD.Condition method)@\spxentry{void\_area\_avg()}\spxextra{MARIGOLD.Condition method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{api/MARIGOLD.Condition:MARIGOLD.Condition.void_area_avg}}
+\pysigstartsignatures
+\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{void\_area\_avg}}}{\sphinxparam{\DUrole{n}{param}\DUrole{p}{:}\DUrole{w}{ }\DUrole{n}{str}}\sphinxparamcomma \sphinxparam{\DUrole{n}{even\_opt}\DUrole{o}{=}\DUrole{default_value}{\textquotesingle{}first\textquotesingle{}}}}{{ $\rightarrow$ float}}
+\pysigstopsignatures
+\sphinxAtStartPar
+Method for calculating the void\sphinxhyphen{}weighted area\sphinxhyphen{}average of a parameter
+
+\sphinxAtStartPar
+\textless{}alpha * param\textgreater{} / \textless{}alpha\textgreater{}
+
+\end{fulllineitems}
+
 
 \end{fulllineitems}
 
@@ -534,8 +1828,17 @@ Method for calculating the void\sphinxhyphen{}weighted area\sphinxhyphen{}averag
 \sphinxstepscope
 
 
-\chapter{MARIGOLD.extracts\_and\_loads}
-\label{\detokenize{modules/MARIGOLD.extracts_and_loads:module-MARIGOLD.extracts_and_loads}}\label{\detokenize{modules/MARIGOLD.extracts_and_loads:marigold-extracts-and-loads}}\label{\detokenize{modules/MARIGOLD.extracts_and_loads::doc}}\index{module@\spxentry{module}!MARIGOLD.extracts\_and\_loads@\spxentry{MARIGOLD.extracts\_and\_loads}}\index{MARIGOLD.extracts\_and\_loads@\spxentry{MARIGOLD.extracts\_and\_loads}!module@\spxentry{module}}\subsubsection*{Functions}
+\subsection{Iskandrani\_Condition}
+\label{\detokenize{api/MARIGOLD.Iskandrani_Condition:iskandrani-condition}}\label{\detokenize{api/MARIGOLD.Iskandrani_Condition::doc}}\index{Iskandrani\_Condition (class in MARIGOLD)@\spxentry{Iskandrani\_Condition}\spxextra{class in MARIGOLD}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{api/MARIGOLD.Iskandrani_Condition:MARIGOLD.Iskandrani_Condition}}
+\pysigstartsignatures
+\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{class\DUrole{w}{ }}}\sphinxcode{\sphinxupquote{MARIGOLD.}}\sphinxbfcode{\sphinxupquote{Iskandrani\_Condition}}}{\sphinxparam{\DUrole{n}{jf}}\sphinxparamcomma \sphinxparam{\DUrole{n}{jg}}}{}
+\pysigstopsignatures
+\sphinxAtStartPar
+Bases: \sphinxcode{\sphinxupquote{object}}
+\subsubsection*{Methods Summary}
 
 
 \begin{savenotes}\sphinxattablestart
@@ -546,77 +1849,7 @@ Method for calculating the void\sphinxhyphen{}weighted area\sphinxhyphen{}averag
 \sphinxtoprule
 \sphinxtableatstartofbodyhook
 \sphinxAtStartPar
-\sphinxcode{\sphinxupquote{dump\_data\_from\_tabs}}({[}dump\_file, skip\_dir{]})
-&
-\sphinxAtStartPar
-
-\\
-\sphinxhline
-\sphinxAtStartPar
-\sphinxcode{\sphinxupquote{extractIskandraniData}}({[}dump\_file{]})
-&
-\sphinxAtStartPar
-
-\\
-\sphinxhline
-\sphinxAtStartPar
-\sphinxcode{\sphinxupquote{extractLocalDataFromDir}}(path{[}, dump\_file, ...{]})
-&
-\sphinxAtStartPar
-Function for getting all local data from spreadsheets in a directory, path
-\\
-\sphinxhline
-\sphinxAtStartPar
-\sphinxcode{\sphinxupquote{extractPitotData}}({[}dump\_file, in\_dir, ...{]})
-&
-\sphinxAtStartPar
-
-\\
-\sphinxhline
-\sphinxAtStartPar
-\sphinxcode{\sphinxupquote{extractProbeData}}({[}dump\_file, in\_dir, ...{]})
-&
-\sphinxAtStartPar
-
-\\
-\sphinxhline
-\sphinxAtStartPar
-\sphinxcode{\sphinxupquote{extractYangData}}({[}dump\_file{]})
-&
-\sphinxAtStartPar
-
-\\
-\sphinxhline
-\sphinxAtStartPar
-\sphinxcode{\sphinxupquote{loadData}}(data\_file)
-&
-\sphinxAtStartPar
-
-\\
-\sphinxhline
-\sphinxAtStartPar
-\sphinxcode{\sphinxupquote{loadIskandraniData}}({[}data\_file{]})
-&
-\sphinxAtStartPar
-
-\\
-\sphinxhline
-\sphinxAtStartPar
-\sphinxcode{\sphinxupquote{loadPitotData}}({[}data\_file{]})
-&
-\sphinxAtStartPar
-
-\\
-\sphinxhline
-\sphinxAtStartPar
-\sphinxcode{\sphinxupquote{loadProbeData}}({[}data\_file{]})
-&
-\sphinxAtStartPar
-
-\\
-\sphinxhline
-\sphinxAtStartPar
-\sphinxcode{\sphinxupquote{loadYangData}}({[}data\_file{]})
+\sphinxcode{\sphinxupquote{area\_avg}}(param)
 &
 \sphinxAtStartPar
 
@@ -625,7 +1858,81 @@ Function for getting all local data from spreadsheets in a directory, path
 \end{tabulary}
 \sphinxtableafterendhook\par
 \sphinxattableend\end{savenotes}
+\subsubsection*{Methods Documentation}
+\index{area\_avg() (MARIGOLD.Iskandrani\_Condition method)@\spxentry{area\_avg()}\spxextra{MARIGOLD.Iskandrani\_Condition method}}
 
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{api/MARIGOLD.Iskandrani_Condition:MARIGOLD.Iskandrani_Condition.area_avg}}
+\pysigstartsignatures
+\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{area\_avg}}}{\sphinxparam{\DUrole{n}{param}}}{}
+\pysigstopsignatures
+\end{fulllineitems}
+
+
+\end{fulllineitems}
+
+
+\sphinxstepscope
+
+
+\subsection{Yang\_Condition}
+\label{\detokenize{api/MARIGOLD.Yang_Condition:yang-condition}}\label{\detokenize{api/MARIGOLD.Yang_Condition::doc}}\index{Yang\_Condition (class in MARIGOLD)@\spxentry{Yang\_Condition}\spxextra{class in MARIGOLD}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{api/MARIGOLD.Yang_Condition:MARIGOLD.Yang_Condition}}
+\pysigstartsignatures
+\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{class\DUrole{w}{ }}}\sphinxcode{\sphinxupquote{MARIGOLD.}}\sphinxbfcode{\sphinxupquote{Yang\_Condition}}}{\sphinxparam{\DUrole{n}{jf}}\sphinxparamcomma \sphinxparam{\DUrole{n}{jg}}}{}
+\pysigstopsignatures
+\sphinxAtStartPar
+Bases: \sphinxcode{\sphinxupquote{Condition}}
+\subsubsection*{Methods Summary}
+
+
+\begin{savenotes}\sphinxattablestart
+\sphinxthistablewithglobalstyle
+\sphinxthistablewithnovlinesstyle
+\centering
+\begin{tabulary}{\linewidth}[t]{\X{1}{2}\X{1}{2}}
+\sphinxtoprule
+\sphinxtableatstartofbodyhook
+\sphinxAtStartPar
+\sphinxcode{\sphinxupquote{pretty\_print}}()
+&
+\sphinxAtStartPar
+Prints out all the information in a Condition in a structured way
+\\
+\sphinxbottomrule
+\end{tabulary}
+\sphinxtableafterendhook\par
+\sphinxattableend\end{savenotes}
+\subsubsection*{Methods Documentation}
+\index{pretty\_print() (MARIGOLD.Yang\_Condition method)@\spxentry{pretty\_print()}\spxextra{MARIGOLD.Yang\_Condition method}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{api/MARIGOLD.Yang_Condition:MARIGOLD.Yang_Condition.pretty_print}}
+\pysigstartsignatures
+\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{pretty\_print}}}{}{{ $\rightarrow$ None}}
+\pysigstopsignatures
+\sphinxAtStartPar
+Prints out all the information in a Condition in a structured way
+
+\sphinxAtStartPar
+Specifically, everything in the Condition.phi dictionary, which has angles
+and r/Rs.
+
+\sphinxAtStartPar
+Can either print to a file (specified by FID) or to stdout. Option to mirror the
+data, if that hasn’t already been done
+
+\end{fulllineitems}
+
+
+\end{fulllineitems}
+
+
+
+\section{Class Inheritance Diagram}
+\label{\detokenize{index:class-inheritance-diagram}}
 
 \chapter{Indices and tables}
 \label{\detokenize{index:indices-and-tables}}\begin{itemize}
@@ -648,7 +1955,7 @@ Function for getting all local data from spreadsheets in a directory, path
 \begin{sphinxtheindex}
 \let\bigletter\sphinxstyleindexlettergroup
 \bigletter{m}
-\item\relax\sphinxstyleindexentry{MARIGOLD.extracts\_and\_loads}\sphinxstyleindexpageref{modules/MARIGOLD.extracts_and_loads:\detokenize{module-MARIGOLD.extracts_and_loads}}
+\item\relax\sphinxstyleindexentry{MARIGOLD}\sphinxstyleindexpageref{index:\detokenize{module-MARIGOLD}}
 \end{sphinxtheindex}
 
 \renewcommand{\indexname}{Index}

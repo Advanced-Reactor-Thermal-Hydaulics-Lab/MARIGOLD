@@ -1,10 +1,10 @@
 # Fdb version 3
-["makeindex marigold.idx"] 0 "marigold.idx" "marigold.ind" "marigold" 0
-  "marigold.idx" 0 -1 0 "pdflatex"
+["makeindex marigold.idx"] 1712342003 "marigold.idx" "marigold.ind" "marigold" 1712342003
+  "marigold.idx" 1712339305 480 04e12cf8c5fcda5b89eed46c7c459ad7 "pdflatex"
   (generated)
   "marigold.ilg"
   "marigold.ind"
-["pdflatex"] 1712339268 "marigold.tex" "marigold.pdf" "marigold" 1712339268
+["pdflatex"] 1712342004 "marigold.tex" "marigold.pdf" "marigold" 1712342004
   "c:/texlive/2022/texmf-dist/fonts/enc/dvips/tex-gyre/q-ec.enc" 1650060422 2457 aaabbccba4df2a7f7371410ee4e075a3 ""
   "c:/texlive/2022/texmf-dist/fonts/enc/dvips/tex-gyre/q-ts1.enc" 1650060422 3124 3813fd4c981d99822890a2861b0d274c ""
   "c:/texlive/2022/texmf-dist/fonts/map/fontname/texfonts.map" 1650052619 3524 cb3e574dea2d1052e39280babc910dc8 ""
@@ -28,6 +28,7 @@
   "c:/texlive/2022/texmf-dist/fonts/tfm/public/tex-gyre/ec-qtmr.tfm" 1650060428 11504 d8fa8a5259789ef3392b939d2a48464c ""
   "c:/texlive/2022/texmf-dist/fonts/tfm/public/tex-gyre/ec-qtmri.tfm" 1650060428 11356 da1519f442d8a49b81c86cbaf25ef79f ""
   "c:/texlive/2022/texmf-dist/fonts/tfm/public/tex-gyre/ts1-qtmr.tfm" 1650060436 1600 20cdf11dab97d5d39e847571f9314407 ""
+  "c:/texlive/2022/texmf-dist/fonts/tfm/public/tex-gyre/ts1-qtmri.tfm" 1650060436 1744 236018a0ac3444bdc221f881182030d8 ""
   "c:/texlive/2022/texmf-dist/fonts/tfm/public/txfonts/t1xbtt.tfm" 1650061434 1436 f00b2a275be56a8355f5c3b07a5a7a4c ""
   "c:/texlive/2022/texmf-dist/fonts/tfm/public/txfonts/t1xtt.tfm" 1650061434 1384 8943063000d26272532f74ca134dfecd ""
   "c:/texlive/2022/texmf-dist/fonts/tfm/public/txfonts/t1xttsl.tfm" 1650061434 1624 fb8f48c6308ace0a799f9278aba03e18 ""
@@ -143,12 +144,13 @@
   "c:/texlive/2022/texmf-var/fonts/map/pdftex/updmap/pdftex.map" 1650062670 4448422 53302d27d6d34c8e3e97ce3a8b4bdfa7 ""
   "c:/texlive/2022/texmf-var/web2c/pdftex/pdflatex.fmt" 1650062833 2828326 b9c1aadf06024fa7d8ddd2aa16eeb7ac ""
   "c:/texlive/2022/texmf.cnf" 1650062641 713 e69b156964470283e0530f5060668171 ""
-  "marigold.aux" 1712339268 34 3985256e7290058c681f74d7a3565a19 "pdflatex"
-  "marigold.ind" 0 -1 0 "makeindex marigold.idx"
-  "marigold.out" 0 -1 0 "pdflatex"
-  "marigold.tex" 1712339268 18926 2f772ad7035bbcc8224faacdafcfc18e ""
+  "marigold.aux" 1712339305 2405 b27e4266028ae14eacea27fc2bf3fb8a "pdflatex"
+  "marigold.ind" 1712342004 644 36c32468ca582abf7a21dc89c03053e5 "makeindex marigold.idx"
+  "marigold.out" 1712339305 601 2037b387b07521ba981deb5d34684878 "pdflatex"
+  "marigold.tex" 1712342002 85302 79e9abf6459f6c27e98278210fa431e9 ""
+  "marigold.toc" 0 -1 0 "pdflatex"
   "sphinx.sty" 1712325636 44560 f9fbf51072c954d129c9bd5284cc4ccf ""
-  "sphinxhighlight.sty" 1712339266 7683 83fb52292c17957d9f4aadcb28c57a87 ""
+  "sphinxhighlight.sty" 1712342002 7683 83fb52292c17957d9f4aadcb28c57a87 ""
   "sphinxlatexadmonitions.sty" 1712325636 10989 c38302e64c2bb47779f086869b246760 ""
   "sphinxlatexcontainers.sty" 1712325636 901 d3a3a1b7b2547f47ade2499350b5c420 ""
   "sphinxlatexgraphics.sty" 1712325636 4840 a9578332b6f3b35e198751fb632c9b79 ""
@@ -163,7 +165,7 @@
   "sphinxlatexstyletext.sty" 1712325636 8589 a7e8f95eb4fef6c1cd2623cd417d6467 ""
   "sphinxlatextables.sty" 1712325636 57830 16f2773b765508003aec5d08680f39b9 ""
   "sphinxmanual.cls" 1712325636 4241 7b0d7a37df7b5715fb0dbd585c52ecdb ""
-  "sphinxmessages.sty" 1712339268 765 3f5fcd6cdd7964ed608767954a8ced6f ""
+  "sphinxmessages.sty" 1712342003 765 3f5fcd6cdd7964ed608767954a8ced6f ""
   "sphinxoptionsgeometry.sty" 1712325636 2061 47bb34b8ed8a78823eb0c886abfb9f4d ""
   "sphinxoptionshyperref.sty" 1712325636 1094 79beb8b8a3f10784f8cce804e0f9d3aa ""
   "sphinxpackageboxes.sty" 1712325636 36615 1d74c63e665ede6c648fa08c42ea70fb ""
