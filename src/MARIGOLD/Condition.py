@@ -220,6 +220,9 @@ Methods:
         each has data. Either copying, assuming some kind of symmetry (either
         axisym or sym90) or just filling in zeros. 
 
+        uniform_rmesh will ensure every angle has data for every r/R point. Will
+        linearly interpolate when data on either side is available
+        
         Force_remirror is untested, no clue if it's safe or not
         
         Also saves the original mesh (r, φ) pairs under self.original_mesh
@@ -460,13 +463,13 @@ Methods:
 
         return
     
-    def approx_vf(self, n=7):
-
-        """
-        
-        Method for approximating vf with power-law relation. 
+    def approx_vf(self, n=7) -> None:
+        """Method for approximating vf with power-law relation. 
 
         vf_approx = (n+1)*(2*n+1) / (2*n*n) * (jf / (1-self.area_avg('alpha'))) * (1 - abs(rstar))**(1/n)
+
+        Will not overwrite vf data if it already exists, but will always store data in 
+        midas_dict['vf_approx'] even if midas_dict['vf'] has data
 
         """
 
@@ -474,16 +477,18 @@ Methods:
 
         for angle, r_dict in self.phi.items():
             for rstar, midas_dict in r_dict.items():
+                vf_approx = (n+1)*(2*n+1) / (2*n*n) * (self.jf / (1-self.area_avg('alpha'))) * (1 - abs(rstar))**(1/n)
                 try:
                     dummy = midas_dict['vf']
                     if debug: print(f"approx_vf: data found for {angle}\t{rstar}", file=debugFID)
                 except:
-                    vf_approx = (n+1)*(2*n+1) / (2*n*n) * (self.jf / (1-self.area_avg('alpha'))) * (1 - abs(rstar))**(1/n)
                     midas_dict.update({'vf': vf_approx})
+                
+                midas_dict.update({'vf_approx': vf_approx})
 
         return
     
-    def approx_vf_Kong(self, n=7):
+    def approx_vf_Kong(self, n=7) -> None:
         # TODO
         self.mirror()
 
@@ -494,28 +499,26 @@ Methods:
 
         return
     
-    def calc_vr(self):
+    def calc_vr(self, warn_approx = True) -> None:
+        """Method for calculating relative velocity. Will approximate vf if it cannot be found.
 
-        """
-        
-        Method for calculating relative velocity. Will approximate vf if it cannot be found.
+        Note that if vg = 0, then this method says vr = 0. This will happen when no data is present,
+        such as in the bottom of the pipe in horizontal, when this is not necessarily true
 
-        Note that if vg = 0, then this method says vr = 0.
+        warn_approx is a flag to print out a warning statement if vf is being approximated
 
         """
 
         self.mirror()
-
-        warn = True
 
         for angle, r_dict in self.phi.items():
             for rstar, midas_dict in r_dict.items():
                 try:
                     dummy = midas_dict['vf']
                 except:
-                    if warn:
+                    if warn_approx:
                         print("Warning: Approximating vf in calculating vr, since no data found")
-                        warn = False
+                        warn_approx = False
                     self.approx_vf()
                 vg = midas_dict['ug1']
                 if vg == 0: # should be the same as α = 0, could maybe switch this to that
@@ -526,7 +529,19 @@ Methods:
 
         return
 
-    def calc_vgj(self):
+    def calc_vgj(self, warn_approx = True) -> None:
+        """Method for calculating Vgj, by doing
+
+        j_local = midas_dict['alpha'] * midas_dict['ug1'] + (1 - midas_dict['alpha']) * midas_dict['vf']
+        vgj = midas_dict['ug1'] - j_local
+
+        stored in midas_dict['vgj']
+
+        warn_approx is a flag to print out a warning statement if vf is being approximated, which will
+        happen if not found
+
+        """
+
         self.mirror()
 
         for angle, r_dict in self.phi.items():
@@ -534,7 +549,9 @@ Methods:
                 try:
                     dummy = midas_dict['vf']
                 except:
-                    print("Warning: Approximating vf in calculating local j, since no data found")
+                    if warn_approx:
+                        print("Warning: Approximating vf in calculating local j, since no data found")
+                        warn_approx = False
                     self.approx_vf()
                 
                 j_local = midas_dict['alpha'] * midas_dict['ug1'] + (1 - midas_dict['alpha']) * midas_dict['vf']
@@ -544,9 +561,7 @@ Methods:
         return
 
     def calc_grad(self, param: str, recalc = False) -> None:
-        
-        """
-        Calculates gradient of param based on the data in self. 
+        """Calculates gradient of param based on the data in self. 
         
         Stored in self's midas_dict as grad_param_r, grad_param_phi, etc.
         Will only be called once, unless recalc is True.
@@ -1569,7 +1584,7 @@ Methods:
 
         return
     
-    def calc_cd(self, method='Ishii-Zuber', rho_f = 998, vr_cheat = False):
+    def calc_cd(self, method='Ishii-Zuber', rho_f = 998, vr_cheat = False, mu_f = 0.001):
         """
         
         Method for calculating drag coefficient. If vr = 0, assume cd = 0
@@ -1624,8 +1639,17 @@ Methods:
                         {'cd': cd}
                     )
 
-                elif method == 'Schiller-Naumann':
+                elif method == 'Schiller-Naumann-limited':
                     cd = max(0.44, 24/Reb * (1 + 0.15*Reb**0.687))
+
+                    midas_dict.update(
+                        {'cd': cd}
+                    )
+
+                elif method == 'Schiller-Naumann':
+                    Reb = (1 - midas_dict['alpha']) * midas_dict['Dsm1'] * rho_f * abs(midas_dict['vr_model']) / mu_f
+
+                    cd = 24/Reb * (1 + 0.15*Reb**0.687)
 
                     midas_dict.update(
                         {'cd': cd}
@@ -1645,7 +1669,8 @@ Methods:
         Implemented options:
         - "wake_1" vr = - c3 * vf * Cd**(1./3)
         - "wake_alpha" vr = - c3 * (1-α)^n * vf * Cd**(1./3)
-        - "wake_alpha2" vr = - c3 * c3 * (α*(1-α))^n * vf * Cd**(1./3)
+        - "wake_alpha2" vr = - c3 *  (α*(1-α))^n * vf * Cd**(1./3)
+        - "wake_lambda" = - c3 * vf * Cd**(1./3) * Db**(2./3) * λ**(-2./3)
 
 
         """
@@ -1672,42 +1697,33 @@ Methods:
             old_vr = self.area_avg('vr_model', recalc=True)
 
             vr_name = "vr_" + method
+            for angle, r_dict in self.phi.items():
+                for rstar, midas_dict in r_dict.items():
+                    
+                    if method == 'wake_1':
+                        vr = c3  * midas_dict['vf'] * midas_dict['cd']**(1./3)
+                    
+                    elif method == 'wake_alpha':
+                        vr = c3  * (1 - midas_dict['alpha'])**n * midas_dict['vf'] * midas_dict['cd']**(1./3)
+                    
+                    elif method == 'wake_alpha2':
+                        vr = c3  * (midas_dict['alpha']*(1 - midas_dict['alpha']))**n * midas_dict['vf'] * midas_dict['cd']**(1./3)
 
-            if method == 'wake_1':
-                for angle, r_dict in self.phi.items():
-                    for rstar, midas_dict in r_dict.items():
-                        midas_dict[vr_name] = c3  * midas_dict['vf'] * midas_dict['cd']**(1./3)
-                        midas_dict['vr_model'] = c3  * midas_dict['vf'] * midas_dict['cd']**(1./3)
+                    elif method == 'wake_lambda':
+                        self.calc_avg_lat_sep()
+                        vr = c3  * midas_dict['vf'] * midas_dict['cd']**(1./3) * midas_dict['Dsm1']**(2/3) * midas_dict['lambda']**(-2./3)
 
-            elif method == 'wake_alpha':
-                for angle, r_dict in self.phi.items():
-                    for rstar, midas_dict in r_dict.items():
-                        midas_dict[vr_name] = c3  * (1 - midas_dict['alpha'])**n * midas_dict['vf'] * midas_dict['cd']**(1./3)
-                        midas_dict['vr_model'] = c3  * (1 - midas_dict['alpha'])**n * midas_dict['vf'] * midas_dict['cd']**(1./3)
+                    elif method == 'wake_vg_lambda':
+                        self.calc_avg_lat_sep()
+                        vr = midas_dict['ug1'] /(2 + c3 * midas_dict['cd']**(1./3) * midas_dict['Dsm1']**(2/3) * midas_dict['lambda']**(-2./3) )
 
-            elif method == 'wake_alpha2':
-                for angle, r_dict in self.phi.items():
-                    for rstar, midas_dict in r_dict.items():
-                        if abs(midas_dict['alpha']-1) > 0.01 and abs(midas_dict['alpha']) > 0.0:
-                            midas_dict[vr_name] = c3  * (midas_dict['alpha']*(1 - midas_dict['alpha']))**n * midas_dict['vf'] * midas_dict['cd']**(1./3)
-                            midas_dict['vr_model'] = c3  * (midas_dict['alpha']*(1 - midas_dict['alpha']))**n * midas_dict['vf'] * midas_dict['cd']**(1./3)
-                        else:
-                            midas_dict[vr_name] = 0
-                            midas_dict['vr_model'] = 0
+                    else:
+                        print(f"{method} not implemented")
+                        return -1
+            
+                    midas_dict[vr_name] = vr
+                    midas_dict['vr_model'] = vr
 
-            elif method == 'wake_lambda':
-                self.calc_avg_lat_sep()
-                for angle, r_dict in self.phi.items():
-                    for rstar, midas_dict in r_dict.items():
-                        if abs(midas_dict['lambda']) > 10**-6:
-                            midas_dict[vr_name] = c3  * midas_dict['vf'] * midas_dict['cd']**(1./3) * midas_dict['Dsm1']**(2/3) * midas_dict['lambda']**(-2./3)
-                            midas_dict['vr_model'] = c3  * midas_dict['vf'] * midas_dict['cd']**(1./3) * midas_dict['Dsm1']**(2/3) * midas_dict['lambda']**(-2./3)
-                        else:
-                            midas_dict[vr_name] = 0
-                            midas_dict['vr_model'] = 0 
-            else:
-                print(f"{method} not implemented")
-                return -1
 
             iterations += 1
 
@@ -1803,8 +1819,8 @@ Methods:
                     midas_dict['lambda*'] = midas_dict['lambda'] / (midas_dict['Dsm1']/1000)
                     midas_dict['alpha_lambda'] = midas_dict['Dsm1']/1000 / midas_dict['lambda']
                 except ZeroDivisionError:
-                    midas_dict['lambda'] = 0
-                    midas_dict['lambda*'] = 0
+                    midas_dict['lambda'] = np.inf
+                    midas_dict['lambda*'] = np.inf
                     midas_dict['alpha_lambda'] = 0
 
         return
@@ -2047,7 +2063,7 @@ Methods:
         return
 
     def plot_contour(self, param:str, save_dir = '.', show=True, set_max = None, set_min = None, fig_size = 4, label_str = None,
-                     rot_angle = 0, ngridr = 50, ngridphi = 50, colormap = 'hot_r', num_levels = 100, title = False, extra_text = '',
+                     rot_angle = 0, ngridr = 50, ngridphi = 50, colormap = 'hot_r', num_levels = 100, title = False, title_str = '', extra_text = '',
                      annotate_h = False, cartesian = False, h_star_kwargs = {'method': 'max_dsm', 'min_void': '0.05'}, plot_measured_points = False) -> None:
         
         """ Method to plot contour of a given param
@@ -2196,7 +2212,10 @@ Methods:
         fig.colorbar(mpbl, label=label_str)
         
         if title:
-            plt.title(self.name)
+            if title_str == '':
+                plt.title(self.name)
+            else:
+                plt.title(title_str)
 
         plt.tight_layout()
         

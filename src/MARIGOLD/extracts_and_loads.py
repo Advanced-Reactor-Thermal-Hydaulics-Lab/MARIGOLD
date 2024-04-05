@@ -561,6 +561,7 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
 
     for file in os.listdir(path):
     
+        # print(file)
         if debug: print(file, file=debugFID)
         if file.split('.')[-1] == 'xlsx' or file.split('.')[-1] == 'xlsm':
 
