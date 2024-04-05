@@ -91,32 +91,6 @@ phi [angle][r/R] gives a dictionary with the MIDAS output
 The MIDAS output is itself a dictionary, with the keys listed in the “tab_keys” array
 So phi[angle][r/R][‘alpha’] should give you the void fraction at r/R for phi = angle
 This structure is initialized with zeros for the MIDAS output at the pipe center and wall</p>
-<p>Methods:
-pretty_print- Prints out the data in the condition in a more human-readable way
-mirror- Copies any data in the negative r/R for a given phi to the corresponding complementary angle.</p>
-<blockquote>
-<div><p>Also copies data assuming some kind of symmetry. Ensures all angles (22.5° increments) are
-represented with data, and that the data ranges from r/R 0-1. Data is guaranteed to exist for
-at least r/R = 0 and r/R = 1 (filled with zero_data if no data exists) for plotting</p>
-</div></blockquote>
-<p>approx_vf- calculates approximate vf based on a simple power law profile
-approx_vf_Kong- calculates approximate vf based on Kong’s asymmetric method (TODO)
-calc_vr- calculates the relative velocity vg - vf
-calc_vgj- calculate local vg - j
-calc_grad- calculates gradient and saves the local information in self.phi[angle][r/R][’<a href="#id1"><span class="problematic" id="id2">grad_</span></a>”param name”_”direction”]
-area_avg-
-line_avg-
-line_dev-
-void_area_avg-
-calc_void_cov-
-calc_sigma_alpha-
-calc_mu3_alpha-
-top_bottom-
-plot_profiles- the 2D line plots we make
-plot_contours- cool contour plots
-plot_surface- rad surface plots
-rough_FR_ID- rough flow regime identification
-TD_FR_ID- Flow regime identification from Taitel and Dukler (TODO)</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="MARIGOLD.Condition.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">jgref</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jgloc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">database</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/MARIGOLD/Condition.html#Condition.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.__init__" title="Link to this definition"></a></dt>
@@ -125,156 +99,153 @@ TD_FR_ID- Flow regime identification from Taitel and Dukler (TODO)</p>
 <p class="rubric">Methods</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="../MARIGOLD.html#MARIGOLD.Condition.Condition.TD_FR_ID" title="MARIGOLD.Condition.Condition.TD_FR_ID"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TD_FR_ID</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">TD_FR_ID</span></code>()</p></td>
 <td><p></p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code>(jgref, jgloc, jf, theta, port, database)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../MARIGOLD.html#MARIGOLD.Condition.Condition.approx_vf" title="MARIGOLD.Condition.Condition.approx_vf"><code class="xref py py-obj docutils literal notranslate"><span class="pre">approx_vf</span></code></a>([n])</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">approx_vf</span></code>([n])</p></td>
 <td><p>Method for approximating vf with power-law relation.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../MARIGOLD.html#MARIGOLD.Condition.Condition.approx_vf_Kong" title="MARIGOLD.Condition.Condition.approx_vf_Kong"><code class="xref py py-obj docutils literal notranslate"><span class="pre">approx_vf_Kong</span></code></a>([n])</p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">approx_vf_Kong</span></code>([n])</p></td>
+<td><p>Method for approximating vf from Kong.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../MARIGOLD.html#MARIGOLD.Condition.Condition.area_avg" title="MARIGOLD.Condition.Condition.area_avg"><code class="xref py py-obj docutils literal notranslate"><span class="pre">area_avg</span></code></a>(param[, even_opt, recalc])</p></td>
-<td><p>Method for calculating the area-average of a parameter, &quot;param&quot;.</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">area_avg</span></code>(param[, even_opt, recalc])</p></td>
+<td><p>Method for calculating the area-average of a parameter, &quot;param&quot;</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../MARIGOLD.html#MARIGOLD.Condition.Condition.calc_W" title="MARIGOLD.Condition.Condition.calc_W"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_W</span></code></a>()</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_W</span></code>()</p></td>
 <td><p>Calculates the wake deficit function, W, from the experimental data</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../MARIGOLD.html#MARIGOLD.Condition.Condition.calc_avg_lat_sep" title="MARIGOLD.Condition.Condition.calc_avg_lat_sep"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_avg_lat_sep</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_avg_lat_sep</span></code>()</p></td>
 <td><p>Calculates average lateral separation distance between bubbles</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../MARIGOLD.html#MARIGOLD.Condition.Condition.calc_cd" title="MARIGOLD.Condition.Condition.calc_cd"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_cd</span></code></a>([method, rho_f, vr_cheat, mu_f])</p></td>
-<td><p>Method for calculating drag coefficient.</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_cd</span></code>([method, rho_f, vr_cheat, mu_f])</p></td>
+<td><p>Method for calculating drag coefficient</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../MARIGOLD.html#MARIGOLD.Condition.Condition.calc_dpdz" title="MARIGOLD.Condition.Condition.calc_dpdz"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_dpdz</span></code></a>([method, rho_f, rho_g, mu_f, ...])</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_dpdz</span></code>([method, rho_f, rho_g, mu_f, ...])</p></td>
 <td><p>Calculates the pressure gradient, dp/dz, according to various methods.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../MARIGOLD.html#MARIGOLD.Condition.Condition.calc_errors" title="MARIGOLD.Condition.Condition.calc_errors"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_errors</span></code></a>(param1, param2)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_errors</span></code>(param1, param2)</p></td>
 <td><p>Calculates the errors, ε, between two parameters (param1 - param2) in midas_dict</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../MARIGOLD.html#MARIGOLD.Condition.Condition.calc_grad" title="MARIGOLD.Condition.Condition.calc_grad"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_grad</span></code></a>(param[, recalc])</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_grad</span></code>(param[, recalc])</p></td>
 <td><p>Calculates gradient of param based on the data in self.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../MARIGOLD.html#MARIGOLD.Condition.Condition.calc_linear_interp" title="MARIGOLD.Condition.Condition.calc_linear_interp"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_linear_interp</span></code></a>(param)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_linear_interp</span></code>(param)</p></td>
 <td><p>Makes a LinearNDInterpolator for the given param.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../MARIGOLD.html#MARIGOLD.Condition.Condition.calc_linear_xy_interp" title="MARIGOLD.Condition.Condition.calc_linear_xy_interp"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_linear_xy_interp</span></code></a>(param)</p></td>
-<td><p>Makes a LinearNDInterpolator for the given param in x y coords.</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_linear_xy_interp</span></code>(param)</p></td>
+<td><p>Makes a LinearNDInterpolator for the given param in x y coords</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../MARIGOLD.html#MARIGOLD.Condition.Condition.calc_mu3_alpha" title="MARIGOLD.Condition.Condition.calc_mu3_alpha"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_mu3_alpha</span></code></a>()</p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_mu3_alpha</span></code>()</p></td>
+<td><p>Calculates the third moment of alpha</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../MARIGOLD.html#MARIGOLD.Condition.Condition.calc_mu_eff" title="MARIGOLD.Condition.Condition.calc_mu_eff"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_mu_eff</span></code></a>([method, mu_f, mu_g, alpha_max])</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_mu_eff</span></code>([method, mu_f, mu_g, alpha_max])</p></td>
 <td><p>Method for calculating effective viscosity.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../MARIGOLD.html#MARIGOLD.Condition.Condition.calc_sigma_alpha" title="MARIGOLD.Condition.Condition.calc_sigma_alpha"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_sigma_alpha</span></code></a>()</p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_sigma_alpha</span></code>()</p></td>
+<td><p>Calculates the second moment of alpha</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../MARIGOLD.html#MARIGOLD.Condition.Condition.calc_vgj" title="MARIGOLD.Condition.Condition.calc_vgj"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_vgj</span></code></a>([warn_approx])</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_vgj</span></code>([warn_approx])</p></td>
 <td><p>Method for calculating Vgj, by doing</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../MARIGOLD.html#MARIGOLD.Condition.Condition.calc_vgj_model" title="MARIGOLD.Condition.Condition.calc_vgj_model"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_vgj_model</span></code></a>()</p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_vgj_model</span></code>()</p></td>
+<td><p>Method for calculating Vgj based on models</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../MARIGOLD.html#MARIGOLD.Condition.Condition.calc_void_cov" title="MARIGOLD.Condition.Condition.calc_void_cov"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_void_cov</span></code></a>()</p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_void_cov</span></code>()</p></td>
+<td><p>Calculates the void covariance</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../MARIGOLD.html#MARIGOLD.Condition.Condition.calc_vr" title="MARIGOLD.Condition.Condition.calc_vr"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_vr</span></code></a>([warn_approx])</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_vr</span></code>([warn_approx])</p></td>
 <td><p>Method for calculating relative velocity.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../MARIGOLD.html#MARIGOLD.Condition.Condition.calc_vr_model" title="MARIGOLD.Condition.Condition.calc_vr_model"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_vr_model</span></code></a>([method, c3, n, iterate_cd, quiet])</p></td>
-<td><p>Method for calculating relative velocity based on models Stored under &quot;vr_method&quot; in midas_dict as well as &quot;vr_model&quot;</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_vr_model</span></code>([method, c3, n, iterate_cd, quiet])</p></td>
+<td><p>Method for calculating relative velocity based on models</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../MARIGOLD.html#MARIGOLD.Condition.Condition.calc_vwvg" title="MARIGOLD.Condition.Condition.calc_vwvg"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_vwvg</span></code></a>()</p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_vwvg</span></code>()</p></td>
+<td><p>Calculates void weighted Vgj</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../MARIGOLD.html#MARIGOLD.Condition.Condition.circ_segment_area_avg" title="MARIGOLD.Condition.Condition.circ_segment_area_avg"><code class="xref py py-obj docutils literal notranslate"><span class="pre">circ_segment_area_avg</span></code></a>(param, hstar[, ...])</p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">circ_segment_area_avg</span></code>(param, hstar[, ...])</p></td>
+<td><p>Method for calculating the area-average of a parameter, &quot;param&quot; over the circular segment defined by h</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../MARIGOLD.html#MARIGOLD.Condition.Condition.circ_segment_void_area_avg" title="MARIGOLD.Condition.Condition.circ_segment_void_area_avg"><code class="xref py py-obj docutils literal notranslate"><span class="pre">circ_segment_void_area_avg</span></code></a>(param, hstar[, ...])</p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">circ_segment_void_area_avg</span></code>(param, hstar[, ...])</p></td>
+<td><p>Method for calculating the void-weighted area-average of a parameter over the circular segment defined by h</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../MARIGOLD.html#MARIGOLD.Condition.Condition.find_hstar_pos" title="MARIGOLD.Condition.Condition.find_hstar_pos"><code class="xref py py-obj docutils literal notranslate"><span class="pre">find_hstar_pos</span></code></a>([method, void_criteria])</p></td>
-<td><p>Returns the vertical distance from the top of the pipe to the bubble layer interface, as determined by the selected method.</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">find_hstar_pos</span></code>([method, void_criteria])</p></td>
+<td><p>Returns the vertical distance from the top of the pipe to the bubble layer interface</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../MARIGOLD.html#MARIGOLD.Condition.Condition.fit_spline" title="MARIGOLD.Condition.Condition.fit_spline"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit_spline</span></code></a>(param[, nphi, nr])</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit_spline</span></code>(param)</p></td>
 <td><p>Fits a RectBivariateSpline for the given param.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../MARIGOLD.html#MARIGOLD.Condition.Condition.interp_area_avg" title="MARIGOLD.Condition.Condition.interp_area_avg"><code class="xref py py-obj docutils literal notranslate"><span class="pre">interp_area_avg</span></code></a>(param[, interp_type])</p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">interp_area_avg</span></code>(param[, interp_type])</p></td>
+<td><p>Function to area-average param, using the spline interpolation of param</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../MARIGOLD.html#MARIGOLD.Condition.Condition.line_avg" title="MARIGOLD.Condition.Condition.line_avg"><code class="xref py py-obj docutils literal notranslate"><span class="pre">line_avg</span></code></a>(param, phi_angle[, even_opt])</p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">line_avg</span></code>(param, phi_angle[, even_opt])</p></td>
+<td><p>Line average of param over line defined by phi_angle</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../MARIGOLD.html#MARIGOLD.Condition.Condition.line_avg_dev" title="MARIGOLD.Condition.Condition.line_avg_dev"><code class="xref py py-obj docutils literal notranslate"><span class="pre">line_avg_dev</span></code></a>(param, phi_angle[, even_opt])</p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">line_avg_dev</span></code>(param, phi_angle[, even_opt])</p></td>
+<td><p>Second moment of param over line defined by phi_angle</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../MARIGOLD.html#MARIGOLD.Condition.Condition.max" title="MARIGOLD.Condition.Condition.max"><code class="xref py py-obj docutils literal notranslate"><span class="pre">max</span></code></a>(param[, recalc])</p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">max</span></code>(param[, recalc])</p></td>
+<td><p>Return maximum value of param in the Condition</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../MARIGOLD.html#MARIGOLD.Condition.Condition.max_line" title="MARIGOLD.Condition.Condition.max_line"><code class="xref py py-obj docutils literal notranslate"><span class="pre">max_line</span></code></a>(param, angle)</p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">max_line</span></code>(param, angle)</p></td>
+<td><p>Return maximum value of param at a given angle</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../MARIGOLD.html#MARIGOLD.Condition.Condition.max_line_loc" title="MARIGOLD.Condition.Condition.max_line_loc"><code class="xref py py-obj docutils literal notranslate"><span class="pre">max_line_loc</span></code></a>(param, angle)</p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">max_line_loc</span></code>(param, angle)</p></td>
+<td><p>Return r/R location of maximum value of param at a given angle</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../MARIGOLD.html#MARIGOLD.Condition.Condition.max_loc" title="MARIGOLD.Condition.Condition.max_loc"><code class="xref py py-obj docutils literal notranslate"><span class="pre">max_loc</span></code></a>(param)</p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">max_loc</span></code>(param)</p></td>
+<td><p>Return location of maximum param in the Condition</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../MARIGOLD.html#MARIGOLD.Condition.Condition.min" title="MARIGOLD.Condition.Condition.min"><code class="xref py py-obj docutils literal notranslate"><span class="pre">min</span></code></a>(param[, recalc, nonzero])</p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">min</span></code>(param[, recalc, nonzero])</p></td>
+<td><p>Return minimum value of param in the Condition</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../MARIGOLD.html#MARIGOLD.Condition.Condition.min_loc" title="MARIGOLD.Condition.Condition.min_loc"><code class="xref py py-obj docutils literal notranslate"><span class="pre">min_loc</span></code></a>(param)</p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">min_loc</span></code>(param)</p></td>
+<td><p>Return minimum value of param in the Condition</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../MARIGOLD.html#MARIGOLD.Condition.Condition.min_nonzero" title="MARIGOLD.Condition.Condition.min_nonzero"><code class="xref py py-obj docutils literal notranslate"><span class="pre">min_nonzero</span></code></a>(param)</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../MARIGOLD.html#MARIGOLD.Condition.Condition.mirror" title="MARIGOLD.Condition.Condition.mirror"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mirror</span></code></a>([sym90, axisym, uniform_rmesh, ...])</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">mirror</span></code>([sym90, axisym, uniform_rmesh, ...])</p></td>
 <td><p>Mirrors data, so we have data for every angle</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../MARIGOLD.html#MARIGOLD.Condition.Condition.plot_contour" title="MARIGOLD.Condition.Condition.plot_contour"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_contour</span></code></a>(param[, save_dir, show, ...])</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_contour</span></code>(param[, save_dir, show, ...])</p></td>
 <td><p>Method to plot contour of a given param</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../MARIGOLD.html#MARIGOLD.Condition.Condition.plot_isoline" title="MARIGOLD.Condition.Condition.plot_isoline"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_isoline</span></code></a>(param, iso_axis, iso_val[, ...])</p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_isoline</span></code>(param, iso_axis, iso_val[, ...])</p></td>
+<td><p>Plot profiles of param over iso_axis at iso_val</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../MARIGOLD.html#MARIGOLD.Condition.Condition.plot_profiles" title="MARIGOLD.Condition.Condition.plot_profiles"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_profiles</span></code></a>(param[, save_dir, show, ...])</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_profiles</span></code>(param[, save_dir, show, ...])</p></td>
 <td><p>Plot profiles of param over x_axis, for const_to_plot, i.e. α over r/R for φ = [90, 67.5 .</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../MARIGOLD.html#MARIGOLD.Condition.Condition.plot_spline_contour" title="MARIGOLD.Condition.Condition.plot_spline_contour"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_spline_contour</span></code></a>(param[, save_dir, show, ...])</p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_spline_contour</span></code>(param[, save_dir, show, ...])</p></td>
+<td><p>Plots a contour from a spline interpolation</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../MARIGOLD.html#MARIGOLD.Condition.Condition.plot_surface" title="MARIGOLD.Condition.Condition.plot_surface"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_surface</span></code></a>(param[, save_dir, show, ...])</p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_surface</span></code>(param[, save_dir, show, ...])</p></td>
+<td><p>Method to plot a surface of a given param</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../MARIGOLD.html#MARIGOLD.Condition.Condition.pretty_print" title="MARIGOLD.Condition.Condition.pretty_print"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pretty_print</span></code></a>([print_to_file, FID, mirror])</p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">pretty_print</span></code>([print_to_file, FID, mirror])</p></td>
+<td><p>Prints out all the information in a Condition in a structured way</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../MARIGOLD.html#MARIGOLD.Condition.Condition.rough_FR_ID" title="MARIGOLD.Condition.Condition.rough_FR_ID"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rough_FR_ID</span></code></a>()</p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">rough_FR_ID</span></code>()</p></td>
+<td><p>Identifies the flow regime for the given condition, by some rough methods</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../MARIGOLD.html#MARIGOLD.Condition.Condition.spline_circ_seg_area_avg" title="MARIGOLD.Condition.Condition.spline_circ_seg_area_avg"><code class="xref py py-obj docutils literal notranslate"><span class="pre">spline_circ_seg_area_avg</span></code></a>(param, hstar[, int_err])</p></td>
-<td><p>Function to integrate over a circular segment, using the spline interpolation of param</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">spline_circ_seg_area_avg</span></code>(param, hstar[, int_err])</p></td>
+<td><p>Function to area-average over a circular segment defined by h, using the spline interpolation of param</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../MARIGOLD.html#MARIGOLD.Condition.Condition.spline_void_area_avg" title="MARIGOLD.Condition.Condition.spline_void_area_avg"><code class="xref py py-obj docutils literal notranslate"><span class="pre">spline_void_area_avg</span></code></a>(param)</p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">spline_void_area_avg</span></code>(param)</p></td>
+<td><p>Function to void-weighted area-average param over a circular segment defined by h, using the spline interpolation of param</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../MARIGOLD.html#MARIGOLD.Condition.Condition.top_bottom" title="MARIGOLD.Condition.Condition.top_bottom"><code class="xref py py-obj docutils literal notranslate"><span class="pre">top_bottom</span></code></a>(param[, even_opt])</p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">top_bottom</span></code>(param[, even_opt])</p></td>
+<td><p>Honestly, I forgot what this does</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../MARIGOLD.html#MARIGOLD.Condition.Condition.void_area_avg" title="MARIGOLD.Condition.Condition.void_area_avg"><code class="xref py py-obj docutils literal notranslate"><span class="pre">void_area_avg</span></code></a>(param[, even_opt])</p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">void_area_avg</span></code>(param[, even_opt])</p></td>
+<td><p>Method for calculating the void-weighted area-average of a parameter</p></td>
 </tr>
 </tbody>
 </table>
 <p class="rubric">Attributes</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="../MARIGOLD.html#MARIGOLD.Condition.Condition.debugFID" title="MARIGOLD.Condition.Condition.debugFID"><code class="xref py py-obj docutils literal notranslate"><span class="pre">debugFID</span></code></a></p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">debugFID</span></code></p></td>
 <td><p></p></td>
 </tr>
 </tbody>

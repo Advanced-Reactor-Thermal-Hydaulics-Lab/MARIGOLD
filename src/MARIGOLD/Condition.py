@@ -1418,6 +1418,13 @@ class Condition:
         return I
 
     def calc_void_cov(self):
+        """Calculates the void covariance
+
+        Returns <alpha^2>/<alpha>^2
+
+        Stored in self.void_cov
+        
+        """
 
         I = 0
         param_r = [] # integrated wrt r
@@ -1452,6 +1459,14 @@ class Condition:
         return I
 
     def calc_sigma_alpha(self):
+        """Calculates the second moment of alpha
+
+        Returns <(alpha-<alpha>)^2>/<alpha>^2
+
+        Stored in self.sigma_alpha
+        
+        """
+
         I = 0
         param_r = [] # integrated wrt r
         angles = []
@@ -1488,6 +1503,14 @@ class Condition:
         return I
     
     def calc_mu3_alpha(self):
+        """Calculates the third moment of alpha
+
+        Returns <(alpha-<alpha>)^3>/<alpha>^3
+
+        Stored in self.mu3_alpha
+        
+        """
+
         I = 0
         param_r = [] # integrated wrt r
         angles = []
@@ -1524,6 +1547,12 @@ class Condition:
         return I
 
     def top_bottom(self, param, even_opt='first') -> float:
+        """Honestly, I forgot what this does
+
+        I think it area-averages the way Bottin did, which is not
+        a good way of doing so. 
+        
+        """
         
         # Check that the parameter that the user requested exists
         try:
@@ -1601,15 +1630,19 @@ class Condition:
 
         return dpdz
 
-    def calc_vwvg(self):
-        print("This guy needs work, probably don't want to use it")
-        self.vwvg = self.jgloc / self.area_avg('alpha')
-        return
-    
-    def calc_W(self):
+    def calc_vwvg(self) -> None:
+        """Calculates void weighted Vgj
+
+        uses self.jgloc / self.area_avg('alpha'), which is not a great method
+
         """
 
-        Calculates the wake deficit function, W, from the experimental data
+        print("This guy needs work, probably don't want to use it")
+        self.vwvg = self.jgloc / self.area_avg('alpha')
+        return self.jgloc / self.area_avg('alpha')
+    
+    def calc_W(self):
+        """Calculates the wake deficit function, W, from the experimental data
 
         """
 
@@ -1635,10 +1668,10 @@ class Condition:
         return
     
     def calc_mu_eff(self, method='Ishii', mu_f = 0.001, mu_g = 18.03e-6, alpha_max = 1.0):
-        """
+        """Method for calculating effective viscosity. 
         
-        Method for calculating effective viscosity. Also calculates mixture viscosity, stored in 
-        μ_eff and μ_m, resepectively. Note that this fuction does mirror the data
+        Also calculates mixture viscosity, stored in μ_eff and μ_m, resepectively. 
+        Note that this fuction does mirror the data
 
         Right now the only method implemented is Ishii's
 
@@ -1660,9 +1693,9 @@ class Condition:
         return
     
     def calc_cd(self, method='Ishii-Zuber', rho_f = 998, vr_cheat = False, mu_f = 0.001):
-        """
+        """ Method for calculating drag coefficient 
         
-        Method for calculating drag coefficient. If vr = 0, assume cd = 0
+        If vr = 0, assume cd = 0
 
         Options are Ishii-Zuber and Schiller-Naumann, but both use
         Reb = (1 - midas_dict['alpha']) * midas_dict['Dsm1'] * rho_f * midas_dict['vr'] / midas_dict['mu_m']\
@@ -1733,10 +1766,8 @@ class Condition:
         return
 
     def calc_vr_model(self, method='wake_1', c3 = -0.15, n=1, iterate_cd = True, quiet = True):
-
-        """
+        """Method for calculating relative velocity based on models
         
-        Method for calculating relative velocity based on models
         Stored under "vr_method" in midas_dict as well as "vr_model"
 
         TODO implement Ishii-Chawla
@@ -1821,6 +1852,11 @@ class Condition:
 
             
     def calc_vgj_model(self):
+        """Method for calculating Vgj based on models
+        
+        midas_dict['vgj_model'] = (1 - midas_dict['alpha']) * midas_dict['vr_model']
+
+        """
 
         for angle, r_dict in self.phi.items():
             for rstar, midas_dict in r_dict.items():
@@ -1870,7 +1906,6 @@ class Condition:
         return
 
     def calc_avg_lat_sep(self):
-
         """ Calculates average lateral separation distance between bubbles
         
         Average lateral separation, λ given by
@@ -1902,11 +1937,11 @@ class Condition:
     def plot_profiles(self, param, save_dir = '.', show=True, x_axis='r', 
                       const_to_plot = [90, 67.5, 45, 22.5, 0], include_complement = True, 
                       rotate=False, fig_size=4, title=True) -> None:
+        """ Plot profiles of param over x_axis, for const_to_plot, i.e. α over r/R for φ = [90, 67.5 ... 0]. 
         
-        """ 
-        
-        Plot profiles of param over x_axis, for const_to_plot, i.e. α over r/R for φ = [90, 67.5 ... 0]. 
         Include_complement will continue with the negative side if x_axis = 'r' 
+
+        Also has an option to rotate the graph based on self.theta, but it's a little sketchy
         
         """
 
@@ -2098,6 +2133,11 @@ class Condition:
 
     def plot_isoline(self, param:str, iso_axis:str, iso_val:float, fig_size=4, plot_res=100, 
                      save_dir = '.', show=True, extra_text = '') -> None:
+        """ Plot profiles of param over iso_axis at iso_val 
+        
+        Based on interpolation, so plot_res changes the resolution
+        
+        """
 
         fig, ax = plt.subplots(figsize=(fig_size, fig_size), dpi=300, layout='compressed')
 
@@ -2140,7 +2180,7 @@ class Condition:
                      rot_angle = 0, ngridr = 50, ngridphi = 50, colormap = 'hot_r', num_levels = 100, title = False, title_str = '', extra_text = '',
                      annotate_h = False, cartesian = False, h_star_kwargs = {'method': 'max_dsm', 'min_void': '0.05'}, plot_measured_points = False) -> None:
         
-        """ Method to plot contour of a given param
+        """Method to plot contour of a given param
         
         Generates a contour plot of any parameter in midas_dict, e.g. 'alpha', 'ai', etc. By default, just shows the figure,
         but if a save_dir is specified, it will save it there instead. label_str can adjust the label of the colorbar. Can accept Latex format, e.g.
@@ -2304,7 +2344,18 @@ class Condition:
 
     def plot_surface(self, param:str, save_dir = '.', show=True, rotate_gif=False, elev_angle = 145, 
                      azim_angle = 0, roll_angle = 180, title=True, ngridr = 50, ngridphi = 50, 
-                     plot_surface_kwargs = None, solid_color = False) -> None:
+                     plot_surface_kwargs = None, solid_color = False, label_str = None, title_str = '') -> None:
+        """Method to plot a surface of a given param
+        
+        Can save a static image or rotating gif, starting at elev_angle, azim_angle, roll_angle. These angles also 
+        the viewing angle for the static image.
+
+        Can specify a label or title str.
+
+        Plot_surface_kwargs is how to specify vmin, vmax, colormap, etc.
+        
+        """ 
+        
         if plot_surface_kwargs is None:
             plot_surface_kwargs = {}
         plt.rcParams.update({'font.size': 12})
@@ -2367,13 +2418,19 @@ class Condition:
         
         ax.set_zlim([plot_surface_kwargs['vmin'], plot_surface_kwargs['vmax']])
 
-        if param == 'alpha':
-            ax.set_zlabel(r'$\alpha$ [-]')
-            fig.colorbar(surf, label= r'$\alpha$ [-]')
+        
+        if label_str:
+            ax.set_zlabel(label_str)
+            fig.colorbar(surf, label=label_str)
         else:
             ax.set_zlabel(param)
             fig.colorbar(surf, label=param)
-        if title: plt.title(self.name)
+        
+        if title: 
+            if title_str:
+                plt.title(title_str)
+            else:
+                plt.title(self.name)
 
         ax.view_init(azim=azim_angle, roll=roll_angle, elev=elev_angle)
                
@@ -2398,6 +2455,11 @@ class Condition:
                      rot_angle = 0, ngridr = 50, ngridphi = 50, colormap = 'hot_r', num_levels = 100, title = False,
                      annotate_h = False, cartesian = False, h_star_kwargs = {'method': 'max_dsm', 'min_void': '0.05'},
                      grad = 'None') -> None:
+        """Plots a contour from a spline interpolation
+
+        Will fit the spline if necessary. 
+        
+        """ 
         
         if param not in self.spline_interp.keys():
             print(f"Warning: {param} not found in spline_interp dict, running fit_spline")
@@ -2488,6 +2550,22 @@ class Condition:
         return
 
     def rough_FR_ID(self) -> None:
+        """Identifies the flow regime for the given condition, by some rough methods
+
+        First checks if it matches any given by previous researchers, or the hierarchical
+        clustering algorithm results
+
+        Stored in self.FR
+
+        1 = bubbly
+        2 = plug
+        3 = slug
+        4 = churn
+        5 = stratified
+        6 = stratified wavy
+        7 = annular
+        
+        """ 
 
         # These values are taken from the respective theses where the data comes from
                
@@ -3072,6 +3150,9 @@ class Condition:
 
 
 def color_cycle():
+    """Custom generator for colors
+    """
+
     var_list = ['#0000FF',
                 '#FF0000',
                 '#00FF00',
@@ -3088,6 +3169,9 @@ def color_cycle():
         i += 1
 
 def marker_cycle():
+    """Custom generator for markers
+    """
+
     var_list = ['o', '^', 's', 'v', 'D']
     i = 0
     while True:

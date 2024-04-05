@@ -1,4 +1,4 @@
-MARIGOLD.Condition
+﻿MARIGOLD.Condition
 ==================
 
 .. currentmodule:: MARIGOLD
@@ -48,7 +48,6 @@ MARIGOLD.Condition
       ~Condition.max_loc
       ~Condition.min
       ~Condition.min_loc
-      ~Condition.min_nonzero
       ~Condition.mirror
       ~Condition.plot_contour
       ~Condition.plot_isoline
