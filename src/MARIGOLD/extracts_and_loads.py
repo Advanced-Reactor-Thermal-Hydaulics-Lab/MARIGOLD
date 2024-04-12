@@ -6,15 +6,19 @@ from .Yang_Condition import Yang_Condition
 
 import re
 
-def extractProbeData(dump_file = 'database.dat', in_dir = [], require_terms = None, skip_terms = ['CFD', 'Copy']) -> None:
+def extractProbeData(dump_file = 'database.dat', in_dir = [], require_terms = None, skip_terms = ['CFD', 'Copy'],
+                     extract_Ryan = True, Ryan_path = 'Z:\\TRSL\\PITA\\Data\\LocalData\\spreadsheets\\PITA',
+                     extract_Kong = True, Kong_path = 'Z:\\TRSL\\PITA\\Data\\LocalData\\spreadsheets\\101.6mm',
+                     extract_Talley = True, Talley_path = 'Z:\\TRSL\\PITA\\Data\\LocalData\\spreadsheets\\38.1mm',
+                     extract_Yadav = True, Yadav_path = 'Z:\\TRSL\\PITA\\Data\\LocalData\\spreadsheets\\50.8mm'
+                     ) -> None:
+    debug = True
     all_conditions = []
 
     ### PITA Data ###
 
-    path = 'Z:\\TRSL\\PITA\\Data\\LocalData\\spreadsheets\\PITA'
-    #for path, directories, files in os.walk('./spreadsheets'):
-    #for file in os.listdir(path):
-    if True:
+    if extract_Ryan:
+        path = Ryan_path
 
         Q1_ranges = list(zip([90, 67.5, 45, 22.5, 0], [ [i for i in range(8, 33)], [i for i in range(57, 82)], [i for i in range(108, 133)], [i for i in range(157, 182)], [i for i in range(208, 233)] ]))
         Q2_ranges = list(zip([112.5, 135, 157.5], [ [i for i in range(57, 82)], [i for i in range(108, 133)], [i for i in range(157, 182)] ]))
@@ -30,9 +34,10 @@ def extractProbeData(dump_file = 'database.dat', in_dir = [], require_terms = No
                     if debug: print(f"Skipping {file}", file=debugFID)
                     continue
 
-                if all(term not in file for term in require_terms):
-                    if debug: print(f"Skipping {file}", file=debugFID)
-                    continue
+                if require_terms:
+                    if all(term not in file for term in require_terms):
+                        if debug: print(f"Skipping {file}", file=debugFID)
+                        continue
                 
                 #if debug: print(path, file=debugFID)
                 
@@ -67,6 +72,7 @@ def extractProbeData(dump_file = 'database.dat', in_dir = [], require_terms = No
                 cond.area_avg_void_sheet = ws['G266'].value
                 
                 for phi, indices in Q1_ranges:
+                    first_phi = True
                     for i in indices:
                         if ws[f'K{i}'].value:
 
@@ -77,7 +83,7 @@ def extractProbeData(dump_file = 'database.dat', in_dir = [], require_terms = No
                                 continue
                             
                             midas_output = []
-                            for cell in ws[f'B{i}':f'BD{i}'][0]:
+                            for cell in ws[f'A{i}':f'BD{i}'][0]:
                                 midas_output.append(cell.value)
                             
                             if len(tab_keys) == len( midas_output ):
@@ -91,8 +97,13 @@ def extractProbeData(dump_file = 'database.dat', in_dir = [], require_terms = No
 
                             try:
                                 cond.phi[phi].update({roverR: data})
-                            except KeyError:
+                            except KeyError as e:
+                                if first_phi:
+                                    pass
+                                else:
+                                    if debug: print("Not my first phi, for some reaseon", e, file=debugFID)
                                 cond.phi.update( {phi:{}} )
+                                first_phi = False
                                 cond.phi[phi].update({1.0: zero_data})
                                 #cond.phi[phi_val].update({0.0: zero_data}) # Cuz I'm paranoid
                                 cond.phi[phi].update({roverR: data})
@@ -109,7 +120,7 @@ def extractProbeData(dump_file = 'database.dat', in_dir = [], require_terms = No
                                 continue
                             
                             midas_output = []
-                            for cell in ws[f'CP{i}':f'ER{i}'][0]:
+                            for cell in ws[f'CO{i}':f'ER{i}'][0]:
                                 midas_output.append(cell.value)
                             
                             if len(tab_keys) == len( midas_output ):
@@ -131,10 +142,9 @@ def extractProbeData(dump_file = 'database.dat', in_dir = [], require_terms = No
 
     
     ### 38.1 mm data (Talley) ###
-    path = 'Z:\\TRSL\\PITA\\Data\\LocalData\\spreadsheets\\38.1mm'
 
-    if True:
-
+    if extract_Talley:
+        path = Talley_path
         #print(Q1_ranges, Q2_ranges)
         phis = [90, 67.5, 45, 22.5, 0]
 
@@ -230,7 +240,7 @@ def extractProbeData(dump_file = 'database.dat', in_dir = [], require_terms = No
                             # use new tab keys
                             roverR = float(ws[f'A{i}'].value)
                             midas_output = []
-                            for cell in ws[f'B{i}':f'BD{i}'][0]:
+                            for cell in ws[f'A{i}':f'BD{i}'][0]:
                                 midas_output.append(cell.value)
                             
                             if len(tab_keys) == len( midas_output ):
@@ -255,11 +265,8 @@ def extractProbeData(dump_file = 'database.dat', in_dir = [], require_terms = No
 
     ### 101.6mm Data ###
 
-    path = 'Z:\\TRSL\\PITA\\Data\\LocalData\\spreadsheets\\101.6mm'
-    #for path, directories, files in os.walk('./spreadsheets'):
-    #for file in os.listdir(path):
-    if True:
-
+    if extract_Kong:
+        path = Kong_path
         Q1_ranges = list(zip([90, 67.5, 45, 22.5, 0], [ [i for i in range(8, 33)], [i for i in range(57, 82)], [i for i in range(108, 133)], [i for i in range(157, 182)], [i for i in range(208, 233)] ]))
         Q2_ranges = list(zip([112.5, 135, 157.5], [ [i for i in range(57, 82)], [i for i in range(108, 133)], [i for i in range(157, 182)] ]))
 
@@ -326,7 +333,7 @@ def extractProbeData(dump_file = 'database.dat', in_dir = [], require_terms = No
                                 continue
                             
                             midas_output = []
-                            for cell in ws[f'B{i}':f'BD{i}'][0]:
+                            for cell in ws[f'A{i}':f'BD{i}'][0]:
                                 midas_output.append(cell.value)
                             
                             if len(tab_keys) == len( midas_output ):
@@ -358,7 +365,7 @@ def extractProbeData(dump_file = 'database.dat', in_dir = [], require_terms = No
                                 continue
                             
                             midas_output = []
-                            for cell in ws[f'CO{i}':f'EQ{i}'][0]:
+                            for cell in ws[f'CN{i}':f'EQ{i}'][0]:
                                 midas_output.append(cell.value)
                             
                             if len(tab_keys) == len( midas_output ):
@@ -381,8 +388,8 @@ def extractProbeData(dump_file = 'database.dat', in_dir = [], require_terms = No
     
     ### Yadav Data ###
 
-    path = 'Z:\\TRSL\\PITA\\Data\\LocalData\\spreadsheets\\50.8mm'
-    if True:
+    if extract_Yadav:
+        path = Yadav_path
         print("Reading Yadav's data")
         Q1_ranges = list(zip([90, 67.5, 45, 22.5, 0], [ [i for i in range(8, 29)], [i for i in range(53, 74)], [i for i in range(100, 121)], [i for i in range(145, 166)], [i for i in range(192, 213)] ]))
         Q2_ranges = list(zip([112.5, 135, 157.5], [ [i for i in range(53, 74)], [i for i in range(100, 121)], [i for i in range(145, 166)] ]))
@@ -451,7 +458,7 @@ def extractProbeData(dump_file = 'database.dat', in_dir = [], require_terms = No
                                 continue
                             
                             midas_output = []
-                            for cell in ws[f'B{i}':f'BD{i}'][0]:
+                            for cell in ws[f'A{i}':f'BD{i}'][0]:
                                 if cell.value == '---':
                                     midas_output.append(0)
                                 elif cell.value is None:

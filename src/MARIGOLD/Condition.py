@@ -203,6 +203,9 @@ class Condition:
         each has data. Either copying, assuming some kind of symmetry (either
         axisym or sym90) or just filling in zeros. 
 
+        Axisym = True will find the angle with the most data (i.e. the most r/R
+        locations with data available) and copy it to every other angle in _angles
+
         uniform_rmesh will ensure every angle has data for every r/R point. Will
         linearly interpolate when data on either side is available
         
@@ -317,10 +320,14 @@ class Condition:
         # Now comes the actual mirroring step. Need data for every angle, incremements of 22.5° (self._angles)
         if axisym: 
             # axisymmetric
+            # Find the reference angle with the most data
+            ref_angle = angles_with_data[0] # initial guess
+            for angle in angles_with_data:
+                if len(self.phi[ref_angle].keys()) < len(self.phi[angle].keys()):
+                    ref_angle = angle
+            
             for angle in self._angles:
-                if angle not in angles_with_data:
-                    ref_angle = angles_with_data[-1]
-                    data = deepcopy( self.phi[ref_angle] )
+                data = deepcopy( self.phi[ref_angle] )
                 
                 data.update({1.0: deepcopy(zero_data)}) 
                 self.phi.update({angle: {}})
@@ -513,7 +520,15 @@ class Condition:
                     vr = 0 # this is an assumption, similar to void weighting
                 else:
                     vr = midas_dict['ug1'] - midas_dict['vf']
-                midas_dict.update({'vr': vr})
+
+                try:
+                    if abs( midas_dict['vr'] - vr ) < 0.00001:
+                        continue
+                    else:
+                        print(f"Warning: vr already present for {rstar}, {angle}°, but doesn't match subtraction. Will update and overwrite")
+                        midas_dict.update({'vr': vr})
+                except:
+                    midas_dict.update({'vr': vr})
 
         return
 
@@ -524,6 +539,7 @@ class Condition:
         vgj = midas_dict['ug1'] - j_local
 
         stored in midas_dict['vgj']
+        also stores local j, midas_dict['j']
 
         warn_approx is a flag to print out a warning statement if vf is being approximated, which will
         happen if not found
@@ -545,6 +561,7 @@ class Condition:
                 j_local = midas_dict['alpha'] * midas_dict['ug1'] + (1 - midas_dict['alpha']) * midas_dict['vf']
                 vgj = midas_dict['ug1'] - j_local
                 midas_dict.update({'vgj': vgj})
+                midas_dict.update({'j': j_local})
 
         return
 
@@ -1765,7 +1782,7 @@ class Condition:
 
         return
 
-    def calc_vr_model(self, method='wake_1', c3 = -0.15, n=1, iterate_cd = True, quiet = True):
+    def calc_vr_model(self, method='wake_1', kw = -0.15, n=1, Lw = 8, km = 0.95, iterate_cd = True, quiet = True):
         """Method for calculating relative velocity based on models
         
         Stored under "vr_method" in midas_dict as well as "vr_model"
@@ -1773,10 +1790,10 @@ class Condition:
         TODO implement Ishii-Chawla
 
         Implemented options:
-        - "wake_1" vr = - c3 * vf * Cd**(1./3)
-        - "wake_alpha" vr = - c3 * (1-α)^n * vf * Cd**(1./3)
-        - "wake_alpha2" vr = - c3 *  (α*(1-α))^n * vf * Cd**(1./3)
-        - "wake_lambda" = - c3 * vf * Cd**(1./3) * Db**(2./3) * λ**(-2./3)
+        - "wake_1" vr = - kw * vf * Cd**(1./3)
+        - "wake_alpha" vr = - kw * (1-α)^n * vf * Cd**(1./3)
+        - "wake_alpha2" vr = - kw *  (α*(1-α))^n * vf * Cd**(1./3)
+        - "wake_lambda" = - kw * vf * Cd**(1./3) * Db**(2./3) * λ**(-2./3)
 
 
         """
@@ -1807,21 +1824,29 @@ class Condition:
                 for rstar, midas_dict in r_dict.items():
                     
                     if method == 'wake_1':
-                        vr = c3  * midas_dict['vf'] * midas_dict['cd']**(1./3)
+                        vr = kw  * midas_dict['vf'] * midas_dict['cd']**(1./3)
                     
                     elif method == 'wake_alpha':
-                        vr = c3  * (1 - midas_dict['alpha'])**n * midas_dict['vf'] * midas_dict['cd']**(1./3)
+                        vr = kw  * (1 - midas_dict['alpha'])**n * midas_dict['vf'] * midas_dict['cd']**(1./3)
                     
                     elif method == 'wake_alpha2':
-                        vr = c3  * (midas_dict['alpha']*(1 - midas_dict['alpha']))**n * midas_dict['vf'] * midas_dict['cd']**(1./3)
+                        vr = kw  * (midas_dict['alpha']*(1 - midas_dict['alpha']))**n * midas_dict['vf'] * midas_dict['cd']**(1./3)
 
                     elif method == 'wake_lambda':
                         self.calc_avg_lat_sep()
-                        vr = c3  * midas_dict['vf'] * midas_dict['cd']**(1./3) * midas_dict['Dsm1']**(2/3) * midas_dict['lambda']**(-2./3)
+                        vr = kw  * midas_dict['vf'] * midas_dict['cd']**(1./3) * midas_dict['Dsm1']**(2/3) * midas_dict['lambda']**(-2./3)
 
                     elif method == 'wake_vg_lambda':
                         self.calc_avg_lat_sep()
-                        vr = midas_dict['ug1'] /(2 + c3 * midas_dict['cd']**(1./3) * midas_dict['Dsm1']**(2/3) * midas_dict['lambda']**(-2./3) )
+                        vr = midas_dict['ug1'] /(1 + kw * midas_dict['cd']**(1./3) * midas_dict['Dsm1']**(2/3) * midas_dict['lambda']**(-2./3) )
+
+                    elif method == 'hubris' or method == 'wake_vr':
+                        cd = midas_dict['cd']
+                        c2 = kw
+                        vr = 1/2* midas_dict['ug1']*(1 - 3 *kw* cd**(1/3)*(2**(2/3) - 2* Lw**(1/3)) - 2* Lw + 6* c2**(3/2)* np.sqrt(cd) *(np.arctan(1./(2**(1/3) * np.sqrt(c2) * cd**(1/6))) - np.arctan(1/((np.sqrt(c2)* cd**(1/6))/Lw**(1/3)))))
+                    
+                    elif method == 'km1':
+                        vr = kw * (np.pi/4)**(1/3) * midas_dict['alpha'] * midas_dict['vf'] * midas_dict['cd']**(1./3) *  (2**(-1./3) - Lw**(1/3))/(0.5 - Lw) + km * midas_dict['vf']
 
                     else:
                         print(f"{method} not implemented")
@@ -2324,6 +2349,9 @@ class Condition:
             label_str = param
 
         fig.colorbar(mpbl, label=label_str)
+
+        if title_str != '':
+            title = True
         
         if title:
             if title_str == '':
