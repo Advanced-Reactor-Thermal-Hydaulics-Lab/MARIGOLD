@@ -1002,6 +1002,21 @@ class Condition:
         print('Invalid method for find_h_pos')
         return np.NaN
 
+    def avg(self, param: str, include_nonzero=False) -> float:
+
+        for angle, r_dict in self.phi.items():
+            for rstar, midas_dict in r_dict.items():
+                
+                if include_nonzero:
+                    count += 1
+                    avg_param += midas_dict[param]
+                else:
+                    if abs(midas_dict[param]) > 0:
+                        count += 1
+                        avg_param += midas_dict[param]
+
+        return avg_param / count
+
     def area_avg(self, param: str, even_opt='first', recalc = True) -> float:
         """Method for calculating the area-average of a parameter, "param"
         
@@ -1877,7 +1892,7 @@ class Condition:
 
             
     def calc_vgj_model(self):
-        """Method for calculating Vgj based on models
+        """Method for calculating local Vgj based on models
         
         midas_dict['vgj_model'] = (1 - midas_dict['alpha']) * midas_dict['vr_model']
 
@@ -1893,6 +1908,14 @@ class Condition:
                 midas_dict['vgj_model'] = (1 - midas_dict['alpha']) * midas_dict['vr_model']
 
         return
+    
+    def calc_aa_values_model(self, method='km1_naive', kw=-5, km=-0.1, Lw=8):
+
+        if method == 'km1_naive':
+            vr = kw * (np.pi/4)**(1/3) * self.area_avg('alpha') * self.jf * self.area_avg('cd')**(1./3) *  (2**(-1./3) - Lw**(1/3))/(0.5 - Lw) + km * self.jf
+
+            self.vwvgj = (1-self.area_avg('alpha'))*vr
+            self.aa_vr = vr
     
     def calc_errors(self, param1:str, param2:str):
         """ Calculates the errors, ε, between two parameters (param1 - param2) in midas_dict
