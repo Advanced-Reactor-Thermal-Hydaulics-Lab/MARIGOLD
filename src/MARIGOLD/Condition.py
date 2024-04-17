@@ -1,5 +1,6 @@
 from .config import *
 from scipy import interpolate
+import warnings
 
 class Condition:
     """ Class to handle the local probe data
@@ -1003,7 +1004,13 @@ class Condition:
         return np.NaN
 
     def avg(self, param: str, include_nonzero=False) -> float:
+        """Calculates a basic average of a parameter, "param"
+        
+        Just looks at every param and ensemble-averages them
 
+        """
+        count = 0
+        avg_param = 0
         for angle, r_dict in self.phi.items():
             for rstar, midas_dict in r_dict.items():
                 
@@ -1810,12 +1817,19 @@ class Condition:
         - "wake_alpha2" vr = - kw *  (α*(1-α))^n * vf * Cd**(1./3)
         - "wake_lambda" = - kw * vf * Cd**(1./3) * Db**(2./3) * λ**(-2./3)
 
+        Lw really Lw*, effective wake length divided by the bubble diameter
+
 
         """
 
         MAX_ITERATIONS = 10000
         iterations = 0
         initialize_vr = True
+
+        try:
+            dummy = self.random_point
+        except:
+            self.random_point = self.original_mesh[np.random.choice(len(self.original_mesh))]
 
         while True:
             if iterate_cd:
@@ -1835,6 +1849,7 @@ class Condition:
             old_vr = self.area_avg('vr_model', recalc=True)
 
             vr_name = "vr_" + method
+
             for angle, r_dict in self.phi.items():
                 for rstar, midas_dict in r_dict.items():
                     
@@ -1863,6 +1878,17 @@ class Condition:
                     elif method == 'km1':
                         vr = kw * (np.pi/4)**(1/3) * midas_dict['alpha'] * midas_dict['vf'] * midas_dict['cd']**(1./3) *  (2**(-1./3) - Lw**(1/3))/(0.5 - Lw) + km * midas_dict['vf']
 
+                    elif method == 'proper_integral':
+                        warnings.warn("This method is probably no good, messed up the math")
+                        vr = midas_dict['ug1'] / ( (0.5 - Lw) + kw * midas_dict['cd']**(1./3) *(np.pi/4)**(1/3)* (2**(-1./3) - Lw**(1/3)))
+
+                    elif method == 'proper_integral_alpha':
+                        warnings.warn("This method is probably no good, messed up the math")
+                        vr = midas_dict['ug1'] / ( (0.5 - Lw) + kw * midas_dict['alpha']**n *midas_dict['cd']**(1./3) *(np.pi/4)**(1/3)* (0.5**(1./3) - Lw**(1/3)))
+
+                        if abs(angle - self.random_point[0] ) < 0.001 and abs(rstar - self.random_point[1] ) < 0.001:
+                            print(self.random_point, (0.5 - Lw), kw * midas_dict['alpha']**n *midas_dict['cd']**(1./3) *(np.pi/4)**(1/3)* (0.5**(1./3) - Lw**(1/3)) )
+                    
                     else:
                         print(f"{method} not implemented")
                         return -1
