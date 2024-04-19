@@ -130,11 +130,12 @@ class Condition:
         
         if interp_method == 'None':
             try:
-                param_values = np.zeros(r_in.size, phi_in.size) # TODO check if r_in and phi_in actually exist
+                param_values = np.zeros((r_in.size, phi_in.size)) # TODO check if r_in and phi_in actually exist
                 for i, r_val in enumerate(r_in):
                     for j, phi_val in enumerate(phi_in):
-                        param_values[i,j] = self.phi[round(phi_val * 180 / np.pi, 2)][r_val][param]
+                        param_values[i,j] = self.phi[round(float(phi_val) * 180 / np.pi, 2)][r_val][param]
             except:
+                # Probably input a single phi instead of an array
                 param_values = self.phi[round(phi_in * 180 / np.pi, 2)][r_in][param]
             return param_values
         
@@ -208,7 +209,8 @@ class Condition:
         locations with data available) and copy it to every other angle in _angles
 
         uniform_rmesh will ensure every angle has data for every r/R point. Will
-        linearly interpolate when data on either side is available
+        linearly interpolate when data on either side is available. This only 
+        considers the +r/R mesh
         
         Force_remirror is untested, no clue if it's safe or not
         
@@ -280,8 +282,9 @@ class Condition:
                 rs = list(deepcopy(self.phi[angle]).keys())
 
                 for r in rs:
-                    all_rs.add(r)
+                    
                     if r > 0:
+                        all_rs.add(r)
                         data.pop(r)
                 
                 for r in rs:
@@ -476,6 +479,33 @@ class Condition:
                     midas_dict.update({'vf': vf_approx})
                 
                 midas_dict.update({'vf_approx': vf_approx})
+
+        return
+    
+    def approx_vg(self, n=7) -> None:
+        """Method for approximating vg with power-law relation. I don't think this makes sense
+
+        vg_approx = (n+1)*(2*n+1) / (2*n*n) * (jg / (self.area_avg('alpha'))) * (1 - abs(rstar))**(1/n)
+
+        Will not overwrite vg data if it already exists, but will always store data in 
+        midas_dict['vg_approx'] even if midas_dict['ug1'] has data
+
+        If you have a lot of group II bubbles this functions' no good
+
+        """
+
+        self.mirror()
+
+        for angle, r_dict in self.phi.items():
+            for rstar, midas_dict in r_dict.items():
+                vg_approx = (n+1)*(2*n+1) / (2*n*n) * (self.jgloc / (self.area_avg('alpha'))) * (1 - abs(rstar))**(1/n)
+                try:
+                    dummy = midas_dict['ug1']
+                    if debug: print(f"approx_vg: data found for {angle}\t{rstar}", file=debugFID)
+                except:
+                    midas_dict.update({'ug1': vg_approx})
+                
+                midas_dict.update({'vg_approx': vg_approx})
 
         return
     
@@ -1056,7 +1086,9 @@ class Condition:
         param_r = [] # array for parameter integrated wrt r
         angles = []
         
-        self.mirror()
+        if not self.mirrored:
+            warnings.warn("Mirroring in area-avg")
+            self.mirror()
 
 
         for angle, r_dict in self.phi.items():
@@ -1804,7 +1836,7 @@ class Condition:
 
         return
 
-    def calc_vr_model(self, method='wake_1', kw = -0.15, n=1, Lw = 8, km = 0.95, iterate_cd = True, quiet = True):
+    def calc_vr_model(self, method='wake_1', kw = -0.15, n=1, Lw = 5, km = 0.1, iterate_cd = True, quiet = True):
         """Method for calculating relative velocity based on models
         
         Stored under "vr_method" in midas_dict as well as "vr_model"
@@ -1945,6 +1977,8 @@ class Condition:
     
     def calc_errors(self, param1:str, param2:str):
         """ Calculates the errors, ε, between two parameters (param1 - param2) in midas_dict
+
+        Usually want to do param1=predicted, param2=experimental
         
         Stores:
          - error, "eps_param1_param2", param1 - param2
@@ -2251,7 +2285,7 @@ class Condition:
         return
 
     def plot_contour(self, param:str, save_dir = '.', show=True, set_max = None, set_min = None, fig_size = 4, label_str = None,
-                     rot_angle = 0, ngridr = 50, ngridphi = 50, colormap = 'hot_r', num_levels = 100, title = False, title_str = '', extra_text = '',
+                     rot_angle = 0, ngridr = 50, ngridphi = 50, colormap = 'hot_r', num_levels = 0, level_step = 0.25, title = False, title_str = '', extra_text = '',
                      annotate_h = False, cartesian = False, h_star_kwargs = {'method': 'max_dsm', 'min_void': '0.05'}, plot_measured_points = False) -> None:
         
         """Method to plot contour of a given param
@@ -2347,16 +2381,25 @@ class Condition:
             extend_opt = 'max'
         elif not extend_min and not extend_max:
             extend_opt = 'neither'
+
+        if num_levels:
+            lvs = np.linspace(set_min, set_max, num_levels)
+        else:
+            if (abs(set_max) < 1e-8): # if the max is 0, start the counting from there
+                lvs = np.arange(set_max, abs(set_min) + 1e-8, level_step)
+                lvs = np.flip(lvs) * -1
+            else:
+                lvs = np.arange(set_min, set_max + 1e-8, level_step)
         
         if cartesian:
-            mpbl = ax.contourf(XI, YI, parami, levels = num_levels, vmin = set_min, vmax = set_max, cmap = colormap)
+            mpbl = ax.contourf(XI, YI, parami, levels = lvs, vmin = set_min, vmax = set_max, cmap = colormap)
 
             x = np.linspace(-1, 1, 100)
             # Make a circle to look nice
             plt.plot(x, np.sqrt(1- x**2), marker= None, linestyle = '-', color = 'black', linewidth = 1)
             plt.plot(x, -np.sqrt(1- x**2), marker= None, linestyle = '-', color = 'black', linewidth = 1)
         else:
-            mpbl = ax.contourf(PHII, RI, parami, levels = np.linspace(set_min, set_max, num_levels), 
+            mpbl = ax.contourf(PHII, RI, parami, levels = lvs, 
                                vmin = set_min, vmax = set_max, cmap = colormap, extend=extend_opt)
             if plot_measured_points: 
                 # print(np.asarray(self.original_mesh)[:,0]* np.pi/180 , np.asarray(self.original_mesh)[:,1])

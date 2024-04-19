@@ -673,6 +673,8 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                 cond = newCond
             else:
                 cond = all_conditions[ all_conditions.index(newCond) ]
+
+            cond.run_ID = ws['B2'].value
             
             ws = wb['2']
 
