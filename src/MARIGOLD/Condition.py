@@ -127,6 +127,14 @@ class Condition:
            Can also return the value at (x, y) if linear_xy is selected as the interp method. phi -> x, r -> y
            
         """
+        if type(phi_in) != np.ndarray:
+            warnings.warn("Converting phi_in to np.ndarray")
+            phi_in = np.asarray(phi_in)
+
+        if type(r_in) != np.ndarray:
+            warnings.warn("Converting r_in to np.ndarray")
+            r_in = np.asarray(r_in)
+
         
         if interp_method == 'None':
             try:
@@ -1909,6 +1917,9 @@ class Condition:
                     
                     elif method == 'km1':
                         vr = kw * (np.pi/4)**(1/3) * midas_dict['alpha'] * midas_dict['vf'] * midas_dict['cd']**(1./3) *  (2**(-1./3) - Lw**(1/3))/(0.5 - Lw) + km * midas_dict['vf']
+                    
+                    elif method == 'km1_simp':
+                        vr = -kw * midas_dict['alpha'] * midas_dict['vf'] * midas_dict['cd']**(1./3) - km * midas_dict['vf']
 
                     elif method == 'proper_integral':
                         warnings.warn("This method is probably no good, messed up the math")
@@ -1967,13 +1978,16 @@ class Condition:
 
         return
     
-    def calc_aa_values_model(self, method='km1_naive', kw=-5, km=-0.1, Lw=8):
+    def calc_aa_values_model(self, method='km1_naive', kw=-0.98, km=-0.083, Lw = 5, Cavf=1):
 
         if method == 'km1_naive':
-            vr = kw * (np.pi/4)**(1/3) * self.area_avg('alpha') * self.jf * self.area_avg('cd')**(1./3) *  (2**(-1./3) - Lw**(1/3))/(0.5 - Lw) + km * self.jf
+            vr = kw * (np.pi/4)**(1/3) * self.area_avg('alpha') * self.jf / (1 - self.area_avg('alpha')) * self.area_avg('cd')**(1./3) *  (2**(-1./3) - Lw**(1/3))/(0.5 - Lw) + km * self.jf / (1 - self.area_avg('alpha'))
+        
+        elif method == 'km1_naive2':
+            vr = kw * self.area_avg('alpha') * self.jf / (1 - self.area_avg('alpha')) * self.area_avg('cd')**(1./3)  + km * self.jf / (1 - self.area_avg('alpha'))
 
-            self.vwvgj = (1-self.area_avg('alpha'))*vr
-            self.aa_vr = vr
+        self.vwvgj = (1-self.area_avg('alpha'))*vr
+        self.aa_vr = vr
     
     def calc_errors(self, param1:str, param2:str):
         """ Calculates the errors, ε, between two parameters (param1 - param2) in midas_dict
@@ -2044,7 +2058,8 @@ class Condition:
     
     def plot_profiles(self, param, save_dir = '.', show=True, x_axis='r', 
                       const_to_plot = [90, 67.5, 45, 22.5, 0], include_complement = True, 
-                      rotate=False, fig_size=4, title=True) -> None:
+                      rotate=False, fig_size=4, title=True, label_str = '', legend_loc = 'best',
+                      set_min = None, set_max = None, show_spines = True) -> None:
         """ Plot profiles of param over x_axis, for const_to_plot, i.e. α over r/R for φ = [90, 67.5 ... 0]. 
         
         Include_complement will continue with the negative side if x_axis = 'r' 
@@ -2056,7 +2071,7 @@ class Condition:
         self.mirror()
         plt.rcParams.update({'font.size': 12})
         plt.rcParams["font.family"] = "Times New Roman"
-        plt.rcParams["mathtext.fontset"] = "dejavuserif"
+        plt.rcParams["mathtext.fontset"] = "cm"
 
         log_x = False # This breaks, so I removed it from the arguments to the function
 
@@ -2092,6 +2107,12 @@ class Condition:
 
         ms = marker_cycle()
         cs = color_cycle()
+
+        if set_min == None:
+            set_min = self.min('param')
+        
+        if set_max == None:
+            set_max = self.max('param') *1.1
 
         if x_axis == 'r':
             for angle in const_to_plot:
@@ -2130,7 +2151,7 @@ class Condition:
                     
                 ax.plot(vals, rs, label=f'{angle}°', color=next(cs), marker=next(ms), linestyle = '--')
             ax.set_ylim(-1, 1)
-            ax.set_xlim(self.min(param), self.max(param)*1.2)
+            ax.set_xlim(set_min, set_max)
             
         
         elif x_axis == 'phi':
@@ -2159,52 +2180,41 @@ class Condition:
                     ax.plot(phis, vals, label=f'{rtarget:0.1f}', color=next(cs), marker=next(ms), linestyle = '--')
             if rotate:
                 ax.set_ylim(0, 360)
-                ax.set_xlim(self.min(param), self.max(param))
+                ax.set_xlim(set_min, set_max)
                 
             else:
                 ax.set_xlim(0, 360)
-                ax.set_ylim(self.min(param), self.max(param))
+                ax.set_ylim(set_min, set_max)
                 
         else:
             print(f"invalid axis for plot_profiles: {x_axis}. Current supported options are 'r' and 'phi'")
             return
         
-        if x_axis == 'r':
+        if label_str == '':
             if param == 'alpha':
-                fake_ax.set_xlabel(r'$\alpha$ [-]')
+                label_str = r'$\alpha\ [-]$'
             elif param == 'ai':
-                fake_ax.set_xlabel(r'$a_{i}$ [1/m]')
+                label_str = r'$a_{i}\ [1/m]$'
             elif param == 'ug1':
-                fake_ax.set_xlabel(r'$v_{g}$ [m/s]')
+                label_str = r'$v_{g}\ [m/s]$'
             else:
-                fake_ax.set_xlabel(param)
+                label_str = param
+        
+        if x_axis == 'r':
+            fake_ax.set_xlabel(label_str)
             fake_ax.set_ylabel(r'$r/R$ [-]')
             fake_ax.set_yticks(np.arange(-1, 1.01, 0.2))
             #fake_ax.set_xticks(np.linspace(self.min(param), self.max(param), 7))
 
         elif x_axis == 'phi':
             if not rotate:
-                if param == 'alpha':
-                    fake_ax.set_ylabel(r'$\alpha$ [-]')
-                elif param == 'ai':
-                    fake_ax.set_ylabel(r'$a_{i}$ [1/m]')
-                elif param == 'ug1':
-                    fake_ax.set_ylabel(r'$v_{g}$ [m/s]')
-                else:
-                    fake_ax.set_ylabel(param)
+                fake_ax.set_ylabel(label_str)
                 fake_ax.set_xlabel(r'$\varphi$ [-]')
 
                 fake_ax.set_xticks([0, 90, 180, 270, 360])
                 #fake_ax.set_yticks(np.linspace(self.min(param), self.max(param), 7))
             else:
-                if param == 'alpha':
-                    fake_ax.set_xlabel(r'$\alpha$ [-]')
-                elif param == 'ai':
-                    fake_ax.set_xlabel(r'$a_{i}$ [1/m]')
-                elif param == 'ug1':
-                    fake_ax.set_xlabel(r'$v_{g}$ [m/s]')
-                else:
-                    fake_ax.set_xlabel(param)
+                fake_ax.set_xlabel(label_str)
                 fake_ax.set_ylabel(r'$\varphi$ [-]')
                 
                 fake_ax.set_yticks([0, 90, 180, 270, 360])
@@ -2216,8 +2226,21 @@ class Condition:
             ax.set_title(self.name)
 
         ax.spines['bottom'].set_position(('data', 0))
-        ax.spines['top'].set_visible(False)
-        ax.spines['right'].set_visible(False)
+
+
+        if set_min == 0 or set_max == 0:
+            ax.spines['left'].set_position(('data', set_min))
+            ax.spines['right'].set_position(('data', 0))
+            ax.yaxis.tick_right()
+            ax.yaxis.set_label_position("right")
+
+        if not show_spines:
+            ax.spines['top'].set_visible(False)
+            ax.spines['right'].set_visible(False)
+        else:
+            ax2 = ax.twiny()
+            ax2.get_xaxis().set_visible(False)
+
 
         if log_x:
             ax.set_xlim(self.min(param, nonzero=True), self.max(param)*1.2)
@@ -2226,7 +2249,7 @@ class Condition:
         
         if rotate:
             fig.add_subplot(fake_ax)
-        ax.legend(loc='lower right', edgecolor='white')
+        ax.legend(loc=legend_loc, edgecolor='white')
 
         fake_ax.set_aspect('auto', adjustable='datalim', share=True)
         ax.set_aspect('auto', adjustable='datalim', share=True)
