@@ -599,8 +599,10 @@ class Condition:
                 
                 j_local = midas_dict['alpha'] * midas_dict['ug1'] + (1 - midas_dict['alpha']) * midas_dict['vf']
                 vgj = midas_dict['ug1'] - j_local
+                alpha_j = midas_dict['alpha'] * j_local
                 midas_dict.update({'vgj': vgj})
                 midas_dict.update({'j': j_local})
+                midas_dict.update({'alpha_j': alpha_j})
 
         return
 
@@ -2059,7 +2061,7 @@ class Condition:
     def plot_profiles(self, param, save_dir = '.', show=True, x_axis='r', 
                       const_to_plot = [90, 67.5, 45, 22.5, 0], include_complement = True, 
                       rotate=False, fig_size=4, title=True, label_str = '', legend_loc = 'best',
-                      set_min = None, set_max = None, show_spines = True) -> None:
+                      set_min = None, set_max = None, show_spines = True, force_RH_y_axis = False) -> None:
         """ Plot profiles of param over x_axis, for const_to_plot, i.e. α over r/R for φ = [90, 67.5 ... 0]. 
         
         Include_complement will continue with the negative side if x_axis = 'r' 
@@ -2109,10 +2111,10 @@ class Condition:
         cs = color_cycle()
 
         if set_min == None:
-            set_min = self.min('param')
+            set_min = self.min(param)
         
         if set_max == None:
-            set_max = self.max('param') *1.1
+            set_max = self.max(param) *1.1
 
         if x_axis == 'r':
             for angle in const_to_plot:
@@ -2228,7 +2230,7 @@ class Condition:
         ax.spines['bottom'].set_position(('data', 0))
 
 
-        if set_min == 0 or set_max == 0:
+        if set_min == 0 or set_max == 0 or force_RH_y_axis:
             ax.spines['left'].set_position(('data', set_min))
             ax.spines['right'].set_position(('data', 0))
             ax.yaxis.tick_right()
