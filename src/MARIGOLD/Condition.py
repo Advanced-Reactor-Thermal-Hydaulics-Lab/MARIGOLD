@@ -1,5 +1,3 @@
-# I suck at this
-
 from .config import *
 from scipy import interpolate
 import warnings

@@ -666,6 +666,9 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                 print(f"Warning: Could not identify port # for {file}, setting jgloc = jgref")
                 jgloc = jgref
 
+            if jgloc is None:
+                jgloc = jgref
+
             newCond = Condition(jgref, jgloc, jf, theta, port, sheet_type.split('_')[0])
 
             if newCond not in all_conditions:
