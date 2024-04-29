@@ -2060,8 +2060,8 @@ class Condition:
     
     def plot_profiles(self, param, save_dir = '.', show=True, x_axis='r', 
                       const_to_plot = [90, 67.5, 45, 22.5, 0], include_complement = True, 
-                      rotate=False, fig_size=4, title=True, label_str = '', legend_loc = 'best',
-                      set_min = None, set_max = None, show_spines = True, force_RH_y_axis = False) -> None:
+                      rotate=False, fig_size=4, title=True, label_str = '', legend_loc = 'best', xlabel_loc = 'center',
+                      set_min = None, set_max = None, show_spines = True, force_RH_y_axis = False, xlabel_loc_coords = None) -> None:
         """ Plot profiles of param over x_axis, for const_to_plot, i.e. α over r/R for φ = [90, 67.5 ... 0]. 
         
         Include_complement will continue with the negative side if x_axis = 'r' 
@@ -2168,11 +2168,11 @@ class Condition:
                             try:
                                 vals.append(midas_output[param])
                             except:
-                                if abs(r - 1) < 0.0001:
+                                if abs(rstar - 1) < 0.0001:
                                     vals.append(0.0)
                                 else:
                                     vals.append(0.0)
-                                    print(f"Could not find {param} for φ = {angle}, r = {r}. Substituting 0")
+                                    print(f"Could not find {param} for φ = {angle}, r = {rstar}. Substituting 0")
 
                 vals = [var for _, var in sorted(zip(phis, vals))]
                 phis = sorted(phis)
@@ -2203,20 +2203,20 @@ class Condition:
                 label_str = param
         
         if x_axis == 'r':
-            fake_ax.set_xlabel(label_str)
+            fake_ax.set_xlabel(label_str, loc = xlabel_loc)
             fake_ax.set_ylabel(r'$r/R$ [-]')
             fake_ax.set_yticks(np.arange(-1, 1.01, 0.2))
             #fake_ax.set_xticks(np.linspace(self.min(param), self.max(param), 7))
 
         elif x_axis == 'phi':
             if not rotate:
-                fake_ax.set_ylabel(label_str)
+                fake_ax.set_ylabel(label_str, loc = xlabel_loc)
                 fake_ax.set_xlabel(r'$\varphi$ [-]')
 
                 fake_ax.set_xticks([0, 90, 180, 270, 360])
                 #fake_ax.set_yticks(np.linspace(self.min(param), self.max(param), 7))
             else:
-                fake_ax.set_xlabel(label_str)
+                fake_ax.set_xlabel(label_str, loc = xlabel_loc)
                 fake_ax.set_ylabel(r'$\varphi$ [-]')
                 
                 fake_ax.set_yticks([0, 90, 180, 270, 360])
@@ -2252,6 +2252,9 @@ class Condition:
         if rotate:
             fig.add_subplot(fake_ax)
         ax.legend(loc=legend_loc, edgecolor='white')
+
+        if xlabel_loc_coords:
+            ax.xaxis.set_label_coords(*xlabel_loc_coords)
 
         fake_ax.set_aspect('auto', adjustable='datalim', share=True)
         ax.set_aspect('auto', adjustable='datalim', share=True)
@@ -2436,7 +2439,7 @@ class Condition:
                         measured_rs[i] = - measured_rs[i]
                         measured_thetas[i] = (measured_thetas[i] + np.pi) % (2*np.pi)
 
-                ax.plot( measured_thetas, measured_rs, marker='o', fillstyle = 'none', mec = 'black', linewidth = 0, ms = 2)
+                ax.plot( measured_thetas, measured_rs, marker='o', fillstyle = 'none', mec = 'red', linewidth = 0, ms = 2)
 
         if annotate_h:
             if not cartesian:
