@@ -68,7 +68,7 @@ class Condition:
 
         self.area_avg_void_sheet = -1
 
-        if database == 'Ryan' or database == 'adix':
+        if database == 'Ryan' or database == 'ryan' or database == 'adix':
             self.Dh = 0.0254 # m, for Ryan
             self.marker_type = 'o'
             self.marker_color = 'r'
