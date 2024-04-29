@@ -1846,7 +1846,7 @@ class Condition:
 
         return
 
-    def calc_vr_model(self, method='wake_1', kw = -0.15, n=1, Lw = 5, km = 0.1, iterate_cd = True, quiet = True):
+    def calc_vr_model(self, method='wake_1', kw = -0.15, n=1, Lw = 5, kf = 0.1, iterate_cd = True, quiet = True):
         """Method for calculating relative velocity based on models
         
         Stored under "vr_method" in midas_dict as well as "vr_model"
@@ -1918,10 +1918,10 @@ class Condition:
                         vr = 1/2* midas_dict['ug1']*(1 - 3 *kw* cd**(1/3)*(2**(2/3) - 2* Lw**(1/3)) - 2* Lw + 6* c2**(3/2)* np.sqrt(cd) *(np.arctan(1./(2**(1/3) * np.sqrt(c2) * cd**(1/6))) - np.arctan(1/((np.sqrt(c2)* cd**(1/6))/Lw**(1/3)))))
                     
                     elif method == 'km1':
-                        vr = kw * (np.pi/4)**(1/3) * midas_dict['alpha'] * midas_dict['vf'] * midas_dict['cd']**(1./3) *  (2**(-1./3) - Lw**(1/3))/(0.5 - Lw) + km * midas_dict['vf']
+                        vr = kw * (np.pi/4)**(1/3) * midas_dict['alpha'] * midas_dict['vf'] * midas_dict['cd']**(1./3) *  (2**(-1./3) - Lw**(1/3))/(0.5 - Lw) + kf * midas_dict['vf']
                     
                     elif method == 'km1_simp':
-                        vr = -kw * midas_dict['alpha'] * midas_dict['vf'] * midas_dict['cd']**(1./3) - km * midas_dict['vf']
+                        vr = -kw * midas_dict['alpha'] * midas_dict['vf'] * midas_dict['cd']**(1./3) - kf * midas_dict['vf']
 
                     elif method == 'proper_integral':
                         warnings.warn("This method is probably no good, messed up the math")
@@ -1980,13 +1980,13 @@ class Condition:
 
         return
     
-    def calc_aa_values_model(self, method='km1_naive', kw=-0.98, km=-0.083, Lw = 5, Cavf=1):
+    def calc_aa_values_model(self, method='km1_naive', kw=-0.98, kf=-0.083, Lw = 5, Cavf=1):
 
         if method == 'km1_naive':
-            vr = kw * (np.pi/4)**(1/3) * self.area_avg('alpha') * self.jf / (1 - self.area_avg('alpha')) * self.area_avg('cd')**(1./3) *  (2**(-1./3) - Lw**(1/3))/(0.5 - Lw) + km * self.jf / (1 - self.area_avg('alpha'))
+            vr = kw * (np.pi/4)**(1/3) * self.area_avg('alpha') * self.jf / (1 - self.area_avg('alpha')) * self.area_avg('cd')**(1./3) *  (2**(-1./3) - Lw**(1/3))/(0.5 - Lw) + kf * self.jf / (1 - self.area_avg('alpha'))
         
         elif method == 'km1_naive2':
-            vr = kw * self.area_avg('alpha') * self.jf / (1 - self.area_avg('alpha')) * self.area_avg('cd')**(1./3)  + km * self.jf / (1 - self.area_avg('alpha'))
+            vr = kw * self.area_avg('alpha') * self.jf / (1 - self.area_avg('alpha')) * self.area_avg('cd')**(1./3)  + kf * self.jf / (1 - self.area_avg('alpha'))
 
         self.vwvgj = (1-self.area_avg('alpha'))*vr
         self.aa_vr = vr
