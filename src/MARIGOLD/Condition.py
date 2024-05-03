@@ -122,7 +122,7 @@ class Condition:
         """
 
         Returns the value of param at (phi, r). Can get raw data, linear interp, or spline interp
-           phi in radians
+           *phi in radians*
 
            Can also return the value at (x, y) if linear_xy is selected as the interp method. phi -> x, r -> y
            
@@ -141,7 +141,14 @@ class Condition:
                 param_values = np.zeros((r_in.size, phi_in.size)) # TODO check if r_in and phi_in actually exist
                 for i, r_val in enumerate(r_in):
                     for j, phi_val in enumerate(phi_in):
-                        param_values[i,j] = self.phi[round(float(phi_val) * 180 / np.pi, 2)][r_val][param]
+                        try:
+                            param_values[i,j] = self.phi[round(float(phi_val) * 180 / np.pi, 2)][r_val][param]
+                        except KeyError as e:
+                            if abs(abs(r_val) - 1) < 0.0001:
+                                param_values[i,j] = 0
+                            else:
+                                print(e)
+                                raise
             except:
                 # Probably input a single phi instead of an array
                 param_values = self.phi[round(phi_in * 180 / np.pi, 2)][r_in][param]
@@ -539,6 +546,8 @@ class Condition:
         Note that if vg = 0, then this method says vr = 0. This will happen when no data is present,
         such as in the bottom of the pipe in horizontal, when this is not necessarily true
 
+        Also calculates vr_naive, and jf_naive
+
         warn_approx is a flag to print out a warning statement if vf is being approximated
 
         """
@@ -548,26 +557,41 @@ class Condition:
         for angle, r_dict in self.phi.items():
             for rstar, midas_dict in r_dict.items():
                 try:
-                    dummy = midas_dict['vf']
+                    vf = midas_dict['vf']
                 except:
                     if warn_approx:
                         print("Warning: Approximating vf in calculating vr, since no data found")
                         warn_approx = False
                     self.approx_vf()
+                    vf = midas_dict['vf']
                 vg = midas_dict['ug1']
+
+                try:
+                    vf_naive = midas_dict['vf_naive']
+                except:
+                    midas_dict.update({'vf_naive': vf})
+
                 if vg == 0: # should be the same as α = 0, could maybe switch this to that
                     vr = 0 # this is an assumption, similar to void weighting
+                    vr_naive = 0
+                    
                 else:
-                    vr = midas_dict['ug1'] - midas_dict['vf']
+                    vr = vg - vf
+
+                    vr_naive = vg - vf_naive
 
                 try:
                     if abs( midas_dict['vr'] - vr ) < 0.00001:
-                        continue
+                        pass
                     else:
                         print(f"Warning: vr already present for {rstar}, {angle}°, but doesn't match subtraction. Will update and overwrite")
                         midas_dict.update({'vr': vr})
                 except:
                     midas_dict.update({'vr': vr})
+
+                midas_dict.update({'vr_naive': vr_naive})
+                midas_dict.update({'jf_naive': midas_dict['vf_naive'] * (1-midas_dict['alpha'])})
+                    
 
         return
 
@@ -2060,8 +2084,8 @@ class Condition:
     
     def plot_profiles(self, param, save_dir = '.', show=True, x_axis='r', 
                       const_to_plot = [90, 67.5, 45, 22.5, 0], include_complement = True, 
-                      rotate=False, fig_size=4, title=True, label_str = '', legend_loc = 'best',
-                      set_min = None, set_max = None, show_spines = True, force_RH_y_axis = False) -> None:
+                      rotate=False, fig_size=4, title=True, label_str = '', legend_loc = 'best', xlabel_loc = 'center',
+                      set_min = None, set_max = None, show_spines = True, force_RH_y_axis = False, xlabel_loc_coords = None) -> None:
         """ Plot profiles of param over x_axis, for const_to_plot, i.e. α over r/R for φ = [90, 67.5 ... 0]. 
         
         Include_complement will continue with the negative side if x_axis = 'r' 
@@ -2168,11 +2192,11 @@ class Condition:
                             try:
                                 vals.append(midas_output[param])
                             except:
-                                if abs(r - 1) < 0.0001:
+                                if abs(rstar - 1) < 0.0001:
                                     vals.append(0.0)
                                 else:
                                     vals.append(0.0)
-                                    print(f"Could not find {param} for φ = {angle}, r = {r}. Substituting 0")
+                                    print(f"Could not find {param} for φ = {angle}, r = {rstar}. Substituting 0")
 
                 vals = [var for _, var in sorted(zip(phis, vals))]
                 phis = sorted(phis)
@@ -2203,20 +2227,20 @@ class Condition:
                 label_str = param
         
         if x_axis == 'r':
-            fake_ax.set_xlabel(label_str)
+            fake_ax.set_xlabel(label_str, loc = xlabel_loc)
             fake_ax.set_ylabel(r'$r/R$ [-]')
             fake_ax.set_yticks(np.arange(-1, 1.01, 0.2))
             #fake_ax.set_xticks(np.linspace(self.min(param), self.max(param), 7))
 
         elif x_axis == 'phi':
             if not rotate:
-                fake_ax.set_ylabel(label_str)
+                fake_ax.set_ylabel(label_str, loc = xlabel_loc)
                 fake_ax.set_xlabel(r'$\varphi$ [-]')
 
                 fake_ax.set_xticks([0, 90, 180, 270, 360])
                 #fake_ax.set_yticks(np.linspace(self.min(param), self.max(param), 7))
             else:
-                fake_ax.set_xlabel(label_str)
+                fake_ax.set_xlabel(label_str, loc = xlabel_loc)
                 fake_ax.set_ylabel(r'$\varphi$ [-]')
                 
                 fake_ax.set_yticks([0, 90, 180, 270, 360])
@@ -2252,6 +2276,9 @@ class Condition:
         if rotate:
             fig.add_subplot(fake_ax)
         ax.legend(loc=legend_loc, edgecolor='white')
+
+        if xlabel_loc_coords:
+            ax.xaxis.set_label_coords(*xlabel_loc_coords)
 
         fake_ax.set_aspect('auto', adjustable='datalim', share=True)
         ax.set_aspect('auto', adjustable='datalim', share=True)
@@ -2309,7 +2336,7 @@ class Condition:
             plt.close()
         return
 
-    def plot_contour(self, param:str, save_dir = '.', show=True, set_max = None, set_min = None, fig_size = 4, label_str = None,
+    def plot_contour(self, param:str, save_dir = '.', show=True, set_max = None, set_min = None, fig_size = 4, label_str = None, suppress_colorbar = False,
                      rot_angle = 0, ngridr = 50, ngridphi = 50, colormap = 'hot_r', num_levels = 0, level_step = 0.25, title = False, title_str = '', extra_text = '',
                      annotate_h = False, cartesian = False, h_star_kwargs = {'method': 'max_dsm', 'min_void': '0.05'}, plot_measured_points = False) -> None:
         
@@ -2436,7 +2463,7 @@ class Condition:
                         measured_rs[i] = - measured_rs[i]
                         measured_thetas[i] = (measured_thetas[i] + np.pi) % (2*np.pi)
 
-                ax.plot( measured_thetas, measured_rs, marker='o', fillstyle = 'none', mec = 'black', linewidth = 0, ms = 2)
+                ax.plot( measured_thetas, measured_rs, marker='o', fillstyle = 'none', mec = 'red', linewidth = 0, ms = 2)
 
         if annotate_h:
             if not cartesian:
@@ -2465,7 +2492,8 @@ class Condition:
         if label_str == None:
             label_str = param
 
-        fig.colorbar(mpbl, label=label_str)
+        if not suppress_colorbar:
+            fig.colorbar(mpbl, label=label_str)
 
         if title_str != '':
             title = True
