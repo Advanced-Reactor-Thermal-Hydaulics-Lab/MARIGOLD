@@ -122,7 +122,7 @@ class Condition:
         """
 
         Returns the value of param at (phi, r). Can get raw data, linear interp, or spline interp
-           phi in radians
+           *phi in radians*
 
            Can also return the value at (x, y) if linear_xy is selected as the interp method. phi -> x, r -> y
            
@@ -141,7 +141,14 @@ class Condition:
                 param_values = np.zeros((r_in.size, phi_in.size)) # TODO check if r_in and phi_in actually exist
                 for i, r_val in enumerate(r_in):
                     for j, phi_val in enumerate(phi_in):
-                        param_values[i,j] = self.phi[round(float(phi_val) * 180 / np.pi, 2)][r_val][param]
+                        try:
+                            param_values[i,j] = self.phi[round(float(phi_val) * 180 / np.pi, 2)][r_val][param]
+                        except KeyError as e:
+                            if abs(abs(r_val) - 1) < 0.0001:
+                                param_values[i,j] = 0
+                            else:
+                                print(e)
+                                raise
             except:
                 # Probably input a single phi instead of an array
                 param_values = self.phi[round(phi_in * 180 / np.pi, 2)][r_in][param]
@@ -539,6 +546,8 @@ class Condition:
         Note that if vg = 0, then this method says vr = 0. This will happen when no data is present,
         such as in the bottom of the pipe in horizontal, when this is not necessarily true
 
+        Also calculates vr_naive, and jf_naive
+
         warn_approx is a flag to print out a warning statement if vf is being approximated
 
         """
@@ -548,26 +557,41 @@ class Condition:
         for angle, r_dict in self.phi.items():
             for rstar, midas_dict in r_dict.items():
                 try:
-                    dummy = midas_dict['vf']
+                    vf = midas_dict['vf']
                 except:
                     if warn_approx:
                         print("Warning: Approximating vf in calculating vr, since no data found")
                         warn_approx = False
                     self.approx_vf()
+                    vf = midas_dict['vf']
                 vg = midas_dict['ug1']
+
+                try:
+                    vf_naive = midas_dict['vf_naive']
+                except:
+                    midas_dict.update({'vf_naive': vf})
+
                 if vg == 0: # should be the same as α = 0, could maybe switch this to that
                     vr = 0 # this is an assumption, similar to void weighting
+                    vr_naive = 0
+                    
                 else:
-                    vr = midas_dict['ug1'] - midas_dict['vf']
+                    vr = vg - vf
+
+                    vr_naive = vg - vf_naive
 
                 try:
                     if abs( midas_dict['vr'] - vr ) < 0.00001:
-                        continue
+                        pass
                     else:
                         print(f"Warning: vr already present for {rstar}, {angle}°, but doesn't match subtraction. Will update and overwrite")
                         midas_dict.update({'vr': vr})
                 except:
                     midas_dict.update({'vr': vr})
+
+                midas_dict.update({'vr_naive': vr_naive})
+                midas_dict.update({'jf_naive': midas_dict['vf_naive'] * (1-midas_dict['alpha'])})
+                    
 
         return
 

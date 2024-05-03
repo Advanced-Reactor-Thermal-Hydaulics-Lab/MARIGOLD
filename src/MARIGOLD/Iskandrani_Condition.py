@@ -1,6 +1,7 @@
 from .config import *
+from .Condition import Condition
 
-class Iskandrani_Condition:
+class Iskandrani_Condition(Condition):
     
     def __init__(self, jf, jg):
 

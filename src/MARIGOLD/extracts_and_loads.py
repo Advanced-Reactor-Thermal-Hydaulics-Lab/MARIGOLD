@@ -998,7 +998,7 @@ def loadPitotData(data_file = 'Pitot_Database.dat') -> list:
 
 def extractIskandraniData(dump_file='Iskandrani_Database.dat') -> None:
     try:
-        wb = op.load_workbook("Z:\\TRSL\\PITA\Data\\LocalData\\Iskandrani_Local_Velocity.xlsx")
+        wb = op.load_workbook("Z:\\TRSL\\PITA\Data\\LocalData\\Iskandrani\\Iskandrani_Local_Velocity.xlsx")
     except IOError as e:
         print(e)
         print("The path to the Iskandrani data is hardcoded, maybe the file moved?")
