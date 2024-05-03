@@ -2312,7 +2312,7 @@ class Condition:
             plt.close()
         return
 
-    def plot_contour(self, param:str, save_dir = '.', show=True, set_max = None, set_min = None, fig_size = 4, label_str = None,
+    def plot_contour(self, param:str, save_dir = '.', show=True, set_max = None, set_min = None, fig_size = 4, label_str = None, suppress_colorbar = False,
                      rot_angle = 0, ngridr = 50, ngridphi = 50, colormap = 'hot_r', num_levels = 0, level_step = 0.25, title = False, title_str = '', extra_text = '',
                      annotate_h = False, cartesian = False, h_star_kwargs = {'method': 'max_dsm', 'min_void': '0.05'}, plot_measured_points = False) -> None:
         
@@ -2468,7 +2468,8 @@ class Condition:
         if label_str == None:
             label_str = param
 
-        fig.colorbar(mpbl, label=label_str)
+        if not suppress_colorbar:
+            fig.colorbar(mpbl, label=label_str)
 
         if title_str != '':
             title = True
