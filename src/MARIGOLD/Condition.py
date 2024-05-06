@@ -554,13 +554,13 @@ class Condition:
         for angle, r_dict in self.phi.items():
             for rstar, midas_dict in r_dict.items():
                 try:
-                    dp = midas_dict['delta_p']
+                    dp = midas_dict['delta_p'] * 6894.757
                 except:
                     raise NotImplementedError("Δp needed for cacluclation of vf_lee")
                 
-                vf_lee = 1 / np.sqrt(1 - midas_dict['alpha']/2) * np.sqrt( 2 * dp / (K * rho_f))
+                vf_lee = 1 / np.sqrt(1 - midas_dict['alpha']**2/2) * np.sqrt( 2 * dp / (K * rho_f))
                 
-                midas_dict.update({'vf': vf_lee})
+                midas_dict.update({'vf_lee': vf_lee})
                 midas_dict.update({'jf_lee': (1-midas_dict['alpha'])* vf_lee})
                 
                 vg = midas_dict['ug1']
@@ -587,7 +587,7 @@ class Condition:
                     vf_naive = midas_dict['vf_naive']
                 except KeyError:
                     try:
-                        dp = midas_dict['delta_p']
+                        dp = midas_dict['delta_p'] * 6894.757
                     except:
                         raise NotImplementedError("Δp needed for cacluclation of vf_naive")
                     
