@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>extractProbeData &mdash; MARIGOLD 0.0.1 documentation</title>
+  <title>print_tab_keys &mdash; MARIGOLD 0.0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=eafc0fe6" />
@@ -21,9 +21,7 @@
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
-    <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="extractYangData" href="MARIGOLD.extractYangData.html" />
-    <link rel="prev" title="extractPitotData" href="MARIGOLD.extractPitotData.html" /> 
+    <link rel="search" title="Search" href="../search.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -45,16 +43,13 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <ul class="current">
+              <ul>
 <li class="toctree-l1"><a class="reference internal" href="MARIGOLD.color_cycle.html">color_cycle</a></li>
 <li class="toctree-l1"><a class="reference internal" href="MARIGOLD.dump_data_from_tabs.html">dump_data_from_tabs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="MARIGOLD.extractIskandraniData.html">extractIskandraniData</a></li>
 <li class="toctree-l1"><a class="reference internal" href="MARIGOLD.extractLocalDataFromDir.html">extractLocalDataFromDir</a></li>
 <li class="toctree-l1"><a class="reference internal" href="MARIGOLD.extractPitotData.html">extractPitotData</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">extractProbeData</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#MARIGOLD.extractProbeData"><code class="docutils literal notranslate"><span class="pre">extractProbeData()</span></code></a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="MARIGOLD.extractProbeData.html">extractProbeData</a></li>
 <li class="toctree-l1"><a class="reference internal" href="MARIGOLD.extractYangData.html">extractYangData</a></li>
 <li class="toctree-l1"><a class="reference internal" href="MARIGOLD.loadData.html">loadData</a></li>
 <li class="toctree-l1"><a class="reference internal" href="MARIGOLD.loadIskandraniData.html">loadIskandraniData</a></li>
@@ -83,9 +78,9 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">extractProbeData</li>
+      <li class="breadcrumb-item active">print_tab_keys</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="../_sources/api/MARIGOLD.extractProbeData.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/api/MARIGOLD.print_tab_keys.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -93,22 +88,20 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="extractprobedata">
-<h1>extractProbeData<a class="headerlink" href="#extractprobedata" title="Link to this heading"></a></h1>
+  <section id="print-tab-keys">
+<h1>print_tab_keys<a class="headerlink" href="#print-tab-keys" title="Link to this heading"></a></h1>
 <dl class="py function">
-<dt class="sig sig-object py" id="MARIGOLD.extractProbeData">
-<span class="sig-prename descclassname"><span class="pre">MARIGOLD.</span></span><span class="sig-name descname"><span class="pre">extractProbeData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dump_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'database.dat'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">in_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">require_terms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_terms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">['CFD',</span> <span class="pre">'Copy']</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extract_Ryan</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ryan_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Z:\\TRSL\\PITA\\Data\\LocalData\\spreadsheets\\PITA'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extract_Kong</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Kong_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Z:\\TRSL\\PITA\\Data\\LocalData\\spreadsheets\\101.6mm'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extract_Talley</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Talley_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Z:\\TRSL\\PITA\\Data\\LocalData\\spreadsheets\\38.1mm'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extract_Yadav</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Yadav_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Z:\\TRSL\\PITA\\Data\\LocalData\\spreadsheets\\50.8mm'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/MARIGOLD/extracts_and_loads.html#extractProbeData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.extractProbeData" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="MARIGOLD.print_tab_keys">
+<span class="sig-prename descclassname"><span class="pre">MARIGOLD.</span></span><span class="sig-name descname"><span class="pre">print_tab_keys</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/MARIGOLD/Condition.html#print_tab_keys"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.print_tab_keys" title="Link to this definition"></a></dt>
+<dd><p>Convenience function in case you forget a tab key</p>
+</dd></dl>
 
 </section>
 
 
            </div>
           </div>
-          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="MARIGOLD.extractPitotData.html" class="btn btn-neutral float-left" title="extractPitotData" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="MARIGOLD.extractYangData.html" class="btn btn-neutral float-right" title="extractYangData" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-    </div>
+          <footer>
 
   <hr/>
 

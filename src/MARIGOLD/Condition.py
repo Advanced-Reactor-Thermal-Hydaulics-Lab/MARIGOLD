@@ -545,7 +545,7 @@ class Condition:
 
         Really a model proposed by Bosio and Malnes
 
-        $ vf = frac{ 1 }{ \\sqrt{1 - \\alpha^{2} / 2} } * sqrt{ frac{ 2 \\Delta p }{K \\rho_{f}} } $
+        .. math:: vf = frac{ 1 }{ \\sqrt{1 - \\alpha^{2} / 2} } * sqrt{ frac{ 2 \\Delta p }{K \\rho_{f}} } 
         
         """
 
@@ -554,7 +554,7 @@ class Condition:
         for angle, r_dict in self.phi.items():
             for rstar, midas_dict in r_dict.items():
                 try:
-                    dp = midas_dict['dp']
+                    dp = midas_dict['delta_p']
                 except:
                     raise NotImplementedError("Δp needed for cacluclation of vf_lee")
                 
@@ -575,7 +575,7 @@ class Condition:
     def calc_vf_naive(self, rho_f = 998):
         """ Calculate vf, jf, vr based on single-phase equation
 
-        $ vf = sqrt{ frac{ 2 \\Delta p }{ \\rho_{f}} } $
+        .. math::  vf = sqrt{ frac{ 2 \\Delta p }{ \\rho_{f}} } 
         
         """
 
@@ -587,7 +587,7 @@ class Condition:
                     vf_naive = midas_dict['vf_naive']
                 except KeyError:
                     try:
-                        dp = midas_dict['dp']
+                        dp = midas_dict['delta_p']
                     except:
                         raise NotImplementedError("Δp needed for cacluclation of vf_naive")
                     
@@ -611,8 +611,6 @@ class Condition:
         Note that if vg = 0, then this method says vr = 0. This will happen when no data is present,
         such as in the bottom of the pipe in horizontal, when this is not necessarily true
 
-        Also calculates vr_naive, and jf_naive
-
         warn_approx is a flag to print out a warning statement if vf is being approximated
 
         """
@@ -630,11 +628,6 @@ class Condition:
                     self.approx_vf()
                     vf = midas_dict['vf']
                 vg = midas_dict['ug1']
-
-                try:
-                    vf_naive = midas_dict['vf_naive']
-                except:
-                    midas_dict.update({'vf_naive': vf})
 
                 if vg == 0: # should be the same as α = 0, could maybe switch this to that
                     vr = 0 # this is an assumption, similar to void weighting

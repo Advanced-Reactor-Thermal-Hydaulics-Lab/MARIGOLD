@@ -101,12 +101,12 @@
 <dl class="py class">
 <dt class="sig sig-object py" id="MARIGOLD.Iskandrani_Condition">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">MARIGOLD.</span></span><span class="sig-name descname"><span class="pre">Iskandrani_Condition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">jf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jg</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/MARIGOLD/Iskandrani_Condition.html#Iskandrani_Condition"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Iskandrani_Condition" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dd><p>Bases: <a class="reference internal" href="../modules/MARIGOLD.Condition.html#MARIGOLD.Condition" title="MARIGOLD.Condition.Condition"><code class="xref py py-class docutils literal notranslate"><span class="pre">Condition</span></code></a></p>
 <p class="rubric">Methods Summary</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">area_avg</span></code>(param)</p></td>
-<td><p></p></td>
+<td><p>Method for calculating the area-average of a parameter, &quot;param&quot;</p></td>
 </tr>
 </tbody>
 </table>
@@ -114,7 +114,13 @@
 <dl class="py method">
 <dt class="sig sig-object py" id="MARIGOLD.Iskandrani_Condition.area_avg">
 <span class="sig-name descname"><span class="pre">area_avg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">param</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/MARIGOLD/Iskandrani_Condition.html#Iskandrani_Condition.area_avg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Iskandrani_Condition.area_avg" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Method for calculating the area-average of a parameter, “param”</p>
+<p>param can be anything MIDAS outputs, but usually of interest are “alpha” or “alpha_ug”
+If you’re not sure what somethings named, try Condition.phi[90][1.0].keys()</p>
+<p>Uses Simpson’s rule for integration, even_opt passed to that. Will save the previously calculated area averages
+in Condition.area_avgs[param], and won’t recalculate unless recalc = True</p>
+<p>Returns the area-averaged parameter, or None if the method failed</p>
+</dd></dl>
 
 </dd></dl>
 
