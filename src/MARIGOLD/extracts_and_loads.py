@@ -685,6 +685,7 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
             ws = wb['2']
 
             cond.area_avg_void_sheet = ws['G266'].value
+            cond.area_avg_ai_sheet = ws['J266'].value
             
             for phi, indices in Q1_ranges:
                 for i in indices:
