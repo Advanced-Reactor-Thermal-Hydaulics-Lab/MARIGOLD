@@ -148,7 +148,7 @@ class Condition:
                                 param_values[i,j] = 0
                             else:
                                 print(e)
-                                raise
+                                raise 
             except:
                 # Probably input a single phi instead of an array
                 param_values = self.phi[round(phi_in * 180 / np.pi, 2)][r_in][param]
@@ -540,6 +540,71 @@ class Condition:
 
         return
     
+    def calc_vf_lee(self, K=1, rho_f = 998):
+        """ Calculate vf, jf, vr based on Lee et al. (2002) equation
+
+        Really a model proposed by Bosio and Malnes
+
+        $ vf = frac{ 1 }{ \\sqrt{1 - \\alpha^{2} / 2} } * sqrt{ frac{ 2 \\Delta p }{K \\rho_{f}} } $
+        
+        """
+
+        self.mirror()
+
+        for angle, r_dict in self.phi.items():
+            for rstar, midas_dict in r_dict.items():
+                try:
+                    dp = midas_dict['dp']
+                except:
+                    raise NotImplementedError("Δp needed for cacluclation of vf_lee")
+                
+                vf_lee = 1 / np.sqrt(1 - midas_dict['alpha']/2) * np.sqrt( 2 * dp / (K * rho_f))
+                
+                midas_dict.update({'vf': vf_lee})
+                midas_dict.update({'jf_lee': (1-midas_dict['alpha'])* vf_lee})
+                
+                vg = midas_dict['ug1']
+                if vg == 0:
+                    vr_lee = 0
+                else:
+                    vr_lee = vg - vf_lee
+                midas_dict.update({'vr_lee':  vr_lee})
+
+        return
+    
+    def calc_vf_naive(self, rho_f = 998):
+        """ Calculate vf, jf, vr based on single-phase equation
+
+        $ vf = sqrt{ frac{ 2 \\Delta p }{ \\rho_{f}} } $
+        
+        """
+
+        self.mirror()
+
+        for angle, r_dict in self.phi.items():
+            for rstar, midas_dict in r_dict.items():
+                try:
+                    vf_naive = midas_dict['vf_naive']
+                except KeyError:
+                    try:
+                        dp = midas_dict['dp']
+                    except:
+                        raise NotImplementedError("Δp needed for cacluclation of vf_naive")
+                    
+                    vf_naive = np.sqrt( 2*dp / rho_f)
+                
+                midas_dict.update({'vf_naive': vf_naive})
+                midas_dict.update({'jf_naive': (1-midas_dict['alpha'])* vf_naive})
+                
+                vg = midas_dict['ug1']
+                if vg == 0:
+                    vr_naive = 0
+                else:
+                    vr_naive = vg - vf_naive
+                midas_dict.update({'vr_naive':  vr_naive})
+
+        return
+    
     def calc_vr(self, warn_approx = True) -> None:
         """Method for calculating relative velocity. Will approximate vf if it cannot be found.
 
@@ -573,12 +638,9 @@ class Condition:
 
                 if vg == 0: # should be the same as α = 0, could maybe switch this to that
                     vr = 0 # this is an assumption, similar to void weighting
-                    vr_naive = 0
                     
                 else:
                     vr = vg - vf
-
-                    vr_naive = vg - vf_naive
 
                 try:
                     if abs( midas_dict['vr'] - vr ) < 0.00001:
@@ -588,9 +650,6 @@ class Condition:
                         midas_dict.update({'vr': vr})
                 except:
                     midas_dict.update({'vr': vr})
-
-                midas_dict.update({'vr_naive': vr_naive})
-                midas_dict.update({'jf_naive': midas_dict['vf_naive'] * (1-midas_dict['alpha'])})
                     
 
         return
