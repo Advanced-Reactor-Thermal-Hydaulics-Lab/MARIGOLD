@@ -657,9 +657,6 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
 
             ws = wb['1']
 
-            # Local corrected gauge pressure can be back-calculated from jgloc and jgatm
-            cond.jgatm = ws['D6'].value
-            
             jglocs = ['O16', 'O17', 'O18', 'O19', 'O20']
             try:
                 jgloc = ws[jglocs[int(re.findall(r'\d+', port)[0])-1]].value
@@ -681,6 +678,9 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                 cond = all_conditions[ all_conditions.index(newCond) ]
 
             cond.run_ID = ws['B2'].value
+
+            # Local corrected gauge pressure can be back-calculated from jgloc and jgatm
+            cond.jgatm = ws['D6'].value
             
             ws = wb['2']
 
