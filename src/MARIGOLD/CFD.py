@@ -939,8 +939,7 @@ END \n\
 END \n\
 COMMAND FILE: \n\
 Version = 22.2 \n\
-END
-    "
+END"
 
         print(strToWrite, file = fi)
         return
