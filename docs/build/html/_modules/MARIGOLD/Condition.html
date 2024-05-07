@@ -90,6 +90,7 @@
   <h1>Source code for MARIGOLD.Condition</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">.config</span> <span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">interpolate</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
 
 <div class="viewcode-block" id="Condition">
 <a class="viewcode-back" href="../../modules/MARIGOLD.Condition.html#MARIGOLD.Condition">[docs]</a>
@@ -218,19 +219,35 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        Returns the value of param at (phi, r). Can get raw data, linear interp, or spline interp</span>
-<span class="sd">           phi in radians</span>
+<span class="sd">           *phi in radians*</span>
 
 <span class="sd">           Can also return the value at (x, y) if linear_xy is selected as the interp method. phi -&gt; x, r -&gt; y</span>
 <span class="sd">           </span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">phi_in</span><span class="p">)</span> <span class="o">!=</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Converting phi_in to np.ndarray&quot;</span><span class="p">)</span>
+            <span class="n">phi_in</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">phi_in</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">r_in</span><span class="p">)</span> <span class="o">!=</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Converting r_in to np.ndarray&quot;</span><span class="p">)</span>
+            <span class="n">r_in</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">r_in</span><span class="p">)</span>
+
         
         <span class="k">if</span> <span class="n">interp_method</span> <span class="o">==</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="n">param_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">r_in</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">phi_in</span><span class="o">.</span><span class="n">size</span><span class="p">)</span> <span class="c1"># TODO check if r_in and phi_in actually exist</span>
+                <span class="n">param_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">r_in</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">phi_in</span><span class="o">.</span><span class="n">size</span><span class="p">))</span> <span class="c1"># TODO check if r_in and phi_in actually exist</span>
                 <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">r_val</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">r_in</span><span class="p">):</span>
                     <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">phi_val</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">phi_in</span><span class="p">):</span>
-                        <span class="n">param_values</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">phi</span><span class="p">[</span><span class="nb">round</span><span class="p">(</span><span class="n">phi_val</span> <span class="o">*</span> <span class="mi">180</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="mi">2</span><span class="p">)][</span><span class="n">r_val</span><span class="p">][</span><span class="n">param</span><span class="p">]</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">param_values</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">phi</span><span class="p">[</span><span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">phi_val</span><span class="p">)</span> <span class="o">*</span> <span class="mi">180</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="mi">2</span><span class="p">)][</span><span class="n">r_val</span><span class="p">][</span><span class="n">param</span><span class="p">]</span>
+                        <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">r_val</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">0.0001</span><span class="p">:</span>
+                                <span class="n">param_values</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                                <span class="k">raise</span> 
             <span class="k">except</span><span class="p">:</span>
+                <span class="c1"># Probably input a single phi instead of an array</span>
                 <span class="n">param_values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">phi</span><span class="p">[</span><span class="nb">round</span><span class="p">(</span><span class="n">phi_in</span> <span class="o">*</span> <span class="mi">180</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="mi">2</span><span class="p">)][</span><span class="n">r_in</span><span class="p">][</span><span class="n">param</span><span class="p">]</span>
             <span class="k">return</span> <span class="n">param_values</span>
         
@@ -306,8 +323,12 @@
 <span class="sd">        each has data. Either copying, assuming some kind of symmetry (either</span>
 <span class="sd">        axisym or sym90) or just filling in zeros. </span>
 
+<span class="sd">        Axisym = True will find the angle with the most data (i.e. the most r/R</span>
+<span class="sd">        locations with data available) and copy it to every other angle in _angles</span>
+
 <span class="sd">        uniform_rmesh will ensure every angle has data for every r/R point. Will</span>
-<span class="sd">        linearly interpolate when data on either side is available</span>
+<span class="sd">        linearly interpolate when data on either side is available. This only </span>
+<span class="sd">        considers the +r/R mesh</span>
 <span class="sd">        </span>
 <span class="sd">        Force_remirror is untested, no clue if it&#39;s safe or not</span>
 <span class="sd">        </span>
@@ -379,8 +400,9 @@
                 <span class="n">rs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">phi</span><span class="p">[</span><span class="n">angle</span><span class="p">])</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
 
                 <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">rs</span><span class="p">:</span>
-                    <span class="n">all_rs</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+                    
                     <span class="k">if</span> <span class="n">r</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">all_rs</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
                         <span class="n">data</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
                 
                 <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">rs</span><span class="p">:</span>
@@ -420,10 +442,14 @@
         <span class="c1"># Now comes the actual mirroring step. Need data for every angle, incremements of 22.5° (self._angles)</span>
         <span class="k">if</span> <span class="n">axisym</span><span class="p">:</span> 
             <span class="c1"># axisymmetric</span>
+            <span class="c1"># Find the reference angle with the most data</span>
+            <span class="n">ref_angle</span> <span class="o">=</span> <span class="n">angles_with_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="c1"># initial guess</span>
+            <span class="k">for</span> <span class="n">angle</span> <span class="ow">in</span> <span class="n">angles_with_data</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">phi</span><span class="p">[</span><span class="n">ref_angle</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">phi</span><span class="p">[</span><span class="n">angle</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+                    <span class="n">ref_angle</span> <span class="o">=</span> <span class="n">angle</span>
+            
             <span class="k">for</span> <span class="n">angle</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_angles</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">angle</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">angles_with_data</span><span class="p">:</span>
-                    <span class="n">ref_angle</span> <span class="o">=</span> <span class="n">angles_with_data</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-                    <span class="n">data</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">phi</span><span class="p">[</span><span class="n">ref_angle</span><span class="p">]</span> <span class="p">)</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">phi</span><span class="p">[</span><span class="n">ref_angle</span><span class="p">]</span> <span class="p">)</span>
                 
                 <span class="n">data</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="mf">1.0</span><span class="p">:</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">zero_data</span><span class="p">)})</span> 
                 <span class="bp">self</span><span class="o">.</span><span class="n">phi</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">angle</span><span class="p">:</span> <span class="p">{}})</span>
@@ -578,6 +604,33 @@
         <span class="k">return</span></div>
 
     
+    <span class="k">def</span> <span class="nf">approx_vg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Method for approximating vg with power-law relation. I don&#39;t think this makes sense</span>
+
+<span class="sd">        vg_approx = (n+1)*(2*n+1) / (2*n*n) * (jg / (self.area_avg(&#39;alpha&#39;))) * (1 - abs(rstar))**(1/n)</span>
+
+<span class="sd">        Will not overwrite vg data if it already exists, but will always store data in </span>
+<span class="sd">        midas_dict[&#39;vg_approx&#39;] even if midas_dict[&#39;ug1&#39;] has data</span>
+
+<span class="sd">        If you have a lot of group II bubbles this functions&#39; no good</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">mirror</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">angle</span><span class="p">,</span> <span class="n">r_dict</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">phi</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">rstar</span><span class="p">,</span> <span class="n">midas_dict</span> <span class="ow">in</span> <span class="n">r_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">vg_approx</span> <span class="o">=</span> <span class="p">(</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">n</span><span class="o">*</span><span class="n">n</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">jgloc</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">area_avg</span><span class="p">(</span><span class="s1">&#39;alpha&#39;</span><span class="p">)))</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="nb">abs</span><span class="p">(</span><span class="n">rstar</span><span class="p">))</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">n</span><span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">dummy</span> <span class="o">=</span> <span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;ug1&#39;</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="n">debug</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;approx_vg: data found for </span><span class="si">{</span><span class="n">angle</span><span class="si">}</span><span class="se">\t</span><span class="si">{</span><span class="n">rstar</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">debugFID</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">midas_dict</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;ug1&#39;</span><span class="p">:</span> <span class="n">vg_approx</span><span class="p">})</span>
+                
+                <span class="n">midas_dict</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;vg_approx&#39;</span><span class="p">:</span> <span class="n">vg_approx</span><span class="p">})</span>
+
+        <span class="k">return</span>
+    
 <div class="viewcode-block" id="Condition.approx_vf_Kong">
 <a class="viewcode-back" href="../../api/MARIGOLD.Condition.html#MARIGOLD.Condition.approx_vf_Kong">[docs]</a>
     <span class="k">def</span> <span class="nf">approx_vf_Kong</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -597,6 +650,71 @@
         <span class="k">return</span></div>
 
     
+    <span class="k">def</span> <span class="nf">calc_vf_lee</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">K</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">rho_f</span> <span class="o">=</span> <span class="mi">998</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Calculate vf, jf, vr based on Lee et al. (2002) equation</span>
+
+<span class="sd">        Really a model proposed by Bosio and Malnes</span>
+
+<span class="sd">        .. math:: vf = frac{ 1 }{ \\sqrt{1 - \\alpha^{2} / 2} } * sqrt{ frac{ 2 \\Delta p }{K \\rho_{f}} } </span>
+<span class="sd">        </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">mirror</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">angle</span><span class="p">,</span> <span class="n">r_dict</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">phi</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">rstar</span><span class="p">,</span> <span class="n">midas_dict</span> <span class="ow">in</span> <span class="n">r_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">dp</span> <span class="o">=</span> <span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;dp&#39;</span><span class="p">]</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Δp needed for cacluclation of vf_lee&quot;</span><span class="p">)</span>
+                
+                <span class="n">vf_lee</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;alpha&#39;</span><span class="p">]</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">dp</span> <span class="o">/</span> <span class="p">(</span><span class="n">K</span> <span class="o">*</span> <span class="n">rho_f</span><span class="p">))</span>
+                
+                <span class="n">midas_dict</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;vf&#39;</span><span class="p">:</span> <span class="n">vf_lee</span><span class="p">})</span>
+                <span class="n">midas_dict</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;jf_lee&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;alpha&#39;</span><span class="p">])</span><span class="o">*</span> <span class="n">vf_lee</span><span class="p">})</span>
+                
+                <span class="n">vg</span> <span class="o">=</span> <span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;ug1&#39;</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">vg</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">vr_lee</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">vr_lee</span> <span class="o">=</span> <span class="n">vg</span> <span class="o">-</span> <span class="n">vf_lee</span>
+                <span class="n">midas_dict</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;vr_lee&#39;</span><span class="p">:</span>  <span class="n">vr_lee</span><span class="p">})</span>
+
+        <span class="k">return</span>
+    
+    <span class="k">def</span> <span class="nf">calc_vf_naive</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rho_f</span> <span class="o">=</span> <span class="mi">998</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Calculate vf, jf, vr based on single-phase equation</span>
+
+<span class="sd">        .. math::  vf = sqrt{ frac{ 2 \\Delta p }{ \\rho_{f}} } </span>
+<span class="sd">        </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">mirror</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">angle</span><span class="p">,</span> <span class="n">r_dict</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">phi</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">rstar</span><span class="p">,</span> <span class="n">midas_dict</span> <span class="ow">in</span> <span class="n">r_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">vf_naive</span> <span class="o">=</span> <span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;vf_naive&#39;</span><span class="p">]</span>
+                <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">dp</span> <span class="o">=</span> <span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;dp&#39;</span><span class="p">]</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Δp needed for cacluclation of vf_naive&quot;</span><span class="p">)</span>
+                    
+                    <span class="n">vf_naive</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span> <span class="mi">2</span><span class="o">*</span><span class="n">dp</span> <span class="o">/</span> <span class="n">rho_f</span><span class="p">)</span>
+                
+                <span class="n">midas_dict</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;vf_naive&#39;</span><span class="p">:</span> <span class="n">vf_naive</span><span class="p">})</span>
+                <span class="n">midas_dict</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;jf_naive&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;alpha&#39;</span><span class="p">])</span><span class="o">*</span> <span class="n">vf_naive</span><span class="p">})</span>
+                
+                <span class="n">vg</span> <span class="o">=</span> <span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;ug1&#39;</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">vg</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">vr_naive</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">vr_naive</span> <span class="o">=</span> <span class="n">vg</span> <span class="o">-</span> <span class="n">vf_naive</span>
+                <span class="n">midas_dict</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;vr_naive&#39;</span><span class="p">:</span>  <span class="n">vr_naive</span><span class="p">})</span>
+
+        <span class="k">return</span>
+    
 <div class="viewcode-block" id="Condition.calc_vr">
 <a class="viewcode-back" href="../../api/MARIGOLD.Condition.html#MARIGOLD.Condition.calc_vr">[docs]</a>
     <span class="k">def</span> <span class="nf">calc_vr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">warn_approx</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -604,6 +722,8 @@
 
 <span class="sd">        Note that if vg = 0, then this method says vr = 0. This will happen when no data is present,</span>
 <span class="sd">        such as in the bottom of the pipe in horizontal, when this is not necessarily true</span>
+
+<span class="sd">        Also calculates vr_naive, and jf_naive</span>
 
 <span class="sd">        warn_approx is a flag to print out a warning statement if vf is being approximated</span>
 
@@ -614,18 +734,35 @@
         <span class="k">for</span> <span class="n">angle</span><span class="p">,</span> <span class="n">r_dict</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">phi</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">for</span> <span class="n">rstar</span><span class="p">,</span> <span class="n">midas_dict</span> <span class="ow">in</span> <span class="n">r_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                 <span class="k">try</span><span class="p">:</span>
-                    <span class="n">dummy</span> <span class="o">=</span> <span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;vf&#39;</span><span class="p">]</span>
+                    <span class="n">vf</span> <span class="o">=</span> <span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;vf&#39;</span><span class="p">]</span>
                 <span class="k">except</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">warn_approx</span><span class="p">:</span>
                         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Warning: Approximating vf in calculating vr, since no data found&quot;</span><span class="p">)</span>
                         <span class="n">warn_approx</span> <span class="o">=</span> <span class="kc">False</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">approx_vf</span><span class="p">()</span>
+                    <span class="n">vf</span> <span class="o">=</span> <span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;vf&#39;</span><span class="p">]</span>
                 <span class="n">vg</span> <span class="o">=</span> <span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;ug1&#39;</span><span class="p">]</span>
+
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">vf_naive</span> <span class="o">=</span> <span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;vf_naive&#39;</span><span class="p">]</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">midas_dict</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;vf_naive&#39;</span><span class="p">:</span> <span class="n">vf</span><span class="p">})</span>
+
                 <span class="k">if</span> <span class="n">vg</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> <span class="c1"># should be the same as α = 0, could maybe switch this to that</span>
                     <span class="n">vr</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1"># this is an assumption, similar to void weighting</span>
+                    
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">vr</span> <span class="o">=</span> <span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;ug1&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;vf&#39;</span><span class="p">]</span>
-                <span class="n">midas_dict</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;vr&#39;</span><span class="p">:</span> <span class="n">vr</span><span class="p">})</span>
+                    <span class="n">vr</span> <span class="o">=</span> <span class="n">vg</span> <span class="o">-</span> <span class="n">vf</span>
+
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span> <span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;vr&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">vr</span> <span class="p">)</span> <span class="o">&lt;</span> <span class="mf">0.00001</span><span class="p">:</span>
+                        <span class="k">pass</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Warning: vr already present for </span><span class="si">{</span><span class="n">rstar</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">angle</span><span class="si">}</span><span class="s2">°, but doesn&#39;t match subtraction. Will update and overwrite&quot;</span><span class="p">)</span>
+                        <span class="n">midas_dict</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;vr&#39;</span><span class="p">:</span> <span class="n">vr</span><span class="p">})</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">midas_dict</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;vr&#39;</span><span class="p">:</span> <span class="n">vr</span><span class="p">})</span>
+                    
 
         <span class="k">return</span></div>
 
@@ -639,6 +776,7 @@
 <span class="sd">        vgj = midas_dict[&#39;ug1&#39;] - j_local</span>
 
 <span class="sd">        stored in midas_dict[&#39;vgj&#39;]</span>
+<span class="sd">        also stores local j, midas_dict[&#39;j&#39;]</span>
 
 <span class="sd">        warn_approx is a flag to print out a warning statement if vf is being approximated, which will</span>
 <span class="sd">        happen if not found</span>
@@ -659,7 +797,10 @@
                 
                 <span class="n">j_local</span> <span class="o">=</span> <span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;alpha&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;ug1&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;alpha&#39;</span><span class="p">])</span> <span class="o">*</span> <span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;vf&#39;</span><span class="p">]</span>
                 <span class="n">vgj</span> <span class="o">=</span> <span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;ug1&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">j_local</span>
+                <span class="n">alpha_j</span> <span class="o">=</span> <span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;alpha&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">j_local</span>
                 <span class="n">midas_dict</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;vgj&#39;</span><span class="p">:</span> <span class="n">vgj</span><span class="p">})</span>
+                <span class="n">midas_dict</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;j&#39;</span><span class="p">:</span> <span class="n">j_local</span><span class="p">})</span>
+                <span class="n">midas_dict</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;alpha_j&#39;</span><span class="p">:</span> <span class="n">alpha_j</span><span class="p">})</span>
 
         <span class="k">return</span></div>
 
@@ -1134,6 +1275,27 @@
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">NaN</span></div>
 
 
+    <span class="k">def</span> <span class="nf">avg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">include_nonzero</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculates a basic average of a parameter, &quot;param&quot;</span>
+<span class="sd">        </span>
+<span class="sd">        Just looks at every param and ensemble-averages them</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">avg_param</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">angle</span><span class="p">,</span> <span class="n">r_dict</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">phi</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">rstar</span><span class="p">,</span> <span class="n">midas_dict</span> <span class="ow">in</span> <span class="n">r_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                
+                <span class="k">if</span> <span class="n">include_nonzero</span><span class="p">:</span>
+                    <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="n">avg_param</span> <span class="o">+=</span> <span class="n">midas_dict</span><span class="p">[</span><span class="n">param</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">midas_dict</span><span class="p">[</span><span class="n">param</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+                        <span class="n">avg_param</span> <span class="o">+=</span> <span class="n">midas_dict</span><span class="p">[</span><span class="n">param</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">avg_param</span> <span class="o">/</span> <span class="n">count</span>
+
 <div class="viewcode-block" id="Condition.area_avg">
 <a class="viewcode-back" href="../../api/MARIGOLD.Condition.html#MARIGOLD.Condition.area_avg">[docs]</a>
     <span class="k">def</span> <span class="nf">area_avg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">even_opt</span><span class="o">=</span><span class="s1">&#39;first&#39;</span><span class="p">,</span> <span class="n">recalc</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
@@ -1168,7 +1330,9 @@
         <span class="n">param_r</span> <span class="o">=</span> <span class="p">[]</span> <span class="c1"># array for parameter integrated wrt r</span>
         <span class="n">angles</span> <span class="o">=</span> <span class="p">[]</span>
         
-        <span class="bp">self</span><span class="o">.</span><span class="n">mirror</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">mirrored</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Mirroring in area-avg&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mirror</span><span class="p">()</span>
 
 
         <span class="k">for</span> <span class="n">angle</span><span class="p">,</span> <span class="n">r_dict</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">phi</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
@@ -1970,7 +2134,7 @@
 
 <div class="viewcode-block" id="Condition.calc_vr_model">
 <a class="viewcode-back" href="../../api/MARIGOLD.Condition.html#MARIGOLD.Condition.calc_vr_model">[docs]</a>
-    <span class="k">def</span> <span class="nf">calc_vr_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;wake_1&#39;</span><span class="p">,</span> <span class="n">c3</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.15</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">iterate_cd</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">quiet</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">calc_vr_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;wake_1&#39;</span><span class="p">,</span> <span class="n">kw</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.15</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">Lw</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span> <span class="n">kf</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span> <span class="n">iterate_cd</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">quiet</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Method for calculating relative velocity based on models</span>
 <span class="sd">        </span>
 <span class="sd">        Stored under &quot;vr_method&quot; in midas_dict as well as &quot;vr_model&quot;</span>
@@ -1978,10 +2142,12 @@
 <span class="sd">        TODO implement Ishii-Chawla</span>
 
 <span class="sd">        Implemented options:</span>
-<span class="sd">        - &quot;wake_1&quot; vr = - c3 * vf * Cd**(1./3)</span>
-<span class="sd">        - &quot;wake_alpha&quot; vr = - c3 * (1-α)^n * vf * Cd**(1./3)</span>
-<span class="sd">        - &quot;wake_alpha2&quot; vr = - c3 *  (α*(1-α))^n * vf * Cd**(1./3)</span>
-<span class="sd">        - &quot;wake_lambda&quot; = - c3 * vf * Cd**(1./3) * Db**(2./3) * λ**(-2./3)</span>
+<span class="sd">        - &quot;wake_1&quot; vr = - kw * vf * Cd**(1./3)</span>
+<span class="sd">        - &quot;wake_alpha&quot; vr = - kw * (1-α)^n * vf * Cd**(1./3)</span>
+<span class="sd">        - &quot;wake_alpha2&quot; vr = - kw *  (α*(1-α))^n * vf * Cd**(1./3)</span>
+<span class="sd">        - &quot;wake_lambda&quot; = - kw * vf * Cd**(1./3) * Db**(2./3) * λ**(-2./3)</span>
+
+<span class="sd">        Lw really Lw*, effective wake length divided by the bubble diameter</span>
 
 
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -1989,6 +2155,11 @@
         <span class="n">MAX_ITERATIONS</span> <span class="o">=</span> <span class="mi">10000</span>
         <span class="n">iterations</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="n">initialize_vr</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">dummy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">random_point</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">random_point</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">original_mesh</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">original_mesh</span><span class="p">))]</span>
 
         <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">iterate_cd</span><span class="p">:</span>
@@ -2008,26 +2179,49 @@
             <span class="n">old_vr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">area_avg</span><span class="p">(</span><span class="s1">&#39;vr_model&#39;</span><span class="p">,</span> <span class="n">recalc</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
             <span class="n">vr_name</span> <span class="o">=</span> <span class="s2">&quot;vr_&quot;</span> <span class="o">+</span> <span class="n">method</span>
+
             <span class="k">for</span> <span class="n">angle</span><span class="p">,</span> <span class="n">r_dict</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">phi</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                 <span class="k">for</span> <span class="n">rstar</span><span class="p">,</span> <span class="n">midas_dict</span> <span class="ow">in</span> <span class="n">r_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                     
                     <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;wake_1&#39;</span><span class="p">:</span>
-                        <span class="n">vr</span> <span class="o">=</span> <span class="n">c3</span>  <span class="o">*</span> <span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;vf&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;cd&#39;</span><span class="p">]</span><span class="o">**</span><span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span>
+                        <span class="n">vr</span> <span class="o">=</span> <span class="n">kw</span>  <span class="o">*</span> <span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;vf&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;cd&#39;</span><span class="p">]</span><span class="o">**</span><span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span>
                     
                     <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;wake_alpha&#39;</span><span class="p">:</span>
-                        <span class="n">vr</span> <span class="o">=</span> <span class="n">c3</span>  <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;alpha&#39;</span><span class="p">])</span><span class="o">**</span><span class="n">n</span> <span class="o">*</span> <span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;vf&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;cd&#39;</span><span class="p">]</span><span class="o">**</span><span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span>
+                        <span class="n">vr</span> <span class="o">=</span> <span class="n">kw</span>  <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;alpha&#39;</span><span class="p">])</span><span class="o">**</span><span class="n">n</span> <span class="o">*</span> <span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;vf&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;cd&#39;</span><span class="p">]</span><span class="o">**</span><span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span>
                     
                     <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;wake_alpha2&#39;</span><span class="p">:</span>
-                        <span class="n">vr</span> <span class="o">=</span> <span class="n">c3</span>  <span class="o">*</span> <span class="p">(</span><span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;alpha&#39;</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;alpha&#39;</span><span class="p">]))</span><span class="o">**</span><span class="n">n</span> <span class="o">*</span> <span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;vf&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;cd&#39;</span><span class="p">]</span><span class="o">**</span><span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span>
+                        <span class="n">vr</span> <span class="o">=</span> <span class="n">kw</span>  <span class="o">*</span> <span class="p">(</span><span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;alpha&#39;</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;alpha&#39;</span><span class="p">]))</span><span class="o">**</span><span class="n">n</span> <span class="o">*</span> <span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;vf&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;cd&#39;</span><span class="p">]</span><span class="o">**</span><span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span>
 
                     <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;wake_lambda&#39;</span><span class="p">:</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">calc_avg_lat_sep</span><span class="p">()</span>
-                        <span class="n">vr</span> <span class="o">=</span> <span class="n">c3</span>  <span class="o">*</span> <span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;vf&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;cd&#39;</span><span class="p">]</span><span class="o">**</span><span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span> <span class="o">*</span> <span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;Dsm1&#39;</span><span class="p">]</span><span class="o">**</span><span class="p">(</span><span class="mi">2</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span> <span class="o">*</span> <span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;lambda&#39;</span><span class="p">]</span><span class="o">**</span><span class="p">(</span><span class="o">-</span><span class="mf">2.</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span>
+                        <span class="n">vr</span> <span class="o">=</span> <span class="n">kw</span>  <span class="o">*</span> <span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;vf&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;cd&#39;</span><span class="p">]</span><span class="o">**</span><span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span> <span class="o">*</span> <span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;Dsm1&#39;</span><span class="p">]</span><span class="o">**</span><span class="p">(</span><span class="mi">2</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span> <span class="o">*</span> <span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;lambda&#39;</span><span class="p">]</span><span class="o">**</span><span class="p">(</span><span class="o">-</span><span class="mf">2.</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span>
 
                     <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;wake_vg_lambda&#39;</span><span class="p">:</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">calc_avg_lat_sep</span><span class="p">()</span>
-                        <span class="n">vr</span> <span class="o">=</span> <span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;ug1&#39;</span><span class="p">]</span> <span class="o">/</span><span class="p">(</span><span class="mi">2</span> <span class="o">+</span> <span class="n">c3</span> <span class="o">*</span> <span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;cd&#39;</span><span class="p">]</span><span class="o">**</span><span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span> <span class="o">*</span> <span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;Dsm1&#39;</span><span class="p">]</span><span class="o">**</span><span class="p">(</span><span class="mi">2</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span> <span class="o">*</span> <span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;lambda&#39;</span><span class="p">]</span><span class="o">**</span><span class="p">(</span><span class="o">-</span><span class="mf">2.</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span> <span class="p">)</span>
+                        <span class="n">vr</span> <span class="o">=</span> <span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;ug1&#39;</span><span class="p">]</span> <span class="o">/</span><span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">kw</span> <span class="o">*</span> <span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;cd&#39;</span><span class="p">]</span><span class="o">**</span><span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span> <span class="o">*</span> <span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;Dsm1&#39;</span><span class="p">]</span><span class="o">**</span><span class="p">(</span><span class="mi">2</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span> <span class="o">*</span> <span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;lambda&#39;</span><span class="p">]</span><span class="o">**</span><span class="p">(</span><span class="o">-</span><span class="mf">2.</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span> <span class="p">)</span>
 
+                    <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;hubris&#39;</span> <span class="ow">or</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;wake_vr&#39;</span><span class="p">:</span>
+                        <span class="n">cd</span> <span class="o">=</span> <span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;cd&#39;</span><span class="p">]</span>
+                        <span class="n">c2</span> <span class="o">=</span> <span class="n">kw</span>
+                        <span class="n">vr</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="o">*</span> <span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;ug1&#39;</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="mi">3</span> <span class="o">*</span><span class="n">kw</span><span class="o">*</span> <span class="n">cd</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="p">(</span><span class="mi">2</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span> <span class="o">-</span> <span class="mi">2</span><span class="o">*</span> <span class="n">Lw</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">))</span> <span class="o">-</span> <span class="mi">2</span><span class="o">*</span> <span class="n">Lw</span> <span class="o">+</span> <span class="mi">6</span><span class="o">*</span> <span class="n">c2</span><span class="o">**</span><span class="p">(</span><span class="mi">3</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">cd</span><span class="p">)</span> <span class="o">*</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arctan</span><span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">c2</span><span class="p">)</span> <span class="o">*</span> <span class="n">cd</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">6</span><span class="p">)))</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">c2</span><span class="p">)</span><span class="o">*</span> <span class="n">cd</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">6</span><span class="p">))</span><span class="o">/</span><span class="n">Lw</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">)))))</span>
+                    
+                    <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;km1&#39;</span><span class="p">:</span>
+                        <span class="n">vr</span> <span class="o">=</span> <span class="n">kw</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">4</span><span class="p">)</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span> <span class="o">*</span> <span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;alpha&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;vf&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;cd&#39;</span><span class="p">]</span><span class="o">**</span><span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span> <span class="o">*</span>  <span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="p">(</span><span class="o">-</span><span class="mf">1.</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span> <span class="o">-</span> <span class="n">Lw</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">))</span><span class="o">/</span><span class="p">(</span><span class="mf">0.5</span> <span class="o">-</span> <span class="n">Lw</span><span class="p">)</span> <span class="o">+</span> <span class="n">kf</span> <span class="o">*</span> <span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;vf&#39;</span><span class="p">]</span>
+                    
+                    <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;km1_simp&#39;</span><span class="p">:</span>
+                        <span class="n">vr</span> <span class="o">=</span> <span class="o">-</span><span class="n">kw</span> <span class="o">*</span> <span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;alpha&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;vf&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;cd&#39;</span><span class="p">]</span><span class="o">**</span><span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span> <span class="o">-</span> <span class="n">kf</span> <span class="o">*</span> <span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;vf&#39;</span><span class="p">]</span>
+
+                    <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;proper_integral&#39;</span><span class="p">:</span>
+                        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;This method is probably no good, messed up the math&quot;</span><span class="p">)</span>
+                        <span class="n">vr</span> <span class="o">=</span> <span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;ug1&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span> <span class="p">(</span><span class="mf">0.5</span> <span class="o">-</span> <span class="n">Lw</span><span class="p">)</span> <span class="o">+</span> <span class="n">kw</span> <span class="o">*</span> <span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;cd&#39;</span><span class="p">]</span><span class="o">**</span><span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span> <span class="o">*</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">4</span><span class="p">)</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span><span class="o">*</span> <span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="p">(</span><span class="o">-</span><span class="mf">1.</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span> <span class="o">-</span> <span class="n">Lw</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">)))</span>
+
+                    <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;proper_integral_alpha&#39;</span><span class="p">:</span>
+                        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;This method is probably no good, messed up the math&quot;</span><span class="p">)</span>
+                        <span class="n">vr</span> <span class="o">=</span> <span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;ug1&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span> <span class="p">(</span><span class="mf">0.5</span> <span class="o">-</span> <span class="n">Lw</span><span class="p">)</span> <span class="o">+</span> <span class="n">kw</span> <span class="o">*</span> <span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;alpha&#39;</span><span class="p">]</span><span class="o">**</span><span class="n">n</span> <span class="o">*</span><span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;cd&#39;</span><span class="p">]</span><span class="o">**</span><span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span> <span class="o">*</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">4</span><span class="p">)</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span><span class="o">*</span> <span class="p">(</span><span class="mf">0.5</span><span class="o">**</span><span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span> <span class="o">-</span> <span class="n">Lw</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">)))</span>
+
+                        <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">angle</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">random_point</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="p">)</span> <span class="o">&lt;</span> <span class="mf">0.001</span> <span class="ow">and</span> <span class="nb">abs</span><span class="p">(</span><span class="n">rstar</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">random_point</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="p">)</span> <span class="o">&lt;</span> <span class="mf">0.001</span><span class="p">:</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">random_point</span><span class="p">,</span> <span class="p">(</span><span class="mf">0.5</span> <span class="o">-</span> <span class="n">Lw</span><span class="p">),</span> <span class="n">kw</span> <span class="o">*</span> <span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;alpha&#39;</span><span class="p">]</span><span class="o">**</span><span class="n">n</span> <span class="o">*</span><span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;cd&#39;</span><span class="p">]</span><span class="o">**</span><span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span> <span class="o">*</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">4</span><span class="p">)</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span><span class="o">*</span> <span class="p">(</span><span class="mf">0.5</span><span class="o">**</span><span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span> <span class="o">-</span> <span class="n">Lw</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">))</span> <span class="p">)</span>
+                    
                     <span class="k">else</span><span class="p">:</span>
                         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">method</span><span class="si">}</span><span class="s2"> not implemented&quot;</span><span class="p">)</span>
                         <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
@@ -2060,7 +2254,7 @@
 <div class="viewcode-block" id="Condition.calc_vgj_model">
 <a class="viewcode-back" href="../../api/MARIGOLD.Condition.html#MARIGOLD.Condition.calc_vgj_model">[docs]</a>
     <span class="k">def</span> <span class="nf">calc_vgj_model</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Method for calculating Vgj based on models</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Method for calculating local Vgj based on models</span>
 <span class="sd">        </span>
 <span class="sd">        midas_dict[&#39;vgj_model&#39;] = (1 - midas_dict[&#39;alpha&#39;]) * midas_dict[&#39;vr_model&#39;]</span>
 
@@ -2078,10 +2272,23 @@
         <span class="k">return</span></div>
 
     
+    <span class="k">def</span> <span class="nf">calc_aa_values_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;km1_naive&#39;</span><span class="p">,</span> <span class="n">kw</span><span class="o">=-</span><span class="mf">0.98</span><span class="p">,</span> <span class="n">kf</span><span class="o">=-</span><span class="mf">0.083</span><span class="p">,</span> <span class="n">Lw</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span> <span class="n">Cavf</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;km1_naive&#39;</span><span class="p">:</span>
+            <span class="n">vr</span> <span class="o">=</span> <span class="n">kw</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">4</span><span class="p">)</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">area_avg</span><span class="p">(</span><span class="s1">&#39;alpha&#39;</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">jf</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">area_avg</span><span class="p">(</span><span class="s1">&#39;alpha&#39;</span><span class="p">))</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">area_avg</span><span class="p">(</span><span class="s1">&#39;cd&#39;</span><span class="p">)</span><span class="o">**</span><span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span> <span class="o">*</span>  <span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="p">(</span><span class="o">-</span><span class="mf">1.</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span> <span class="o">-</span> <span class="n">Lw</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">))</span><span class="o">/</span><span class="p">(</span><span class="mf">0.5</span> <span class="o">-</span> <span class="n">Lw</span><span class="p">)</span> <span class="o">+</span> <span class="n">kf</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">jf</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">area_avg</span><span class="p">(</span><span class="s1">&#39;alpha&#39;</span><span class="p">))</span>
+        
+        <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;km1_naive2&#39;</span><span class="p">:</span>
+            <span class="n">vr</span> <span class="o">=</span> <span class="n">kw</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">area_avg</span><span class="p">(</span><span class="s1">&#39;alpha&#39;</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">jf</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">area_avg</span><span class="p">(</span><span class="s1">&#39;alpha&#39;</span><span class="p">))</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">area_avg</span><span class="p">(</span><span class="s1">&#39;cd&#39;</span><span class="p">)</span><span class="o">**</span><span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span>  <span class="o">+</span> <span class="n">kf</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">jf</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">area_avg</span><span class="p">(</span><span class="s1">&#39;alpha&#39;</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">vwvgj</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">area_avg</span><span class="p">(</span><span class="s1">&#39;alpha&#39;</span><span class="p">))</span><span class="o">*</span><span class="n">vr</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">aa_vr</span> <span class="o">=</span> <span class="n">vr</span>
+    
 <div class="viewcode-block" id="Condition.calc_errors">
 <a class="viewcode-back" href="../../api/MARIGOLD.Condition.html#MARIGOLD.Condition.calc_errors">[docs]</a>
     <span class="k">def</span> <span class="nf">calc_errors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param1</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">param2</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Calculates the errors, ε, between two parameters (param1 - param2) in midas_dict</span>
+
+<span class="sd">        Usually want to do param1=predicted, param2=experimental</span>
 <span class="sd">        </span>
 <span class="sd">        Stores:</span>
 <span class="sd">         - error, &quot;eps_param1_param2&quot;, param1 - param2</span>
@@ -2153,7 +2360,8 @@
 <a class="viewcode-back" href="../../api/MARIGOLD.Condition.html#MARIGOLD.Condition.plot_profiles">[docs]</a>
     <span class="k">def</span> <span class="nf">plot_profiles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">save_dir</span> <span class="o">=</span> <span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">x_axis</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> 
                       <span class="n">const_to_plot</span> <span class="o">=</span> <span class="p">[</span><span class="mi">90</span><span class="p">,</span> <span class="mf">67.5</span><span class="p">,</span> <span class="mi">45</span><span class="p">,</span> <span class="mf">22.5</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">include_complement</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> 
-                      <span class="n">rotate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">fig_size</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+                      <span class="n">rotate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">fig_size</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">label_str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">legend_loc</span> <span class="o">=</span> <span class="s1">&#39;best&#39;</span><span class="p">,</span> <span class="n">xlabel_loc</span> <span class="o">=</span> <span class="s1">&#39;center&#39;</span><span class="p">,</span>
+                      <span class="n">set_min</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">set_max</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">show_spines</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">force_RH_y_axis</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">xlabel_loc_coords</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Plot profiles of param over x_axis, for const_to_plot, i.e. α over r/R for φ = [90, 67.5 ... 0]. </span>
 <span class="sd">        </span>
 <span class="sd">        Include_complement will continue with the negative side if x_axis = &#39;r&#39; </span>
@@ -2165,7 +2373,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">mirror</span><span class="p">()</span>
         <span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;font.size&#39;</span><span class="p">:</span> <span class="mi">12</span><span class="p">})</span>
         <span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;font.family&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Times New Roman&quot;</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;mathtext.fontset&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;dejavuserif&quot;</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;mathtext.fontset&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;cm&quot;</span>
 
         <span class="n">log_x</span> <span class="o">=</span> <span class="kc">False</span> <span class="c1"># This breaks, so I removed it from the arguments to the function</span>
 
@@ -2201,6 +2409,12 @@
 
         <span class="n">ms</span> <span class="o">=</span> <span class="n">marker_cycle</span><span class="p">()</span>
         <span class="n">cs</span> <span class="o">=</span> <span class="n">color_cycle</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">set_min</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">set_min</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">param</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">set_max</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">set_max</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">param</span><span class="p">)</span> <span class="o">*</span><span class="mf">1.1</span>
 
         <span class="k">if</span> <span class="n">x_axis</span> <span class="o">==</span> <span class="s1">&#39;r&#39;</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">angle</span> <span class="ow">in</span> <span class="n">const_to_plot</span><span class="p">:</span>
@@ -2239,7 +2453,7 @@
                     
                 <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">vals</span><span class="p">,</span> <span class="n">rs</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">angle</span><span class="si">}</span><span class="s1">°&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="nb">next</span><span class="p">(</span><span class="n">cs</span><span class="p">),</span> <span class="n">marker</span><span class="o">=</span><span class="nb">next</span><span class="p">(</span><span class="n">ms</span><span class="p">),</span> <span class="n">linestyle</span> <span class="o">=</span> <span class="s1">&#39;--&#39;</span><span class="p">)</span>
             <span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-            <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">param</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">param</span><span class="p">)</span><span class="o">*</span><span class="mf">1.2</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">set_min</span><span class="p">,</span> <span class="n">set_max</span><span class="p">)</span>
             
         
         <span class="k">elif</span> <span class="n">x_axis</span> <span class="o">==</span> <span class="s1">&#39;phi&#39;</span><span class="p">:</span>
@@ -2254,11 +2468,11 @@
                             <span class="k">try</span><span class="p">:</span>
                                 <span class="n">vals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">midas_output</span><span class="p">[</span><span class="n">param</span><span class="p">])</span>
                             <span class="k">except</span><span class="p">:</span>
-                                <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">r</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">0.0001</span><span class="p">:</span>
+                                <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">rstar</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">0.0001</span><span class="p">:</span>
                                     <span class="n">vals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
                                 <span class="k">else</span><span class="p">:</span>
                                     <span class="n">vals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
-                                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Could not find </span><span class="si">{</span><span class="n">param</span><span class="si">}</span><span class="s2"> for φ = </span><span class="si">{</span><span class="n">angle</span><span class="si">}</span><span class="s2">, r = </span><span class="si">{</span><span class="n">r</span><span class="si">}</span><span class="s2">. Substituting 0&quot;</span><span class="p">)</span>
+                                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Could not find </span><span class="si">{</span><span class="n">param</span><span class="si">}</span><span class="s2"> for φ = </span><span class="si">{</span><span class="n">angle</span><span class="si">}</span><span class="s2">, r = </span><span class="si">{</span><span class="n">rstar</span><span class="si">}</span><span class="s2">. Substituting 0&quot;</span><span class="p">)</span>
 
                 <span class="n">vals</span> <span class="o">=</span> <span class="p">[</span><span class="n">var</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">var</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">phis</span><span class="p">,</span> <span class="n">vals</span><span class="p">))]</span>
                 <span class="n">phis</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">phis</span><span class="p">)</span>
@@ -2268,52 +2482,41 @@
                     <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">phis</span><span class="p">,</span> <span class="n">vals</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">rtarget</span><span class="si">:</span><span class="s1">0.1f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="nb">next</span><span class="p">(</span><span class="n">cs</span><span class="p">),</span> <span class="n">marker</span><span class="o">=</span><span class="nb">next</span><span class="p">(</span><span class="n">ms</span><span class="p">),</span> <span class="n">linestyle</span> <span class="o">=</span> <span class="s1">&#39;--&#39;</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">rotate</span><span class="p">:</span>
                 <span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">360</span><span class="p">)</span>
-                <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">param</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">param</span><span class="p">))</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">set_min</span><span class="p">,</span> <span class="n">set_max</span><span class="p">)</span>
                 
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">360</span><span class="p">)</span>
-                <span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">param</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">param</span><span class="p">))</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="n">set_min</span><span class="p">,</span> <span class="n">set_max</span><span class="p">)</span>
                 
         <span class="k">else</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;invalid axis for plot_profiles: </span><span class="si">{</span><span class="n">x_axis</span><span class="si">}</span><span class="s2">. Current supported options are &#39;r&#39; and &#39;phi&#39;&quot;</span><span class="p">)</span>
             <span class="k">return</span>
         
-        <span class="k">if</span> <span class="n">x_axis</span> <span class="o">==</span> <span class="s1">&#39;r&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">label_str</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">param</span> <span class="o">==</span> <span class="s1">&#39;alpha&#39;</span><span class="p">:</span>
-                <span class="n">fake_ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\alpha$ [-]&#39;</span><span class="p">)</span>
+                <span class="n">label_str</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;$\alpha\ [-]$&#39;</span>
             <span class="k">elif</span> <span class="n">param</span> <span class="o">==</span> <span class="s1">&#39;ai&#39;</span><span class="p">:</span>
-                <span class="n">fake_ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$a_</span><span class="si">{i}</span><span class="s1">$ [1/m]&#39;</span><span class="p">)</span>
+                <span class="n">label_str</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;$a_</span><span class="si">{i}</span><span class="s1">\ [1/m]$&#39;</span>
             <span class="k">elif</span> <span class="n">param</span> <span class="o">==</span> <span class="s1">&#39;ug1&#39;</span><span class="p">:</span>
-                <span class="n">fake_ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$v_</span><span class="si">{g}</span><span class="s1">$ [m/s]&#39;</span><span class="p">)</span>
+                <span class="n">label_str</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;$v_</span><span class="si">{g}</span><span class="s1">\ [m/s]$&#39;</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">fake_ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="n">param</span><span class="p">)</span>
+                <span class="n">label_str</span> <span class="o">=</span> <span class="n">param</span>
+        
+        <span class="k">if</span> <span class="n">x_axis</span> <span class="o">==</span> <span class="s1">&#39;r&#39;</span><span class="p">:</span>
+            <span class="n">fake_ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="n">label_str</span><span class="p">,</span> <span class="n">loc</span> <span class="o">=</span> <span class="n">xlabel_loc</span><span class="p">)</span>
             <span class="n">fake_ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$r/R$ [-]&#39;</span><span class="p">)</span>
             <span class="n">fake_ax</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mf">1.01</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">))</span>
             <span class="c1">#fake_ax.set_xticks(np.linspace(self.min(param), self.max(param), 7))</span>
 
         <span class="k">elif</span> <span class="n">x_axis</span> <span class="o">==</span> <span class="s1">&#39;phi&#39;</span><span class="p">:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">rotate</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">param</span> <span class="o">==</span> <span class="s1">&#39;alpha&#39;</span><span class="p">:</span>
-                    <span class="n">fake_ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\alpha$ [-]&#39;</span><span class="p">)</span>
-                <span class="k">elif</span> <span class="n">param</span> <span class="o">==</span> <span class="s1">&#39;ai&#39;</span><span class="p">:</span>
-                    <span class="n">fake_ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$a_</span><span class="si">{i}</span><span class="s1">$ [1/m]&#39;</span><span class="p">)</span>
-                <span class="k">elif</span> <span class="n">param</span> <span class="o">==</span> <span class="s1">&#39;ug1&#39;</span><span class="p">:</span>
-                    <span class="n">fake_ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$v_</span><span class="si">{g}</span><span class="s1">$ [m/s]&#39;</span><span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">fake_ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="n">param</span><span class="p">)</span>
+                <span class="n">fake_ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="n">label_str</span><span class="p">,</span> <span class="n">loc</span> <span class="o">=</span> <span class="n">xlabel_loc</span><span class="p">)</span>
                 <span class="n">fake_ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\varphi$ [-]&#39;</span><span class="p">)</span>
 
                 <span class="n">fake_ax</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">90</span><span class="p">,</span> <span class="mi">180</span><span class="p">,</span> <span class="mi">270</span><span class="p">,</span> <span class="mi">360</span><span class="p">])</span>
                 <span class="c1">#fake_ax.set_yticks(np.linspace(self.min(param), self.max(param), 7))</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">param</span> <span class="o">==</span> <span class="s1">&#39;alpha&#39;</span><span class="p">:</span>
-                    <span class="n">fake_ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\alpha$ [-]&#39;</span><span class="p">)</span>
-                <span class="k">elif</span> <span class="n">param</span> <span class="o">==</span> <span class="s1">&#39;ai&#39;</span><span class="p">:</span>
-                    <span class="n">fake_ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$a_</span><span class="si">{i}</span><span class="s1">$ [1/m]&#39;</span><span class="p">)</span>
-                <span class="k">elif</span> <span class="n">param</span> <span class="o">==</span> <span class="s1">&#39;ug1&#39;</span><span class="p">:</span>
-                    <span class="n">fake_ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$v_</span><span class="si">{g}</span><span class="s1">$ [m/s]&#39;</span><span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">fake_ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="n">param</span><span class="p">)</span>
+                <span class="n">fake_ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="n">label_str</span><span class="p">,</span> <span class="n">loc</span> <span class="o">=</span> <span class="n">xlabel_loc</span><span class="p">)</span>
                 <span class="n">fake_ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\varphi$ [-]&#39;</span><span class="p">)</span>
                 
                 <span class="n">fake_ax</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">90</span><span class="p">,</span> <span class="mi">180</span><span class="p">,</span> <span class="mi">270</span><span class="p">,</span> <span class="mi">360</span><span class="p">])</span>
@@ -2325,8 +2528,21 @@
             <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 
         <span class="n">ax</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="s1">&#39;bottom&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">set_position</span><span class="p">((</span><span class="s1">&#39;data&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="s1">&#39;top&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="s1">&#39;right&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+
+
+        <span class="k">if</span> <span class="n">set_min</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">set_max</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">force_RH_y_axis</span><span class="p">:</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="s1">&#39;left&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">set_position</span><span class="p">((</span><span class="s1">&#39;data&#39;</span><span class="p">,</span> <span class="n">set_min</span><span class="p">))</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="s1">&#39;right&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">set_position</span><span class="p">((</span><span class="s1">&#39;data&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">tick_right</span><span class="p">()</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_label_position</span><span class="p">(</span><span class="s2">&quot;right&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">show_spines</span><span class="p">:</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="s1">&#39;top&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="s1">&#39;right&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ax2</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">twiny</span><span class="p">()</span>
+            <span class="n">ax2</span><span class="o">.</span><span class="n">get_xaxis</span><span class="p">()</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+
 
         <span class="k">if</span> <span class="n">log_x</span><span class="p">:</span>
             <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="n">nonzero</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">param</span><span class="p">)</span><span class="o">*</span><span class="mf">1.2</span><span class="p">)</span>
@@ -2335,7 +2551,10 @@
         
         <span class="k">if</span> <span class="n">rotate</span><span class="p">:</span>
             <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="n">fake_ax</span><span class="p">)</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s1">&#39;lower right&#39;</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;white&#39;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="n">legend_loc</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;white&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">xlabel_loc_coords</span><span class="p">:</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_label_coords</span><span class="p">(</span><span class="o">*</span><span class="n">xlabel_loc_coords</span><span class="p">)</span>
 
         <span class="n">fake_ax</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">adjustable</span><span class="o">=</span><span class="s1">&#39;datalim&#39;</span><span class="p">,</span> <span class="n">share</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">adjustable</span><span class="o">=</span><span class="s1">&#39;datalim&#39;</span><span class="p">,</span> <span class="n">share</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -2399,8 +2618,8 @@
 
 <div class="viewcode-block" id="Condition.plot_contour">
 <a class="viewcode-back" href="../../api/MARIGOLD.Condition.html#MARIGOLD.Condition.plot_contour">[docs]</a>
-    <span class="k">def</span> <span class="nf">plot_contour</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">save_dir</span> <span class="o">=</span> <span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">set_max</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">set_min</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">fig_size</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span> <span class="n">label_str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                     <span class="n">rot_angle</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">ngridr</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span> <span class="n">ngridphi</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span> <span class="n">colormap</span> <span class="o">=</span> <span class="s1">&#39;hot_r&#39;</span><span class="p">,</span> <span class="n">num_levels</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span> <span class="n">title</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">title_str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">extra_text</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+    <span class="k">def</span> <span class="nf">plot_contour</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">save_dir</span> <span class="o">=</span> <span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">set_max</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">set_min</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">fig_size</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span> <span class="n">label_str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">suppress_colorbar</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                     <span class="n">rot_angle</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">ngridr</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span> <span class="n">ngridphi</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span> <span class="n">colormap</span> <span class="o">=</span> <span class="s1">&#39;hot_r&#39;</span><span class="p">,</span> <span class="n">num_levels</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">level_step</span> <span class="o">=</span> <span class="mf">0.25</span><span class="p">,</span> <span class="n">title</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">title_str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">extra_text</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
                      <span class="n">annotate_h</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">cartesian</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">h_star_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;method&#39;</span><span class="p">:</span> <span class="s1">&#39;max_dsm&#39;</span><span class="p">,</span> <span class="s1">&#39;min_void&#39;</span><span class="p">:</span> <span class="s1">&#39;0.05&#39;</span><span class="p">},</span> <span class="n">plot_measured_points</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Method to plot contour of a given param</span>
@@ -2496,16 +2715,25 @@
             <span class="n">extend_opt</span> <span class="o">=</span> <span class="s1">&#39;max&#39;</span>
         <span class="k">elif</span> <span class="ow">not</span> <span class="n">extend_min</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">extend_max</span><span class="p">:</span>
             <span class="n">extend_opt</span> <span class="o">=</span> <span class="s1">&#39;neither&#39;</span>
+
+        <span class="k">if</span> <span class="n">num_levels</span><span class="p">:</span>
+            <span class="n">lvs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">set_min</span><span class="p">,</span> <span class="n">set_max</span><span class="p">,</span> <span class="n">num_levels</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">set_max</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">1e-8</span><span class="p">):</span> <span class="c1"># if the max is 0, start the counting from there</span>
+                <span class="n">lvs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">set_max</span><span class="p">,</span> <span class="nb">abs</span><span class="p">(</span><span class="n">set_min</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1e-8</span><span class="p">,</span> <span class="n">level_step</span><span class="p">)</span>
+                <span class="n">lvs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">flip</span><span class="p">(</span><span class="n">lvs</span><span class="p">)</span> <span class="o">*</span> <span class="o">-</span><span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">lvs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">set_min</span><span class="p">,</span> <span class="n">set_max</span> <span class="o">+</span> <span class="mf">1e-8</span><span class="p">,</span> <span class="n">level_step</span><span class="p">)</span>
         
         <span class="k">if</span> <span class="n">cartesian</span><span class="p">:</span>
-            <span class="n">mpbl</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">contourf</span><span class="p">(</span><span class="n">XI</span><span class="p">,</span> <span class="n">YI</span><span class="p">,</span> <span class="n">parami</span><span class="p">,</span> <span class="n">levels</span> <span class="o">=</span> <span class="n">num_levels</span><span class="p">,</span> <span class="n">vmin</span> <span class="o">=</span> <span class="n">set_min</span><span class="p">,</span> <span class="n">vmax</span> <span class="o">=</span> <span class="n">set_max</span><span class="p">,</span> <span class="n">cmap</span> <span class="o">=</span> <span class="n">colormap</span><span class="p">)</span>
+            <span class="n">mpbl</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">contourf</span><span class="p">(</span><span class="n">XI</span><span class="p">,</span> <span class="n">YI</span><span class="p">,</span> <span class="n">parami</span><span class="p">,</span> <span class="n">levels</span> <span class="o">=</span> <span class="n">lvs</span><span class="p">,</span> <span class="n">vmin</span> <span class="o">=</span> <span class="n">set_min</span><span class="p">,</span> <span class="n">vmax</span> <span class="o">=</span> <span class="n">set_max</span><span class="p">,</span> <span class="n">cmap</span> <span class="o">=</span> <span class="n">colormap</span><span class="p">)</span>
 
             <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
             <span class="c1"># Make a circle to look nice</span>
             <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span> <span class="n">x</span><span class="o">**</span><span class="mi">2</span><span class="p">),</span> <span class="n">marker</span><span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">linestyle</span> <span class="o">=</span> <span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="n">color</span> <span class="o">=</span> <span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="n">linewidth</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span>
             <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span> <span class="n">x</span><span class="o">**</span><span class="mi">2</span><span class="p">),</span> <span class="n">marker</span><span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">linestyle</span> <span class="o">=</span> <span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="n">color</span> <span class="o">=</span> <span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="n">linewidth</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">mpbl</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">contourf</span><span class="p">(</span><span class="n">PHII</span><span class="p">,</span> <span class="n">RI</span><span class="p">,</span> <span class="n">parami</span><span class="p">,</span> <span class="n">levels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">set_min</span><span class="p">,</span> <span class="n">set_max</span><span class="p">,</span> <span class="n">num_levels</span><span class="p">),</span> 
+            <span class="n">mpbl</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">contourf</span><span class="p">(</span><span class="n">PHII</span><span class="p">,</span> <span class="n">RI</span><span class="p">,</span> <span class="n">parami</span><span class="p">,</span> <span class="n">levels</span> <span class="o">=</span> <span class="n">lvs</span><span class="p">,</span> 
                                <span class="n">vmin</span> <span class="o">=</span> <span class="n">set_min</span><span class="p">,</span> <span class="n">vmax</span> <span class="o">=</span> <span class="n">set_max</span><span class="p">,</span> <span class="n">cmap</span> <span class="o">=</span> <span class="n">colormap</span><span class="p">,</span> <span class="n">extend</span><span class="o">=</span><span class="n">extend_opt</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">plot_measured_points</span><span class="p">:</span> 
                 <span class="c1"># print(np.asarray(self.original_mesh)[:,0]* np.pi/180 , np.asarray(self.original_mesh)[:,1])</span>
@@ -2517,7 +2745,7 @@
                         <span class="n">measured_rs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span> <span class="n">measured_rs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
                         <span class="n">measured_thetas</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">measured_thetas</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">%</span> <span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
 
-                <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span> <span class="n">measured_thetas</span><span class="p">,</span> <span class="n">measured_rs</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">fillstyle</span> <span class="o">=</span> <span class="s1">&#39;none&#39;</span><span class="p">,</span> <span class="n">mec</span> <span class="o">=</span> <span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="n">linewidth</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">ms</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span> <span class="n">measured_thetas</span><span class="p">,</span> <span class="n">measured_rs</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">fillstyle</span> <span class="o">=</span> <span class="s1">&#39;none&#39;</span><span class="p">,</span> <span class="n">mec</span> <span class="o">=</span> <span class="s1">&#39;red&#39;</span><span class="p">,</span> <span class="n">linewidth</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">ms</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">annotate_h</span><span class="p">:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">cartesian</span><span class="p">:</span>
@@ -2546,7 +2774,11 @@
         <span class="k">if</span> <span class="n">label_str</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">label_str</span> <span class="o">=</span> <span class="n">param</span>
 
-        <span class="n">fig</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">mpbl</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label_str</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">suppress_colorbar</span><span class="p">:</span>
+            <span class="n">fig</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">mpbl</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label_str</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">title_str</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+            <span class="n">title</span> <span class="o">=</span> <span class="kc">True</span>
         
         <span class="k">if</span> <span class="n">title</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">title_str</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
@@ -3420,6 +3652,15 @@
         <span class="k">yield</span> <span class="n">var_list</span><span class="p">[</span> <span class="n">i</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">var_list</span><span class="p">)]</span>
         <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span></div>
 
+
+<div class="viewcode-block" id="print_tab_keys">
+<a class="viewcode-back" href="../../api/MARIGOLD.print_tab_keys.html#MARIGOLD.print_tab_keys">[docs]</a>
+<span class="k">def</span> <span class="nf">print_tab_keys</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convenience function in case you forget a tab key</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">tab_keys</span><span class="p">)</span>
+    <span class="k">return</span></div>
 
 
 <span class="n">tab_keys</span> <span class="o">=</span> <span class="p">[</span>
