@@ -1031,8 +1031,13 @@ END\n\
 > update\n\
 \n\
 > quit ", file = fi)
-    print('$module load ansys && cfx5pre -s CFXPre_Commands.pre')
-    subprocess.check_call('module load ansys && cfx5pre -s CFXPre_Commands.pre -line > auto_cfx_run.log', shell=True)
+    print('$\ncfx5pre -s CFXPre_Commands.pre')
+    try:
+        subprocess.check_call("ml ansys", shell=True)
+    except subprocess.CalledProcessError as e:
+        print(e)
+        print("Continuing...")
+    subprocess.check_call('cfx5pre -s CFXPre_Commands.pre -line > auto_cfx_run.log', shell=True)
     return
 
 def run_CFX_case(case_name, parallel=True, npart = 4):
@@ -1043,13 +1048,18 @@ def run_CFX_case(case_name, parallel=True, npart = 4):
     Can run in parallel, specify the number of cores with npart
     
     """
+    try:
+        subprocess.check_call("ml ansys", shell=True)
+    except subprocess.CalledProcessError as e:
+        print(e)
+        print("Continuing...")
     
     if parallel:
-        print(f'$module load ansys && cfx5solve -def {case_name}.def -par -par-local -part {npart} -double')
-        subprocess.check_call(f'module load ansys && cfx5solve -def {case_name}.def -par -par-local -part 8 -double > auto_cfx_run.log', shell=True)
+        print(f'\n$cfx5solve -def {case_name}.def -par -par-local -part {npart} -double')
+        subprocess.check_call(f'cfx5solve -def {case_name}.def -par -par-local -part 8 -double > auto_cfx_run.log', shell=True)
     else:
-        print(f'module load ansys && cfx5solve -def {case_name}.def -double')
-        subprocess.check_call(f'module load ansys && cfx5solve -def {case_name}.def -double > auto_cfx_run.log', shell=True)
+        print(f'\n$cfx5solve -def {case_name}.def -double')
+        subprocess.check_call(f'cfx5solve -def {case_name}.def -double > auto_cfx_run.log', shell=True)
     return
 
 
