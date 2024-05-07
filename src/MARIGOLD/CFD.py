@@ -254,8 +254,12 @@ ic_uns_create_diagnostic_edgelist 0 \n\
 ic_undo_group_end \n\
 ic_uns_min_metric Quality {{}} {{}} \n\
 ic_exit\n', file=fi)
-
-    subprocess.check_call('module load ansys && icemcfd -x ./mesh_replay.rpl > auto_cfx_run.log', shell=True)
+    try:
+        subprocess.check_call("ml ansys", shell=True)
+    except subprocess.CalledProcessError as e:
+        print(e)
+        print("Continuing...")
+    subprocess.check_call('icemcfd -x ./mesh_replay.rpl > auto_cfx_run.log', shell=True)
     if cleanup:
         subprocess.check_call('rm mesh_replay.rpl', shell=True)
         subprocess.check_call('rm project1.*', shell=True)
@@ -362,7 +366,7 @@ def write_CCL(mom_source = 'drag_model', ccl_name = 'auto_setup.ccl',
     with open(outDataFile, 'r') as infi:
         trash = infi.readline()
         OutletData = infi.readline().split(',')[0] # Name of function in csv
-    
+    CD_CFX = 0
     if mom_source == 'IS':
         mom_source_to_write = ['ISfx', 'ISfy', 'ISfz', 'ISgx', 'ISgy', 'ISgz']
     elif mom_source == 'drag_model':
@@ -373,6 +377,7 @@ def write_CCL(mom_source = 'drag_model', ccl_name = 'auto_setup.ccl',
         Kw = 0
     else:
         mom_source_to_write = ['0 [kg m^-2 s^-2]', '0 [kg m^-2 s^-2]', '0 [kg m^-2 s^-2]', '0 [kg m^-2 s^-2]', '0 [kg m^-2 s^-2]', '0 [kg m^-2 s^-2]']
+        CD_CFX = CD
 
     if CL == 'tomiyama':
         CL = calculate_CL_Ryan(jf=jf, jg=jg, theta=90, Db=Db)
@@ -885,8 +890,8 @@ MASS TRANSFER:\n\
 Option = None\n\
 END\n\
 MOMENTUM TRANSFER:\n\
-DRAG FORCE:\n\
-Option = Schiller Naumann\n\
+Drag Coefficient = {CD_CFX}\n\
+Option = Drag Coefficient\n\
 END\n\
 LIFT FORCE:\n\
 Lift Coefficient = {CL}\n\
@@ -993,12 +998,15 @@ END\n\
         print(strToWrite, file = fi)
         return
 
-def make_CFX_case(case_name, setup_ccl='auto_setup.ccl'):
+def make_CFX_case(case_name, mesh_name = None, ccl_name='auto_setup'):
     """ Makes CFX case based on CCL file
 
     Takes "setup_ccl" and writes a case file, "casename.def"
     
     """
+
+    if mesh_name is None:
+        mesh_name = case_name
 
     with open('CFXPre_Commands.pre', 'w') as fi:
         print(f"\
@@ -1014,7 +1022,7 @@ END\n\
 > gtmImport filename={case_name}.msh, type=Fluent, units=m, genOpt= -n, nameStrategy=Assembly\n\
 > update\n\
 \n\
->importccl filename={setup_ccl}, mode=replace, autoLoadLibrary=none\n\
+>importccl filename={ccl_name}.ccl, mode=replace, autoLoadLibrary=none\n\
 > update\n\
 \n\
 >writeCaseFile filename=./{case_name}.def, operation=write def file\n\
