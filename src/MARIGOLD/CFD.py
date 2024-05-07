@@ -465,6 +465,7 @@ END\n\
 FUNCTION: {OutletData}\n\
 Argument Units = [mm], [m], []\n\
 Option = Profile Data\n\
+Reference Coord Frame = Coord 0\n\
 Spatial Fields = radius, z, phi\n\
 DATA FIELD: Velocity u\n\
 Field Name = Velocity u\n\
