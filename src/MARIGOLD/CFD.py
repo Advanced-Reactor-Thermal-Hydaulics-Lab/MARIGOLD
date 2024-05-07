@@ -1021,7 +1021,7 @@ END\n\
 >load mode=new\n\
 > update\n\
 \n\
-> gtmImport filename={case_name}.msh, type=Fluent, units=m, genOpt= -n, nameStrategy=Assembly\n\
+> gtmImport filename={mesh_name}.msh, type=Fluent, units=m, genOpt= -n, nameStrategy=Assembly\n\
 > update\n\
 \n\
 >importccl filename={ccl_name}.ccl, mode=replace, autoLoadLibrary=none\n\
