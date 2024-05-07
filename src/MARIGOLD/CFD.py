@@ -1000,7 +1000,7 @@ def run_CFX_case(case_name, parallel=True, npart = 4):
     
     if parallel:
         print(f'\n$cfx5solve -def {case_name}.def -par -par-local -part {npart} -double')
-        subprocess.check_call(f'cfx5solve -def {case_name}.def -monitor -par -par-local -part 8 -double > auto_cfx_run.log', shell=True)
+        subprocess.check_call(f'cfx5solve -def {case_name}.def -monitor {case_name}_001.out -par -par-local -part 8 -double > auto_cfx_run.log', shell=True)
     else:
         print(f'\n$cfx5solve -def {case_name}.def -double')
         subprocess.check_call(f'cfx5solve -def {case_name}.def -monitor -double > auto_cfx_run.log', shell=True)
