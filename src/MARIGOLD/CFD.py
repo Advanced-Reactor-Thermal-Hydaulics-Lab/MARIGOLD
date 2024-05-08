@@ -1117,9 +1117,14 @@ END\n\
 >quit     \n\
         \
         ', file=fi)
+    try:
+        subprocess.check_call("ml ansys", shell=True)
+    except subprocess.CalledProcessError as e:
+        print(e)
+        print("Continuing...")
     print(os.getcwd())
     subprocess.check_call(f'rm -rf ./{case_name}_Results', shell=True)
-    subprocess.check_call(f'module load ansys && cfx5post -play CFXPost_Commands.cse -line > auto_cfx_run.log', shell=True)
+    subprocess.check_call(f'cfx5post -play CFXPost_Commands.cse -line > auto_cfx_run.log', shell=True)
 
 
 
