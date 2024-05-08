@@ -660,6 +660,7 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
             jglocs = ['O16', 'O17', 'O18', 'O19', 'O20']
             try:
                 jgloc = ws[jglocs[int(re.findall(r'\d+', port)[0])-1]].value
+                print("where are you getting this from? ",jgloc)
                 #jgloc = ws[jglocs[int(port.strip('P'))]].value
             except Exception as e:
                 print(e)
