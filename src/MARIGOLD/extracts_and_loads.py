@@ -666,7 +666,12 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                 print(f"Warning: Could not identify port # for {file}, setting jgloc = jgref")
                 jgloc = jgref
 
-            if jgloc is None:
+            # Above jglocs not implemented for Ryan templates (DHK)
+            if jgloc is None and sheet_type == 'ryan_template':
+                print(f"Sheet type identified as {sheet_type}, referencing cell U23 for jgloc")
+                jgloc = ws['U23'].value
+            elif jgloc is None:
+                print(f"Warning: jgloc could not be found, setting jgloc = jgref")
                 jgloc = jgref
 
             newCond = Condition(jgref, jgloc, jf, theta, port, sheet_type.split('_')[0])
@@ -678,10 +683,14 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                 cond = all_conditions[ all_conditions.index(newCond) ]
 
             cond.run_ID = ws['B2'].value
+
+            # Local corrected gauge pressure can be back-calculated from jgloc and jgatm (DHK)
+            cond.jgatm = ws['D6'].value
             
             ws = wb['2']
 
             cond.area_avg_void_sheet = ws['G266'].value
+            cond.area_avg_ai_sheet = ws['J266'].value
             
             for phi, indices in Q1_ranges:
                 for i in indices:
