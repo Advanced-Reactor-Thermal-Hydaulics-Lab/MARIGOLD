@@ -40,7 +40,9 @@ def write_CFX_BC(cond:Condition, save_dir = ".", z_loc = 0):
 
 
 def make_ICEM_pipe_mesh(r_divs: int, theta_divs: int, z_divs: int, o_point: float, L: float, 
-                        case_name: str, turb_model = 'ke', Ref = 20000, growth_ratio = 1.2, cleanup = True):
+                        case_name: str, turb_model = 'ke', Ref = 20000, growth_ratio = 1.2, 
+                        fluent_translator_path = "/apps/cent7/ansys22/v221/icemcfd/linux64_amd/icemcfd/output-interfaces/fluent6",
+                        cleanup = True):
     """ Function for making an O-grid pipe mesh using ANSYS ICEM
 
     Adjusts first layer based on selected turbulence model, Ref
@@ -245,7 +247,7 @@ ic_solution_set_solver {{Ansys Fluent}} 1\n\
 ic_boco_save project1.fbc\n\
 ic_boco_save_atr project1.atr\n\
 ic_save_project_file ./project1.prj {{array\ set\ file_name\ \{{ {{    catia_dir .}} {{    parts_dir .}} {{    domain_loaded 0}} {{    cart_file_loaded 0}} {{    cart_file {{}}}} {{    domain_saved project1.uns}} {{    archive {{}}}} {{    med_replay {{}}}} {{    topology_dir .}} {{    ugparts_dir .}} {{    icons {{{{$env(ICEM_ACN)/lib/ai_env/icons}} {{$env(ICEM_ACN)/lib/va/EZCAD/icons}} {{$env(ICEM_ACN)/lib/icons}} {{$env(ICEM_ACN)/lib/va/CABIN/icons}}}}}} {{    tetin project1.tin}} {{    family_boco project1.fbc}} {{    iges_dir .}} {{    solver_params_loaded 0}} {{    attributes_loaded 0}} {{    project_lock {{}}}} {{    attributes project1.atr}} {{    domain project1.uns}} {{    domains_dir .}} {{    settings_loaded 0}} {{    settings project1.prj}} {{    blocking project1.blk}} {{    hexa_replay {{}}}} {{    transfer_dir .}} {{    mesh_dir .}} {{    family_topo {{}}}} {{    gemsparts_dir .}} {{    family_boco_loaded 0}} {{    tetin_loaded 0}} {{    project_dir .}} {{    topo_mulcad_out {{}}}} {{    solver_params {{}}}} \}} array\ set\ options\ \{{ {{    expert 1}} {{    remote_path {{}}}} {{    tree_disp_quad 2}} {{    tree_disp_pyra 0}} {{    evaluate_diagnostic 0}} {{    histo_show_default 1}} {{    select_toggle_corners 0}} {{    remove_all 0}} {{    keep_existing_file_names 0}} {{    record_journal 0}} {{    edit_wait 0}} {{    face_mode 1}} {{    select_mode all}} {{    med_save_emergency_tetin 1}} {{    user_name adix}} {{    diag_which all}} {{    uns_warn_if_display 500000}} {{    bubble_delay 1000}} {{    external_num 1}} {{    tree_disp_tri 2}} {{    apply_all 0}} {{    default_solver {{Ansys Fluent}}}} {{    temporary_directory {{}}}} {{    flood_select_angle 0}} {{    home_after_load 1}} {{    project_active 0}} {{    histo_color_by_quality_default 1}} {{    undo_logging 1}} {{    tree_disp_hexa 0}} {{    histo_solid_default 1}} {{    host_name brown-a016.rcac.purdue.edu}} {{    xhidden_full 1}} {{    replay_internal_editor 1}} {{    editor {{}}}} {{    mouse_color orange}} {{    clear_undo 1}} {{    remote_acn {{}}}} {{    remote_sh csh}} {{    tree_disp_penta 0}} {{    n_processors 1}} {{    remote_host {{}}}} {{    save_to_new 0}} {{    quality_info Quality}} {{    tree_disp_node 0}} {{    med_save_emergency_mesh 1}} {{    redtext_color red}} {{    tree_disp_line 0}} {{    select_edge_mode 0}} {{    use_dlremote 0}} {{    max_mesh_map_size 1024}} {{    show_tris 1}} {{    remote_user {{}}}} {{    enable_idle 0}} {{    auto_save_views 1}} {{    max_cad_map_size 512}} {{    display_origin 0}} {{    uns_warn_user_if_display 1000000}} {{    detail_info 0}} {{    win_java_help 0}} {{    show_factor 1}} {{    boundary_mode all}} {{    clean_up_tmp_files 1}} {{    auto_fix_uncovered_faces 1}} {{    med_save_emergency_blocking 1}} {{    max_binary_tetin 0}} {{    tree_disp_tetra 0}} \}} array\ set\ disp_options\ \{{ {{    uns_dualmesh 0}} {{    uns_warn_if_display 500000}} {{    uns_normals_colored 0}} {{    uns_icons 0}} {{    uns_locked_elements 0}} {{    uns_shrink_npos 0}} {{    uns_node_type None}} {{    uns_icons_normals_vol 0}} {{    uns_bcfield 0}} {{    backup Solid/wire}} {{    uns_nodes 0}} {{    uns_only_edges 0}} {{    uns_surf_bounds 0}} {{    uns_wide_lines 0}} {{    uns_vol_bounds 0}} {{    uns_displ_orient Triad}} {{    uns_orientation 0}} {{    uns_directions 0}} {{    uns_thickness 0}} {{    uns_shell_diagnostic 0}} {{    uns_normals 0}} {{    uns_couplings 0}} {{    uns_periodicity 0}} {{    uns_single_surfaces 0}} {{    uns_midside_nodes 1}} {{    uns_shrink 100}} {{    uns_multiple_surfaces 0}} {{    uns_no_inner 0}} {{    uns_enums 0}} {{    uns_disp Wire}} {{    uns_bcfield_name {{}}}} {{    uns_color_by_quality 0}} {{    uns_changes 0}} {{    uns_cut_delay_count 1000}} \}} {{set icon_size1 24}} {{set icon_size2 35}} {{set thickness_defined 0}} {{set solver_type 1}} {{set solver_setup -1}} array\ set\ prism_values\ \{{ {{    n_triangle_smoothing_steps 5}} {{    min_smoothing_steps 6}} {{    first_layer_smoothing_steps 1}} {{    new_volume {{}}}} {{    height {{}}}} {{    prism_height_limit {{}}}} {{    interpolate_heights 0}} {{    n_tetra_smoothing_steps 10}} {{    do_checks {{}}}} {{    delete_standalone 1}} {{    ortho_weight 0.50}} {{    max_aspect_ratio {{}}}} {{    ratio_max {{}}}} {{    incremental_write 0}} {{    total_height {{}}}} {{    use_prism_v10 0}} {{    intermediate_write 1}} {{    delete_base_triangles {{}}}} {{    ratio_multiplier {{}}}} {{    verbosity_level 1}} {{    refine_prism_boundary 1}} {{    max_size_ratio {{}}}} {{    triangle_quality {{}}}} {{    max_prism_angle 180}} {{    tetra_smooth_limit 0.3}} {{    max_jump_factor 5}} {{    use_existing_quad_layers 0}} {{    layers 3}} {{    fillet 0.10}} {{    into_orphan 0}} {{    init_dir_from_prev {{}}}} {{    blayer_2d 0}} {{    do_not_allow_sticking {{}}}} {{    top_family {{}}}} {{    law exponential}} {{    min_smoothing_val 0.1}} {{    auto_reduction 0}} {{    stop_columns 1}} {{    stair_step 1}} {{    smoothing_steps 12}} {{    side_family {{}}}} {{    min_prism_quality 0.01}} {{    ratio 1.2}} \}} {{set aie_current_flavor {{}}}} array\ set\ vid_options\ \{{ {{    auxiliary 0}} {{    show_name 0}} {{    inherit 1}} {{    default_part GEOM}} {{    new_srf_topo 1}} {{    DelPerFlag 0}} {{    show_item_name 0}} {{    composite_tolerance 1.0}} {{    replace 0}} {{    same_pnt_tol 1e-4}} {{    tdv_axes 1}} {{    vid_mode 0}} {{    DelBlkPerFlag 0}} \}} {{set savedTreeVisibility {{geomNode 1 geom_subsetNode 0 geomPointNode 0 geomCurveNode 0 geomSurfNode 2 meshNode 1 mesh_subsetNode 0 meshLineNode 0 meshShellNode 2 meshQuadNode 2 meshVolumeNode 0 meshHexaNode 0 blockingNode 1 block_subsetNode 2 block_vertNode 0 block_edgeNode 0 block_faceNode 0 block_blockNode 0 block_meshNode 0 topoNode 2 topo-root 2 partNode 2 part-INLET 2 part-OUTLET 2 part-SOLID 2 part-VORFN 0 part-WALLS 2}}}} {{set last_view {{rot {{3.19905930365e-05 0.999933204826 0.00429823005183 0.0107289367044}} scale {{12258.8222189 12258.8222189 12258.8222189}} center {{0 0 1.2700001001400001}} pos {{-93.0 19.0 0}}}}}} array\ set\ cut_info\ \{{ {{    active 0}} {{    whole 1}} \}} array\ set\ hex_option\ \{{ {{    default_bunching_ratio 2.0}} {{    floating_grid 0}} {{    project_to_topo 0}} {{    n_tetra_smoothing_steps 20}} {{    sketching_mode 0}} {{    trfDeg 1}} {{    wr_hexa7 0}} {{    hexa_projection_mode 0}} {{    smooth_ogrid 0}} {{    find_worst 1-3}} {{    hexa_verbose_mode 0}} {{    old_eparams 0}} {{    uns_face_mesh_method uniform_quad}} {{    multigrid_level 0}} {{    uns_face_mesh one_tri}} {{    check_blck 0}} {{    proj_limit 0}} {{    check_inv 0}} {{    project_bspline 0}} {{    hexa_update_mode 1}} {{    default_bunching_law BiGeometric}} {{    worse_criterion Quality}} \}} array\ set\ saved_views\ \{{ {{    views {{}}}} \}}}} {{ICEM CFD}}\n\
-ic_exec /apps/cent7/ansys22/v221/icemcfd/linux64_amd/icemcfd/output-interfaces/fluent6 -dom ./hex.uns -b project1.fbc ./{case_name}.msh\n\
+ic_exec {fluent_translator_path} -dom ./hex.uns -b project1.fbc ./{case_name}.msh\n\
 ic_uns_num_couplings \n\
 ic_undo_group_begin \n\
 ic_uns_create_diagnostic_edgelist 1 \n\
@@ -254,8 +256,12 @@ ic_uns_create_diagnostic_edgelist 0 \n\
 ic_undo_group_end \n\
 ic_uns_min_metric Quality {{}} {{}} \n\
 ic_exit\n', file=fi)
-
-    subprocess.check_call('module load ansys && icemcfd -x ./mesh_replay.rpl > auto_cfx_run.log', shell=True)
+    try:
+        subprocess.check_call("ml ansys", shell=True)
+    except subprocess.CalledProcessError as e:
+        print(e)
+        print("Continuing...")
+    subprocess.check_call('icemcfd -x ./mesh_replay.rpl > auto_cfx_run.log', shell=True)
     if cleanup:
         subprocess.check_call('rm mesh_replay.rpl', shell=True)
         subprocess.check_call('rm project1.*', shell=True)
@@ -329,9 +335,9 @@ def calculate_CL_Ryan(jf, jg, theta=0.0, Db = 0.0018, testing = False):
     CL = CL_T * I * f_sharma
     return CL
 
-def write_CCL(mom_source = 'drag_model', ccl_name = 'auto_setup.ccl',
-                          inDataFile= '/scratch/brown/adix/0/H/inH.csv', 
-                          outDataFile = '/scratch/brown/adix/PITA/0/H/outH.csv', 
+def write_CCL(mom_source = 'normal_drag_mom_source', ccl_name = 'auto_setup.ccl',
+                          inDataFile= '/home/adix/CFD/exp_BCs/in_H_0.csv', 
+                          outDataFile = '/home/adix/CFD/exp_BCs/out_H_0.csv', 
                           Db=0.0018, CL = 0.25, CTD = 0.25, theta = 0, mdot = 2.02277,
                           Kf = 0.083, Kw = 0.98, CD = 0.44, jf = 4, jg = 0.11,
                           num_iter = 10000, resid_target = 1e-6):
@@ -362,7 +368,7 @@ def write_CCL(mom_source = 'drag_model', ccl_name = 'auto_setup.ccl',
     with open(outDataFile, 'r') as infi:
         trash = infi.readline()
         OutletData = infi.readline().split(',')[0] # Name of function in csv
-    
+    CD_CFX = 0
     if mom_source == 'IS':
         mom_source_to_write = ['ISfx', 'ISfy', 'ISfz', 'ISgx', 'ISgy', 'ISgz']
     elif mom_source == 'drag_model':
@@ -373,6 +379,7 @@ def write_CCL(mom_source = 'drag_model', ccl_name = 'auto_setup.ccl',
         Kw = 0
     else:
         mom_source_to_write = ['0 [kg m^-2 s^-2]', '0 [kg m^-2 s^-2]', '0 [kg m^-2 s^-2]', '0 [kg m^-2 s^-2]', '0 [kg m^-2 s^-2]', '0 [kg m^-2 s^-2]']
+        CD_CFX = CD
 
     if CL == 'tomiyama':
         CL = calculate_CL_Ryan(jf=jf, jg=jg, theta=90, Db=Db)
@@ -384,621 +391,569 @@ def write_CCL(mom_source = 'drag_model', ccl_name = 'auto_setup.ccl',
 
         strToWrite = f"\
 \
-LIBRARY:\n\
-CEL:\n\
-EXPRESSIONS:\n\
-ISfx = -( liquid. Volume Fraction.Gradient Z) * ( liquid.Dynamic Viscosity ) * liquid.Velocity w.Gradient X\n\
-ISfy = -( liquid. Volume Fraction.Gradient Z) * ( liquid.Dynamic Viscosity ) * liquid.Velocity w.Gradient Y\n\
-ISfz = -( liquid.Dynamic Viscosity ) * (( liquid. Volume Fraction.Gradient X) * liquid.Velocity w.Gradient X + ( gas. Volume Fraction.Gradient Y) * liquid.Velocity w.Gradient Y + ( gas. Volume Fraction.Gradient Z) * 2* liquid.Velocity w.Gradient Z)\n\
-ISgx = -( gas. Volume Fraction.Gradient Z) * ( liquid.Dynamic Viscosity ) * liquid.Velocity w.Gradient X\n\
-ISgy = -( gas. Volume Fraction.Gradient Z) * ( liquid.Dynamic Viscosity ) * liquid.Velocity w.Gradient Y\n\
-ISgz = -( liquid.Dynamic Viscosity ) * (( gas. Volume Fraction.Gradient X) * liquid.Velocity w.Gradient X + ( gas. Volume Fraction.Gradient Y) * liquid.Velocity w.Gradient Y + ( gas. Volume Fraction.Gradient Z) * 2* liquid.Velocity w.Gradient Z)\n\
-CD = {CD} \n\
-FDGx = - 3/4 * CD / (gas.Mean Particle Diameter) * (gas.Volume Fraction) * liquid.density * (vrNorm) * (gas.u - liquid.u)\n\
-FDGy = - 3/4 * CD / (gas.Mean Particle Diameter) * (gas.Volume Fraction) * liquid.density* (vrNorm) * (gas.v - liquid.v)\n\
-FDGz = - 3/4 * CD / (gas.Mean Particle Diameter) * (gas.Volume Fraction) * liquid.density* (vrNorm) * (gas.w - liquidWEff)\n\
-FDLx = 3/4 * CD / (gas.Mean Particle Diameter) * (gas.Volume Fraction) * liquid.density * (vrNorm) * (gas.u - liquid.u)\n\
-FDLy = 3/4 * CD / (gas.Mean Particle Diameter) * (gas.Volume Fraction) * liquid.density * (vrNorm) * (gas.v - liquid.v)\n\
-FDLz = 3/4 * CD / (gas.Mean Particle Diameter) * (gas.Volume Fraction) * liquid.density * (vrNorm) * (gas.w- liquidWEff)\n\
+LIBRARY: \n\
+CEL: \n\
+EXPRESSIONS: \n\
+CD = 0.44 \n\
+FDGx = - 3/4 * CD / (gas.Mean Particle Diameter) * (gas.Volume Fraction) * liquid.density * (vrNorm) * (gas.u - liquid.u) \n\
+FDGy = - 3/4 * CD / (gas.Mean Particle Diameter) * (gas.Volume Fraction) * liquid.density* (vrNorm) * (gas.v - liquid.v) \n\
+FDGz = - 3/4 * CD / (gas.Mean Particle Diameter) * (gas.Volume Fraction) * liquid.density* (vrNorm) * (gas.w - liquidWEff) \n\
+FDLx = 3/4 * CD / (gas.Mean Particle Diameter) * (gas.Volume Fraction) * liquid.density * (vrNorm) * (gas.u - liquid.u) \n\
+FDLy = 3/4 * CD / (gas.Mean Particle Diameter) * (gas.Volume Fraction) * liquid.density * (vrNorm) * (gas.v - liquid.v) \n\
+FDLz = 3/4 * CD / (gas.Mean Particle Diameter) * (gas.Volume Fraction) * liquid.density * (vrNorm) * (gas.w- liquidWEff) \n\
 Kf = {Kf} \n\
 Kw = {Kw} \n\
 facilitytheta = {theta} \n\
 gravy = -9.81 [m s^-2]*cos(facilitytheta* pi / 180) \n\
 gravz = -9.81 [m s^-2]*sin(facilitytheta* pi / 180) \n\
-liquidWEff = (1 - Kf - Kw * gas.Volume Fraction * CD^(1/3) ) * liquid.w  \n\
+liquidWEff = max( (1 - Kf - Kw * gas.Volume Fraction * CD^(1/3) ) * liquid.w, 0 [m s^-1]) \n\
 phi = if(y>0 [m], pi/2+atan(x/y), 3*pi/2+atan(x/y)) \n\
 radius = sqrt(x^2 + y^2) \n\
 vrNorm = sqrt( (gas.u - liquid.u)^2+ (gas.v - liquid.v)^2+ (gas.w - liquidWEff)^2 ) \n\
-END\n\
-FUNCTION: {InletData}\n\
-Argument Units = [mm], [m], []\n\
-Option = Profile Data\n\
-Reference Coord Frame = Coord 0\n\
-Spatial Fields = radius, z, phi\n\
-DATA FIELD: Velocity u\n\
-Field Name = Velocity u\n\
-Parameter List = U,Velocity r Component,Wall U,Wall Velocity r Component\n\
-Result Units = [m s^-1]\n\
-END\n\
-DATA FIELD: Velocity u f\n\
-Field Name = Velocity u f\n\
-Parameter List = U,Velocity r Component,Wall U,Wall Velocity r Component\n\
-Result Units = [m s^-1]\n\
-END\n\
-DATA FIELD: Velocity v\n\
-Field Name = Velocity v\n\
-Parameter List = V,Velocity Theta Component,Wall V,Wall Velocity Theta Component\n\
-Result Units = [m s^-1]\n\
-END\n\
-DATA FIELD: Velocity v f\n\
-Field Name = Velocity v f\n\
-Parameter List = V,Velocity Theta Component,Wall V,Wall Velocity Theta Component\n\
-Result Units = [m s^-1]\n\
-END\n\
-DATA FIELD: Velocity w\n\
-Field Name = Velocity w\n\
-Parameter List = Velocity Axial Component,W,Wall Velocity Axial Component,Wall W\n\
-Result Units = [m s^-1]\n\
-END\n\
-DATA FIELD: Velocity w f\n\
-Field Name = Velocity w f\n\
-Parameter List = Velocity Axial Component,W,Wall Velocity Axial Component,Wall W\n\
-Result Units = [m s^-1]\n\
-END\n\
-DATA FIELD: Volume Fraction\n\
-Field Name = Volume Fraction\n\
-Parameter List = Volume Fraction\n\
-Result Units = []\n\
-END\n\
-DATA SOURCE:\n\
-File Name = {inDataFile}\n\
-Option = From File\n\
-END\n\
-END\n\
-FUNCTION: {OutletData}\n\
-Argument Units = [mm], [m], []\n\
-Option = Profile Data\n\
-Spatial Fields = radius, z, phi\n\
-DATA FIELD: Velocity u\n\
-Field Name = Velocity u\n\
-Parameter List = U,Velocity r Component,Wall U,Wall Velocity r Component\n\
-Result Units = [m s^-1]\n\
-END\n\
-DATA FIELD: Velocity u f\n\
-Field Name = Velocity u f\n\
-Result Units = [m s^-1]\n\
-END\n\
-DATA FIELD: Velocity v\n\
-Field Name = Velocity v\n\
-Parameter List = V,Velocity Theta Component,Wall V,Wall Velocity Theta Component\n\
-Result Units = [m s^-1]\n\
-END\n\
-DATA FIELD: Velocity v f\n\
-Field Name = Velocity v f\n\
-Result Units = [m s^-1]\n\
-END\n\
-DATA FIELD: Velocity w\n\
-Field Name = Velocity w\n\
-Parameter List = Velocity Axial Component,W,Wall Velocity Axial Component,Wall W\n\
-Result Units = [m s^-1]\n\
-END\n\
-DATA FIELD: Velocity w f\n\
-Field Name = Velocity w f\n\
-Result Units = [m s^-1]\n\
-END\n\
-DATA FIELD: Volume Fraction\n\
-Field Name = Volume Fraction\n\
-Parameter List = Volume Fraction\n\
-Result Units = []\n\
-END\n\
-DATA SOURCE:\n\
-File Name = {outDataFile}\n\
-Option = From File\n\
-END\n\
-END\n\
-END\n\
-MATERIAL: Air Ideal Gas\n\
-Material Description = Air Ideal Gas (constant Cp)\n\
-Material Group = Air Data, Calorically Perfect Ideal Gases\n\
-Option = Pure Substance\n\
-Thermodynamic State = Gas\n\
-PROPERTIES:\n\
-Option = General Material\n\
-EQUATION OF STATE:\n\
-Molar Mass = 28.96 [kg kmol^-1]\n\
-Option = Ideal Gas\n\
-END\n\
-SPECIFIC HEAT CAPACITY:\n\
-Option = Value\n\
-Specific Heat Capacity = 1.0044E+03 [J kg^-1 K^-1]\n\
-Specific Heat Type = Constant Pressure\n\
-END\n\
-REFERENCE STATE:\n\
-Option = Specified Point\n\
-Reference Pressure = 1 [atm]\n\
-Reference Specific Enthalpy = 0. [J/kg]\n\
-Reference Specific Entropy = 0. [J/kg/K]\n\
-Reference Temperature = 25 [C]\n\
-END\n\
-DYNAMIC VISCOSITY:\n\
-Dynamic Viscosity = 1.831E-05 [kg m^-1 s^-1]\n\
-Option = Value\n\
-END\n\
-THERMAL CONDUCTIVITY:\n\
-Option = Value\n\
-Thermal Conductivity = 2.61E-2 [W m^-1 K^-1]\n\
-END\n\
-ABSORPTION COEFFICIENT:\n\
-Absorption Coefficient = 0.01 [m^-1]\n\
-Option = Value\n\
-END\n\
-SCATTERING COEFFICIENT:\n\
-Option = Value\n\
-Scattering Coefficient = 0.0 [m^-1]\n\
-END\n\
-REFRACTIVE INDEX:\n\
-Option = Value\n\
-Refractive Index = 1.0 [m m^-1]\n\
-END\n\
-END\n\
-END\n\
-MATERIAL: Air at 25 C\n\
-Material Description = Air at 25 C and 1 atm (dry)\n\
-Material Group = Air Data, Constant Property Gases\n\
-Option = Pure Substance\n\
-Thermodynamic State = Gas\n\
-PROPERTIES:\n\
-Option = General Material\n\
-EQUATION OF STATE:\n\
-Density = 1.185 [kg m^-3]\n\
-Molar Mass = 28.96 [kg kmol^-1]\n\
-Option = Value\n\
-END\n\
-SPECIFIC HEAT CAPACITY:\n\
-Option = Value\n\
-Specific Heat Capacity = 1.0044E+03 [J kg^-1 K^-1]\n\
-Specific Heat Type = Constant Pressure\n\
-END\n\
-REFERENCE STATE:\n\
-Option = Specified Point\n\
-Reference Pressure = 1 [atm]\n\
-Reference Specific Enthalpy = 0. [J/kg]\n\
-Reference Specific Entropy = 0. [J/kg/K]\n\
-Reference Temperature = 25 [C]\n\
-END\n\
-DYNAMIC VISCOSITY:\n\
-Dynamic Viscosity = 1.831E-05 [kg m^-1 s^-1]\n\
-Option = Value\n\
-END\n\
-THERMAL CONDUCTIVITY:\n\
-Option = Value\n\
-Thermal Conductivity = 2.61E-02 [W m^-1 K^-1]\n\
-END\n\
-ABSORPTION COEFFICIENT:\n\
-Absorption Coefficient = 0.01 [m^-1]\n\
-Option = Value\n\
-END\n\
-SCATTERING COEFFICIENT:\n\
-Option = Value\n\
-Scattering Coefficient = 0.0 [m^-1]\n\
-END\n\
-REFRACTIVE INDEX:\n\
-Option = Value\n\
-Refractive Index = 1.0 [m m^-1]\n\
-END\n\
-THERMAL EXPANSIVITY:\n\
-Option = Value\n\
-Thermal Expansivity = 0.003356 [K^-1]\n\
-END\n\
-END\n\
-END\n\
-MATERIAL: Water\n\
-Material Description = Water (liquid)\n\
-Material Group = Water Data, Constant Property Liquids\n\
-Option = Pure Substance\n\
-Thermodynamic State = Liquid\n\
-PROPERTIES:\n\
-Option = General Material\n\
-EQUATION OF STATE:\n\
-Density = 997.0 [kg m^-3]\n\
-Molar Mass = 18.02 [kg kmol^-1]\n\
-Option = Value\n\
-END\n\
-SPECIFIC HEAT CAPACITY:\n\
-Option = Value\n\
-Specific Heat Capacity = 4181.7 [J kg^-1 K^-1]\n\
-Specific Heat Type = Constant Pressure\n\
-END\n\
-REFERENCE STATE:\n\
-Option = Specified Point\n\
-Reference Pressure = 1 [atm]\n\
-Reference Specific Enthalpy = 0.0 [J/kg]\n\
-Reference Specific Entropy = 0.0 [J/kg/K]\n\
-Reference Temperature = 25 [C]\n\
-END\n\
-DYNAMIC VISCOSITY:\n\
-Dynamic Viscosity = 8.899E-4 [kg m^-1 s^-1]\n\
-Option = Value\n\
-END\n\
-THERMAL CONDUCTIVITY:\n\
-Option = Value\n\
-Thermal Conductivity = 0.6069 [W m^-1 K^-1]\n\
-END\n\
-ABSORPTION COEFFICIENT:\n\
-Absorption Coefficient = 1.0 [m^-1]\n\
-Option = Value\n\
-END\n\
-SCATTERING COEFFICIENT:\n\
-Option = Value\n\
-Scattering Coefficient = 0.0 [m^-1]\n\
-END\n\
-REFRACTIVE INDEX:\n\
-Option = Value\n\
-Refractive Index = 1.0 [m m^-1]\n\
-END\n\
-THERMAL EXPANSIVITY:\n\
-Option = Value\n\
-Thermal Expansivity = 2.57E-04 [K^-1]\n\
-END\n\
-END\n\
-END\n\
-MATERIAL: Water Ideal Gas\n\
-Material Description = Water Vapour Ideal Gas (100 C and 1 atm)\n\
-Material Group = Calorically Perfect Ideal Gases, Water Data\n\
-Option = Pure Substance\n\
-Thermodynamic State = Gas\n\
-PROPERTIES:\n\
-Option = General Material\n\
-EQUATION OF STATE:\n\
-Molar Mass = 18.02 [kg kmol^-1]\n\
-Option = Ideal Gas\n\
-END\n\
-SPECIFIC HEAT CAPACITY:\n\
-Option = Value\n\
-Specific Heat Capacity = 2080.1 [J kg^-1 K^-1]\n\
-Specific Heat Type = Constant Pressure\n\
-END\n\
-REFERENCE STATE:\n\
-Option = Specified Point\n\
-Reference Pressure = 1.014 [bar]\n\
-Reference Specific Enthalpy = 0. [J/kg]\n\
-Reference Specific Entropy = 0. [J/kg/K]\n\
-Reference Temperature = 100 [C]\n\
-END\n\
-DYNAMIC VISCOSITY:\n\
-Dynamic Viscosity = 9.4E-06 [kg m^-1 s^-1]\n\
-Option = Value\n\
-END\n\
-THERMAL CONDUCTIVITY:\n\
-Option = Value\n\
-Thermal Conductivity = 193E-04 [W m^-1 K^-1]\n\
-END\n\
-ABSORPTION COEFFICIENT:\n\
-Absorption Coefficient = 1.0 [m^-1]\n\
-Option = Value\n\
-END\n\
-SCATTERING COEFFICIENT:\n\
-Option = Value\n\
-Scattering Coefficient = 0.0 [m^-1]\n\
-END\n\
-REFRACTIVE INDEX:\n\
-Option = Value\n\
-Refractive Index = 1.0 [m m^-1]\n\
-END\n\
-END\n\
-END\n\
-END\n\
-FLOW: Flow Analysis 1\n\
-SOLUTION UNITS:\n\
-Angle Units = [rad]\n\
-Length Units = [m]\n\
-Mass Units = [kg]\n\
-Solid Angle Units = [sr]\n\
-Temperature Units = [K]\n\
-Time Units = [s]\n\
-END\n\
-ANALYSIS TYPE:\n\
-Option = Steady State\n\
-EXTERNAL SOLVER COUPLING:\n\
-Option = None\n\
-END\n\
-END\n\
-DOMAIN: Default Domain\n\
-Coord Frame = Coord 0\n\
-Domain Type = Fluid\n\
-Location = SOLID\n\
-BOUNDARY: inlet\n\
-Boundary Type = INLET\n\
-Location = INLET\n\
-Use Profile Data = False\n\
-BOUNDARY CONDITIONS:\n\
-FLOW REGIME:\n\
-Option = Subsonic\n\
-END\n\
-MASS AND MOMENTUM:\n\
-Option = Fluid Velocity\n\
-END\n\
-TURBULENCE:\n\
-Option = Medium Intensity and Eddy Viscosity Ratio\n\
-END\n\
-END\n\
-FLUID: gas\n\
-BOUNDARY CONDITIONS:\n\
-VELOCITY:\n\
-Option = Cartesian Velocity Components\n\
-U = 0 [m s^-1]\n\
-V = 0 [m s^-1]\n\
-W = {InletData}.Velocity v(radius,z,phi)\n\
-END\n\
-VOLUME FRACTION:\n\
-Option = Value\n\
-Volume Fraction = {InletData}.Volume Fraction(radius,z,phi)\n\
-END\n\
-END\n\
-END\n\
-FLUID: liquid\n\
-BOUNDARY CONDITIONS:\n\
+END \n\
+FUNCTION: {InletData} \n\
+Argument Units = [mm], [m], [] \n\
+Option = Profile Data \n\
+Reference Coord Frame = Coord 0 \n\
+Spatial Fields = radius, z, phi \n\
+DATA FIELD: Velocity u \n\
+Field Name = Velocity u \n\
+Parameter List = U,Velocity r Component,Wall U,Wall Velocity r Component \n\
+Result Units = [m s^-1] \n\
+END \n\
+DATA FIELD: Velocity u f \n\
+Field Name = Velocity u f \n\
+Parameter List = U,Velocity r Component,Wall U,Wall Velocity r Component \n\
+Result Units = [m s^-1] \n\
+END \n\
+DATA FIELD: Velocity v \n\
+Field Name = Velocity v \n\
+Parameter List = V,Velocity Theta Component,Wall V,Wall Velocity Theta Component \n\
+Result Units = [m s^-1] \n\
+END \n\
+DATA FIELD: Velocity v f \n\
+Field Name = Velocity v f \n\
+Parameter List = V,Velocity Theta Component,Wall V,Wall Velocity Theta Component \n\
+Result Units = [m s^-1] \n\
+END \n\
+DATA FIELD: Velocity w \n\
+Field Name = Velocity w \n\
+Parameter List = Velocity Axial Component,W,Wall Velocity Axial Component,Wall W \n\
+Result Units = [m s^-1] \n\
+END \n\
+DATA FIELD: Velocity w f \n\
+Field Name = Velocity w f \n\
+Parameter List = Velocity Axial Component,W,Wall Velocity Axial Component,Wall W \n\
+Result Units = [m s^-1] \n\
+END \n\
+DATA FIELD: Volume Fraction \n\
+Field Name = Volume Fraction \n\
+Parameter List = Volume Fraction \n\
+Result Units = [] \n\
+END \n\
+DATA SOURCE: \n\
+File Name = {inDataFile} \n\
+Option = From File \n\
+END \n\
+END \n\
+FUNCTION: {OutletData} \n\
+Argument Units = [mm], [m], [] \n\
+Option = Profile Data \n\
+Reference Coord Frame = Coord 0 \n\
+Spatial Fields = radius, z, phi \n\
+DATA FIELD: Velocity u \n\
+Field Name = Velocity u \n\
+Parameter List = U,Velocity r Component,Wall U,Wall Velocity r Component \n\
+Result Units = [m s^-1] \n\
+END \n\
+DATA FIELD: Velocity u f \n\
+Field Name = Velocity u f \n\
+Result Units = [m s^-1] \n\
+END \n\
+DATA FIELD: Velocity v \n\
+Field Name = Velocity v \n\
+Parameter List = V,Velocity Theta Component,Wall V,Wall Velocity Theta Component \n\
+Result Units = [m s^-1] \n\
+END \n\
+DATA FIELD: Velocity v f \n\
+Field Name = Velocity v f \n\
+Result Units = [m s^-1] \n\
+END \n\
+DATA FIELD: Velocity w \n\
+Field Name = Velocity w \n\
+Parameter List = Velocity Axial Component,W,Wall Velocity Axial Component,Wall W \n\
+Result Units = [m s^-1] \n\
+END \n\
+DATA FIELD: Velocity w f \n\
+Field Name = Velocity w f \n\
+Result Units = [m s^-1] \n\
+END \n\
+DATA FIELD: Volume Fraction \n\
+Field Name = Volume Fraction \n\
+Parameter List = Volume Fraction \n\
+Result Units = [] \n\
+END \n\
+DATA SOURCE: \n\
+File Name = {outDataFile} \n\
+Option = From File \n\
+END \n\
+END \n\
+END \n\
+MATERIAL: Air Ideal Gas \n\
+Material Description = Air Ideal Gas (constant Cp) \n\
+Material Group = Air Data, Calorically Perfect Ideal Gases \n\
+Option = Pure Substance \n\
+Thermodynamic State = Gas \n\
+PROPERTIES: \n\
+Option = General Material \n\
+EQUATION OF STATE: \n\
+Molar Mass = 28.96 [kg kmol^-1] \n\
+Option = Ideal Gas \n\
+END \n\
+SPECIFIC HEAT CAPACITY: \n\
+Option = Value \n\
+Specific Heat Capacity = 1.0044E+03 [J kg^-1 K^-1] \n\
+Specific Heat Type = Constant Pressure \n\
+END \n\
+REFERENCE STATE: \n\
+Option = Specified Point \n\
+Reference Pressure = 1 [atm] \n\
+Reference Specific Enthalpy = 0. [J/kg] \n\
+Reference Specific Entropy = 0. [J/kg/K] \n\
+Reference Temperature = 25 [C] \n\
+END \n\
+DYNAMIC VISCOSITY: \n\
+Dynamic Viscosity = 1.831E-05 [kg m^-1 s^-1] \n\
+Option = Value \n\
+END \n\
+THERMAL CONDUCTIVITY: \n\
+Option = Value \n\
+Thermal Conductivity = 2.61E-2 [W m^-1 K^-1] \n\
+END \n\
+ABSORPTION COEFFICIENT: \n\
+Absorption Coefficient = 0.01 [m^-1] \n\
+Option = Value \n\
+END \n\
+SCATTERING COEFFICIENT: \n\
+Option = Value \n\
+Scattering Coefficient = 0.0 [m^-1] \n\
+END \n\
+REFRACTIVE INDEX: \n\
+Option = Value \n\
+Refractive Index = 1.0 [m m^-1] \n\
+END \n\
+END \n\
+END \n\
+MATERIAL: Water \n\
+Material Description = Water (liquid) \n\
+Material Group = Water Data, Constant Property Liquids \n\
+Option = Pure Substance \n\
+Thermodynamic State = Liquid \n\
+PROPERTIES: \n\
+Option = General Material \n\
+EQUATION OF STATE: \n\
+Density = 997.0 [kg m^-3] \n\
+Molar Mass = 18.02 [kg kmol^-1] \n\
+Option = Value \n\
+END \n\
+SPECIFIC HEAT CAPACITY: \n\
+Option = Value \n\
+Specific Heat Capacity = 4181.7 [J kg^-1 K^-1] \n\
+Specific Heat Type = Constant Pressure \n\
+END \n\
+REFERENCE STATE: \n\
+Option = Specified Point \n\
+Reference Pressure = 1 [atm] \n\
+Reference Specific Enthalpy = 0.0 [J/kg] \n\
+Reference Specific Entropy = 0.0 [J/kg/K] \n\
+Reference Temperature = 25 [C] \n\
+END \n\
+DYNAMIC VISCOSITY: \n\
+Dynamic Viscosity = 8.899E-4 [kg m^-1 s^-1] \n\
+Option = Value \n\
+END \n\
+THERMAL CONDUCTIVITY: \n\
+Option = Value \n\
+Thermal Conductivity = 0.6069 [W m^-1 K^-1] \n\
+END \n\
+ABSORPTION COEFFICIENT: \n\
+Absorption Coefficient = 1.0 [m^-1] \n\
+Option = Value \n\
+END \n\
+SCATTERING COEFFICIENT: \n\
+Option = Value \n\
+Scattering Coefficient = 0.0 [m^-1] \n\
+END \n\
+REFRACTIVE INDEX: \n\
+Option = Value \n\
+Refractive Index = 1.0 [m m^-1] \n\
+END \n\
+THERMAL EXPANSIVITY: \n\
+Option = Value \n\
+Thermal Expansivity = 2.57E-04 [K^-1] \n\
+END \n\
+END \n\
+END \n\
+END \n\
+FLOW: Flow Analysis 1 \n\
+SOLUTION UNITS: \n\
+Angle Units = [rad] \n\
+Length Units = [m] \n\
+Mass Units = [kg] \n\
+Solid Angle Units = [sr] \n\
+Temperature Units = [K] \n\
+Time Units = [s] \n\
+END \n\
+ANALYSIS TYPE: \n\
+Option = Steady State \n\
+EXTERNAL SOLVER COUPLING: \n\
+Option = None \n\
+END \n\
+END \n\
+DOMAIN: Default Domain \n\
+Coord Frame = Coord 0 \n\
+Domain Type = Fluid \n\
+Location = SOLID \n\
+BOUNDARY: inlet \n\
+Boundary Type = INLET \n\
+Location = INLET \n\
+Use Profile Data = False \n\
+BOUNDARY CONDITIONS: \n\
+FLOW REGIME: \n\
+Option = Subsonic \n\
+END \n\
+MASS AND MOMENTUM: \n\
+Option = Fluid Velocity \n\
+END \n\
+TURBULENCE: \n\
+Option = Medium Intensity and Eddy Viscosity Ratio \n\
+END \n\
+END \n\
+FLUID: gas \n\
+BOUNDARY CONDITIONS: \n\
+VELOCITY: \n\
+Option = Cartesian Velocity Components \n\
+U = 0 [m s^-1] \n\
+V = 0 [m s^-1] \n\
+W = {InletData}.Velocity v(radius,z,phi) \n\
+END \n\
+VOLUME FRACTION: \n\
+Option = Value \n\
+Volume Fraction = {InletData}.Volume Fraction(radius,z,phi) \n\
+END \n\
+END \n\
+END \n\
+FLUID: liquid \n\
+BOUNDARY CONDITIONS: \n\
 FLOW DIRECTION: \n\
-Option = Normal to Boundary Condition\n\
-END\n\
-VELOCITY:\n\
-Mass Flow Rate = {mdot} [kg s^-1]\n\
-Option = Mass Flow Rate\n\
-END\n\
-VOLUME FRACTION:\n\
-Option = Value\n\
-Volume Fraction = 1-{InletData}.Volume Fraction(radius,z,phi)\n\
-END\n\
-END\n\
-END\n\
-END\n\
-BOUNDARY: outlet\n\
-Boundary Type = OUTLET\n\
-Location = OUTLET\n\
-BOUNDARY CONDITIONS:\n\
-FLOW REGIME:\n\
-Option = Subsonic\n\
-END\n\
-MASS AND MOMENTUM:\n\
-Option = Average Static Pressure\n\
-Pressure Profile Blend = 0.05\n\
-Relative Pressure = 0 [Pa]\n\
-END\n\
-PRESSURE AVERAGING:\n\
-Option = Average Over Whole Outlet\n\
-END\n\
-END\n\
-END\n\
-BOUNDARY: walls\n\
-Boundary Type = WALL\n\
-Location = WALLS\n\
-Use Profile Data = False\n\
-BOUNDARY CONDITIONS:\n\
-MASS AND MOMENTUM:\n\
-Option = Fluid Dependent\n\
-END\n\
-WALL CONTACT MODEL:\n\
-Option = Use Volume Fraction\n\
-END\n\
-WALL ROUGHNESS:\n\
-Option = Smooth Wall\n\
-END\n\
-END\n\
-FLUID: gas\n\
-BOUNDARY CONDITIONS:\n\
-MASS AND MOMENTUM:\n\
-Option = No Slip Wall\n\
-END\n\
-END\n\
-END\n\
-FLUID: liquid\n\
-BOUNDARY CONDITIONS:\n\
-MASS AND MOMENTUM:\n\
-Option = No Slip Wall\n\
-END\n\
-END\n\
-END\n\
-END\n\
-DOMAIN MODELS:\n\
-BUOYANCY MODEL:\n\
-Buoyancy Reference Density = 998 [kg m^-3]\n\
-Gravity X Component = 0 [m s^-2]\n\
-Gravity Y Component = gravy\n\
-Gravity Z Component = gravz\n\
-Option = Buoyant\n\
-BUOYANCY REFERENCE LOCATION:\n\
-Option = Automatic\n\
-END\n\
-END\n\
-DOMAIN MOTION:\n\
-Option = Stationary\n\
-END\n\
-MESH DEFORMATION:\n\
-Option = None\n\
-END\n\
-REFERENCE PRESSURE:\n\
-Reference Pressure = 1 [atm]\n\
-END\n\
-END\n\
-FLUID DEFINITION: gas\n\
-Material = Air Ideal Gas\n\
-Option = Material Library\n\
-MORPHOLOGY:\n\
-Mean Diameter = {Db} [m]\n\
-Minimum Volume Fraction = 0.00001\n\
-Option = Dispersed Fluid\n\
-END\n\
-END\n\
-FLUID DEFINITION: liquid\n\
-Material = Water\n\
-Option = Material Library\n\
-MORPHOLOGY:\n\
-Minimum Volume Fraction = 0.00001\n\
-Option = Continuous Fluid\n\
-END\n\
-END\n\
-FLUID MODELS:\n\
-COMBUSTION MODEL:\n\
-Option = None\n\
-END\n\
-FLUID: gas\n\
-FLUID BUOYANCY MODEL:\n\
-Option = Density Difference\n\
-END\n\
-TURBULENCE MODEL:\n\
-Option = Dispersed Phase Zero Equation\n\
-END\n\
-END\n\
-FLUID: liquid\n\
-FLUID BUOYANCY MODEL:\n\
-Option = Density Difference\n\
-END\n\
-TURBULENCE MODEL:\n\
-Option = k epsilon\n\
-BUOYANCY TURBULENCE:\n\
-Option = None\n\
-END\n\
-END\n\
-TURBULENT WALL FUNCTIONS:\n\
-Option = Scalable\n\
-END\n\
-END\n\
-HEAT TRANSFER MODEL:\n\
-Fluid Temperature = 25 [C]\n\
-Homogeneous Model = False\n\
-Option = Isothermal\n\
-END\n\
-THERMAL RADIATION MODEL:\n\
-Option = None\n\
-END\n\
-TURBULENCE MODEL:\n\
-Homogeneous Model = False\n\
-Option = Fluid Dependent\n\
-END\n\
-END\n\
-FLUID PAIR: gas | liquid\n\
-Surface Tension Coefficient = 0.072 [N m^-1]\n\
-INTERPHASE TRANSFER MODEL:\n\
-Option = Particle Model\n\
-END\n\
-MASS TRANSFER:\n\
-Option = None\n\
-END\n\
-MOMENTUM TRANSFER:\n\
-DRAG FORCE:\n\
-Option = Schiller Naumann\n\
-END\n\
-LIFT FORCE:\n\
-Lift Coefficient = {CL}\n\
-Option = Lift Coefficient\n\
-END\n\
-TURBULENT DISPERSION FORCE:\n\
-Option = Lopez de Bertodano\n\
-Turbulent Dispersion Coefficient = {CTD}\n\
-END\n\
-VIRTUAL MASS FORCE:\n\
-Option = None\n\
-END\n\
-WALL LUBRICATION FORCE:\n\
-Lubrication Coefficient C1 = -0.01\n\
-Lubrication Coefficient C2 = 0.05\n\
-Option = Antal\n\
-END\n\
-END\n\
-TURBULENCE TRANSFER:\n\
-ENHANCED TURBULENCE PRODUCTION MODEL:\n\
-Option = Sato Enhanced Eddy Viscosity\n\
-END\n\
-END\n\
-END\n\
-MULTIPHASE MODELS:\n\
-Homogeneous Model = False\n\
-FREE SURFACE MODEL:\n\
-Option = None\n\
-END\n\
-END\n\
-SUBDOMAIN: fluid\n\
-Coord Frame = Coord 0\n\
-Location = SOLID\n\
-FLUID: gas\n\
-SOURCES:\n\
-MOMENTUM SOURCE:\n\
-GENERAL MOMENTUM SOURCE:\n\
-Momentum Source X Component = {mom_source_to_write[3]}\n\
-Momentum Source Y Component = {mom_source_to_write[4]}\n\
-Momentum Source Z Component = {mom_source_to_write[5]}\n\
-Option = Cartesian Components\n\
-END\n\
-END\n\
-END\n\
-END\n\
-FLUID: liquid\n\
-SOURCES:\n\
-MOMENTUM SOURCE:\n\
-GENERAL MOMENTUM SOURCE:\n\
-Momentum Source X Component = {mom_source_to_write[0]}\n\
-Momentum Source Y Component = {mom_source_to_write[1]}\n\
-Momentum Source Z Component = {mom_source_to_write[2]}\n\
-Option = Cartesian Components\n\
-END\n\
-END\n\
-END\n\
-END\n\
-END\n\
-END\n\
-OUTPUT CONTROL:\n\
-RESULTS:\n\
-File Compression Level = Default\n\
-Option = Standard\n\
-END\n\
-END\n\
-SOLVER CONTROL:\n\
-Optimization Level = 3\n\
-Turbulence Numerics = High Resolution\n\
-ADVECTION SCHEME:\n\
-Option = High Resolution\n\
-END\n\
-CONVERGENCE CONTROL:\n\
-Length Scale Option = Conservative\n\
-Maximum Number of Iterations = {num_iter}\n\
-Minimum Number of Iterations = 1\n\
-Timescale Control = Auto Timescale\n\
-Timescale Factor = 0.5\n\
-END\n\
-CONVERGENCE CRITERIA:\n\
-Conservation Target = 0.01\n\
-Residual Target = {resid_target}\n\
-Residual Type = RMS\n\
-END\n\
-DYNAMIC MODEL CONTROL:\n\
-Global Dynamic Model Control = On\n\
-END\n\
-INTERRUPT CONTROL:\n\
-Option = Any Interrupt\n\
-CONVERGENCE CONDITIONS:\n\
-Option = Default Conditions\n\
-END\n\
-END\n\
-MULTIPHASE CONTROL:\n\
-Optimization Level = 3\n\
-Volume Fraction Coupling = Coupled\n\
-END\n\
-END\n\
-END\n\
-COMMAND FILE:\n\
-Version = 22.1\n\
-END\n\
-    "
+Option = Normal to Boundary Condition \n\
+END \n\
+VELOCITY: \n\
+Mass Flow Rate = {mdot} [kg s^-1] \n\
+Option = Mass Flow Rate \n\
+END \n\
+VOLUME FRACTION: \n\
+Option = Value \n\
+Volume Fraction = 1-{InletData}.Volume Fraction(radius,z,phi) \n\
+END \n\
+END \n\
+END \n\
+END \n\
+BOUNDARY: outlet \n\
+Boundary Type = OUTLET \n\
+Location = OUTLET \n\
+BOUNDARY CONDITIONS: \n\
+FLOW REGIME: \n\
+Option = Subsonic \n\
+END \n\
+MASS AND MOMENTUM: \n\
+Option = Average Static Pressure \n\
+Pressure Profile Blend = 0.05 \n\
+Relative Pressure = 0 [Pa] \n\
+END \n\
+PRESSURE AVERAGING: \n\
+Option = Average Over Whole Outlet \n\
+END \n\
+END \n\
+END \n\
+BOUNDARY: walls \n\
+Boundary Type = WALL \n\
+Location = WALLS \n\
+Use Profile Data = False \n\
+BOUNDARY CONDITIONS: \n\
+MASS AND MOMENTUM: \n\
+Option = Fluid Dependent \n\
+END \n\
+WALL CONTACT MODEL: \n\
+Option = Use Volume Fraction \n\
+END \n\
+WALL ROUGHNESS: \n\
+Option = Smooth Wall \n\
+END \n\
+END \n\
+FLUID: gas \n\
+BOUNDARY CONDITIONS: \n\
+MASS AND MOMENTUM: \n\
+Option = No Slip Wall \n\
+END \n\
+END \n\
+END \n\
+FLUID: liquid \n\
+BOUNDARY CONDITIONS: \n\
+MASS AND MOMENTUM: \n\
+Option = No Slip Wall \n\
+END \n\
+END \n\
+END \n\
+END \n\
+DOMAIN MODELS: \n\
+BUOYANCY MODEL: \n\
+Buoyancy Reference Density = 998 [kg m^-3] \n\
+Gravity X Component = 0 [m s^-2] \n\
+Gravity Y Component = gravy \n\
+Gravity Z Component = gravz \n\
+Option = Buoyant \n\
+BUOYANCY REFERENCE LOCATION: \n\
+Option = Automatic \n\
+END \n\
+END \n\
+DOMAIN MOTION: \n\
+Option = Stationary \n\
+END \n\
+MESH DEFORMATION: \n\
+Option = None \n\
+END \n\
+REFERENCE PRESSURE: \n\
+Reference Pressure = 1 [atm] \n\
+END \n\
+END \n\
+FLUID DEFINITION: gas \n\
+Material = Air Ideal Gas \n\
+Option = Material Library \n\
+MORPHOLOGY: \n\
+Mean Diameter = {Db} [m] \n\
+Minimum Volume Fraction = 0.001 \n\
+Option = Dispersed Fluid \n\
+END \n\
+END \n\
+FLUID DEFINITION: liquid \n\
+Material = Water \n\
+Option = Material Library \n\
+MORPHOLOGY: \n\
+Minimum Volume Fraction = 0.001 \n\
+Option = Continuous Fluid \n\
+END \n\
+END \n\
+FLUID MODELS: \n\
+COMBUSTION MODEL: \n\
+Option = None \n\
+END \n\
+FLUID: gas \n\
+FLUID BUOYANCY MODEL: \n\
+Option = Density Difference \n\
+END \n\
+TURBULENCE MODEL: \n\
+Option = Dispersed Phase Zero Equation \n\
+END \n\
+END \n\
+FLUID: liquid \n\
+FLUID BUOYANCY MODEL: \n\
+Option = Density Difference \n\
+END \n\
+TURBULENCE MODEL: \n\
+Option = k epsilon \n\
+BUOYANCY TURBULENCE: \n\
+Option = None \n\
+END \n\
+END \n\
+TURBULENT WALL FUNCTIONS: \n\
+Option = Scalable \n\
+END \n\
+END \n\
+HEAT TRANSFER MODEL: \n\
+Fluid Temperature = 25 [C] \n\
+Homogeneous Model = False \n\
+Option = Isothermal \n\
+END \n\
+THERMAL RADIATION MODEL: \n\
+Option = None \n\
+END \n\
+TURBULENCE MODEL: \n\
+Homogeneous Model = False \n\
+Option = Fluid Dependent \n\
+END \n\
+END \n\
+FLUID PAIR: gas | liquid \n\
+Surface Tension Coefficient = 0.072 [N m^-1] \n\
+INTERPHASE TRANSFER MODEL: \n\
+Minimum Volume Fraction for Area Density = 0.001 \n\
+Option = Particle Model \n\
+END \n\
+MASS TRANSFER: \n\
+Option = None \n\
+END \n\
+MOMENTUM TRANSFER: \n\
+DRAG FORCE: \n\
+Drag Coefficient = {CD_CFX} \n\
+Option = Drag Coefficient \n\
+END \n\
+LIFT FORCE: \n\
+Lift Coefficient = {CL} \n\
+Option = Lift Coefficient \n\
+END \n\
+TURBULENT DISPERSION FORCE: \n\
+Option = Lopez de Bertodano \n\
+Turbulent Dispersion Coefficient = {CTD} \n\
+END \n\
+VIRTUAL MASS FORCE: \n\
+Option = None \n\
+END \n\
+WALL LUBRICATION FORCE: \n\
+Lubrication Coefficient C1 = -0.01 \n\
+Lubrication Coefficient C2 = 0.05 \n\
+Option = Antal \n\
+END \n\
+END \n\
+TURBULENCE TRANSFER: \n\
+ENHANCED TURBULENCE PRODUCTION MODEL: \n\
+Option = Sato Enhanced Eddy Viscosity \n\
+END \n\
+END \n\
+END \n\
+INITIALISATION: \n\
+Option = Automatic \n\
+FLUID: gas \n\
+INITIAL CONDITIONS: \n\
+Velocity Type = Cartesian \n\
+CARTESIAN VELOCITY COMPONENTS: \n\
+Option = Automatic with Value \n\
+U = 0 [m s^-1] \n\
+V = 0 [m s^-1] \n\
+W = 4 [m s^-1] \n\
+END \n\
+VOLUME FRACTION: \n\
+Option = Automatic with Value \n\
+Volume Fraction = 0.1 \n\
+END \n\
+END \n\
+END \n\
+FLUID: liquid \n\
+INITIAL CONDITIONS: \n\
+Velocity Type = Cartesian \n\
+CARTESIAN VELOCITY COMPONENTS: \n\
+Option = Automatic with Value \n\
+U = 0 [m s^-1] \n\
+V = 0 [m s^-1] \n\
+W = 4 [m s^-1] \n\
+END \n\
+TURBULENCE INITIAL CONDITIONS: \n\
+Option = Medium Intensity and Eddy Viscosity Ratio \n\
+END \n\
+VOLUME FRACTION: \n\
+Option = Automatic with Value \n\
+Volume Fraction = 0.9 \n\
+END \n\
+END \n\
+END \n\
+INITIAL CONDITIONS: \n\
+STATIC PRESSURE: \n\
+Option = Automatic \n\
+END \n\
+END \n\
+END \n\
+MULTIPHASE MODELS: \n\
+Homogeneous Model = False \n\
+FREE SURFACE MODEL: \n\
+Option = None \n\
+END \n\
+END \n\
+SUBDOMAIN: fluid \n\
+Coord Frame = Coord 0 \n\
+Location = SOLID \n\
+FLUID: gas \n\
+SOURCES: \n\
+MOMENTUM SOURCE: \n\
+GENERAL MOMENTUM SOURCE: \n\
+Momentum Source Coefficient = 1000000 [kg m^-3 s^-1] \n\
+Momentum Source X Component = {mom_source_to_write[3]} \n\
+Momentum Source Y Component = {mom_source_to_write[4]} \n\
+Momentum Source Z Component = {mom_source_to_write[5]} \n\
+Option = Cartesian Components \n\
+END \n\
+END \n\
+END \n\
+END \n\
+FLUID: liquid \n\
+SOURCES: \n\
+MOMENTUM SOURCE: \n\
+GENERAL MOMENTUM SOURCE: \n\
+Momentum Source Coefficient = 1000000 [kg m^-3 s^-1] \n\
+Momentum Source X Component = {mom_source_to_write[0]} \n\
+Momentum Source Y Component = {mom_source_to_write[1]} \n\
+Momentum Source Z Component = {mom_source_to_write[2]} \n\
+Option = Cartesian Components \n\
+END \n\
+END \n\
+END \n\
+END \n\
+END \n\
+END \n\
+OUTPUT CONTROL: \n\
+RESULTS: \n\
+File Compression Level = Default \n\
+Option = Standard \n\
+END \n\
+END \n\
+SOLVER CONTROL: \n\
+Optimization Level = 3 \n\
+Turbulence Numerics = High Resolution \n\
+ADVECTION SCHEME: \n\
+Option = High Resolution \n\
+END \n\
+CONVERGENCE CONTROL: \n\
+Length Scale Option = Conservative \n\
+Maximum Number of Iterations = {num_iter} \n\
+Minimum Number of Iterations = 1 \n\
+Timescale Control = Auto Timescale \n\
+Timescale Factor = 0.5 \n\
+END \n\
+CONVERGENCE CRITERIA: \n\
+Conservation Target = 0.01 \n\
+Residual Target = {resid_target} \n\
+Residual Type = RMS \n\
+END \n\
+DYNAMIC MODEL CONTROL: \n\
+Global Dynamic Model Control = On \n\
+END \n\
+INTERRUPT CONTROL: \n\
+Option = Any Interrupt \n\
+CONVERGENCE CONDITIONS: \n\
+Option = Default Conditions \n\
+END \n\
+END \n\
+MULTIPHASE CONTROL: \n\
+Initial Volume Fraction Smoothing = Volume-Weighted \n\
+Optimization Level = 3 \n\
+Volume Fraction Coupling = Coupled \n\
+END \n\
+END \n\
+END \n\
+COMMAND FILE: \n\
+Version = 22.2 \n\
+END"
 
         print(strToWrite, file = fi)
         return
 
-def make_CFX_case(case_name, setup_ccl='auto_setup.ccl'):
+def make_CFX_case(case_name, mesh_name = None, ccl_name='auto_setup'):
     """ Makes CFX case based on CCL file
 
     Takes "setup_ccl" and writes a case file, "casename.def"
     
     """
+
+    if mesh_name is None:
+        mesh_name = case_name
 
     with open('CFXPre_Commands.pre', 'w') as fi:
         print(f"\
@@ -1011,21 +966,26 @@ END\n\
 >load mode=new\n\
 > update\n\
 \n\
-> gtmImport filename={case_name}.msh, type=Fluent, units=m, genOpt= -n, nameStrategy=Assembly\n\
+> gtmImport filename={mesh_name}.msh, type=Fluent, units=m, genOpt= -n, nameStrategy=Assembly\n\
 > update\n\
 \n\
->importccl filename={setup_ccl}, mode=replace, autoLoadLibrary=none\n\
+>importccl filename={ccl_name}.ccl, mode=replace, autoLoadLibrary=none\n\
 > update\n\
 \n\
 >writeCaseFile filename=./{case_name}.def, operation=write def file\n\
 > update\n\
 \n\
 > quit ", file = fi)
-    print('$module load ansys && cfx5pre -s CFXPre_Commands.pre')
-    subprocess.check_call('module load ansys && cfx5pre -s CFXPre_Commands.pre -line > auto_cfx_run.log', shell=True)
+    print('$\ncfx5pre -s CFXPre_Commands.pre')
+    try:
+        subprocess.check_call("ml ansys", shell=True)
+    except subprocess.CalledProcessError as e:
+        print(e)
+        print("Continuing...")
+    subprocess.check_call('cfx5pre -s CFXPre_Commands.pre -line > auto_cfx_run.log', shell=True)
     return
 
-def run_CFX_case(case_name, parallel=True, npart = 4):
+def run_CFX_case(case_name, parallel=True, npart = 4, init_fi = None, interactive = False):
     """ Runs CFX case case_name.def
 
     Must be in the same directory, or a full path (without the .def) supplied
@@ -1033,13 +993,27 @@ def run_CFX_case(case_name, parallel=True, npart = 4):
     Can run in parallel, specify the number of cores with npart
     
     """
+    try:
+        subprocess.check_call("ml ansys", shell=True)
+    except subprocess.CalledProcessError as e:
+        print(e)
+        print("Continuing...")
+
+    run_string = f"cfx5solve -def {case_name}.def -monitor {case_name}_001.out -double"
     
     if parallel:
-        print(f'$module load ansys && cfx5solve -def {case_name}.def -par -par-local -part {npart} -double')
-        subprocess.check_call(f'module load ansys && cfx5solve -def {case_name}.def -par -par-local -part 8 -double > auto_cfx_run.log', shell=True)
-    else:
-        print(f'module load ansys && cfx5solve -def {case_name}.def -double')
-        subprocess.check_call(f'module load ansys && cfx5solve -def {case_name}.def -double > auto_cfx_run.log', shell=True)
+        run_string += f" -par -par-local -part {npart}"
+
+    if init_fi:
+        run_string += f" -initial-file {init_fi}"
+
+    if interactive:
+        run_string += f" -interactive"
+    
+    run_string += " > auto_cfx_run.log"
+
+    print(f"${run_string}")
+    subprocess.check_call(run_string, shell=True)
     return
 
 
@@ -1144,9 +1118,14 @@ END\n\
 >quit     \n\
         \
         ', file=fi)
+    try:
+        subprocess.check_call("ml ansys", shell=True)
+    except subprocess.CalledProcessError as e:
+        print(e)
+        print("Continuing...")
     print(os.getcwd())
     subprocess.check_call(f'rm -rf ./{case_name}_Results', shell=True)
-    subprocess.check_call(f'module load ansys && cfx5post -play CFXPost_Commands.cse -line > auto_cfx_run.log', shell=True)
+    subprocess.check_call(f'cfx5post -play CFXPost_Commands.cse -line > auto_cfx_run.log', shell=True)
 
 
 
