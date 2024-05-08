@@ -1017,7 +1017,7 @@ def run_CFX_case(case_name, parallel=True, npart = 4, init_fi = None, interactiv
     return
 
 
-def post_process_CFX_case(case_name, template_name = 'CFX'):
+def post_process_CFX_case(case_name, template = 'CFX'):
     """ Post-process a CFX case, case_name.res
 
     Must have a template available, "CFX" is the default. Might need to set it up beforehand based on a .cst file
@@ -1066,7 +1066,7 @@ VIEW:View 1\n\
 END\n\
 \n\
 > update\n\
->report generatemode=APPEND, loadtemplate={template_name}\n\
+>report generatemode=APPEND, loadtemplate={template}\n\
 \n\
 REPORT:\n\
   PUBLISH:\n\
