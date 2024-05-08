@@ -335,7 +335,7 @@ def calculate_CL_Ryan(jf, jg, theta=0.0, Db = 0.0018, testing = False):
     CL = CL_T * I * f_sharma
     return CL
 
-def write_CCL(mom_source = 'drag_model', ccl_name = 'auto_setup.ccl',
+def write_CCL(mom_source = 'normal_drag_mom_source', ccl_name = 'auto_setup.ccl',
                           inDataFile= '/home/adix/CFD/exp_BCs/in_H_0.csv', 
                           outDataFile = '/home/adix/CFD/exp_BCs/out_H_0.csv', 
                           Db=0.0018, CL = 0.25, CTD = 0.25, theta = 0, mdot = 2.02277,
