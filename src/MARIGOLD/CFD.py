@@ -900,7 +900,8 @@ END \n\
 END \n\
 OUTPUT CONTROL: \n\
 RESULTS: \n\
-Option = None \n\
+File Compression Level = Default \n\
+Option = Standard \n\
 END \n\
 END \n\
 SOLVER CONTROL: \n\
