@@ -336,8 +336,8 @@ def calculate_CL_Ryan(jf, jg, theta=0.0, Db = 0.0018, testing = False):
     return CL
 
 def write_CCL(mom_source = 'drag_model', ccl_name = 'auto_setup.ccl',
-                          inDataFile= '/scratch/brown/adix/0/H/inH.csv', 
-                          outDataFile = '/scratch/brown/adix/PITA/0/H/outH.csv', 
+                          inDataFile= '/home/adix/CFD/exp_BCs/in_H_0.csv', 
+                          outDataFile = '/home/adix/CFD/exp_BCs/out_H_0.csv', 
                           Db=0.0018, CL = 0.25, CTD = 0.25, theta = 0, mdot = 2.02277,
                           Kf = 0.083, Kw = 0.98, CD = 0.44, jf = 4, jg = 0.11,
                           num_iter = 10000, resid_target = 1e-6):
@@ -401,9 +401,9 @@ FDGz = - 3/4 * CD / (gas.Mean Particle Diameter) * (gas.Volume Fraction) * liqui
 FDLx = 3/4 * CD / (gas.Mean Particle Diameter) * (gas.Volume Fraction) * liquid.density * (vrNorm) * (gas.u - liquid.u) \n\
 FDLy = 3/4 * CD / (gas.Mean Particle Diameter) * (gas.Volume Fraction) * liquid.density * (vrNorm) * (gas.v - liquid.v) \n\
 FDLz = 3/4 * CD / (gas.Mean Particle Diameter) * (gas.Volume Fraction) * liquid.density * (vrNorm) * (gas.w- liquidWEff) \n\
-Kf = 0.083 \n\
-Kw = 0.98 \n\
-facilitytheta = 0 \n\
+Kf = {Kf} \n\
+Kw = {Kw} \n\
+facilitytheta = {theta} \n\
 gravy = -9.81 [m s^-2]*cos(facilitytheta* pi / 180) \n\
 gravz = -9.81 [m s^-2]*sin(facilitytheta* pi / 180) \n\
 liquidWEff = max( (1 - Kf - Kw * gas.Volume Fraction * CD^(1/3) ) * liquid.w, 0 [m s^-1]) \n\
@@ -411,7 +411,7 @@ phi = if(y>0 [m], pi/2+atan(x/y), 3*pi/2+atan(x/y)) \n\
 radius = sqrt(x^2 + y^2) \n\
 vrNorm = sqrt( (gas.u - liquid.u)^2+ (gas.v - liquid.v)^2+ (gas.w - liquidWEff)^2 ) \n\
 END \n\
-FUNCTION: InletData \n\
+FUNCTION: {InletData} \n\
 Argument Units = [mm], [m], [] \n\
 Option = Profile Data \n\
 Reference Coord Frame = Coord 0 \n\
@@ -452,11 +452,11 @@ Parameter List = Volume Fraction \n\
 Result Units = [] \n\
 END \n\
 DATA SOURCE: \n\
-File Name = /home/adix/CFD/exp_BCs/in_H_0.csv \n\
+File Name = {inDataFile} \n\
 Option = From File \n\
 END \n\
 END \n\
-FUNCTION: OutletData \n\
+FUNCTION: {OutletData} \n\
 Argument Units = [mm], [m], [] \n\
 Option = Profile Data \n\
 Reference Coord Frame = Coord 0 \n\
@@ -494,7 +494,7 @@ Parameter List = Volume Fraction \n\
 Result Units = [] \n\
 END \n\
 DATA SOURCE: \n\
-File Name = /home/adix/CFD/exp_BCs/out_H_0.csv \n\
+File Name = {outDataFile} \n\
 Option = From File \n\
 END \n\
 END \n\
@@ -635,11 +635,11 @@ VELOCITY: \n\
 Option = Cartesian Velocity Components \n\
 U = 0 [m s^-1] \n\
 V = 0 [m s^-1] \n\
-W = InletData.Velocity v(radius,z,phi) \n\
+W = {InletData}.Velocity v(radius,z,phi) \n\
 END \n\
 VOLUME FRACTION: \n\
 Option = Value \n\
-Volume Fraction = InletData.Volume Fraction(radius,z,phi) \n\
+Volume Fraction = {InletData}.Volume Fraction(radius,z,phi) \n\
 END \n\
 END \n\
 END \n\
@@ -649,12 +649,12 @@ FLOW DIRECTION: \n\
 Option = Normal to Boundary Condition \n\
 END \n\
 VELOCITY: \n\
-Mass Flow Rate = 2.02277 [kg s^-1] \n\
+Mass Flow Rate = {mdot} [kg s^-1] \n\
 Option = Mass Flow Rate \n\
 END \n\
 VOLUME FRACTION: \n\
 Option = Value \n\
-Volume Fraction = 1-InletData.Volume Fraction(radius,z,phi) \n\
+Volume Fraction = 1-{InletData}.Volume Fraction(radius,z,phi) \n\
 END \n\
 END \n\
 END \n\
@@ -731,7 +731,7 @@ FLUID DEFINITION: gas \n\
 Material = Air Ideal Gas \n\
 Option = Material Library \n\
 MORPHOLOGY: \n\
-Mean Diameter = 0.0018 [m] \n\
+Mean Diameter = {Db} [m] \n\
 Minimum Volume Fraction = 0.001 \n\
 Option = Dispersed Fluid \n\
 END \n\
@@ -794,16 +794,16 @@ Option = None \n\
 END \n\
 MOMENTUM TRANSFER: \n\
 DRAG FORCE: \n\
-Drag Coefficient = 0.0 \n\
+Drag Coefficient = {CD_CFX} \n\
 Option = Drag Coefficient \n\
 END \n\
 LIFT FORCE: \n\
-Lift Coefficient = 0.25 \n\
+Lift Coefficient = {CL} \n\
 Option = Lift Coefficient \n\
 END \n\
 TURBULENT DISPERSION FORCE: \n\
 Option = Lopez de Bertodano \n\
-Turbulent Dispersion Coefficient = 0.25 \n\
+Turbulent Dispersion Coefficient = {CTD} \n\
 END \n\
 VIRTUAL MASS FORCE: \n\
 Option = None \n\
@@ -875,9 +875,9 @@ SOURCES: \n\
 MOMENTUM SOURCE: \n\
 GENERAL MOMENTUM SOURCE: \n\
 Momentum Source Coefficient = 1000000 [kg m^-3 s^-1] \n\
-Momentum Source X Component = FDGx \n\
-Momentum Source Y Component = FDGy \n\
-Momentum Source Z Component = FDGz \n\
+Momentum Source X Component = {mom_source_to_write[3]} \n\
+Momentum Source Y Component = {mom_source_to_write[4]} \n\
+Momentum Source Z Component = {mom_source_to_write[5]} \n\
 Option = Cartesian Components \n\
 END \n\
 END \n\
@@ -888,9 +888,9 @@ SOURCES: \n\
 MOMENTUM SOURCE: \n\
 GENERAL MOMENTUM SOURCE: \n\
 Momentum Source Coefficient = 1000000 [kg m^-3 s^-1] \n\
-Momentum Source X Component = FDLx \n\
-Momentum Source Y Component = FDLy \n\
-Momentum Source Z Component = FDLz \n\
+Momentum Source X Component = {mom_source_to_write[0]} \n\
+Momentum Source Y Component = {mom_source_to_write[1]} \n\
+Momentum Source Z Component = {mom_source_to_write[2]} \n\
 Option = Cartesian Components \n\
 END \n\
 END \n\
@@ -911,14 +911,14 @@ Option = High Resolution \n\
 END \n\
 CONVERGENCE CONTROL: \n\
 Length Scale Option = Conservative \n\
-Maximum Number of Iterations = 100000 \n\
+Maximum Number of Iterations = {num_iter} \n\
 Minimum Number of Iterations = 1 \n\
 Timescale Control = Auto Timescale \n\
 Timescale Factor = 0.5 \n\
 END \n\
 CONVERGENCE CRITERIA: \n\
 Conservation Target = 0.01 \n\
-Residual Target = 1e-6 \n\
+Residual Target = {resid_target} \n\
 Residual Type = RMS \n\
 END \n\
 DYNAMIC MODEL CONTROL: \n\
@@ -984,7 +984,7 @@ END\n\
     subprocess.check_call('cfx5pre -s CFXPre_Commands.pre -line > auto_cfx_run.log', shell=True)
     return
 
-def run_CFX_case(case_name, parallel=True, npart = 4):
+def run_CFX_case(case_name, parallel=True, npart = 4, init_fi = None, interactive = False):
     """ Runs CFX case case_name.def
 
     Must be in the same directory, or a full path (without the .def) supplied
@@ -997,13 +997,22 @@ def run_CFX_case(case_name, parallel=True, npart = 4):
     except subprocess.CalledProcessError as e:
         print(e)
         print("Continuing...")
+
+    run_string = f"cfx5solve -def {case_name}.def -monitor {case_name}_001.out -double"
     
     if parallel:
-        print(f'\n$cfx5solve -def {case_name}.def -par -par-local -part {npart} -double')
-        subprocess.check_call(f'cfx5solve -def {case_name}.def -monitor {case_name}_001.out -par -par-local -part 8 -double > auto_cfx_run.log', shell=True)
-    else:
-        print(f'\n$cfx5solve -def {case_name}.def -double')
-        subprocess.check_call(f'cfx5solve -def {case_name}.def -monitor -double > auto_cfx_run.log', shell=True)
+        run_string += f" -par -par-local -part {npart}"
+
+    if init_fi:
+        run_string += f" -initial-file {init_fi}"
+
+    if interactive:
+        run_string += f" -interactive"
+    
+    run_string += " > auto_cfx_run.log"
+
+    print(f"${run_string}")
+    subprocess.check_call(run_string, shell=True)
     return
 
 
