@@ -38,6 +38,18 @@ def write_CFX_BC(cond:Condition, save_dir = ".", z_loc = 0):
 
                     f.write(f"{r},{z_loc},{angle * np.pi/180},{0},{midas_output['ug1']},{0},{midas_output['alpha']},{0},{vf},{0}")
 
+    return
+
+def read_CFX_export(csv_name, jf, jgref, theta, port, database, jgloc=None) -> Condition:
+    if jgloc is None:
+        jgloc = jgref
+    cond = Condition(jgref, jgloc, jf, theta, port, database)
+
+    with open(csv_name) as fi:
+        fi.readline() # [Name]
+
+    return cond
+
 
 def make_ICEM_pipe_mesh(r_divs: int, theta_divs: int, z_divs: int, o_point: float, L: float, 
                         case_name: str, turb_model = 'ke', Ref = 20000, growth_ratio = 1.2, 
@@ -1111,6 +1123,42 @@ EXPORT:\n\
   Separator = ", "\n\
   Spatial Variables = X,Y,Z\n\
   Variable List = X, Y, Z, gas.Velocity w, gas.Volume Fraction, liquid.Velocity w\n\
+  Vector Brackets = ()\n\
+  Vector Display = Scalar\n\
+END\n\
+>export\n\
+EXPORT:\n\
+  ANSYS Export Data = Element Heat Flux\n\
+  ANSYS File Format = ANSYS\n\
+  ANSYS Reference Temperature = 0.0 [K]\n\
+  ANSYS Specify Reference Temperature = Off\n\
+  ANSYS Supplemental HTC = 0.0 [W m^-2 K^-1]\n\
+  Additional Variable List =\n\
+  BC Profile Type = Inlet Velocity\n\
+  CSV Type = CSV\n\
+  Case Name = Case {case_name}_001\n\
+  Export Connectivity = Off\n\
+  Export Coord Frame = Global\n\
+  Export File = {case_name}_port3.csv\n\
+  Export Geometry = Off\n\
+  Export Location Aliases =\n\
+  Export Node Numbers = Off\n\
+  Export Null Data = On\n\
+  Export Type = Generic\n\
+  Export Units System = Current\n\
+  Export Variable Type = Current\n\
+  External Export Data = None\n\
+  Include File Information = Off\n\
+  Include Header = On\n\
+  Location = inlet\n\
+  Location List = /PLANE:port3\n\
+  Null Token = null\n\
+  Overwrite = On\n\
+  Precision = 8\n\
+  Separator = ", "\n\
+  Spatial Variables = X,Y,Z\n\
+  Variable List = gas.Velocity w, gas.Volume Fraction, liquid.Velocity w, X, Y,\\n\
+ Z\n\
   Vector Brackets = ()\n\
   Vector Display = Scalar\n\
 END\n\
