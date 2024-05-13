@@ -382,10 +382,13 @@ def write_CCL(mom_source = 'normal_drag_mom_source', ccl_name = 'auto_setup.ccl'
         CD_CFX = CD
 
     if CL == 'tomiyama':
-        CL = calculate_CL_Ryan(jf=jf, jg=jg, theta=90, Db=Db)
+        lift_string = f"Option = Tomiyama \n"
+    else:
 
-    elif CL == 'ryan_DFM':
-        CL = calculate_CL_Ryan(jf=jf, jg=jg, theta=theta, Db=Db)
+        if CL == 'ryan_DFM':
+            CL = calculate_CL_Ryan(jf=jf, jg=jg, theta=theta, Db=Db)
+
+        lift_string = f"Lift Coefficient = {CL} \nOption = Lift Coefficient \n"
 
     with open(ccl_name, 'w') as fi:
 
@@ -798,8 +801,7 @@ Drag Coefficient = {CD_CFX} \n\
 Option = Drag Coefficient \n\
 END \n\
 LIFT FORCE: \n\
-Lift Coefficient = {CL} \n\
-Option = Lift Coefficient \n\
+{lift_string}\
 END \n\
 TURBULENT DISPERSION FORCE: \n\
 Option = Lopez de Bertodano \n\
@@ -988,7 +990,7 @@ END\n\
 def run_CFX_case(case_name, parallel=True, npart = 4, init_fi = None, interactive = False):
     """ Runs CFX case case_name.def
 
-    Must be in the same directory, or a full path (without the .def) supplied
+    Must be in the same directory, or a full path (without the .def extension) supplied
 
     Can run in parallel, specify the number of cores with npart
     
