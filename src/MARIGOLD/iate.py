@@ -1,6 +1,6 @@
 from .config import *
 
-def iate(cond, query, z_step, *args, **kwargs):
+def iate(cond, query, z_step, void_method = 'driftflux', *args, **kwargs):
     # Version History:
     #   > v1: Pressure cheating, jgref substitute for jgatm
     #       > v1_b1
@@ -19,12 +19,14 @@ def iate(cond, query, z_step, *args, **kwargs):
     #   > v3: Yadav methods, incorporation of COV terms, support for elbows, VU, VD, horizontal
     # 
     # Inputs:
-    #   > cond:     Condition object, part of MARIGOLD framework
-    #   > query:    L/D endpoint
-    #   > z_step:   Axial mesh cell size [-]
+    #   > cond:             Condition object, part of MARIGOLD framework
+    #   > query:            L/D endpoint
+    #   > z_step:           Axial mesh cell size [-]
+    #   > void_method:      Void fraction prediction method, 'driftflux' or 'continuity'
 
     cheat = True
     elbow = False
+    quarantine = True
 
     # MARIGOLD retrieval
     theta       = cond.theta                        # Pipe inclination angle
@@ -259,27 +261,24 @@ def iate(cond, query, z_step, *args, **kwargs):
         elif elbow == True:
             SWE[i] = 0
             
-            # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
-            # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
-            # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
-            # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
-            '''
-            # Elbow elbow
-            vgzP4 = slip*jf/(1-alpha[zstep_v])
-            
-            L_D = 0.3156
-            deltaz = z[i]-z[zstep_v]
-            slope = (vgzP4-vgz[zstep_v])/L_D
-            vgz[i] = vgz[zstep_v]+slope*(deltaz)
-            
-            # Dissipation elbow
-            Sratio = np.exp(-beta_diss*(z[i]-z[zstep_v+24])/Dh)
-            vgz[i] = vgzP4*(1+Const1*np.log(Sratio))
-            '''
-            # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
-            # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
-            # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
-            # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
+            if quarantine == False:
+                # Yadav calculates vgz differently if solving in elbow region and dissipation length region
+                '''
+                beta_diss = 0.18-7.6E-7*Rem  # dissipation coefficient
+                Sratio = 0.1; # Sratio = S/S0 (strength of elbow effect)
+
+                # Elbow elbow
+                vgzP4 = slip*jf/(1-alpha[zstep_v])
+                
+                L_D = 0.3156
+                deltaz = z[i]-z[zstep_v]
+                slope = (vgzP4-vgz[zstep_v])/L_D
+                vgz[i] = vgz[zstep_v]+slope*(deltaz)
+                
+                # Dissipation elbow
+                Sratio = np.exp(-beta_diss*(z[i]-z[zstep_v+24])/Dh)
+                vgz[i] = vgzP4*(1+Const1*np.log(Sratio))
+                '''
         
         # Sink due to Random Collisions	
         RC1 = ut * ai[i]**2 / alpha_max**(1/3) / (alpha_max**(1/3) - alpha[i]**(1/3))
@@ -341,43 +340,30 @@ def iate(cond, query, z_step, *args, **kwargs):
         # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
         # Estimate Void Fraction for the next step calculation
 
-        # Drift Flux Model
-        j = jgloc + jf
-        
-        # Drift Velocity
-        # Applicable for void fractions less than 20%; for void fractions greater than 30%, use Kataoka and Ishii 1987 for drift-velocity
-        vgj = (2**0.5) * (sigma * grav * (rho_f - rho_gz[i]) / (rho_f**2))**(0.25)
-        
-        # alpha[i+1] = (jgloc) / (C0 * j + vgj)
+        if void_method == 'driftflux':      # Drift Flux Model
 
-        # C0 = 1.20 - 0.2*((rho_gz[i]/rho_f)**0.5)    # Super tiny number, also Worosz MATLAB script has + instead of -?
-        alpha[i+1] = (jgloc) / (C0 * j + vgj * (1 - alpha[i])**(1.75))
+            j = jgloc + jf
+            
+            # Drift Velocity
+            # Applicable for void fractions less than 20%; for void fractions greater than 30%, use Kataoka and Ishii 1987 for drift-velocity
+            vgj = (2**0.5) * (sigma * grav * (rho_f - rho_gz[i]) / (rho_f**2))**(0.25)
+            
+            # C0 = 1.20 - 0.2*((rho_gz[i]/rho_f)**0.5)    # Super tiny number, also Worosz MATLAB script has + instead of -?
+            # alpha[i+1] = (jgloc) / (C0 * j + vgj)
 
-        # Continuity
-        # alpha[i+1] = alpha[i] - alpha[i] / (pz[i]) * -dpdz * z_step
+            alpha[i+1] = (jgloc) / (C0 * j + vgj * (1 - alpha[i])**(1.75))            
 
-        # YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV
-        # YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV
-        # YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV
-        # YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV
-        '''
-        #Estimate Sauter mean diameter for the next step calculation
-        #     a(i+1) = jgloc(i)/vgz(i);
+        elif void_method == 'continuity':   # Continuity
 
-        # Continuity Solution
-        # a(i+1)=a(i)*(1-zstep*(dvgdz(i)/vgz(i)+dpdz(i)/(patm+pz(i))));
+            # alpha[i+1] = alpha[i] - alpha[i] / (pz[i]) * -dpdz * z_step
 
-        if i<=3:
-            #specific form of continuity not involving velocity gradients
-            #to avoid starting issue
-            alpha[i+1] = alpha(i)-alpha(i)*(rho_gz(i+1)-rho_gz(i))/rho_gz(i)
-        else:
-            alpha[i+1] = alpha(i)-(alpha(i)/(rho_gz(i)*vgz(i)))*((rho_gz(i)*vgz(i))-(rho_gz(i-1)*vgz(i-1)))
-        '''
-        # YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV
-        # YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV
-        # YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV
-        # YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV YADAV
+            # Yadav
+            if i <= 2:
+                # Specific form of continuity not involving velocity gradients to avoid starting issue
+                alpha[i+1] = alpha[i] - alpha[i] * (rho_gz[i+1] - rho_gz[i]) / rho_gz[i]
+
+            else:
+                alpha[i+1] = alpha[i] - (alpha[i] / (rho_gz[i] * vgz[i])) * ((rho_gz[i] * vgz[i]) - (rho_gz[i-1] * vgz[i-1]))
 
         # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
         # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
