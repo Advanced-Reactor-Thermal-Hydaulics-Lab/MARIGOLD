@@ -1,6 +1,6 @@
 from .config import *
 
-def iate(cond, query, z_step, void_method = 'driftflux', *args, **kwargs):
+def iate(cond, query, z_step = 0.01, void_method = 'driftflux', *args, **kwargs):
     # Version History:
     #   > v1: Pressure cheating, jgref substitute for jgatm
     #       > v1_b1
