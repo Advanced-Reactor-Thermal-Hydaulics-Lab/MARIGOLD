@@ -121,10 +121,13 @@ class Condition:
     def __call__(self, phi_in:np.ndarray, r_in:np.ndarray, param:str, interp_method='None') -> np.ndarray:
         """
 
-        Returns the value of param at (phi, r). Can get raw data, linear interp, or spline interp
-           *phi in radians*
-
-           Can also return the value at (x, y) if linear_xy is selected as the interp method. phi -> x, r -> y
+        Returns the value of param at (phi, r). Phi is in radians
+         
+        Interp options:
+         * 'None', will try to fetch raw data at this location
+         * 'linear', linear interpolation
+         * 'spline', spline interpolation
+         * 'linear_xy', cartesian interpolation, phi -> x, r -> y
            
         """
         if type(phi_in) != np.ndarray:

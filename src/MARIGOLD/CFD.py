@@ -44,6 +44,7 @@ def read_CFX_export(csv_name, jf, jgref, theta, port, database, jgloc=None) -> C
     if jgloc is None:
         jgloc = jgref
     cond = Condition(jgref, jgloc, jf, theta, port, database)
+    cond.run_ID = 'CFD'
 
     with open(csv_name) as fi:
         fi.readline()             # 
