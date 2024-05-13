@@ -335,10 +335,6 @@ def iate(cond, query, z_step = 0.01, void_method = 'driftflux', *args, **kwargs)
         aiwe[i+1]       = aiwe[i] + z_step * SWE[i] / vgz[i]
         aivg[i+1]       = aivg[i] + z_step * SVG[i] / vgz[i]
 
-        # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
-        # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
-        # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
-        # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
         # Estimate Void Fraction for the next step calculation
 
         if void_method == 'driftflux':      # Drift Flux Model
@@ -356,22 +352,16 @@ def iate(cond, query, z_step = 0.01, void_method = 'driftflux', *args, **kwargs)
 
         elif void_method == 'continuity':   # Continuity
 
-            alpha[i+1] = alpha[i] - alpha[i] / pz[i] * -dpdz * z_step
+            # alpha[i+1] = alpha[i] - alpha[i] / pz[i] * -dpdz * z_step
 
-            '''
             # Yadav
+            # No discernible difference between this method and original continuity method
             if i <= 2:
                 # Specific form of continuity not involving velocity gradients to avoid starting issue
                 alpha[i+1] = alpha[i] - alpha[i] * (rho_gz[i+1] - rho_gz[i]) / rho_gz[i]
 
             else:
                 alpha[i+1] = alpha[i] - (alpha[i] / (rho_gz[i] * vgz[i])) * ((rho_gz[i] * vgz[i]) - (rho_gz[i-1] * vgz[i-1]))
-            '''
-
-        # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
-        # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
-        # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
-        # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
 
         # Estimate Sauter mean diameter for the next step calculation
         Db[i+1] = 6 * alpha[i+1] / ai[i+1]
