@@ -26,7 +26,7 @@ def write_CFX_BC(cond:Condition, save_dir = ".", z_loc = 0, only_90 = False):
     with open(path_to_csv, "w") as f:
 
         f.write("[Name],,,,,,,,,\n")
-        f.write(f"{cond.run_ID}_data,,,,,,,,,\n")
+        f.write(f"{cond.run_ID}data,,,,,,,,,\n")
         f.write("[Spatial Fields],,,,,,,,,\n")
         f.write("radius,z,phi,,,,,,,\n")
         f.write("[Data],,,,,,,,,\n")
@@ -1053,7 +1053,11 @@ END\n\
     except subprocess.CalledProcessError as e:
         print(e)
         print("Continuing...")
-    subprocess.check_call('cfx5pre -s CFXPre_Commands.pre -line > auto_cfx_run.log', shell=True)
+    try:
+        subprocess.check_call('cfx5pre -s CFXPre_Commands.pre -line > auto_cfx_run.log', shell=True)
+    except subprocess.CalledProcessError as e:
+        print(e)
+        print(e.returncode)
     return
 
 def run_CFX_case(case_name, parallel=True, npart = 4, init_fi = None, interactive = False):
