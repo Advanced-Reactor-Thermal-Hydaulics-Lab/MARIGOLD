@@ -2,16 +2,21 @@ from .Condition import Condition
 from .config import *
 import subprocess
 
-def write_CFX_BC(cond:Condition, save_dir = ".", z_loc = 0):
+def write_CFX_BC(cond:Condition, save_dir = ".", z_loc = 0, only_90 = False):
     """ Write a csv file for CFX based on cond
 
     z_loc can be set by the user, or set to "LoverD" to use the cond L/D information
 
     vf information will be taken from condition, or approximated by approx_vf()
+
+    only_90 option for writing data only down the 90 degree line
     
     """
 
-    csv_name = f"{cond.run_ID}_jf{cond.jf:0.1f}_jg{cond.jgref}_{cond.theta}.csv"
+    if only_90:
+        csv_name = f"{cond.run_ID}_jf{cond.jf:0.1f}_jg{cond.jgref}_{cond.theta}_90deg.csv"
+    else:
+        csv_name = f"{cond.run_ID}_jf{cond.jf:0.1f}_jg{cond.jgref}_{cond.theta}.csv"
 
     path_to_csv = os.path.join(save_dir, csv_name)
 
@@ -29,6 +34,11 @@ def write_CFX_BC(cond:Condition, save_dir = ".", z_loc = 0):
 
         for angle, r_dict in cond.phi.items():
                 for rstar, midas_output in r_dict.items():
+                    if only_90:
+                        if angle == 90 or angle == 270:
+                            pass
+                        else:
+                            continue
                     r = rstar * 12.7 # r/R * R [mm]
                     try:
                         vf = midas_output['vf']
