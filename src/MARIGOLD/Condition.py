@@ -2420,8 +2420,7 @@ class Condition:
         phis = []
         vals = []
 
-        for phi_angle in self._angles:
-            r_dict = self.phi[phi_angle]
+        for phi_angle, r_dict in self.phi.items():
             for r, midas_output in r_dict.items():
                 if r >= 0:
                     rs.append(r)
@@ -2485,6 +2484,10 @@ class Condition:
             extend_opt = 'max'
         elif not extend_min and not extend_max:
             extend_opt = 'neither'
+
+        if abs(set_max - set_min) < level_step:
+            print(f'Warning: Level step {level_step} too larger for range {set_max}, {set_min}. Defaulting to 0.01*(set_max - set_min)')
+            level_step = 0.01*(set_max - set_min)
 
         if num_levels:
             lvs = np.linspace(set_min, set_max, num_levels)
