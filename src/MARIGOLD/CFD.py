@@ -25,7 +25,7 @@ def write_CFX_BC(cond:Condition, save_dir = ".", z_loc = 0):
         f.write("[Spatial Fields],,,,,,,,,\n")
         f.write("radius,z,phi,,,,,,,\n")
         f.write("[Data],,,,,,,,,\n")
-        f.write("radius [mm],z [m],phi [],Velocity u [m s^-1],Velocity v [m s^-1],Velocity w [m s^-1],Volume Fraction [],Velocity u f [m s^-1],Velocity v f [m s^-1],Velocity w f [m s^-1]\n")
+        f.write("radius [mm],z [m],phi [],Velocity u [m s^-1],Velocity v [m s^-1],Velocity w [m s^-1],Volume Fraction [],Velocity u f [m s^-1],Velocity v f [m s^-1],Velocity w f [m s^-1],\n")
 
         for angle, r_dict in cond.phi.items():
                 for rstar, midas_output in r_dict.items():
