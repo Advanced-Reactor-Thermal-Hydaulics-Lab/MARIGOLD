@@ -36,7 +36,7 @@ def write_CFX_BC(cond:Condition, save_dir = ".", z_loc = 0):
                         cond.approx_vf()
                         vf = midas_output['vf']
 
-                    f.write(f"{r},{z_loc},{angle * np.pi/180},{0},{midas_output['ug1']},{0},{midas_output['alpha']},{0},{vf},{0}")
+                    f.write(f"{r},{z_loc},{angle * np.pi/180},{0},{midas_output['ug1']},{0},{midas_output['alpha']},{0},{vf},{0},\n")
 
     return
 
