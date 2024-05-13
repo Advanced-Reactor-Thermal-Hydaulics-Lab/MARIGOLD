@@ -300,16 +300,14 @@ def iate(cond, query, z_step = 0.01, void_method = 'driftflux', *args, **kwargs)
         # Estimate sources & sinks in the Interfacial Area Transport Eqn. (Part 2)
 
         # Source due to Bubble Expansion
-        '''
         if i <= 2:      # Previously 3, but in MATLAB (1 indexing vs. 0 indexing)
             # Forward difference for first node
             SEXP[i] = -2 / 3 / rho_gz[i] * ai[i] * vgz[i] * (rho_gz[i+1] - rho_gz[i]) / z_step
         else:
             # Backwards difference for remaining nodes
             SEXP[i] = -2 / 3 / rho_gz[i] * ai[i] * vgz[i] * (rho_gz[i] - rho_gz[i-1]) / z_step
-        '''
 
-        SEXP[i] = -2 / 3 / pz[i] * ai[i] * vgz[i] * (-dpdz)     # Original DOE_MATLAB_IAC
+        # SEXP[i] = -2 / 3 / pz[i] * ai[i] * vgz[i] * (-dpdz)     # Original DOE_MATLAB_IAC
         
         # Source/sink due to Bubble Acceleration (advection in Yadav's script)
         if i <= 2:
