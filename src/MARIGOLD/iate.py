@@ -115,6 +115,7 @@ def iate(cond, query, z_step = 0.01, void_method = 'driftflux', *args, **kwargs)
 
     # Yadav
     # Temporary, Yadav implemented as a bunch of arrays. There must be a better way to do this.
+    # calc_void_cov in Condition.py may be useful
     if theta == 90 and elbow == False:
         COV_RC = 1
         COV_TI = 1
@@ -355,8 +356,9 @@ def iate(cond, query, z_step = 0.01, void_method = 'driftflux', *args, **kwargs)
 
         elif void_method == 'continuity':   # Continuity
 
-            # alpha[i+1] = alpha[i] - alpha[i] / (pz[i]) * -dpdz * z_step
+            alpha[i+1] = alpha[i] - alpha[i] / pz[i] * -dpdz * z_step
 
+            '''
             # Yadav
             if i <= 2:
                 # Specific form of continuity not involving velocity gradients to avoid starting issue
@@ -364,6 +366,7 @@ def iate(cond, query, z_step = 0.01, void_method = 'driftflux', *args, **kwargs)
 
             else:
                 alpha[i+1] = alpha[i] - (alpha[i] / (rho_gz[i] * vgz[i])) * ((rho_gz[i] * vgz[i]) - (rho_gz[i-1] * vgz[i-1]))
+            '''
 
         # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
         # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
