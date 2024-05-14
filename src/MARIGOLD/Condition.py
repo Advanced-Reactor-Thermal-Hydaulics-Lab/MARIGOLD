@@ -1776,7 +1776,7 @@ class Condition:
             > n         : Blasius formulation coefficient (Darcy friction factor)
             > LM_C      : Chisholm parameter
             > k_m       : Minor loss coefficient
-            > L         : Length of restriction
+            > L         : Length of restriction, only matters for 'Kim' method
 
         """
         

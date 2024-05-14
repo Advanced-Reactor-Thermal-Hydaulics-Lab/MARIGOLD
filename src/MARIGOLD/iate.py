@@ -1,32 +1,24 @@
 from .config import *
 
-def iate(cond, query, z_step = 0.01, void_method = 'driftflux', *args, **kwargs):
-    # Version History:
-    #   > v1: Pressure cheating, jgref substitute for jgatm
-    #       > v1_b1
-    #       > v1_b2
-    #       > v1_b3
-    #       > v1_b4
-    #       > v1_b5
-    #       > v1_b6
-    #       > v1_b7        
-    #   > v2: MG update, pressure retrieval, jgatm retrieval
-    #       > v1_b1
-    #       > v1_b2
-    #       > v1_b3
-    #       > v1_b4
-    #       > v1_b5    
-    #   > v3: Yadav methods, incorporation of COV terms, support for elbows, VU, VD, horizontal
-    # 
-    # Inputs:
-    #   > cond:             Condition object, part of MARIGOLD framework
-    #   > query:            L/D endpoint
-    #   > z_step:           Axial mesh cell size [-]
-    #   > void_method:      Void fraction prediction method, 'driftflux' or 'continuity'
+def iate(cond, query, z_step = 0.01, dpdz_method = 'LM', void_method = 'driftflux', 
+         LoverD_restriction = None, cheat = True, elbow = False, quarantine = True):    # Temporary arguments, fix later
+    """
+    Version History:
+        > v1: Pressure cheating, jgref substitute for jgatm
+        > v2: MG update, pressure retrieval, jgatm retrieval
+        > v3: Yadav methods, incorporation of COV terms, support for elbows, VU, VD, horizontal
+    
+    Inputs:
+        > cond:             Condition object, part of MARIGOLD framework
+        > query:            L/D endpoint
+        > z_step:           Axial mesh cell size [-]
+        > void_method:      Void fraction prediction method, 'driftflux' or 'continuity'
 
-    cheat = True
-    elbow = False
-    quarantine = True
+    Notes:
+        > IATE coefficients are currently set to default values depending on geometry
+            > Probably want to make these all optional arguments, set default values for 90 straight pipe, and input other values for different geometries outside of IATE function
+            > Same goes for COV models?
+    """
 
     # MARIGOLD retrieval
     theta       = cond.theta                        # Pipe inclination angle
@@ -173,7 +165,8 @@ def iate(cond, query, z_step = 0.01, void_method = 'driftflux', *args, **kwargs)
         alpha[0]    = cond.area_avg("alpha")                    # [-]
         Db[0]       = cond.void_area_avg("Dsm1") / 1000         # [m]
     
-    dpdz        = cond.calc_dpdz()                              # [Pa/m] MARIGOLD uses LM
+    dpdz        = cond.calc_dpdz(method = dpdz_method, L = (LoverD_restriction * Dh))   # [Pa/m]
+    
     jf          = cond.jf                                       # [m/s]
     jgloc       = cond.jgloc                                    # [m/s]
 
