@@ -1779,26 +1779,53 @@ class Condition:
         I = integrate.simpson(param_r, angles, even=even_opt) / np.pi # Integrate wrt theta, divide by normalized area
         return I
 
-    def calc_dpdz(self, method = 'LM', LM_C = 25):
+    def calc_dpdz(self, method = 'LM', m = 0.316, n = 0.25, LM_C = 25, k_m = 0.10, L = 9999):
         """
         Calculates the pressure gradient, dp/dz, according to various methods. Can access later with self.dpdz
 
-        'LM' -> Lockhart Martinelli, assuming turbulent-turbulent, C = LM_C
+        Inputs:
+            > method    : Calculation method
+                > 'LM'  : Lockhart Martinelli, assuming turbulent-turbulent, C = LM_C
+                > 'Kim' : Kim-modified Lockhart Martinelli
+            > rho_f     : Liquid phase density
+            > rho_g     : Gas phase density
+            > mu_f      : Liquid phase dynamic viscosity
+            > mu_g      : Gas phase dynamic viscosity
+            > m         : Blasius formulation coefficient (Darcy friction factor)
+            > n         : Blasius formulation coefficient (Darcy friction factor)
+            > LM_C      : Chisholm parameter
+            > k_m       : Minor loss coefficient
+            > L         : Length of restriction, only matters for 'Kim' method
 
-           """
+        """
         
         if method == 'LM':
             Re_f = self.rho_f * self.jf * self.Dh / self.mu_f
             Re_g = self.rho_g * self.jgloc * self.Dh / self.mu_g
 
-            f_f = 0.316 / Re_f**0.25 
-            f_g = 0.316 / Re_g**0.25
+            f_f = m / Re_f**n
+            f_g = m / Re_g**n
+
+            phi_f2 = 1 + LM_C/np.sqrt(chi2) + 1 / chi2
+            dpdz = phi_f2 * dpdz_f
+
+        elif method == 'Kim':
+            Re_f = rho_f * self.jf * self.Dh / self.mu_f
+            Re_g = rho_g * self.jgloc * self.Dh / self.mu_g
+
+            f_f = m / Re_f**n
+            f_g = m / Re_g**n
 
             dpdz_f = f_f * 1/self.Dh * self.rho_f * self.jf**2 / 2
             dpdz_g = f_g * 1/self.Dh * self.rho_g * self.jgloc**2 / 2
-            chi2 = dpdz_f / dpdz_g 
-            phi_f2 = 1 + LM_C/np.sqrt(chi2) + 1 / chi2
+            dpdz_m = k_m * self.rho_f * self.jf**2 / 2 / L
+
+            chi2 = dpdz_f / dpdz_g
+            chiM2 = dpdz_f / dpdz_m
+
+            phi_f2 = (1 + 1 / chiM2) + np.sqrt(1 + 1 / chiM2) * LM_C / np.sqrt(chi2) + 1 / chi2
             dpdz = phi_f2 * dpdz_f
+
         else:
             raise NotImplementedError(f'{method} is not a valid option for calc_dpdz. Try "LM" ')
         
