@@ -570,65 +570,9 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
     
         # print(file)
         if debug: print(file, file=debugFID)
+
         if file.split('.')[-1] == 'xlsx' or file.split('.')[-1] == 'xlsm':
 
-            if sheet_type == 'infer':
-                if file.split('.')[-1] == 'xlsm' or 'adix' in file:
-                    sheet_type = 'adix_template4'
-                elif '60deg' in file or '30deg' in file or '80deg' in file or 'Ryan' in file or 'ryan' in file:
-                    sheet_type = 'ryan_template'
-                elif 'P4' in file or 'P5' in file or 'P6' in file or 'P7' in file or 'Quan' in file or 'quan' in file:
-                    sheet_type = 'adix_template' # Might rename this Quan template
-                else:
-                    sheet_type = 'adix_template'
-
-            if sheet_type == 'ryan_template':
-                Q1_ranges = list(zip([90, 67.5, 45, 22.5, 0], [ [i for i in range(8, 33)], [i for i in range(57, 82)], [i for i in range(108, 133)], [i for i in range(157, 182)], [i for i in range(208, 233)] ]))
-                Q2_ranges = list(zip([112.5, 135, 157.5], [ [i for i in range(57, 82)], [i for i in range(108, 133)], [i for i in range(157, 182)] ]))
-                Q2_start = 'CP'
-                Q2_end = 'ES'
-                Q1_start = 'A'
-                Q1_end = 'BD'
-
-                Q1_check = 'K'
-                Q2_check = 'DA'
-            
-            elif sheet_type == 'adix_template':
-                Q1_ranges = list(zip([90, 67.5, 45, 22.5, 0], [ [i for i in range(8, 29)], [i for i in range(53, 74)], [i for i in range(100, 121)], [i for i in range(145, 166)], [i for i in range(192, 213)] ]))
-                Q2_ranges = list(zip([112.5, 135, 157.5], [ [i for i in range(53, 74)], [i for i in range(100, 121)], [i for i in range(145, 166)] ]))
-                Q2_start = 'CP'
-                Q2_end = 'ES'
-                Q1_start = 'A'
-                Q1_end = 'BD'
-
-                Q1_check = 'K'
-                Q2_check = 'DA'
-            
-            elif sheet_type == 'adix_template4':
-                pitot_sheet = True
-                Q1_ranges = list(zip([90, 67.5, 45, 22.5, 0], [ [i for i in range(8, 29)], [i for i in range(53, 74)], [i for i in range(100, 121)], [i for i in range(145, 166)], [i for i in range(192, 213)] ]))
-                Q2_ranges = list(zip([112.5, 135, 157.5], [ [i for i in range(53, 74)], [i for i in range(100, 121)], [i for i in range(145, 166)] ]))
-                Q2_start = 'CR'
-                Q2_end = 'ET'
-                Q1_start = 'A'
-                Q1_end = 'BD'
-                Q1_pitot_start = 'CF'
-                Q1_pitot_end = 'CO'
-                Q2_pitot_start = 'FV'
-                Q2_pitot_end = 'GE'
-
-                Q1_check = 'K'
-                Q2_check = 'DA'
-                Q1_pitot_check = 'CJ'
-                Q2_pitot_check = 'FZ'
-
-            elif sheet_type == 'custom' or sheet_type == 'Custom':
-                print('Hopefully you specified all the ranges, starts, ends, and checks')
-            
-            else:
-                print("Error: Unknown sheet type")
-                return
-            
             # Check if the file has any skipped/required terms
             if any(term in file for term in skip_terms):
                 if debug: print(f"Skipping {file}", file=debugFID)
@@ -654,157 +598,308 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
             except:
                 print(f'Warning: Non-standard excel file name {file}. Skipping...')
                 continue
-
-            ws = wb['1']
-
-            jglocs = ['O16', 'O17', 'O18', 'O19', 'O20']
-            try:
-                jgloc = ws[jglocs[int(re.findall(r'\d+', port)[0])-1]].value
-                #jgloc = ws[jglocs[int(port.strip('P'))]].value
-            except Exception as e:
-                print(e)
-                print(f"Warning: Could not identify port # for {file}, setting jgloc = jgref")
-                jgloc = jgref
-
-            if jgloc is None:
-                jgloc = jgref
-
-            newCond = Condition(jgref, jgloc, jf, theta, port, sheet_type.split('_')[0])
-
-            if newCond not in all_conditions:
-                all_conditions.append(newCond)
-                cond = newCond
-            else:
-                cond = all_conditions[ all_conditions.index(newCond) ]
-
-            cond.run_ID = ws['B2'].value
             
-            ws = wb['2']
+            # Yadav's template is a bit chaotic; let's not try to adapt PITA's extract logic to it (DHK)
+            if sheet_type == 'yadav_template':
 
-            cond.area_avg_void_sheet = ws['G266'].value
-            
-            for phi, indices in Q1_ranges:
-                for i in indices:
-                    if ws[f'{Q1_check}{i}'].value:
+                potent_ranges = [ [i for i in range(8, 22)], [i for i in range(48, 62)], [i for i in range(87, 101)], [i for i in range(128, 142)], [i for i in range(168, 182)], [i for i in range(209, 223)], [i for i in range(250, 264)], [i for i in range(290, 304)] ]
+                
+                # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
+                # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
+                # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
+                # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
 
-                        try:
-                            roverR = float(ws[f'{Q1_start}{i}'].value)
-                        except:
-                            if debug: print(f'Warning: data found in row {i} in sheet {file}, but column {Q1_start} could not be floatified. Skipping...', file=debugFID)
-                            continue
-                        
-                        midas_output = []
-                        for cell in ws[f'{Q1_start}{i}':f'{Q1_end}{i}'][0]:
-                            midas_output.append(cell.value)
-                        
-                        if len(tab_keys) == len( midas_output ):
-                            data = dict( zip( tab_keys, midas_output ))
-                        else:
-                            if debug: print("Warning, tab_keys not the same length as midas_output", file=debugFID)
-                            data = dict( zip( tab_keys, midas_output ))
-                            if debug:
-                                print("tab_keys not the same length as midas_output", file=debugFID)
-                                print(tab_keys, midas_output, file=debugFID)
-                        
-                        try:
-                            cond.phi[phi].update({roverR: data})
-                        except KeyError:
-                            cond.phi.update( {phi:{}} )
-                            cond.phi[phi].update({1.0: deepcopy(zero_data)})
-                            #cond.phi[phi_val].update({0.0: zero_data}) # Cuz I'm paranoid
-                            cond.phi[phi].update({roverR: data})
+                ws = wb['1']
 
-            
-            if pitot_sheet: # Pitot data for Q1
+                jglocs = ['O16', 'O17', 'O18', 'O19', 'O20']
+                try:
+                    jgloc = ws[jglocs[int(re.findall(r'\d+', port)[0])-1]].value
+                    #jgloc = ws[jglocs[int(port.strip('P'))]].value
+                except Exception as e:
+                    print(e)
+                    print(f"Warning: Could not identify port # for {file}, setting jgloc = jgref")
+                    jgloc = jgref
+
+                # Above jglocs not implemented for Ryan templates (DHK)
+                if jgloc is None and sheet_type == 'ryan_template':
+                    print(f"Sheet type identified as {sheet_type}, referencing cell U23 for jgloc")
+                    jgloc = ws['U23'].value
+                elif jgloc is None:
+                    print(f"Warning: jgloc could not be found, setting jgloc = jgref")
+                    jgloc = jgref
+
+                newCond = Condition(jgref, jgloc, jf, theta, port, sheet_type.split('_')[0])
+
+                if newCond not in all_conditions:
+                    all_conditions.append(newCond)
+                    cond = newCond
+                else:
+                    cond = all_conditions[ all_conditions.index(newCond) ]
+
+                cond.run_ID = ws['B2'].value
+
+                # Local corrected gauge pressure can be back-calculated from jgloc and jgatm (DHK)
+                cond.jgatm = ws['D6'].value
+                
+                ws = wb['2']
+
+                cond.area_avg_void_sheet = ws['G266'].value
+                cond.area_avg_ai_sheet = ws['J266'].value
+
                 for phi, indices in Q1_ranges:
                     for i in indices:
-                        if ws[f'{Q1_pitot_check}{i}'].value:
+                        if ws[f'{Q1_check}{i}'].value:
 
                             try:
-                                roverR = float(ws[f'{Q1_pitot_start}{i}'].value)
+                                roverR = float(ws[f'{Q1_start}{i}'].value)
                             except:
-                                if debug: print(f'Warning: data found in row {i} in sheet {file}, but column {Q1_start} could not be floatified. Skipping...')
+                                if debug: print(f'Warning: data found in row {i} in sheet {file}, but column {Q1_start} could not be floatified. Skipping...', file=debugFID)
                                 continue
-
-                            pitot_output = []
-                            for cell in ws[f'{Q1_pitot_start}{i}':f'{Q1_pitot_end}{i}'][0]:
-                                pitot_output.append(cell.value)
-
-                            if len(pitot_keys2) == len( pitot_output ):
-                                pitot_data = dict( zip( pitot_keys2, pitot_output ))
+                            
+                            midas_output = []
+                            for cell in ws[f'{Q1_start}{i}':f'{Q1_end}{i}'][0]:
+                                midas_output.append(cell.value)
+                            
+                            if len(tab_keys) == len( midas_output ):
+                                data = dict( zip( tab_keys, midas_output ))
                             else:
-                                if debug: print("Warning, pitot_keys2 not the same length as pitot_output", file=debugFID)
-                                pitot_data = dict( zip( pitot_keys2, pitot_output ))
+                                if debug: print("Warning, tab_keys not the same length as midas_output", file=debugFID)
+                                data = dict( zip( tab_keys, midas_output ))
                                 if debug:
-                                    print("pitot_keys2 not the same length as pitot_output", file=debugFID)
-                                    print(pitot_keys2, pitot_output, file=debugFID)
+                                    print("tab_keys not the same length as midas_output", file=debugFID)
+                                    print(tab_keys, midas_output, file=debugFID)
+                            
+                            try:
+                                cond.phi[phi].update({roverR: data})
+                            except KeyError:
+                                cond.phi.update( {phi:{}} )
+                                cond.phi[phi].update({1.0: deepcopy(zero_data)})
+                                #cond.phi[phi_val].update({0.0: zero_data}) # Cuz I'm paranoid
+                                cond.phi[phi].update({roverR: data})
+
+                # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
+                # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
+                # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
+                # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
+            
+            # General PITA template structure holds
+            else:
+                if sheet_type == 'infer':
+                    if file.split('.')[-1] == 'xlsm' or 'adix' in file:
+                        sheet_type = 'adix_template4'
+                    elif '60deg' in file or '30deg' in file or '80deg' in file or 'Ryan' in file or 'ryan' in file:
+                        sheet_type = 'ryan_template'
+                    elif 'P4' in file or 'P5' in file or 'P6' in file or 'P7' in file or 'Quan' in file or 'quan' in file:
+                        sheet_type = 'adix_template' # Might rename this Quan template
+                    else:
+                        sheet_type = 'adix_template'
+
+                if sheet_type == 'ryan_template':
+                    Q1_ranges = list(zip([90, 67.5, 45, 22.5, 0], [ [i for i in range(8, 33)], [i for i in range(57, 82)], [i for i in range(108, 133)], [i for i in range(157, 182)], [i for i in range(208, 233)] ]))
+                    Q2_ranges = list(zip([112.5, 135, 157.5], [ [i for i in range(57, 82)], [i for i in range(108, 133)], [i for i in range(157, 182)] ]))
+                    Q2_start = 'CP'
+                    Q2_end = 'ES'
+                    Q1_start = 'A'
+                    Q1_end = 'BD'
+
+                    Q1_check = 'K'
+                    Q2_check = 'DA'
+                
+                elif sheet_type == 'adix_template':
+                    Q1_ranges = list(zip([90, 67.5, 45, 22.5, 0], [ [i for i in range(8, 29)], [i for i in range(53, 74)], [i for i in range(100, 121)], [i for i in range(145, 166)], [i for i in range(192, 213)] ]))
+                    Q2_ranges = list(zip([112.5, 135, 157.5], [ [i for i in range(53, 74)], [i for i in range(100, 121)], [i for i in range(145, 166)] ]))
+                    Q2_start = 'CP'
+                    Q2_end = 'ES'
+                    Q1_start = 'A'
+                    Q1_end = 'BD'
+
+                    Q1_check = 'K'
+                    Q2_check = 'DA'
+                
+                elif sheet_type == 'adix_template4':
+                    pitot_sheet = True
+                    Q1_ranges = list(zip([90, 67.5, 45, 22.5, 0], [ [i for i in range(8, 29)], [i for i in range(53, 74)], [i for i in range(100, 121)], [i for i in range(145, 166)], [i for i in range(192, 213)] ]))
+                    Q2_ranges = list(zip([112.5, 135, 157.5], [ [i for i in range(53, 74)], [i for i in range(100, 121)], [i for i in range(145, 166)] ]))
+                    Q2_start = 'CR'
+                    Q2_end = 'ET'
+                    Q1_start = 'A'
+                    Q1_end = 'BD'
+                    Q1_pitot_start = 'CF'
+                    Q1_pitot_end = 'CO'
+                    Q2_pitot_start = 'FV'
+                    Q2_pitot_end = 'GE'
+
+                    Q1_check = 'K'
+                    Q2_check = 'DA'
+                    Q1_pitot_check = 'CJ'
+                    Q2_pitot_check = 'FZ'
+
+                elif sheet_type == 'custom' or sheet_type == 'Custom':
+                    print('Hopefully you specified all the ranges, starts, ends, and checks')
+                
+                else:
+                    print("Error: Unknown sheet type")
+                    return
+                
+                ws = wb['1']
+
+                jglocs = ['O16', 'O17', 'O18', 'O19', 'O20']
+                try:
+                    jgloc = ws[jglocs[int(re.findall(r'\d+', port)[0])-1]].value
+                    #jgloc = ws[jglocs[int(port.strip('P'))]].value
+                except Exception as e:
+                    print(e)
+                    print(f"Warning: Could not identify port # for {file}, setting jgloc = jgref")
+                    jgloc = jgref
+
+                # Above jglocs not implemented for Ryan templates (DHK)
+                if jgloc is None and sheet_type == 'ryan_template':
+                    print(f"Sheet type identified as {sheet_type}, referencing cell U23 for jgloc")
+                    jgloc = ws['U23'].value
+                elif jgloc is None:
+                    print(f"Warning: jgloc could not be found, setting jgloc = jgref")
+                    jgloc = jgref
+
+                newCond = Condition(jgref, jgloc, jf, theta, port, sheet_type.split('_')[0])
+
+                if newCond not in all_conditions:
+                    all_conditions.append(newCond)
+                    cond = newCond
+                else:
+                    cond = all_conditions[ all_conditions.index(newCond) ]
+
+                cond.run_ID = ws['B2'].value
+
+                # Local corrected gauge pressure can be back-calculated from jgloc and jgatm (DHK)
+                cond.jgatm = ws['D6'].value
+                
+                ws = wb['2']
+
+                cond.area_avg_void_sheet = ws['G266'].value
+                cond.area_avg_ai_sheet = ws['J266'].value
+                
+                for phi, indices in Q1_ranges:
+                    for i in indices:
+                        if ws[f'{Q1_check}{i}'].value:
 
                             try:
-                                cond.phi[phi][roverR].update(pitot_data)
+                                roverR = float(ws[f'{Q1_start}{i}'].value)
+                            except:
+                                if debug: print(f'Warning: data found in row {i} in sheet {file}, but column {Q1_start} could not be floatified. Skipping...', file=debugFID)
+                                continue
+                            
+                            midas_output = []
+                            for cell in ws[f'{Q1_start}{i}':f'{Q1_end}{i}'][0]:
+                                midas_output.append(cell.value)
+                            
+                            if len(tab_keys) == len( midas_output ):
+                                data = dict( zip( tab_keys, midas_output ))
+                            else:
+                                if debug: print("Warning, tab_keys not the same length as midas_output", file=debugFID)
+                                data = dict( zip( tab_keys, midas_output ))
+                                if debug:
+                                    print("tab_keys not the same length as midas_output", file=debugFID)
+                                    print(tab_keys, midas_output, file=debugFID)
+                            
+                            try:
+                                cond.phi[phi].update({roverR: data})
                             except KeyError:
-                                cond.phi[phi].update({roverR: deepcopy(zero_data)})
-                                cond.phi[phi][roverR].update(pitot_data)
+                                cond.phi.update( {phi:{}} )
+                                cond.phi[phi].update({1.0: deepcopy(zero_data)})
+                                #cond.phi[phi_val].update({0.0: zero_data}) # Cuz I'm paranoid
+                                cond.phi[phi].update({roverR: data})
 
-            for phi, indices in Q2_ranges:
-                for i in indices:
-                    if ws[f'{Q2_check}{i}'].value:
+                
+                if pitot_sheet: # Pitot data for Q1
+                    for phi, indices in Q1_ranges:
+                        for i in indices:
+                            if ws[f'{Q1_pitot_check}{i}'].value:
 
-                        try:
-                            roverR = float(ws[f'{Q2_start}{i}'].value)
-                        except:
-                            if debug: print(f'Warning: data found in row {i} in sheet {file}, but column {Q2_start} could not be floatified. Skipping...')
-                            continue
-                        
-                        midas_output = []
-                        for cell in ws[f'{Q2_start}{i}':f'{Q2_end}{i}'][0]:
-                            midas_output.append(cell.value)
-                        
-                        if len(tab_keys) == len( midas_output ):
-                            data = dict( zip( tab_keys, midas_output ))
-                        else:
-                            if debug: print("Warning, tab_keys not the same length as midas_output")
-                            data = dict( zip( tab_keys, midas_output ))
-                            if debug:
-                                print("tab_keys not the same length as midas_output", file=debugFID)
-                                print(tab_keys, midas_output, file=debugFID)
+                                try:
+                                    roverR = float(ws[f'{Q1_pitot_start}{i}'].value)
+                                except:
+                                    if debug: print(f'Warning: data found in row {i} in sheet {file}, but column {Q1_start} could not be floatified. Skipping...')
+                                    continue
 
-                        try:
-                            cond.phi[phi].update({roverR: data})
-                        except KeyError:
-                            cond.phi.update( {phi:{}} )
-                            cond.phi[phi].update({1.0: zero_data})
-                            #cond.phi[phi_val].update({0.0: zero_data}) # Cuz I'm paranoid
-                            cond.phi[phi].update({roverR: data}) 
+                                pitot_output = []
+                                for cell in ws[f'{Q1_pitot_start}{i}':f'{Q1_pitot_end}{i}'][0]:
+                                    pitot_output.append(cell.value)
 
-            if pitot_sheet: # Pitot data for Q2
+                                if len(pitot_keys2) == len( pitot_output ):
+                                    pitot_data = dict( zip( pitot_keys2, pitot_output ))
+                                else:
+                                    if debug: print("Warning, pitot_keys2 not the same length as pitot_output", file=debugFID)
+                                    pitot_data = dict( zip( pitot_keys2, pitot_output ))
+                                    if debug:
+                                        print("pitot_keys2 not the same length as pitot_output", file=debugFID)
+                                        print(pitot_keys2, pitot_output, file=debugFID)
+
+                                try:
+                                    cond.phi[phi][roverR].update(pitot_data)
+                                except KeyError:
+                                    cond.phi[phi].update({roverR: deepcopy(zero_data)})
+                                    cond.phi[phi][roverR].update(pitot_data)
+
                 for phi, indices in Q2_ranges:
                     for i in indices:
-                        if ws[f'{Q2_pitot_check}{i}'].value:
+                        if ws[f'{Q2_check}{i}'].value:
 
                             try:
-                                roverR = float(ws[f'{Q2_pitot_start}{i}'].value)
+                                roverR = float(ws[f'{Q2_start}{i}'].value)
                             except:
-                                if debug: print(f'Warning: data found in row {i} in sheet {file}, but column {Q2_pitot_start} could not be floatified. Skipping...')
+                                if debug: print(f'Warning: data found in row {i} in sheet {file}, but column {Q2_start} could not be floatified. Skipping...')
                                 continue
-
-                            pitot_output = []
-                            for cell in ws[f'{Q2_pitot_start}{i}':f'{Q2_pitot_end}{i}'][0]:
-                                pitot_output.append(cell.value)
-
-                            if len(pitot_keys2) == len( pitot_output ):
-                                pitot_data = dict( zip( pitot_keys2, pitot_output ))
+                            
+                            midas_output = []
+                            for cell in ws[f'{Q2_start}{i}':f'{Q2_end}{i}'][0]:
+                                midas_output.append(cell.value)
+                            
+                            if len(tab_keys) == len( midas_output ):
+                                data = dict( zip( tab_keys, midas_output ))
                             else:
-                                if debug: print("Warning, pitot_keys2 not the same length as pitot_output", file=debugFID)
-                                pitot_data = dict( zip( pitot_keys2, pitot_output ))
+                                if debug: print("Warning, tab_keys not the same length as midas_output")
+                                data = dict( zip( tab_keys, midas_output ))
                                 if debug:
-                                    print("pitot_keys2 not the same length as pitot_output", file=debugFID)
-                                    print(pitot_keys2, pitot_output, file=debugFID)
+                                    print("tab_keys not the same length as midas_output", file=debugFID)
+                                    print(tab_keys, midas_output, file=debugFID)
 
                             try:
-                                cond.phi[phi][roverR].update(pitot_data)
+                                cond.phi[phi].update({roverR: data})
                             except KeyError:
-                                cond.phi[phi].update({roverR: deepcopy(zero_data)})
-                                cond.phi[phi][roverR].update(pitot_data)
+                                cond.phi.update( {phi:{}} )
+                                cond.phi[phi].update({1.0: zero_data})
+                                #cond.phi[phi_val].update({0.0: zero_data}) # Cuz I'm paranoid
+                                cond.phi[phi].update({roverR: data}) 
+
+                if pitot_sheet: # Pitot data for Q2
+                    for phi, indices in Q2_ranges:
+                        for i in indices:
+                            if ws[f'{Q2_pitot_check}{i}'].value:
+
+                                try:
+                                    roverR = float(ws[f'{Q2_pitot_start}{i}'].value)
+                                except:
+                                    if debug: print(f'Warning: data found in row {i} in sheet {file}, but column {Q2_pitot_start} could not be floatified. Skipping...')
+                                    continue
+
+                                pitot_output = []
+                                for cell in ws[f'{Q2_pitot_start}{i}':f'{Q2_pitot_end}{i}'][0]:
+                                    pitot_output.append(cell.value)
+
+                                if len(pitot_keys2) == len( pitot_output ):
+                                    pitot_data = dict( zip( pitot_keys2, pitot_output ))
+                                else:
+                                    if debug: print("Warning, pitot_keys2 not the same length as pitot_output", file=debugFID)
+                                    pitot_data = dict( zip( pitot_keys2, pitot_output ))
+                                    if debug:
+                                        print("pitot_keys2 not the same length as pitot_output", file=debugFID)
+                                        print(pitot_keys2, pitot_output, file=debugFID)
+
+                                try:
+                                    cond.phi[phi][roverR].update(pitot_data)
+                                except KeyError:
+                                    cond.phi[phi].update({roverR: deepcopy(zero_data)})
+                                    cond.phi[phi][roverR].update(pitot_data)
 
     if debug and False:
         for cond in all_conditions:
