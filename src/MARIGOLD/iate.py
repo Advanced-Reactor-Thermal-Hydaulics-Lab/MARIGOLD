@@ -173,7 +173,7 @@ def iate(cond, query, z_step = 0.01, void_method = 'driftflux', *args, **kwargs)
         alpha[0]    = cond.area_avg("alpha")                    # [-]
         Db[0]       = cond.void_area_avg("Dsm1") / 1000         # [m]
     
-    dpdz        = cond.calc_dpdz()*2                              # [Pa/m] MARIGOLD uses LM
+    dpdz        = cond.calc_dpdz()                              # [Pa/m] MARIGOLD uses LM
     jf          = cond.jf                                       # [m/s]
     jgloc       = cond.jgloc                                    # [m/s]
 
@@ -366,4 +366,4 @@ def iate(cond, query, z_step = 0.01, void_method = 'driftflux', *args, **kwargs)
         # Estimate Sauter mean diameter for the next step calculation
         Db[i+1] = 6 * alpha[i+1] / ai[i+1]
         
-    return z_mesh, ai, aiti, airc, aiexp, aiwe, aivg, alpha, Db, vgz, pz, SEXP
+    return z_mesh, ai, aiti, airc, aiexp, aiwe, aivg, alpha, Db, vgz, pz
