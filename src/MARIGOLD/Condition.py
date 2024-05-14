@@ -18,8 +18,8 @@ class Condition:
     def __init__(self, jgref:float, jgloc:float, jf:float, theta:int, port:str, database:str, fluids = 'air-water') -> None:
         """ Initialize Condition object
 
-        implemented fluids:
-        * air-water, uses properties at STP
+        Implemented Fluids:
+        - air-water, uses properties at STP
         
         """
         self.jgref = jgref
@@ -140,10 +140,10 @@ class Condition:
         Returns the value of param at (phi, r). Phi is in radians
          
         Interp options:
-         * 'None', will try to fetch raw data at this location
-         * 'linear', linear interpolation
-         * 'spline', spline interpolation
-         * 'linear_xy', cartesian interpolation, phi -> x, r -> y
+         - 'None', will try to fetch raw data at this location
+         - 'linear', linear interpolation
+         - 'spline', spline interpolation
+         - 'linear_xy', cartesian interpolation, phi -> x, r -> y
            
         """
         if type(phi_in) != np.ndarray:
@@ -1780,22 +1780,21 @@ class Condition:
         return I
 
     def calc_dpdz(self, method = 'LM', m = 0.316, n = 0.25, LM_C = 25, k_m = 0.10, L = 9999):
-        """
-        Calculates the pressure gradient, dp/dz, according to various methods. Can access later with self.dpdz
+        """ Calculates the pressure gradient, dp/dz, according to various methods. Can access later with self.dpdz
 
-        Inputs:
-            > method    : Calculation method
+        Options:
+            - method    : Calculation method
                 > 'LM'  : Lockhart Martinelli, assuming turbulent-turbulent, C = LM_C
                 > 'Kim' : Kim-modified Lockhart Martinelli
-            > rho_f     : Liquid phase density
-            > rho_g     : Gas phase density
-            > mu_f      : Liquid phase dynamic viscosity
-            > mu_g      : Gas phase dynamic viscosity
-            > m         : Blasius formulation coefficient (Darcy friction factor)
-            > n         : Blasius formulation coefficient (Darcy friction factor)
-            > LM_C      : Chisholm parameter
-            > k_m       : Minor loss coefficient
-            > L         : Length of restriction, only matters for 'Kim' method
+            - rho_f     : Liquid phase density
+            - rho_g     : Gas phase density
+            - mu_f      : Liquid phase dynamic viscosity
+            - mu_g      : Gas phase dynamic viscosity
+            - m         : Blasius formulation coefficient (Darcy friction factor)
+            - n         : Blasius formulation coefficient (Darcy friction factor)
+            - LM_C      : Chisholm parameter
+            - k_m       : Minor loss coefficient
+            - L         : Length of restriction, only matters for 'Kim' method
 
         """
         
@@ -1810,8 +1809,8 @@ class Condition:
             dpdz = phi_f2 * dpdz_f
 
         elif method == 'Kim':
-            Re_f = rho_f * self.jf * self.Dh / self.mu_f
-            Re_g = rho_g * self.jgloc * self.Dh / self.mu_g
+            Re_f = self.rho_f * self.jf * self.Dh / self.mu_f
+            Re_g = self.rho_g * self.jgloc * self.Dh / self.mu_g
 
             f_f = m / Re_f**n
             f_g = m / Re_g**n
@@ -2121,7 +2120,7 @@ class Condition:
         Stores:
          - error, "eps_param1_param2", param1 - param2
          - relative, "eps_rel_param1_param2", (param1 - param2) / param2
-         - absolute relative, "eps_abs_rel_param1_param2", |param1 - param2| / param2
+         - absolute relative, "eps_abs_rel_param1_param2", | param1 - param2 | / param2
          - square, "eps_sq_param1_param2", (param1 - param2)**2
          - relative square, "eps_rel_sq_param1_param2", ((param1 - param2)/param2)**2
 
