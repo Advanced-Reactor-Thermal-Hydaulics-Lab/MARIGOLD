@@ -2,16 +2,21 @@ from .Condition import Condition
 from .config import *
 import subprocess
 
-def write_CFX_BC(cond:Condition, save_dir = ".", z_loc = 0):
+def write_CFX_BC(cond:Condition, save_dir = ".", z_loc = 0, only_90 = False):
     """ Write a csv file for CFX based on cond
 
     z_loc can be set by the user, or set to "LoverD" to use the cond L/D information
 
     vf information will be taken from condition, or approximated by approx_vf()
+
+    only_90 option for writing data only down the 90 degree line
     
     """
 
-    csv_name = f"{cond.run_ID}_jf{cond.jf:0.1f}_jg{cond.jgref}_{cond.theta}.csv"
+    if only_90:
+        csv_name = f"{cond.run_ID}_jf{cond.jf:0.1f}_jg{cond.jgref}_{cond.theta}_90deg.csv"
+    else:
+        csv_name = f"{cond.run_ID}_jf{cond.jf:0.1f}_jg{cond.jgref}_{cond.theta}.csv"
 
     path_to_csv = os.path.join(save_dir, csv_name)
 
@@ -21,14 +26,19 @@ def write_CFX_BC(cond:Condition, save_dir = ".", z_loc = 0):
     with open(path_to_csv, "w") as f:
 
         f.write("[Name],,,,,,,,,\n")
-        f.write(f"{cond.run_ID}_data,,,,,,,,,\n")
+        f.write(f"{cond.run_ID}data,,,,,,,,,\n")
         f.write("[Spatial Fields],,,,,,,,,\n")
         f.write("radius,z,phi,,,,,,,\n")
         f.write("[Data],,,,,,,,,\n")
-        f.write("radius [mm],z [m],phi [],Velocity u [m s^-1],Velocity v [m s^-1],Velocity w [m s^-1],Volume Fraction [],Velocity u f [m s^-1],Velocity v f [m s^-1],Velocity w f [m s^-1]\n")
+        f.write("radius [mm],z [m],phi [],Velocity u [m s^-1],Velocity v [m s^-1],Velocity w [m s^-1],Volume Fraction [],Velocity u f [m s^-1],Velocity v f [m s^-1],Velocity w f [m s^-1],\n")
 
         for angle, r_dict in cond.phi.items():
                 for rstar, midas_output in r_dict.items():
+                    if only_90:
+                        if angle == 90 or angle == 270:
+                            pass
+                        else:
+                            continue
                     r = rstar * 12.7 # r/R * R [mm]
                     try:
                         vf = midas_output['vf']
@@ -36,7 +46,73 @@ def write_CFX_BC(cond:Condition, save_dir = ".", z_loc = 0):
                         cond.approx_vf()
                         vf = midas_output['vf']
 
-                    f.write(f"{r},{z_loc},{angle * np.pi/180},{0},{midas_output['ug1']},{0},{midas_output['alpha']},{0},{vf},{0}")
+                    f.write(f"{r},{z_loc},{angle * np.pi/180},{0},{midas_output['ug1']},{0},{midas_output['alpha']},{0},{vf},{0},\n")
+
+    return
+
+def read_CFX_export(csv_name, jf, jgref, theta, port, database, jgloc=None) -> Condition:
+    """ Read CFX csv export into a MARIGOLD Condition object
+
+    Must supply jf, jgref, theta, port, database, jgloc, etc. for Condition
+
+    Returns Condition object
+    
+    """
+    if jgloc is None:
+        jgloc = jgref
+    cond = Condition(jgref, jgloc, jf, theta, port, database)
+    cond.run_ID = 'CFD'
+
+    with open(csv_name) as fi:
+        fi.readline()             # 
+        fi.readline()             # [Name]
+        fi.readline()             # port3
+        fi.readline()             # 
+        fi.readline()             # [data]
+        variables = fi.readline() # variables
+
+        variables = variables.split(",")
+
+        vg_idx = [idx for idx, s in enumerate(variables) if 'gas.Velocity' in s][0]
+        vf_idx = [idx for idx, s in enumerate(variables) if 'liquid.Velocity' in s][0]
+        alpha_idx = [idx for idx, s in enumerate(variables) if 'gas.Volume' in s][0]
+        x_idx = [idx for idx, s in enumerate(variables) if 'X [ m ]' in s][0]
+        y_idx = [idx for idx, s in enumerate(variables) if 'Y [ m ]' in s][0]
+
+        while True:
+            try:
+                data = fi.readline().split(",")
+            except IOError:
+                break
+            
+            if data == ['']:
+                break
+
+            try:
+                x = float(data[x_idx])
+                y = float(data[y_idx])
+                vg = float(data[vg_idx])
+                vf = float(data[vf_idx])
+                alpha = float(data[alpha_idx])
+            except Exception as e:
+                print(e)
+                print(variables)
+                print("\nProblem data:")
+                print(data)
+                print(x_idx, y_idx, vg_idx, vf_idx, alpha_idx)
+
+            data_dict = {'ug1': vg, 'vf': vf, 'alpha': alpha}
+            
+            roverR = np.sqrt(x**2 + y**2) / 0.0127
+            phi_angle = int(np.arctan2(y, x) * 180/np.pi)
+
+            try:
+                cond.phi[phi_angle].update({roverR:data_dict})
+            except:
+                cond.phi.update({phi_angle:{}})
+                cond.phi[phi_angle].update({roverR:data_dict})
+
+    return cond
 
 
 def make_ICEM_pipe_mesh(r_divs: int, theta_divs: int, z_divs: int, o_point: float, L: float, 
@@ -382,10 +458,13 @@ def write_CCL(mom_source = 'normal_drag_mom_source', ccl_name = 'auto_setup.ccl'
         CD_CFX = CD
 
     if CL == 'tomiyama':
-        CL = calculate_CL_Ryan(jf=jf, jg=jg, theta=90, Db=Db)
+        lift_string = f"Option = Tomiyama \n"
+    else:
 
-    elif CL == 'ryan_DFM':
-        CL = calculate_CL_Ryan(jf=jf, jg=jg, theta=theta, Db=Db)
+        if CL == 'ryan_DFM':
+            CL = calculate_CL_Ryan(jf=jf, jg=jg, theta=theta, Db=Db)
+
+        lift_string = f"Lift Coefficient = {CL} \nOption = Lift Coefficient \n"
 
     with open(ccl_name, 'w') as fi:
 
@@ -406,7 +485,7 @@ Kw = {Kw} \n\
 facilitytheta = {theta} \n\
 gravy = -9.81 [m s^-2]*cos(facilitytheta* pi / 180) \n\
 gravz = -9.81 [m s^-2]*sin(facilitytheta* pi / 180) \n\
-liquidWEff = max( (1 - Kf - Kw * gas.Volume Fraction * CD^(1/3) ) * liquid.w, 0 [m s^-1]) \n\
+liquidWEff = (1 - Kf - Kw * gas.Volume Fraction * CD^(1/3) ) * liquid.w \n\
 phi = if(y>0 [m], pi/2+atan(x/y), 3*pi/2+atan(x/y)) \n\
 radius = sqrt(x^2 + y^2) \n\
 vrNorm = sqrt( (gas.u - liquid.u)^2+ (gas.v - liquid.v)^2+ (gas.w - liquidWEff)^2 ) \n\
@@ -732,7 +811,7 @@ Material = Air Ideal Gas \n\
 Option = Material Library \n\
 MORPHOLOGY: \n\
 Mean Diameter = {Db} [m] \n\
-Minimum Volume Fraction = 0.001 \n\
+Minimum Volume Fraction = 0.000001 \n\
 Option = Dispersed Fluid \n\
 END \n\
 END \n\
@@ -740,7 +819,7 @@ FLUID DEFINITION: liquid \n\
 Material = Water \n\
 Option = Material Library \n\
 MORPHOLOGY: \n\
-Minimum Volume Fraction = 0.001 \n\
+Minimum Volume Fraction = 0.000001 \n\
 Option = Continuous Fluid \n\
 END \n\
 END \n\
@@ -786,7 +865,7 @@ END \n\
 FLUID PAIR: gas | liquid \n\
 Surface Tension Coefficient = 0.072 [N m^-1] \n\
 INTERPHASE TRANSFER MODEL: \n\
-Minimum Volume Fraction for Area Density = 0.001 \n\
+Minimum Volume Fraction for Area Density = 0.000001 \n\
 Option = Particle Model \n\
 END \n\
 MASS TRANSFER: \n\
@@ -798,8 +877,7 @@ Drag Coefficient = {CD_CFX} \n\
 Option = Drag Coefficient \n\
 END \n\
 LIFT FORCE: \n\
-Lift Coefficient = {CL} \n\
-Option = Lift Coefficient \n\
+{lift_string}\
 END \n\
 TURBULENT DISPERSION FORCE: \n\
 Option = Lopez de Bertodano \n\
@@ -826,14 +904,10 @@ FLUID: gas \n\
 INITIAL CONDITIONS: \n\
 Velocity Type = Cartesian \n\
 CARTESIAN VELOCITY COMPONENTS: \n\
-Option = Automatic with Value \n\
-U = 0 [m s^-1] \n\
-V = 0 [m s^-1] \n\
-W = 4 [m s^-1] \n\
+Option = Automatic\n\
 END \n\
 VOLUME FRACTION: \n\
-Option = Automatic with Value \n\
-Volume Fraction = 0.1 \n\
+Option = Automatic \n\
 END \n\
 END \n\
 END \n\
@@ -841,17 +915,13 @@ FLUID: liquid \n\
 INITIAL CONDITIONS: \n\
 Velocity Type = Cartesian \n\
 CARTESIAN VELOCITY COMPONENTS: \n\
-Option = Automatic with Value \n\
-U = 0 [m s^-1] \n\
-V = 0 [m s^-1] \n\
-W = 4 [m s^-1] \n\
+Option = Automatic\n\
 END \n\
 TURBULENCE INITIAL CONDITIONS: \n\
 Option = Medium Intensity and Eddy Viscosity Ratio \n\
 END \n\
 VOLUME FRACTION: \n\
-Option = Automatic with Value \n\
-Volume Fraction = 0.9 \n\
+Option = Automatic\n\
 END \n\
 END \n\
 END \n\
@@ -982,13 +1052,17 @@ END\n\
     except subprocess.CalledProcessError as e:
         print(e)
         print("Continuing...")
-    subprocess.check_call('cfx5pre -s CFXPre_Commands.pre -line > auto_cfx_run.log', shell=True)
+    try:
+        subprocess.check_call('cfx5pre -s CFXPre_Commands.pre -line > auto_cfx_run.log', shell=True)
+    except subprocess.CalledProcessError as e:
+        print(e)
+        print(e.returncode)
     return
 
 def run_CFX_case(case_name, parallel=True, npart = 4, init_fi = None, interactive = False):
     """ Runs CFX case case_name.def
 
-    Must be in the same directory, or a full path (without the .def) supplied
+    Must be in the same directory, or a full path (without the .def extension) supplied
 
     Can run in parallel, specify the number of cores with npart
     
@@ -1109,6 +1183,41 @@ EXPORT:\n\
   Separator = ", "\n\
   Spatial Variables = X,Y,Z\n\
   Variable List = X, Y, Z, gas.Velocity w, gas.Volume Fraction, liquid.Velocity w\n\
+  Vector Brackets = ()\n\
+  Vector Display = Scalar\n\
+END\n\
+>export\n\
+EXPORT:\n\
+  ANSYS Export Data = Element Heat Flux\n\
+  ANSYS File Format = ANSYS\n\
+  ANSYS Reference Temperature = 0.0 [K]\n\
+  ANSYS Specify Reference Temperature = Off\n\
+  ANSYS Supplemental HTC = 0.0 [W m^-2 K^-1]\n\
+  Additional Variable List =\n\
+  BC Profile Type = Inlet Velocity\n\
+  CSV Type = CSV\n\
+  Case Name = Case {case_name}_001\n\
+  Export Connectivity = Off\n\
+  Export Coord Frame = Global\n\
+  Export File = {case_name}_port3.csv\n\
+  Export Geometry = Off\n\
+  Export Location Aliases =\n\
+  Export Node Numbers = Off\n\
+  Export Null Data = On\n\
+  Export Type = Generic\n\
+  Export Units System = Current\n\
+  Export Variable Type = Current\n\
+  External Export Data = None\n\
+  Include File Information = Off\n\
+  Include Header = On\n\
+  Location = inlet\n\
+  Location List = /PLANE:port3\n\
+  Null Token = null\n\
+  Overwrite = On\n\
+  Precision = 8\n\
+  Separator = ", "\n\
+  Spatial Variables = X,Y,Z \n\
+  Variable List = gas.Velocity w, gas.Volume Fraction, liquid.Velocity w, X, Y, Z\n\
   Vector Brackets = ()\n\
   Vector Display = Scalar\n\
 END\n\

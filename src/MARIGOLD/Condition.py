@@ -15,8 +15,13 @@ class Condition:
 """
 
     debugFID = None
-    def __init__(self, jgref:float, jgloc:float, jf:float, theta:int, port:str, database:str) -> None:
+    def __init__(self, jgref:float, jgloc:float, jf:float, theta:int, port:str, database:str, fluids = 'air-water') -> None:
+        """ Initialize Condition object
+
+        implemented fluids:
+        * air-water, uses properties at STP
         
+        """
         self.jgref = jgref
         self.jf = jf
         self.jgloc =jgloc
@@ -105,6 +110,17 @@ class Condition:
         self.mins = {}
         self._grads_calced = []
 
+        if fluids == 'air-water':
+            self.rho_f = 998       # kg/m^3
+            self.rho_g = 1.204     # kg/m^3
+            self.mu_f = 0.001002   # Pa s
+            self.mu_g = 0.01803e-3 # Pa s
+
+            self.sigma = 0.0728    # N/m
+        
+        else:
+            raise NotImplementedError(f"{fluids} not available, try 'air-water'")
+
     def __eq__(self, __o: object) -> bool:
         if isinstance(__o, Condition):
 
@@ -121,10 +137,13 @@ class Condition:
     def __call__(self, phi_in:np.ndarray, r_in:np.ndarray, param:str, interp_method='None') -> np.ndarray:
         """
 
-        Returns the value of param at (phi, r). Can get raw data, linear interp, or spline interp
-           *phi in radians*
-
-           Can also return the value at (x, y) if linear_xy is selected as the interp method. phi -> x, r -> y
+        Returns the value of param at (phi, r). Phi is in radians
+         
+        Interp options:
+         * 'None', will try to fetch raw data at this location
+         * 'linear', linear interpolation
+         * 'spline', spline interpolation
+         * 'linear_xy', cartesian interpolation, phi -> x, r -> y
            
         """
         if type(phi_in) != np.ndarray:
@@ -540,7 +559,7 @@ class Condition:
 
         return
     
-    def calc_vf_lee(self, K=1, rho_f = 998):
+    def calc_vf_lee(self, K=1):
         """ Calculate vf, jf, vr based on Lee et al. (2002) equation
 
         Really a model proposed by Bosio and Malnes
@@ -558,7 +577,7 @@ class Condition:
                 except:
                     raise NotImplementedError("Δp needed for cacluclation of vf_lee")
                 
-                vf_lee = 1 / np.sqrt(1 - midas_dict['alpha']**2/2) * np.sqrt( 2 * dp / (K * rho_f))
+                vf_lee = 1 / np.sqrt(1 - midas_dict['alpha']**2/2) * np.sqrt( 2 * dp / (K * self.rho_f))
                 
                 midas_dict.update({'vf_lee': vf_lee})
                 midas_dict.update({'jf_lee': (1-midas_dict['alpha'])* vf_lee})
@@ -572,7 +591,7 @@ class Condition:
 
         return
     
-    def calc_vf_naive(self, rho_f = 998):
+    def calc_vf_naive(self):
         """ Calculate vf, jf, vr based on single-phase equation
 
         .. math::  vf = sqrt{ frac{ 2 \\Delta p }{ \\rho_{f}} } 
@@ -591,7 +610,7 @@ class Condition:
                     except:
                         raise NotImplementedError("Δp needed for cacluclation of vf_naive")
                     
-                    vf_naive = np.sqrt( 2*dp / rho_f)
+                    vf_naive = np.sqrt( 2*dp / self.rho_f)
                 
                 midas_dict.update({'vf_naive': vf_naive})
                 midas_dict.update({'jf_naive': (1-midas_dict['alpha'])* vf_naive})
@@ -1760,7 +1779,7 @@ class Condition:
         I = integrate.simpson(param_r, angles, even=even_opt) / np.pi # Integrate wrt theta, divide by normalized area
         return I
 
-    def calc_dpdz(self, method = 'LM', rho_f = 998, rho_g = 1.225, mu_f = 0.001, mu_g = 1.18e-5, m = 0.316, n = 0.25, LM_C = 25, k_m = 0.10, L = 9999):
+    def calc_dpdz(self, method = 'LM', m = 0.316, n = 0.25, LM_C = 25, k_m = 0.10, L = 9999):
         """
         Calculates the pressure gradient, dp/dz, according to various methods. Can access later with self.dpdz
 
@@ -1781,30 +1800,25 @@ class Condition:
         """
         
         if method == 'LM':
-            Re_f = rho_f * self.jf * self.Dh / mu_f
-            Re_g = rho_g * self.jgloc * self.Dh / mu_g
+            Re_f = self.rho_f * self.jf * self.Dh / self.mu_f
+            Re_g = self.rho_g * self.jgloc * self.Dh / self.mu_g
 
             f_f = m / Re_f**n
             f_g = m / Re_g**n
-
-            dpdz_f = f_f * 1/self.Dh * rho_f * self.jf**2 / 2
-            dpdz_g = f_g * 1/self.Dh * rho_g * self.jgloc**2 / 2
-
-            chi2 = dpdz_f / dpdz_g
 
             phi_f2 = 1 + LM_C/np.sqrt(chi2) + 1 / chi2
             dpdz = phi_f2 * dpdz_f
 
         elif method == 'Kim':
-            Re_f = rho_f * self.jf * self.Dh / mu_f
-            Re_g = rho_g * self.jgloc * self.Dh / mu_g
+            Re_f = rho_f * self.jf * self.Dh / self.mu_f
+            Re_g = rho_g * self.jgloc * self.Dh / self.mu_g
 
             f_f = m / Re_f**n
             f_g = m / Re_g**n
 
-            dpdz_f = f_f * 1/self.Dh * rho_f * self.jf**2 / 2
-            dpdz_g = f_g * 1/self.Dh * rho_g * self.jgloc**2 / 2
-            dpdz_m = k_m * rho_f * self.jf**2 / 2 / L
+            dpdz_f = f_f * 1/self.Dh * self.rho_f * self.jf**2 / 2
+            dpdz_g = f_g * 1/self.Dh * self.rho_g * self.jgloc**2 / 2
+            dpdz_m = k_m * self.rho_f * self.jf**2 / 2 / L
 
             chi2 = dpdz_f / dpdz_g
             chiM2 = dpdz_f / dpdz_m
@@ -1856,7 +1870,7 @@ class Condition:
 
         return
     
-    def calc_mu_eff(self, method='Ishii', mu_f = 0.001, mu_g = 18.03e-6, alpha_max = 1.0):
+    def calc_mu_eff(self, method='Ishii', alpha_max = 1.0):
         """Method for calculating effective viscosity. 
         
         Also calculates mixture viscosity, stored in μ_eff and μ_m, resepectively. 
@@ -1872,7 +1886,7 @@ class Condition:
             for rstar, midas_dict in r_dict.items():
 
                 if method == 'Ishii':
-                    mu_m = mu_f * (1 - midas_dict['alpha'] / alpha_max)**(-2.5*alpha_max * (mu_g + 0.4*mu_f) / (mu_g + mu_f)  )
+                    mu_m = self.mu_f * (1 - midas_dict['alpha'] / alpha_max)**(-2.5*alpha_max * (self.mu_g + 0.4*self.mu_f) / (self.mu_g + self.mu_f)  )
                     mu_eff = mu_m
 
                     midas_dict.update({'mu_m': mu_eff})
@@ -1881,7 +1895,7 @@ class Condition:
 
         return
     
-    def calc_cd(self, method='Ishii-Zuber', rho_f = 998, vr_cheat = False, mu_f = 0.001):
+    def calc_cd(self, method='Ishii-Zuber', vr_cheat = False):
         """ Method for calculating drag coefficient 
         
         If vr = 0, assume cd = 0
@@ -1900,7 +1914,7 @@ class Condition:
             for rstar, midas_dict in r_dict.items():
 
                 if vr_cheat:
-                    Reb = (1 - midas_dict['alpha']) * midas_dict['Dsm1'] * rho_f * abs(midas_dict['vr']) / midas_dict['mu_m']
+                    Reb = (1 - midas_dict['alpha']) * midas_dict['Dsm1'] * self.rho_f * abs(midas_dict['vr']) / midas_dict['mu_m']
                 else:
 
                     if 'vr_model' not in midas_dict.keys(): # Initialize for iteration
@@ -1908,7 +1922,7 @@ class Condition:
                             {'vr_model': -1}
                         )
 
-                    Reb = (1 - midas_dict['alpha']) * midas_dict['Dsm1'] * rho_f * abs(midas_dict['vr_model']) / midas_dict['mu_m']
+                    Reb = (1 - midas_dict['alpha']) * midas_dict['Dsm1'] * self.rho_f * abs(midas_dict['vr_model']) / midas_dict['mu_m']
 
                 midas_dict.update(
                         {'Reb': Reb}
@@ -1944,7 +1958,7 @@ class Condition:
                     )
 
                 elif method == 'Schiller-Naumann':
-                    Reb = (1 - midas_dict['alpha']) * midas_dict['Dsm1'] * rho_f * abs(midas_dict['vr_model']) / mu_f
+                    Reb = (1 - midas_dict['alpha']) * midas_dict['Dsm1'] * self.rho_f * abs(midas_dict['vr_model']) / self.mu_f
 
                     cd = 24/Reb * (1 + 0.15*Reb**0.687)
 
@@ -2452,8 +2466,7 @@ class Condition:
         phis = []
         vals = []
 
-        for phi_angle in self._angles:
-            r_dict = self.phi[phi_angle]
+        for phi_angle, r_dict in self.phi.items():
             for r, midas_output in r_dict.items():
                 if r >= 0:
                     rs.append(r)
@@ -2517,6 +2530,10 @@ class Condition:
             extend_opt = 'max'
         elif not extend_min and not extend_max:
             extend_opt = 'neither'
+
+        if abs(set_max - set_min) < level_step:
+            print(f'Warning: Level step {level_step} too larger for range {set_max}, {set_min}. Defaulting to 0.01*(set_max - set_min)')
+            level_step = 0.01*(set_max - set_min)
 
         if num_levels:
             lvs = np.linspace(set_min, set_max, num_levels)
