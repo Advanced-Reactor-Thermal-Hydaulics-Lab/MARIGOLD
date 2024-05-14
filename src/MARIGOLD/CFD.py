@@ -916,7 +916,7 @@ FLUID: liquid \n\
 INITIAL CONDITIONS: \n\
 Velocity Type = Cartesian \n\
 CARTESIAN VELOCITY COMPONENTS: \n\
-Option = Automatic
+Option = Automatic\n\
 END \n\
 TURBULENCE INITIAL CONDITIONS: \n\
 Option = Medium Intensity and Eddy Viscosity Ratio \n\
