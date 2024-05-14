@@ -6,18 +6,18 @@ def iate(cond, query, z_step = 0.01,
          cheat = True, elbow = False, quarantine = True):                                           # Temporary arguments, fix later
     """
     Version History:
-        > v1: Pressure cheating, jgref substitute for jgatm
-        > v2: MG update, pressure retrieval, jgatm retrieval
-        > v3: Yadav methods, incorporation of COV terms, support for elbows, VU, VD, horizontal
+        * v1: Pressure cheating, jgref substitute for jgatm
+        * v2: MG update, pressure retrieval, jgatm retrieval
+        * v3: Yadav methods, incorporation of COV terms, support for elbows, VU, VD, horizontal
     
     Inputs:
-        > cond:             Condition object, part of MARIGOLD framework
-        > query:            L/D endpoint
-        > z_step:           Axial mesh cell size [-]
-        > void_method:      Void fraction prediction method, 'driftflux' or 'continuity'
+        * cond:             Condition object, part of MARIGOLD framework
+        * query:            L/D endpoint
+        * z_step:           Axial mesh cell size [-]
+        * void_method:      Void fraction prediction method, 'driftflux' or 'continuity'
 
     Notes:
-        > IATE coefficients are currently set to default values depending on geometry
+        * IATE coefficients are currently set to default values depending on geometry
             > Probably want to make these all optional arguments, set default values for 90 straight pipe, and input other values for different geometries outside of IATE function
             > Same goes for COV models?
     """
