@@ -1,8 +1,18 @@
 from .Condition import Condition
 from .config import *
 
-def comp_cond(cond1:Condition, cond2:Condition, tag = 'run_ID'):
+def comp_cond(cond1:Condition, cond2:Condition, tag = 'run_ID') -> Condition:
+    """ Collate data from cond1 and cond2 into a single condition
+    
+    Each param will be tagged with "tag", options are
+    * run_ID, use cond.run_ID
+    * jf, use cond.jf
+    * jgloc, use cond.jgloc
+    * port, use cond.port
+    * name, use cond.name
+    * exp_cfd, tag1 -> exp, tag2 -> CFD
 
+    """
     compCond = Condition(cond1.jgref, cond1.jgloc, cond1.jf, cond1.theta, cond1.port, cond1.database)
 
     if tag == 'run_ID':
@@ -10,6 +20,10 @@ def comp_cond(cond1:Condition, cond2:Condition, tag = 'run_ID'):
         tag2 = cond2.run_ID
 
     elif tag == 'jf':
+        tag1 = cond1.jf
+        tag2 = cond2.jf
+
+    elif tag == 'jgloc':
         tag1 = cond1.jf
         tag2 = cond2.jf
 

@@ -51,6 +51,13 @@ def write_CFX_BC(cond:Condition, save_dir = ".", z_loc = 0, only_90 = False):
     return
 
 def read_CFX_export(csv_name, jf, jgref, theta, port, database, jgloc=None) -> Condition:
+    """ Read CFX csv export into a MARIGOLD Condition object
+
+    Must supply jf, jgref, theta, port, database, jgloc, etc. for Condition
+
+    Returns Condition object
+    
+    """
     if jgloc is None:
         jgloc = jgref
     cond = Condition(jgref, jgloc, jf, theta, port, database)
@@ -478,7 +485,7 @@ Kw = {Kw} \n\
 facilitytheta = {theta} \n\
 gravy = -9.81 [m s^-2]*cos(facilitytheta* pi / 180) \n\
 gravz = -9.81 [m s^-2]*sin(facilitytheta* pi / 180) \n\
-liquidWEff = max( (1 - Kf - Kw * gas.Volume Fraction * CD^(1/3) ) * liquid.w, 0 [m s^-1]) \n\
+liquidWEff = (1 - Kf - Kw * gas.Volume Fraction * CD^(1/3) ) * liquid.w \n\
 phi = if(y>0 [m], pi/2+atan(x/y), 3*pi/2+atan(x/y)) \n\
 radius = sqrt(x^2 + y^2) \n\
 vrNorm = sqrt( (gas.u - liquid.u)^2+ (gas.v - liquid.v)^2+ (gas.w - liquidWEff)^2 ) \n\
@@ -897,10 +904,7 @@ FLUID: gas \n\
 INITIAL CONDITIONS: \n\
 Velocity Type = Cartesian \n\
 CARTESIAN VELOCITY COMPONENTS: \n\
-Option = Automatic with Value \n\
-U = 0 [m s^-1] \n\
-V = 0 [m s^-1] \n\
-W = 4 [m s^-1] \n\
+Option = Automatic\n\
 END \n\
 VOLUME FRACTION: \n\
 Option = Automatic with Value \n\
@@ -912,10 +916,7 @@ FLUID: liquid \n\
 INITIAL CONDITIONS: \n\
 Velocity Type = Cartesian \n\
 CARTESIAN VELOCITY COMPONENTS: \n\
-Option = Automatic with Value \n\
-U = 0 [m s^-1] \n\
-V = 0 [m s^-1] \n\
-W = 4 [m s^-1] \n\
+Option = Automatic
 END \n\
 TURBULENCE INITIAL CONDITIONS: \n\
 Option = Medium Intensity and Eddy Viscosity Ratio \n\
