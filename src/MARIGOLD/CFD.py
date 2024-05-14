@@ -1216,9 +1216,8 @@ EXPORT:\n\
   Overwrite = On\n\
   Precision = 8\n\
   Separator = ", "\n\
-  Spatial Variables = X,Y,Z\n\
-  Variable List = gas.Velocity w, gas.Volume Fraction, liquid.Velocity w, X, Y,\\n\
- Z\n\
+  Spatial Variables = X,Y,Z \n\
+  Variable List = gas.Velocity w, gas.Volume Fraction, liquid.Velocity w, X, Y, Z\n\
   Vector Brackets = ()\n\
   Vector Display = Scalar\n\
 END\n\
