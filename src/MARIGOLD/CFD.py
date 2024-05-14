@@ -811,7 +811,7 @@ Material = Air Ideal Gas \n\
 Option = Material Library \n\
 MORPHOLOGY: \n\
 Mean Diameter = {Db} [m] \n\
-Minimum Volume Fraction = 0.001 \n\
+Minimum Volume Fraction = 0.000001 \n\
 Option = Dispersed Fluid \n\
 END \n\
 END \n\
@@ -819,7 +819,7 @@ FLUID DEFINITION: liquid \n\
 Material = Water \n\
 Option = Material Library \n\
 MORPHOLOGY: \n\
-Minimum Volume Fraction = 0.001 \n\
+Minimum Volume Fraction = 0.000001 \n\
 Option = Continuous Fluid \n\
 END \n\
 END \n\
@@ -865,7 +865,7 @@ END \n\
 FLUID PAIR: gas | liquid \n\
 Surface Tension Coefficient = 0.072 [N m^-1] \n\
 INTERPHASE TRANSFER MODEL: \n\
-Minimum Volume Fraction for Area Density = 0.001 \n\
+Minimum Volume Fraction for Area Density = 0.000001 \n\
 Option = Particle Model \n\
 END \n\
 MASS TRANSFER: \n\
@@ -907,8 +907,7 @@ CARTESIAN VELOCITY COMPONENTS: \n\
 Option = Automatic\n\
 END \n\
 VOLUME FRACTION: \n\
-Option = Automatic with Value \n\
-Volume Fraction = 0.1 \n\
+Option = Automatic \n\
 END \n\
 END \n\
 END \n\
@@ -922,8 +921,7 @@ TURBULENCE INITIAL CONDITIONS: \n\
 Option = Medium Intensity and Eddy Viscosity Ratio \n\
 END \n\
 VOLUME FRACTION: \n\
-Option = Automatic with Value \n\
-Volume Fraction = 0.9 \n\
+Option = Automatic\n\
 END \n\
 END \n\
 END \n\
