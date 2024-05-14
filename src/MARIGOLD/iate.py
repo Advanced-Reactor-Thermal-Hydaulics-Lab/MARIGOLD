@@ -1,7 +1,8 @@
 from .config import *
 
 def iate(cond, query, z_step = 0.01, dpdz_method = 'LM', void_method = 'driftflux', 
-         LoverD_restriction = None, cheat = True, elbow = False, quarantine = True):    # Temporary arguments, fix later
+         LM_C = 40, k_m = 0.40, LoverD_restriction = 9999,      # Pressure drop calculation arguments
+         cheat = True, elbow = False, quarantine = True):       # Temporary arguments, fix later
     """
     Version History:
         > v1: Pressure cheating, jgref substitute for jgatm
@@ -21,13 +22,14 @@ def iate(cond, query, z_step = 0.01, dpdz_method = 'LM', void_method = 'driftflu
     """
 
     # MARIGOLD retrieval
-    theta       = cond.theta                        # Pipe inclination angle
-    Dh          = cond.Dh                           # Hydraulic diameter
-    LoverD      = cond.LoverD                       # Condition L/D
+    theta           = cond.theta                                # Pipe inclination angle
+    Dh              = cond.Dh                                   # Hydraulic diameter
+    LoverD          = cond.LoverD                               # Condition L/D
 
     # Yadav
     RoverD = 9      # Make into optional input
-    R_curv      = RoverD * Dh                       # Radius of curvature of elbow/bend
+    R_curv          = RoverD * Dh                               # Radius of curvature of elbow/bend
+
     # May want to include arc of the bend?
     # Ah, yes
     L_elb = np.pi/2 * R_curv        # This assumes 90\degree elbow
@@ -41,16 +43,16 @@ def iate(cond, query, z_step = 0.01, dpdz_method = 'LM', void_method = 'driftflu
     ############################################################################################################################
     # expcond.m
 
-    p_atm       = 101325                            # Ambient pressure [Pa]
-    rho_f       = 998.0                             # Liquid phase density [kg/m**3]
-    rho_g       = 1.204                             # Gas phase density [kg/m**3]
-    mu_f        = 0.001002                          # Viscosity of water [Pa-s]
-    sigma       = 0.0728                            # Surface tension of air/water [N/m]
-    grav        = 9.81*np.sin((theta)*np.pi/180)    # Gravity constant (added by Drew to account for pipe inclination)
+    p_atm           = 101325                                    # Ambient pressure [Pa]
+    rho_f           = 998.0                                     # Liquid phase density [kg/m**3]
+    rho_g           = 1.204                                     # Gas phase density [kg/m**3]
+    mu_f            = 0.001002                                  # Viscosity of water [Pa-s]
+    sigma           = 0.0728                                    # Surface tension of air/water [N/m]
+    grav            = 9.81*np.sin((theta)*np.pi/180)            # Gravity constant (added by Drew to account for pipe inclination)
 
     # Worosz
-    R_spec      = 287.058                           # Specific gas constant for dry air [J/kg-K]
-    T           = 293.15                            # Ambient absolute temperature [K], for calculating air density as a function of pressure along channel
+    R_spec          = 287.058                                   # Specific gas constant for dry air [J/kg-K]
+    T               = 293.15                                    # Ambient absolute temperature [K], for calculating air density as a function of pressure along channel
     
     ############################################################################################################################
     #                                                                                                                          #
@@ -59,19 +61,19 @@ def iate(cond, query, z_step = 0.01, dpdz_method = 'LM', void_method = 'driftflu
     ############################################################################################################################
     # coeff.m
     
-    C_WE        = 0.002     # Wake entrainment coefficient, Talley
-    C_RC        = 0.004     # Random collision coefficient
-    C_TI        = 0.085     # Turbulent impact coefficient
+    C_WE            = 0.002                                     # Wake entrainment coefficient, Talley
+    C_RC            = 0.004                                     # Random collision coefficient
+    C_TI            = 0.085                                     # Turbulent impact coefficient
     
-    alpha_max   = 0.75
-    C           = 3         # What is this
-    We_cr       = 6         # Weber number criterion
+    alpha_max       = 0.75
+    C               = 3                                         # What is this
+    We_cr           = 6                                         # Weber number criterion
 
-    acrit_flag  = 0
-    acrit       = 0.13
-    # C_WE        = 0.004   # Wake entrainment coefficient, Worosz
+    acrit_flag      = 0
+    acrit           = 0.13
+    # C_WE            = 0.004                                     # Wake entrainment coefficient, Worosz
 
-    C0          = 1.20      # Drift Flux Model
+    C0              = 1.20                                      # Drift Flux Model
 
     # Yadav
     if theta == 90 and elbow == False:
@@ -95,8 +97,8 @@ def iate(cond, query, z_step = 0.01, dpdz_method = 'LM', void_method = 'driftflu
 
         We_cr       = 6
         
-        slip = 0.91         # Slip at port P4 (<<vg>>/<<vf>>)
-        Const1 = 0.05       # Constant in the correlation for velocity
+        slip        = 0.91                                      # Slip at port P4 (<<vg>>/<<vf>>)
+        Const1      = 0.05                                      # Constant in the correlation for velocity
     
     ############################################################################################################################
     #                                                                                                                          #
@@ -109,14 +111,14 @@ def iate(cond, query, z_step = 0.01, dpdz_method = 'LM', void_method = 'driftflu
     # Temporary, Yadav implemented as a bunch of arrays. There must be a better way to do this.
     # calc_void_cov in Condition.py may be useful
     if theta == 90 and elbow == False:
-        COV_RC = 1
-        COV_TI = 1
+        COV_RC      = 1
+        COV_TI      = 1
     elif theta == 0 and elbow == False:
-        COV_RC = 1
-        COV_TI = 1
+        COV_RC      = 1
+        COV_TI      = 1
     elif elbow == True:
-        COV_RC = 1
-        COV_TI = 1
+        COV_RC      = 1
+        COV_TI      = 1
 
     ############################################################################################################################
     #                                                                                                                          #
@@ -127,57 +129,56 @@ def iate(cond, query, z_step = 0.01, dpdz_method = 'LM', void_method = 'driftflu
     if query < LoverD+z_step:
         raise ValueError('Please choose a query L/D downstream of the boundary condition.')
     
-    z_mesh = np.arange(LoverD, query + z_step, z_step)      # Axial mesh [-]
-    z_mesh = z_mesh * Dh                                    # Axial mesh [m], units necessary for dp calculation
+    z_mesh = np.arange(LoverD, query + z_step, z_step)          # Axial mesh [-]
+    z_mesh = z_mesh * Dh                                        # Axial mesh [m], units necessary for dp calculation
     z_step = z_step * Dh
     
     # Variable initialization
-    ai          = np.empty(len(z_mesh))
-    alpha       = np.empty(len(z_mesh))
-    Db          = np.empty(len(z_mesh))
-    vgz         = np.empty(len(z_mesh))
+    ai              = np.empty(len(z_mesh))
+    alpha           = np.empty(len(z_mesh))
+    Db              = np.empty(len(z_mesh))
+    vgz             = np.empty(len(z_mesh))
     
-    SWE         = np.empty(len(z_mesh))
-    SRC         = np.empty(len(z_mesh))
-    STI         = np.empty(len(z_mesh))
-    SEXP        = np.empty(len(z_mesh))
-    SVG         = np.empty(len(z_mesh))
+    SWE             = np.empty(len(z_mesh))
+    SRC             = np.empty(len(z_mesh))
+    STI             = np.empty(len(z_mesh))
+    SEXP            = np.empty(len(z_mesh))
+    SVG             = np.empty(len(z_mesh))
     
-    aiwe        = np.empty(len(z_mesh))
-    airc        = np.empty(len(z_mesh))
-    aiti        = np.empty(len(z_mesh))
-    aiexp       = np.empty(len(z_mesh))
-    aivg        = np.empty(len(z_mesh))
+    aiwe            = np.empty(len(z_mesh))
+    airc            = np.empty(len(z_mesh))
+    aiti            = np.empty(len(z_mesh))
+    aiexp           = np.empty(len(z_mesh))
+    aivg            = np.empty(len(z_mesh))
 
-    aiwe[0]     = 0
-    airc[0]     = 0
-    aiti[0]     = 0
-    aiexp[0]    = 0
-    aivg[0]     = 0
+    aiwe[0]         = 0
+    airc[0]         = 0
+    aiti[0]         = 0
+    aiexp[0]        = 0
+    aivg[0]         = 0
 
     # Apply experimental values as boundary conditions at first node 
     if cheat:
-        ai[0] = cond.area_avg_ai_sheet
-        alpha[0] = cond.area_avg_void_sheet
-        Db[0] = 6 * alpha[0] / ai[0]
+        ai[0]       = cond.area_avg_ai_sheet                    # [1/m]
+        alpha[0]    = cond.area_avg_void_sheet                  # [-]
+        Db[0]       = 6 * alpha[0] / ai[0]                      # [m]
     else:    
         ai[0]       = cond.area_avg("ai")                       # [1/m]
         alpha[0]    = cond.area_avg("alpha")                    # [-]
         Db[0]       = cond.void_area_avg("Dsm1") / 1000         # [m]
     
-    dpdz        = cond.calc_dpdz(method = dpdz_method, L = (LoverD_restriction * Dh))   # [Pa/m]
+    dpdz            = cond.calc_dpdz(method = dpdz_method, L = (LoverD_restriction * Dh))   # [Pa/m]
     
-    jf          = cond.jf                                       # [m/s]
-    jgloc       = cond.jgloc                                    # [m/s]
+    jf              = cond.jf                                   # [m/s]
+    jgloc           = cond.jgloc                                # [m/s]
 
     if 'jgatm' in dir(cond):
-        jgatm = cond.jgatm
+        jgatm       = cond.jgatm
     else:
         print("Warning: jgatm not found. Defaulting to jgref")
-        jgatm = cond.jgref
+        jgatm       = cond.jgref
     
-    # Back-calculate local corrected gauge pressure
-    p = (jgatm * p_atm / jgloc) - p_atm
+    p               = (jgatm * p_atm / jgloc) - p_atm           # Back-calculate local corrected gauge pressure
 
 	# Local Pressure along the test section
     omegaz = 1 - (z_mesh - z_mesh[0]) * abs(dpdz / (p + p_atm))

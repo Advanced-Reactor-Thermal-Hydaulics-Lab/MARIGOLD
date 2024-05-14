@@ -1760,7 +1760,7 @@ class Condition:
         I = integrate.simpson(param_r, angles, even=even_opt) / np.pi # Integrate wrt theta, divide by normalized area
         return I
 
-    def calc_dpdz(self, method = 'LM', rho_f = 998, rho_g = 1.225, mu_f = 0.001, mu_g = 1.18e-5, m = 0.316, n = 0.25, LM_C = 25, k_m = 0.10, L = 'None'):
+    def calc_dpdz(self, method = 'LM', rho_f = 998, rho_g = 1.225, mu_f = 0.001, mu_g = 1.18e-5, m = 0.316, n = 0.25, LM_C = 25, k_m = 0.10, L = 9999):
         """
         Calculates the pressure gradient, dp/dz, according to various methods. Can access later with self.dpdz
 
