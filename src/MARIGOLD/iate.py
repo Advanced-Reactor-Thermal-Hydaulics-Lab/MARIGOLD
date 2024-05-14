@@ -167,7 +167,8 @@ def iate(cond, query, z_step = 0.01, dpdz_method = 'LM', void_method = 'driftflu
         alpha[0]    = cond.area_avg("alpha")                    # [-]
         Db[0]       = cond.void_area_avg("Dsm1") / 1000         # [m]
     
-    dpdz            = cond.calc_dpdz(method = dpdz_method, L = (LoverD_restriction * Dh))   # [Pa/m]
+    # Pressure drop [Pa/m]
+    dpdz            = cond.calc_dpdz(method=dpdz_method, LM_C=LM_C, k_m=k_m, L=(LoverD_restriction*Dh))
     
     jf              = cond.jf                                   # [m/s]
     jgloc           = cond.jgloc                                # [m/s]
