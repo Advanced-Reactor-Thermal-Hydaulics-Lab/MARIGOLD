@@ -2,6 +2,7 @@ LICENSE
 README.md
 pyproject.toml
 setup.cfg
+src/MARIGOLD/CFD.py
 src/MARIGOLD/Condition.py
 src/MARIGOLD/Iskandrani_Condition.py
 src/MARIGOLD/Yang_Condition.py
