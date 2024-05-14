@@ -205,7 +205,7 @@ def iate(cond, query, z_step = 0.01, void_method = 'driftflux', *args, **kwargs)
         if (i+1) >= len(z_mesh):
             break
             
-        jgloc = jgatm * p_atm / pz[i]
+        jgloc = jgatm * p_atm / pz[i]                           # Talley used jgP1 and pressure at P1 instead of jgatm and p_atm
 
         vgz[i] = jgloc / alpha[i]                               # Estimate void weighted velocity
         vfz = jf / (1 - alpha[i])
@@ -366,4 +366,4 @@ def iate(cond, query, z_step = 0.01, void_method = 'driftflux', *args, **kwargs)
         # Estimate Sauter mean diameter for the next step calculation
         Db[i+1] = 6 * alpha[i+1] / ai[i+1]
         
-    return z_mesh, ai, aiti, airc, aiexp, aiwe, aivg, alpha, Db, vgz, pz
+    return z_mesh, ai, aiti, airc, aiexp, aiwe, aivg, alpha, Db, vgz, pz, SEXP
