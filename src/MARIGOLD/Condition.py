@@ -2223,8 +2223,8 @@ class Condition:
         rho_m        = (1 - alpha_avg) * rho_f + alpha_avg * rho_g     # Mixture density
         v_m          =(rho_f*self.jf+rho_g*self.jgloc)/rho_m           # Mixture velocity                     
         Rem          = rho_m * v_m * Dh / mu_m_avg                     # Ran Kong
-        f_TP         = 0.316*(1/(1-alpha_avg)/Rem)**0.25                # Two-phase frictional factor Kong (2018)
-        #f_TP         = 0.316*(mu_m_avg/self.mu_f/Rem)**0.25            # Two-phase frictional factor Talley (2015) and Ted (2015)
+        #f_TP         = 0.316*(1/(1-alpha_avg)/Rem)**0.25                # Two-phase frictional factor Kong (2018)
+        f_TP         = 0.316*(mu_m_avg/self.mu_f/Rem)**0.25            # Two-phase frictional factor Talley (2015) and Ted (2015)
         eps          =  f_TP*v_m**3 /2/Dh                                # epsilon for calculating u_t
             
         for angle, r_dict in self.phi.items():
