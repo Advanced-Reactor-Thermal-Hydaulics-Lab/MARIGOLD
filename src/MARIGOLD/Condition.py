@@ -2217,59 +2217,40 @@ class Condition:
 
         alpha_avg    = self.area_avg('alpha')
         ai_avg       = self.area_avg('ai')
-        Dsm1_avg     = self.area_avg ('Dsm1')
+        Dsm1_avg     = self.area_avg ('Dsm1')   # try void weighted
         mu_m_avg     = self.void_area_avg ('mu_m') 
 
         rho_m        = (1 - alpha_avg) * rho_f + alpha_avg * rho_g     # Mixture density
-        v_m          =rho_f*self.jf+rho_g*self.jgloc                   # Mixture velocity                     
+        v_m          =(rho_f*self.jf+rho_g*self.jgloc)/rho_m           # Mixture velocity                     
         Rem          = rho_m * v_m * Dh / mu_m_avg                     # Ran Kong
-        f_TP         = 0.316/(1/(1-alpha_avg)/Rem)**0.25                # Two-phase frictional factor
+        f_TP         = 0.316*(1/(1-alpha_avg)/Rem)**0.25                # Two-phase frictional factor
         eps          =  f_TP*v_m**3 /2/Dh                                # epsilon for calculating u_t
             
         for angle, r_dict in self.phi.items():
             for rstar, midas_dict in r_dict.items():
-                if midas_dict['alpha'] <= alpha_cr:  # Check if local void fraction is less than or equal to alpha_cr
-                  u_t = 1.4*eps**(1/3)*(midas_dict['Dsm1']/1000)**(1/3) 
-                else:
-                  u_t = 0  # The turbulence-impact and random- collision are driven by the turbulent fluctuation velocity (u_t).
-                midas_dict.update({'u_t': u_t})
-            # Calculate COV_loc
-                COV_loc = u_t * (midas_dict['ai'])**2 / alpha_max**(1/3)*(alpha_max**(1/3)-(midas_dict['alpha'])**(1/3))
-                midas_dict.update({'COV_loc': COV_loc})
-
-        u_t_avg=self.area_avg ('u_t')
-        COV_avg = u_t_avg * ai_avg**2 / alpha_max**(1/3)*(alpha_max**(1/3)-alpha_avg**(1/3))
-
-        I = 0
-        param_r = [] # integrated wrt r
-        angles = []
-
-        self.mirror()
-
-        for angle, r_dict in self.phi.items():
-            rs_temp = []
-            vars_temp = []
-            angles.append(angle * np.pi/180) # Convert degrees to radians
-            for rstar, midas_dict in r_dict.items():
-                if rstar >= 0:
-                    rs_temp.append( rstar ) # This is proably equivalent to rs = list(r_dict.keys() ), but I'm paranoid about ordering
-                    vars_temp.append(rstar * (midas_dict['COV_loc']))
-                    if debug: print(angle, midas_dict, file=debugFID)
-            
-            vars = [var for _, var in sorted(zip(rs_temp, vars_temp))]
-            rs = sorted(rs_temp)
-
-            if debug: print("Arrays to integrate", rs, vars, file=debugFID)
                 
-            param_r.append( integrate.simpson(vars, rs) ) # Integrate wrt r
-            if debug: print("calculated integral:", integrate.simpson(vars, rs), file=debugFID)
-                #I = 2 * np.pi
-        if debug: print("Integrated wrt r", param_r, file=debugFID)
-        param_r_int = [var for _, var in sorted(zip(angles, param_r))]
-        angles_int = sorted(angles)
-        I = integrate.simpson(param_r_int, angles_int) / np.pi / COV_avg # Integrate wrt theta, divide by normalized area
-        if debug: print('Calculated sigma_alpha: ', I)
+                if midas_dict['alpha'] <= alpha_cr:  # Check if local void fraction is less than or equal to alpha_cr
+                    u_t = 1.4 * eps**(1./3) * (midas_dict['Dsm1']/1000.)**(1./3) 
+                    # print(angle, rstar, Dh, v_m, Rem, f_TP, eps, midas_dict['Dsm1']) # for check
+                else:
+                    u_t = 0  # The turbulence-impact and random- collision are driven by the turbulent fluctuation velocity (u_t).
 
+                COV_loc = u_t * (midas_dict['ai'])**2 / alpha_max**(1/3)*(alpha_max**(1/3)-(midas_dict['alpha'])**(1/3))     
+                
+                midas_dict.update({'u_t': u_t})
+        
+                midas_dict.update({'COV_loc': COV_loc})
+                
+        u_t_avg=self.area_avg ('u_t')
+        if u_t_avg > 0:
+            COV_avg = u_t_avg * ai_avg**2 / alpha_max**(1/3)*(alpha_max**(1/3)-alpha_avg**(1/3))
+            I = self.area_avg('COV_loc') / COV_avg
+        else:
+            COV_avg = 0
+            I = 0
+
+        print("COV_avg:", COV_avg)  # Output COV_avg
+        print("u_t_avg:",u_t_avg)
         self.COV_RC = I
         return I
 
