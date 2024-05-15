@@ -2,6 +2,10 @@ from .Condition import Condition
 from .config import *
 import subprocess
 
+""" Functions for interfacing with CFX
+
+"""
+
 def write_CFX_BC(cond:Condition, save_dir = ".", z_loc = 0, only_90 = False):
     """ Write a csv file for CFX based on cond
 
@@ -420,20 +424,20 @@ def write_CCL(mom_source = 'normal_drag_mom_source', ccl_name = 'auto_setup.ccl'
     """ Function to write the CCL file that CFX reads
 
     Can use different momentum source terms, current options are
-    * "drag_model", drag force calculated with 
-    * "IS", 
-    * "normal_drag_mom_source", regular drag formulation
+    - "drag_model", drag force calculated with 
+    - "IS", 
+    - "normal_drag_mom_source", regular drag formulation
 
     Other important simulation parameters
-    * Db, bubble diameter
-    * mdot, mass flow rate for BC
-    * CL, lift coefficient. Can set to a constant, 'tomiyama', or 'ryan_DFM'. For the latter cases, also need jf and jg. They both also use Sharma's lift modification
-    * CTD, turbulent dispersion coefficient. Using Lopez-de-Bertodano model
-    * CD, drag coefficient
-    * Kf, Kw, for relative velocity model
-    * jf, jg, needed for lift coefficient models
-    * num_iter, number of iterations
-    * resid_target, residual convergence criteria
+    - Db, bubble diameter
+    - mdot, mass flow rate for BC
+    - CL, lift coefficient. Can set to a constant, 'tomiyama', or 'ryan_DFM'. For the latter cases, also need jf and jg. They both also use Sharma's lift modification
+    - CTD, turbulent dispersion coefficient. Using Lopez-de-Bertodano model
+    - CD, drag coefficient
+    - Kf, Kw, for relative velocity model
+    - jf, jg, needed for lift coefficient models
+    - num_iter, number of iterations
+    - resid_target, residual convergence criteria
     
     """
     
