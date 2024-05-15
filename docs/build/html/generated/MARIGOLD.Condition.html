@@ -20,7 +20,9 @@
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
-    <link rel="search" title="Search" href="../search.html" /> 
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="MARIGOLD.iate" href="MARIGOLD.iate.html" />
+    <link rel="prev" title="Welcome to MARIGOLD’s documentation!" href="../index.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -42,21 +44,21 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <ul>
-<li class="toctree-l1"><a class="reference internal" href="../generated/MARIGOLD.Condition.html">MARIGOLD.Condition</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../generated/MARIGOLD.Condition.html#MARIGOLD.Condition"><code class="docutils literal notranslate"><span class="pre">Condition</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="../generated/MARIGOLD.Condition.html#MARIGOLD.Condition.__init__"><code class="docutils literal notranslate"><span class="pre">__init__()</span></code></a></li>
+              <ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">MARIGOLD.Condition</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#MARIGOLD.Condition"><code class="docutils literal notranslate"><span class="pre">Condition</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.Condition.__init__"><code class="docutils literal notranslate"><span class="pre">__init__()</span></code></a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../generated/MARIGOLD.iate.html">MARIGOLD.iate</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../generated/MARIGOLD.iate.html#MARIGOLD.iate"><code class="docutils literal notranslate"><span class="pre">iate()</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="MARIGOLD.iate.html">MARIGOLD.iate</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="MARIGOLD.iate.html#MARIGOLD.iate"><code class="docutils literal notranslate"><span class="pre">iate()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../generated/MARIGOLD.CFD.html">MARIGOLD.CFD</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../generated/MARIGOLD.misc.html">MARIGOLD.misc</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../generated/MARIGOLD.extracts_and_loads.html">MARIGOLD.extracts_and_loads</a></li>
+<li class="toctree-l1"><a class="reference internal" href="MARIGOLD.CFD.html">MARIGOLD.CFD</a></li>
+<li class="toctree-l1"><a class="reference internal" href="MARIGOLD.misc.html">MARIGOLD.misc</a></li>
+<li class="toctree-l1"><a class="reference internal" href="MARIGOLD.extracts_and_loads.html">MARIGOLD.extracts_and_loads</a></li>
 </ul>
 
         </div>
@@ -75,7 +77,7 @@
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
       <li class="breadcrumb-item active">MARIGOLD.Condition</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="../_sources/modules/MARIGOLD.Condition.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/generated/MARIGOLD.Condition.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -118,133 +120,148 @@ This structure is initialized with zeros for the MIDAS output at the pipe center
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">approx_vf_Kong</span></code>([n])</p></td>
 <td><p>Method for approximating vf from Kong.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">area_avg</span></code>(param[, even_opt, recalc])</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">approx_vg</span></code>([n])</p></td>
+<td><p>Method for approximating vg with power-law relation.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">area_avg</span></code>(param[, even_opt, recalc])</p></td>
 <td><p>Method for calculating the area-average of a parameter, &quot;param&quot;</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">avg</span></code>(param[, include_nonzero])</p></td>
+<td><p>Calculates a basic average of a parameter, &quot;param&quot;</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_W</span></code>()</p></td>
 <td><p>Calculates the wake deficit function, W, from the experimental data</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_avg_lat_sep</span></code>()</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_aa_values_model</span></code>([method, kw, kf, Lw, Cavf])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_avg_lat_sep</span></code>()</p></td>
 <td><p>Calculates average lateral separation distance between bubbles</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_cd</span></code>([method, vr_cheat])</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_cd</span></code>([method, vr_cheat])</p></td>
 <td><p>Method for calculating drag coefficient</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_dpdz</span></code>([method, m, n, LM_C, k_m, L])</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_dpdz</span></code>([method, m, n, LM_C, k_m, L])</p></td>
 <td><p>Calculates the pressure gradient, dp/dz, according to various methods.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_errors</span></code>(param1, param2)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_errors</span></code>(param1, param2)</p></td>
 <td><p>Calculates the errors, ε, between two parameters (param1 - param2) in midas_dict</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_grad</span></code>(param[, recalc])</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_grad</span></code>(param[, recalc])</p></td>
 <td><p>Calculates gradient of param based on the data in self.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_linear_interp</span></code>(param)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_linear_interp</span></code>(param)</p></td>
 <td><p>Makes a LinearNDInterpolator for the given param.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_linear_xy_interp</span></code>(param)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_linear_xy_interp</span></code>(param)</p></td>
 <td><p>Makes a LinearNDInterpolator for the given param in x y coords</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_mu3_alpha</span></code>()</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_mu3_alpha</span></code>()</p></td>
 <td><p>Calculates the third moment of alpha</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_mu_eff</span></code>([method, alpha_max])</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_mu_eff</span></code>([method, alpha_max])</p></td>
 <td><p>Method for calculating effective viscosity.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_sigma_alpha</span></code>()</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_sigma_alpha</span></code>()</p></td>
 <td><p>Calculates the second moment of alpha</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_vgj</span></code>([warn_approx])</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_vf_lee</span></code>([K])</p></td>
+<td><p>Calculate vf, jf, vr based on Lee et al. (2002) equation.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_vf_naive</span></code>()</p></td>
+<td><p>Calculate vf, jf, vr based on single-phase equation</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_vgj</span></code>([warn_approx])</p></td>
 <td><p>Method for calculating Vgj, by doing</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_vgj_model</span></code>()</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_vgj_model</span></code>()</p></td>
 <td><p>Method for calculating local Vgj based on models</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_void_cov</span></code>()</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_void_cov</span></code>()</p></td>
 <td><p>Calculates the void covariance</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_vr</span></code>([warn_approx])</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_vr</span></code>([warn_approx])</p></td>
 <td><p>Method for calculating relative velocity.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_vr_model</span></code>([method, kw, n, Lw, kf, ...])</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_vr_model</span></code>([method, kw, n, Lw, kf, ...])</p></td>
 <td><p>Method for calculating relative velocity based on models</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_vwvg</span></code>()</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_vwvg</span></code>()</p></td>
 <td><p>Calculates void weighted Vgj</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">circ_segment_area_avg</span></code>(param, hstar[, ...])</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">circ_segment_area_avg</span></code>(param, hstar[, ...])</p></td>
 <td><p>Method for calculating the area-average of a parameter, &quot;param&quot; over the circular segment defined by h</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">circ_segment_void_area_avg</span></code>(param, hstar[, ...])</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">circ_segment_void_area_avg</span></code>(param, hstar[, ...])</p></td>
 <td><p>Method for calculating the void-weighted area-average of a parameter over the circular segment defined by h</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">find_hstar_pos</span></code>([method, void_criteria])</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">find_hstar_pos</span></code>([method, void_criteria])</p></td>
 <td><p>Returns the vertical distance from the top of the pipe to the bubble layer interface</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit_spline</span></code>(param)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit_spline</span></code>(param)</p></td>
 <td><p>Fits a RectBivariateSpline for the given param.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">interp_area_avg</span></code>(param[, interp_type])</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">interp_area_avg</span></code>(param[, interp_type])</p></td>
 <td><p>Function to area-average param, using the spline interpolation of param</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">line_avg</span></code>(param, phi_angle[, even_opt])</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">line_avg</span></code>(param, phi_angle[, even_opt])</p></td>
 <td><p>Line average of param over line defined by phi_angle</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">line_avg_dev</span></code>(param, phi_angle[, even_opt])</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">line_avg_dev</span></code>(param, phi_angle[, even_opt])</p></td>
 <td><p>Second moment of param over line defined by phi_angle</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">max</span></code>(param[, recalc])</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">max</span></code>(param[, recalc])</p></td>
 <td><p>Return maximum value of param in the Condition</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">max_line</span></code>(param, angle)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">max_line</span></code>(param, angle)</p></td>
 <td><p>Return maximum value of param at a given angle</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">max_line_loc</span></code>(param, angle)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">max_line_loc</span></code>(param, angle)</p></td>
 <td><p>Return r/R location of maximum value of param at a given angle</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">max_loc</span></code>(param)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">max_loc</span></code>(param)</p></td>
 <td><p>Return location of maximum param in the Condition</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">min</span></code>(param[, recalc, nonzero])</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">min</span></code>(param[, recalc, nonzero])</p></td>
 <td><p>Return minimum value of param in the Condition</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">min_loc</span></code>(param)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">min_loc</span></code>(param)</p></td>
 <td><p>Return minimum value of param in the Condition</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">mirror</span></code>([sym90, axisym, uniform_rmesh, ...])</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">mirror</span></code>([sym90, axisym, uniform_rmesh, ...])</p></td>
 <td><p>Mirrors data, so we have data for every angle</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_contour</span></code>(param[, save_dir, show, ...])</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_contour</span></code>(param[, save_dir, show, ...])</p></td>
 <td><p>Method to plot contour of a given param</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_isoline</span></code>(param, iso_axis, iso_val[, ...])</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_isoline</span></code>(param, iso_axis, iso_val[, ...])</p></td>
 <td><p>Plot profiles of param over iso_axis at iso_val</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_profiles</span></code>(param[, save_dir, show, ...])</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_profiles</span></code>(param[, save_dir, show, ...])</p></td>
 <td><p>Plot profiles of param over x_axis, for const_to_plot, i.e. α over r/R for φ = [90, 67.5 .</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_spline_contour</span></code>(param[, save_dir, show, ...])</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_spline_contour</span></code>(param[, save_dir, show, ...])</p></td>
 <td><p>Plots a contour from a spline interpolation</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_surface</span></code>(param[, save_dir, show, ...])</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_surface</span></code>(param[, save_dir, show, ...])</p></td>
 <td><p>Method to plot a surface of a given param</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">pretty_print</span></code>([print_to_file, FID, mirror])</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">pretty_print</span></code>([print_to_file, FID, mirror])</p></td>
 <td><p>Prints out all the information in a Condition in a structured way</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">rough_FR_ID</span></code>()</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">rough_FR_ID</span></code>()</p></td>
 <td><p>Identifies the flow regime for the given condition, by some rough methods</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">spline_circ_seg_area_avg</span></code>(param, hstar[, int_err])</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">spline_circ_seg_area_avg</span></code>(param, hstar[, int_err])</p></td>
 <td><p>Function to area-average over a circular segment defined by h, using the spline interpolation of param</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">spline_void_area_avg</span></code>(param)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">spline_void_area_avg</span></code>(param)</p></td>
 <td><p>Function to void-weighted area-average param over a circular segment defined by h, using the spline interpolation of param</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">top_bottom</span></code>(param[, even_opt])</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">top_bottom</span></code>(param[, even_opt])</p></td>
 <td><p>Honestly, I forgot what this does</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">void_area_avg</span></code>(param[, even_opt])</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">void_area_avg</span></code>(param[, even_opt])</p></td>
 <td><p>Method for calculating the void-weighted area-average of a parameter</p></td>
 </tr>
 </tbody>
@@ -264,7 +281,10 @@ This structure is initialized with zeros for the MIDAS output at the pipe center
 
            </div>
           </div>
-          <footer>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../index.html" class="btn btn-neutral float-left" title="Welcome to MARIGOLD’s documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="MARIGOLD.iate.html" class="btn btn-neutral float-right" title="MARIGOLD.iate" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
 
   <hr/>
 

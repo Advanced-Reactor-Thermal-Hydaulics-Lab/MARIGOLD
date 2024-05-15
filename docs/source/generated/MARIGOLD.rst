@@ -1,0 +1,23 @@
+﻿MARIGOLD
+========
+
+.. automodule:: MARIGOLD
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

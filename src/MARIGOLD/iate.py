@@ -4,7 +4,8 @@ def iate(cond, query, z_step = 0.01,
          dpdz_method = 'LM', void_method = 'driftflux', mueff_method = 'ishii', cd_method = 'doe',  # Method arguments
          LM_C = 40, k_m = 0.40, LoverD_restriction = 9999,                                          # Pressure drop calculation arguments
          cheat = True, elbow = False, quarantine = True):                                           # Temporary arguments, fix later
-    """
+    """ Calculate the area-averaged interfacial area concentration at query location based on the 1G IATE
+
     Version History:
      - v1: Pressure cheating, jgref substitute for jgatm
      - v2: MG update, pressure retrieval, jgatm retrieval
