@@ -244,9 +244,7 @@ def iate(cond, query, z_step = 0.01,
         #     dissipation rate
 
         if mueff_method == 'ishii':
-            # Currently broken
-            print("Warning: Ishii method for calculating mu_eff is currently broken")
-            mu_m = cond.calc_mu_eff()
+            mu_m = cond.area_avg("mu_m")
 
         elif mueff_method == 'ishiichawla':
             mu_m = mu_f / (1 - alpha[i])                        # Mixture viscosity, given by Ishii and Chawla (Eq. 4-10 in Dr. Kim thesis)
