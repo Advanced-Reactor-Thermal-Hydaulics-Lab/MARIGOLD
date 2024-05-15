@@ -1,10 +1,11 @@
 from .config import *
 
-def iate(cond, query, z_step = 0.01, dpdz_method = 'LM', void_method = 'driftflux', 
-         LM_C = 40, k_m = 0.40, LoverD_restriction = 9999,      # Pressure drop calculation arguments
-         cheat = True, elbow = False, quarantine = True):       # Temporary arguments, fix later
+def iate(cond, query, z_step = 0.01,
+         dpdz_method = 'LM', void_method = 'driftflux', mueff_method = 'ishii', cd_method = 'doe',  # Method arguments
+         LM_C = 40, k_m = 0.40, LoverD_restriction = 9999,                                          # Pressure drop calculation arguments
+         cheat = True, elbow = False, quarantine = True):                                           # Temporary arguments, fix later
     """ Calculate the area-averaged interfacial area concentration at query location based on the 1G IATE
-    
+
     Version History:
         > v1: Pressure cheating, jgref substitute for jgatm
         > v2: MG update, pressure retrieval, jgatm retrieval
@@ -209,31 +210,40 @@ def iate(cond, query, z_step = 0.01, dpdz_method = 'LM', void_method = 'driftflu
         ########################################################################################################################
         # Estimate bubble relative velocity <ur> (See Talley, 2012, 4.2.2.6)
         ur = 0.2        # Set to constant value of 0.23 m/s by Schilling (2007)
-        '''
-        err = 0.1
-        while abs(err) > 0.000001:
-            ReD = rho_f * ur * Db[i] * (1 - alpha[i]) / mu_f    # Bubble Reynolds number
-            CDe = 24 * (1 + 0.1 * ReD**0.75) / ReD              # Drag coefficient
 
-            # Relative velocity (Ishii and Chawla, 1979), implemented by Worosz accounting for density difference
-            ure1 = (4 * grav * Db[i] * (rho_f - rho_gz[i]) * (1 - alpha[i]) / 3 / CDe / rho_f)**0.5
-            err = (ure1 - ur) / ur
+        if cd_method == 'iter':
+            err = 0.1
+            while abs(err) > 0.000001:
+                ReD = rho_f * ur * Db[i] * (1 - alpha[i]) / mu_f    # Bubble Reynolds number
+                CDe = 24 * (1 + 0.1 * ReD**0.75) / ReD              # Drag coefficient
 
-            ur = ure1
-        ReD = rho_f * ur * Db[i] * (1 - alpha[i]) / mu_f        # Update bubble Reynolds number
-        CDwe = 24 * (1 + 0.1 * ReD**0.75) / ReD                 # Update drag coefficient
-        '''
+                # Relative velocity (Ishii and Chawla, 1979), implemented by Worosz accounting for density difference
+                ure1 = (4 * grav * Db[i] * (rho_f - rho_gz[i]) * (1 - alpha[i]) / 3 / CDe / rho_f)**0.5
+                err = (ure1 - ur) / ur
 
-        # Original DOE_MATLAB_IAC
-        ReD = rho_f * ur * Db[i] * (1 - alpha[i]) / mu_f
-        CDwe = 24 * (1 + 0.1 * ReD**0.75) / ReD
-        ur = (4 * grav * Db[i] / 3 / CDwe)**0.5                 # Interestingly, Yadav keeps 9.8 instead of changing grav for angle
+                ur = ure1
+            ReD = rho_f * ur * Db[i] * (1 - alpha[i]) / mu_f        # Update bubble Reynolds number
+            CDwe = 24 * (1 + 0.1 * ReD**0.75) / ReD                 # Update drag coefficient
+        elif cd_method == 'doe':
+            # Original DOE_MATLAB_IAC
+            ReD = rho_f * ur * Db[i] * (1 - alpha[i]) / mu_f
+            CDwe = 24 * (1 + 0.1 * ReD**0.75) / ReD
+            ur = (4 * grav * Db[i] / 3 / CDwe)**0.5                 # Interestingly, Yadav keeps 9.8 instead of changing grav for angle
+        else:
+            CDwe = cond.calc_cd(cd_method)
+            ur = cond.calc_vr_method()
 
         ########################################################################################################################
         # Estimate Energy Dissipation Rate and Turbulent Velocity (See Talley, 2012, 4.2.2.3)
         #   > One-group models written using turbulent fluctuation velocity, while models implemented in TRACE are written using
         #     dissipation rate
-        mu_m = mu_f / (1 - alpha[i])                            # Mixture viscosity
+
+        if mueff_method == 'ishii':
+            cond.calc_mu_eff()
+
+        else:
+            mu_m = mu_f / (1 - alpha[i])                        # Mixture viscosity
+
         rho_m = (1 - alpha[i]) * rho_f + alpha[i] * rho_gz[i]   # Mixture density
 
         vm = (rho_f * (1 - alpha[i]) * vfz + rho_gz[i] * alpha[i] * vgz[i]) \
@@ -334,6 +344,7 @@ def iate(cond, query, z_step = 0.01, dpdz_method = 'LM', void_method = 'driftflu
         # Estimate Void Fraction for the next step calculation
 
         if void_method == 'driftflux':      # Drift Flux Model
+            # Currently seems broken
 
             j = jgloc + jf
             
