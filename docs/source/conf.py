@@ -18,11 +18,14 @@ extensions = [
     'sphinx.ext.intersphinx',
     'sphinx.ext.viewcode',
     'sphinx.ext.napoleon',
-    'sphinx_automodapi.automodapi'
+    'sphinx.ext.autodoc',
+    'sphinx.ext.autosummary'
 ]
 
 templates_path = ['_templates']
 exclude_patterns = []
+
+toc_object_entries_show_parents = 'hide'
 
 numpydoc_show_class_members = False
 
@@ -35,3 +38,6 @@ napoleon_use_ivar = True
 
 html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
+html_theme_options = {
+    "collapse_navigation" : False
+}

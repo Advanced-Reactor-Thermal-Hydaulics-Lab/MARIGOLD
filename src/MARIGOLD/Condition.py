@@ -19,7 +19,7 @@ class Condition:
         """ Initialize Condition object
 
         Implemented Fluids:
-        - air-water, uses properties at STP
+        - air-water, uses properties at atmospheric conditions
         
         """
         self.jgref = jgref
