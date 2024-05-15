@@ -2215,27 +2215,28 @@ class Condition:
         Dh           = self.Dh                                         # Hydraulic diameter
 
 
-        alpha_avg    = self.area_avg('alpha')
-        ai_avg       = self.area_avg('ai')
-        Dsm1_avg     = self.area_avg ('Dsm1')   # try void weighted
+        alpha_avg    = self.area_avg('alpha_G1')
+        ai_avg       = self.area_avg('ai_G1')
+        Dsm1_avg     = self.void_area_avg ('Dsm1')   
         mu_m_avg     = self.void_area_avg ('mu_m') 
 
         rho_m        = (1 - alpha_avg) * rho_f + alpha_avg * rho_g     # Mixture density
         v_m          =(rho_f*self.jf+rho_g*self.jgloc)/rho_m           # Mixture velocity                     
         Rem          = rho_m * v_m * Dh / mu_m_avg                     # Ran Kong
-        f_TP         = 0.316*(1/(1-alpha_avg)/Rem)**0.25                # Two-phase frictional factor
+        f_TP         = 0.316*(1/(1-alpha_avg)/Rem)**0.25                # Two-phase frictional factor Kong (2018)
+        #f_TP         = 0.316*(mu_m_avg/self.mu_f/Rem)**0.25            # Two-phase frictional factor Talley (2015) and Ted (2015)
         eps          =  f_TP*v_m**3 /2/Dh                                # epsilon for calculating u_t
             
         for angle, r_dict in self.phi.items():
             for rstar, midas_dict in r_dict.items():
                 
-                if midas_dict['alpha'] <= alpha_cr:  # Check if local void fraction is less than or equal to alpha_cr
-                    u_t = 1.4 * eps**(1./3) * (midas_dict['Dsm1']/1000.)**(1./3) 
+                if midas_dict['alpha_G1'] <= alpha_cr:  # Check if local void fraction is less than or equal to alpha_cr
+                    u_t = 1.4 * eps**(1/3) * (midas_dict['Dsm1']/1000)**(1/3) 
                     # print(angle, rstar, Dh, v_m, Rem, f_TP, eps, midas_dict['Dsm1']) # for check
                 else:
                     u_t = 0  # The turbulence-impact and random- collision are driven by the turbulent fluctuation velocity (u_t).
 
-                COV_loc = u_t * (midas_dict['ai'])**2 / alpha_max**(1/3)*(alpha_max**(1/3)-(midas_dict['alpha'])**(1/3))     
+                COV_loc = u_t * (midas_dict['ai_G1'])**2 / alpha_max**(1/3)*(alpha_max**(1/3)-(midas_dict['alpha_G1'])**(1/3))     
                 
                 midas_dict.update({'u_t': u_t})
         
@@ -2249,8 +2250,6 @@ class Condition:
             COV_avg = 0
             I = 0
 
-        print("COV_avg:", COV_avg)  # Output COV_avg
-        print("u_t_avg:",u_t_avg)
         self.COV_RC = I
         return I
 
