@@ -1810,6 +1810,10 @@ class Condition:
             f_f = m / Re_f**n
             f_g = m / Re_g**n
 
+            dpdz_f = f_f * 1/self.Dh * self.rho_f * self.jf**2 / 2
+            dpdz_g = f_g * 1/self.Dh * self.rho_g * self.jgloc**2 / 2
+            chi2 = dpdz_f / dpdz_g
+
             phi_f2 = 1 + LM_C/np.sqrt(chi2) + 1 / chi2
             dpdz = phi_f2 * dpdz_f
 

@@ -7,20 +7,20 @@ def iate(cond, query, z_step = 0.01,
     """ Calculate the area-averaged interfacial area concentration at query location based on the 1G IATE
 
     Version History:
-        > v1: Pressure cheating, jgref substitute for jgatm
-        > v2: MG update, pressure retrieval, jgatm retrieval
-        > v3: Yadav methods, incorporation of COV terms, support for elbows, VU, VD, horizontal
+     - v1: Pressure cheating, jgref substitute for jgatm
+     - v2: MG update, pressure retrieval, jgatm retrieval
+     - v3: Yadav methods, incorporation of COV terms, support for elbows, VU, VD, horizontal
     
     Inputs:
-        > cond:             Condition object, part of MARIGOLD framework
-        > query:            L/D endpoint
-        > z_step:           Axial mesh cell size [-]
-        > void_method:      Void fraction prediction method, 'driftflux' or 'continuity'
+     - cond:             Condition object, part of MARIGOLD framework
+     - query:            L/D endpoint
+     - z_step:           Axial mesh cell size [-]
+     - void_method:      Void fraction prediction method, 'driftflux' or 'continuity'
 
     Notes:
-        > IATE coefficients are currently set to default values depending on geometry
-            > Probably want to make these all optional arguments, set default values for 90 straight pipe, and input other values for different geometries outside of IATE function
-            > Same goes for COV models?
+     - IATE coefficients are currently set to default values depending on geometry
+     - Probably want to make these all optional arguments, set default values for 90 straight pipe, and input other values for different geometries outside of IATE function
+     - Same goes for COV models?
     """
 
     # MARIGOLD retrieval
@@ -46,10 +46,10 @@ def iate(cond, query, z_step = 0.01,
     # expcond.m
 
     p_atm           = 101325                                    # Ambient pressure [Pa]
-    rho_f           = 998.0                                     # Liquid phase density [kg/m**3]
-    rho_g           = 1.204                                     # Gas phase density [kg/m**3]
-    mu_f            = 0.001002                                  # Viscosity of water [Pa-s]
-    sigma           = 0.0728                                    # Surface tension of air/water [N/m]
+    rho_f           = cond.rho_f                                # Liquid phase density [kg/m**3]
+    rho_g           = cond.rho_g                                # Gas phase density [kg/m**3]
+    mu_f            = cond.mu_f                                 # Viscosity of water [Pa-s]
+    sigma           = cond.sigma                                # Surface tension of air/water [N/m]
     grav            = 9.81*np.sin((theta)*np.pi/180)            # Gravity constant (added by Drew to account for pipe inclination)
 
     # Worosz
@@ -112,13 +112,16 @@ def iate(cond, query, z_step = 0.01,
     # Yadav
     # Temporary, Yadav implemented as a bunch of arrays. There must be a better way to do this.
     # calc_void_cov in Condition.py may be useful
-    if theta == 90 and elbow == False:
+    if theta == 90 and elbow == False:      # Vertical, no elbow
         COV_RC      = 1
         COV_TI      = 1
-    elif theta == 0 and elbow == False:
+    elif theta == 0 and elbow == False:     # Horizontal, no elbow, look at Ran's work?
         COV_RC      = 1
         COV_TI      = 1
-    elif elbow == True:
+    elif elbow == True:                     # Elbow, look at Shoxu's work?
+        COV_RC      = 1
+        COV_TI      = 1
+    else:                                   # Inclined, look at Drew's work?
         COV_RC      = 1
         COV_TI      = 1
 
@@ -239,7 +242,8 @@ def iate(cond, query, z_step = 0.01,
         #     dissipation rate
 
         if mueff_method == 'ishii':
-            cond.calc_mu_eff()
+            mu_m = cond.calc_mu_eff()
+            print("mu_m: ",mu_m)
 
         else:
             mu_m = mu_f / (1 - alpha[i])                        # Mixture viscosity
