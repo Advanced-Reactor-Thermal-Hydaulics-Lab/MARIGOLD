@@ -46,10 +46,10 @@ def iate(cond, query, z_step = 0.01,
     # expcond.m
 
     p_atm           = 101325                                    # Ambient pressure [Pa]
-    rho_f           = 998.0                                     # Liquid phase density [kg/m**3]
-    rho_g           = 1.204                                     # Gas phase density [kg/m**3]
-    mu_f            = 0.001002                                  # Viscosity of water [Pa-s]
-    sigma           = 0.0728                                    # Surface tension of air/water [N/m]
+    rho_f           = cond.rho_f                                # Liquid phase density [kg/m**3]
+    rho_g           = cond.rho_g                                # Gas phase density [kg/m**3]
+    mu_f            = cond.mu_f                                 # Viscosity of water [Pa-s]
+    sigma           = cond.sigma                                # Surface tension of air/water [N/m]
     grav            = 9.81*np.sin((theta)*np.pi/180)            # Gravity constant (added by Drew to account for pipe inclination)
 
     # Worosz
