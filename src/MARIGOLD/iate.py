@@ -1,7 +1,7 @@
 from .config import *
 
 def iate(cond, query, z_step = 0.01,
-         dpdz_method = 'LM', void_method = 'driftflux', mueff_method = 'ishii', cd_method = 'doe',  # Method arguments
+         dpdz_method = 'LM', void_method = 'driftflux', mueff_method = 'ishiichawla', cd_method = 'doe',  # Method arguments
          LM_C = 40, k_m = 0.40, LoverD_restriction = 9999,                                          # Pressure drop calculation arguments
          cheat = True, elbow = False, quarantine = True):                                           # Temporary arguments, fix later
     """ Calculate the area-averaged interfacial area concentration at query location based on the 1G IATE
@@ -227,11 +227,13 @@ def iate(cond, query, z_step = 0.01,
                 ur = ure1
             ReD = rho_f * ur * Db[i] * (1 - alpha[i]) / mu_f        # Update bubble Reynolds number
             CDwe = 24 * (1 + 0.1 * ReD**0.75) / ReD                 # Update drag coefficient
+
         elif cd_method == 'doe':
             # Original DOE_MATLAB_IAC
             ReD = rho_f * ur * Db[i] * (1 - alpha[i]) / mu_f
             CDwe = 24 * (1 + 0.1 * ReD**0.75) / ReD
             ur = (4 * grav * Db[i] / 3 / CDwe)**0.5                 # Interestingly, Yadav keeps 9.8 instead of changing grav for angle
+            
         else:
             CDwe = cond.calc_cd(cd_method)
             ur = cond.calc_vr_method()
@@ -242,9 +244,9 @@ def iate(cond, query, z_step = 0.01,
         #     dissipation rate
 
         if mueff_method == 'ishii':
+            # Currently broken
+            print("Warning: Ishii method for calculating mu_eff is currently broken")
             mu_m = cond.calc_mu_eff()
-            print("mu_m: ",mu_m)
-            print("mu_m stored?: ",cond.mu_eff)
 
         elif mueff_method == 'ishiichawla':
             mu_m = mu_f / (1 - alpha[i])                        # Mixture viscosity, given by Ishii and Chawla (Eq. 4-10 in Dr. Kim thesis)
