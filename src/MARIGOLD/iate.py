@@ -242,7 +242,7 @@ def iate(cond, query, z_step = 0.01,
         #     dissipation rate
 
         if mueff_method == 'ishii':
-            cond.calc_mu_eff()
+            mu_m = cond.calc_mu_eff()
 
         else:
             mu_m = mu_f / (1 - alpha[i])                        # Mixture viscosity
