@@ -1895,6 +1895,21 @@ class Condition:
 
         return
     
+    # Test different ways of calculating mixture viscosity, 05/15 Quan
+    def calc_mu_eff1(self, method='Ishii', alpha_max = 1.0): 
+        """Method for calculating mixture viscosity using averaged void fraction. 
+        Method from ishii & Zuber 91979) paper
+        """
+
+        alpha_avg = self.area_avg('alpha')
+                
+        if method == 'Ishii':
+            mu_m = self.mu_f * (1 - alpha_avg / alpha_max)**(-2.5*alpha_max * (self.mu_g + 0.4*self.mu_f) / (self.mu_g + self.mu_f)  )
+            mu_eff1 = mu_m
+        else:
+            mu_m = self.mu_f / (1 - alpha_avg)                        
+        return mu_eff1
+    
     def calc_cd(self, method='Ishii-Zuber', vr_cheat = False):
         """ Method for calculating drag coefficient 
         
@@ -2180,6 +2195,81 @@ class Condition:
 
         return
     
+
+    def calc_COV_RC(self):
+        
+        """Calculates the experimental Random Collision Covariance based on Talley (2012) method (with modification factor m_RC eliminated), Quan, 05/15
+        Stored in self.COV_RC"""
+     ############################################################################################################################
+    #                                                                                                                          #
+    #                                                       CONSTANTS                                                          #
+    #                                                                                                                          #
+    ############################################################################################################################
+  
+        rho_f        = 998.0                                         # Liquid phase density [kg/m**3]
+        rho_g        = 1.204                                          # Gas phase density [kg/m**3]
+        alpha_max    = 0.75                                            # Maximum void fraction based on hexagonal-closed-packed (HCP) bubble distribution
+        alpha_cr     = 0.11                                            # Critical alpha to activate Random Collision, Talley (2012), Kong (2018) 
+        Dh           = cond.Dh                                         # Hydraulic diameter
+
+
+        alpha_avg    = self.area_avg('alpha')
+        ai_avg       = self.area_avg('ai')
+        Dsm1_avg     = self.area_avg ('Dsm1')
+        mu_m_avg     = self.area_avg ('mu_m') 
+
+        rho_m        = (1 - alpha_avg) * rho_f + alpha_avg * rho_g     # Mixture density
+        v_m          =rho_f*self.jf+rho_g*self.jgloc                   # Mixture velocity                     
+        Rem          = rho_m * v_m * Dh / mu_m_avg                     # Ran Kong
+        f_TP         = 0.316/(1/(1-alpha_avg)/Rem)**0.25                # Two-phase frictional factor
+        eps          =  f_TP*v_m^3/2/Dh                                # epsilon for calculating u_t
+            
+        self.u_t=1.4*eps**(1/3)*(midas_dict['Dsm1']/1000)**(1/3)
+        u_t_avg=self.area_avg ('u_t')
+
+        COV_loc = self.u_t * (midas_dict['ai'])**2 / alpha_max**(1/3)*(alpha_max**(1/3)-(midas_dict['alpha'])**(1/3))
+        COV_avg = u_t_avg * ai_avg**2 / alpha_max**(1/3)*(alpha_max**(1/3)-alpha_avg**(1/3))
+
+        I = 0
+        param_r = [] # integrated wrt r
+        angles = []
+
+        self.mirror()
+
+        for angle, r_dict in self.phi.items():
+            rs_temp = []
+            vars_temp = []
+            angles.append(angle * np.pi/180) # Convert degrees to radians
+            for rstar, midas_dict in r_dict.items():
+                if rstar >= 0:
+                    rs_temp.append( rstar ) # This is proably equivalent to rs = list(r_dict.keys() ), but I'm paranoid about ordering
+                    vars_temp.append(rstar * (midas_dict['COV_loc']))
+                    if debug: print(angle, midas_dict, file=debugFID)
+            
+            vars = [var for _, var in sorted(zip(rs_temp, vars_temp))]
+            rs = sorted(rs_temp)
+
+            if debug: print("Arrays to integrate", rs, vars, file=debugFID)
+                
+            param_r.append( integrate.simpson(vars, rs) ) # Integrate wrt r
+            if debug: print("calculated integral:", integrate.simpson(vars, rs), file=debugFID)
+                #I = 2 * np.pi
+        if debug: print("Integrated wrt r", param_r, file=debugFID)
+        param_r_int = [var for _, var in sorted(zip(angles, param_r))]
+        angles_int = sorted(angles)
+        I = integrate.simpson(param_r_int, angles_int) / np.pi / COV_avg # Integrate wrt theta, divide by normalized area
+        if debug: print('Calculated sigma_alpha: ', I)
+
+        self.COV_RC = I
+        return I
+
+    
+
+    def calc_COV_TI(self):
+    
+
+        return
+
     def plot_profiles(self, param, save_dir = '.', show=True, x_axis='r', 
                       const_to_plot = [90, 67.5, 45, 22.5, 0], include_complement = True, 
                       rotate=False, fig_size=4, title=True, label_str = '', legend_loc = 'best', xlabel_loc = 'center',
