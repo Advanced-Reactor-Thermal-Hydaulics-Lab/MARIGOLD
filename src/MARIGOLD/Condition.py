@@ -2196,38 +2196,48 @@ class Condition:
         return
     
 
-    def calc_COV_RC(self):
+    def calc_COV_RC(self, alpha_max = 0.75, alpha_cr = 0.11):
         
         """Calculates the experimental Random Collision Covariance based on Talley (2012) method (with modification factor m_RC eliminated), Quan, 05/15
-        Stored in self.COV_RC"""
+        Stored in self.COV_RC
+        
+        """
      ############################################################################################################################
     #                                                                                                                          #
     #                                                       CONSTANTS                                                          #
     #                                                                                                                          #
     ############################################################################################################################
   
-        rho_f        = 998.0                                         # Liquid phase density [kg/m**3]
-        rho_g        = 1.204                                          # Gas phase density [kg/m**3]
-        alpha_max    = 0.75                                            # Maximum void fraction based on hexagonal-closed-packed (HCP) bubble distribution
-        alpha_cr     = 0.11                                            # Critical alpha to activate Random Collision, Talley (2012), Kong (2018) 
-        Dh           = cond.Dh                                         # Hydraulic diameter
+        rho_f        = self.rho_f                                         # Liquid phase density [kg/m**3]
+        rho_g        = self.rho_g                                     # Gas phase density [kg/m**3]
+        # alpha_max = 0.75, Maximum void fraction based on hexagonal-closed-packed (HCP) bubble distribution
+        # alpha_cr = 0.11, Critical alpha to activate Random Collision, Talley (2012), Kong (2018) 
+        Dh           = self.Dh                                         # Hydraulic diameter
 
 
         alpha_avg    = self.area_avg('alpha')
         ai_avg       = self.area_avg('ai')
         Dsm1_avg     = self.area_avg ('Dsm1')
-        mu_m_avg     = self.area_avg ('mu_m') 
+        mu_m_avg     = self.void_area_avg ('mu_m') 
 
         rho_m        = (1 - alpha_avg) * rho_f + alpha_avg * rho_g     # Mixture density
         v_m          =rho_f*self.jf+rho_g*self.jgloc                   # Mixture velocity                     
         Rem          = rho_m * v_m * Dh / mu_m_avg                     # Ran Kong
         f_TP         = 0.316/(1/(1-alpha_avg)/Rem)**0.25                # Two-phase frictional factor
-        eps          =  f_TP*v_m^3/2/Dh                                # epsilon for calculating u_t
+        eps          =  f_TP*v_m**3 /2/Dh                                # epsilon for calculating u_t
             
-        self.u_t=1.4*eps**(1/3)*(midas_dict['Dsm1']/1000)**(1/3)
-        u_t_avg=self.area_avg ('u_t')
+        for angle, r_dict in self.phi.items():
+            for rstar, midas_dict in r_dict.items():
+                if midas_dict['alpha'] <= alpha_cr:  # Check if local void fraction is less than or equal to alpha_cr
+                  u_t = 1.4*eps**(1/3)*(midas_dict['Dsm1']/1000)**(1/3) 
+                else:
+                  u_t = 0  # The turbulence-impact and random- collision are driven by the turbulent fluctuation velocity (u_t).
+                midas_dict.update({'u_t': u_t})
+            # Calculate COV_loc
+                COV_loc = u_t * (midas_dict['ai'])**2 / alpha_max**(1/3)*(alpha_max**(1/3)-(midas_dict['alpha'])**(1/3))
+                midas_dict.update({'COV_loc': COV_loc})
 
-        COV_loc = self.u_t * (midas_dict['ai'])**2 / alpha_max**(1/3)*(alpha_max**(1/3)-(midas_dict['alpha'])**(1/3))
+        u_t_avg=self.area_avg ('u_t')
         COV_avg = u_t_avg * ai_avg**2 / alpha_max**(1/3)*(alpha_max**(1/3)-alpha_avg**(1/3))
 
         I = 0
