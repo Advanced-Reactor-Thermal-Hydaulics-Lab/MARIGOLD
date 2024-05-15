@@ -243,6 +243,7 @@ def iate(cond, query, z_step = 0.01,
 
         if mueff_method == 'ishii':
             mu_m = cond.calc_mu_eff()
+            print("mu_m: ",mu_m)
 
         else:
             mu_m = mu_f / (1 - alpha[i])                        # Mixture viscosity
