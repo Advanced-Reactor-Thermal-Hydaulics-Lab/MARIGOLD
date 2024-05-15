@@ -9,18 +9,9 @@ Welcome to MARIGOLD's documentation!
 **M**\ ultiphase \ **A** nalysis\ of \ **R**\ aw \ **I**\ nformation for \ **G**\ lobal \ **O**\ r \ **L**\ ocal \ **D**\ ata 
 
 .. toctree::
-   :maxdepth: 3
-   :caption: Contents:
+   :maxdepth: 4
 
-
-.. autosummary::
-    :toctree: generated
-
-    MARIGOLD.Condition
-    MARIGOLD.iate
-    MARIGOLD.CFD
-    MARIGOLD.misc
-    MARIGOLD.extracts_and_loads
+   MARIGOLD
 
 
 Indices and tables

@@ -42,20 +42,7 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../generated/MARIGOLD.Condition.html">MARIGOLD.Condition</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../generated/MARIGOLD.Condition.html#MARIGOLD.Condition"><code class="docutils literal notranslate"><span class="pre">Condition</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../generated/MARIGOLD.Condition.html#MARIGOLD.Condition.__init__"><code class="docutils literal notranslate"><span class="pre">__init__()</span></code></a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="../../generated/MARIGOLD.iate.html">MARIGOLD.iate</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../generated/MARIGOLD.iate.html#MARIGOLD.iate"><code class="docutils literal notranslate"><span class="pre">iate()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="../../generated/MARIGOLD.CFD.html">MARIGOLD.CFD</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../generated/MARIGOLD.misc.html">MARIGOLD.misc</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../generated/MARIGOLD.extracts_and_loads.html">MARIGOLD.extracts_and_loads</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../MARIGOLD.html">MARIGOLD</a></li>
 </ul>
 
         </div>
@@ -88,7 +75,7 @@
 <span class="kn">import</span> <span class="nn">warnings</span>
 
 <div class="viewcode-block" id="Condition">
-<a class="viewcode-back" href="../../modules/MARIGOLD.Condition.html#MARIGOLD.Condition">[docs]</a>
+<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition">[docs]</a>
 <span class="k">class</span> <span class="nc">Condition</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Class to handle the local probe data</span>
 
@@ -99,11 +86,14 @@
 <span class="sd">    So phi[angle][r/R][&#39;alpha&#39;] should give you the void fraction at r/R for phi = angle</span>
 <span class="sd">    This structure is initialized with zeros for the MIDAS output at the pipe center and wall</span>
 
+<span class="sd">    Can also get the data at a local point from calling the condition, syntax</span>
+
+<span class="sd">    cond(phi, r, &#39;param&#39;). Phi is in radians, the arguments can be constants or numpy arrays.</span>
+<span class="sd">    Also has an option for interpolation, &#39;interp_method&#39;</span>
+
 <span class="sd">&quot;&quot;&quot;</span>
 
     <span class="n">debugFID</span> <span class="o">=</span> <span class="kc">None</span>
-<div class="viewcode-block" id="Condition.__init__">
-<a class="viewcode-back" href="../../modules/MARIGOLD.Condition.html#MARIGOLD.Condition.__init__">[docs]</a>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">jgref</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">jgloc</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">jf</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">theta</span><span class="p">:</span><span class="nb">int</span><span class="p">,</span> <span class="n">port</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">database</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">fluids</span> <span class="o">=</span> <span class="s1">&#39;air-water&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Initialize Condition object</span>
 
@@ -208,8 +198,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span> <span class="o">=</span> <span class="mf">0.0728</span>    <span class="c1"># N/m</span>
         
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">fluids</span><span class="si">}</span><span class="s2"> not available, try &#39;air-water&#39;&quot;</span><span class="p">)</span></div>
-
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">fluids</span><span class="si">}</span><span class="s2"> not available, try &#39;air-water&#39;&quot;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">__o</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">__o</span><span class="p">,</span> <span class="n">Condition</span><span class="p">):</span>
@@ -290,6 +279,8 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">NameError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">interp_method</span><span class="si">}</span><span class="s2"> not regonized. Accepted arguments are &#39;None&#39;, &#39;spline&#39;, &#39;linear&#39; or &#39;linear_xy&#39;&quot;</span><span class="p">)</span>
 
+<div class="viewcode-block" id="Condition.pretty_print">
+<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.pretty_print">[docs]</a>
     <span class="k">def</span> <span class="nf">pretty_print</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">print_to_file</span><span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">FID</span><span class="o">=</span><span class="n">debugFID</span><span class="p">,</span> <span class="n">mirror</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Prints out all the information in a Condition in a structured way </span>
 
@@ -318,8 +309,11 @@
                 <span class="k">for</span> <span class="n">r</span><span class="p">,</span> <span class="n">midas_output</span> <span class="ow">in</span> <span class="n">r_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\t</span><span class="si">{</span><span class="n">r</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
                     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t\t</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">midas_output</span><span class="p">)</span>
-        <span class="k">return</span>
+        <span class="k">return</span></div>
 
+
+<div class="viewcode-block" id="Condition.mirror">
+<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.mirror">[docs]</a>
     <span class="k">def</span> <span class="nf">mirror</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sym90</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">axisym</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">uniform_rmesh</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">force_remirror</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Mirrors data, so we have data for every angle</span>
 
@@ -579,12 +573,15 @@
                         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Warning: &#39;None&#39; value for </span><span class="si">{</span><span class="n">param</span><span class="si">}</span><span class="s2"> at </span><span class="si">{</span><span class="n">rstar</span><span class="si">}</span><span class="s2">. Setting to 0&quot;</span><span class="p">)</span>
                         <span class="n">midas_dict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span> <span class="p">{</span><span class="n">param</span> <span class="p">:</span> <span class="mi">0</span><span class="p">})</span>
 
-        <span class="k">return</span>
+        <span class="k">return</span></div>
+
     
+<div class="viewcode-block" id="Condition.approx_vf">
+<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.approx_vf">[docs]</a>
     <span class="k">def</span> <span class="nf">approx_vf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Method for approximating vf with power-law relation. </span>
 
-<span class="sd">        vf_approx = (n+1)*(2*n+1) / (2*n*n) * (jf / (1-self.area_avg(&#39;alpha&#39;))) * (1 - abs(rstar))**(1/n)</span>
+<span class="sd">        .. math:: v_{f, approx} = \\frac{(n+1)(2*n+1)}{ (2*n^{2})} * (j_{f} / (1- \\langle \\alpha \\rangle)) * (1 - abs(rstar))**(1/n)</span>
 
 <span class="sd">        Will not overwrite vf data if it already exists, but will always store data in </span>
 <span class="sd">        midas_dict[&#39;vf_approx&#39;] even if midas_dict[&#39;vf&#39;] has data</span>
@@ -604,12 +601,15 @@
                 
                 <span class="n">midas_dict</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;vf_approx&#39;</span><span class="p">:</span> <span class="n">vf_approx</span><span class="p">})</span>
 
-        <span class="k">return</span>
+        <span class="k">return</span></div>
+
     
+<div class="viewcode-block" id="Condition.approx_vg">
+<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.approx_vg">[docs]</a>
     <span class="k">def</span> <span class="nf">approx_vg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Method for approximating vg with power-law relation. I don&#39;t think this makes sense</span>
 
-<span class="sd">        vg_approx = (n+1)*(2*n+1) / (2*n*n) * (jg / (self.area_avg(&#39;alpha&#39;))) * (1 - abs(rstar))**(1/n)</span>
+<span class="sd">        .. math:: v_{g, approx} = \\frac{(n+1)(2*n+1)}{ (2*n^{2})} * (j_{g} / \\langle \\alpha \\rangle) * (1 - abs(rstar))**(1/n)</span>
 
 <span class="sd">        Will not overwrite vg data if it already exists, but will always store data in </span>
 <span class="sd">        midas_dict[&#39;vg_approx&#39;] even if midas_dict[&#39;ug1&#39;] has data</span>
@@ -631,8 +631,11 @@
                 
                 <span class="n">midas_dict</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;vg_approx&#39;</span><span class="p">:</span> <span class="n">vg_approx</span><span class="p">})</span>
 
-        <span class="k">return</span>
+        <span class="k">return</span></div>
+
     
+<div class="viewcode-block" id="Condition.approx_vf_Kong">
+<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.approx_vf_Kong">[docs]</a>
     <span class="k">def</span> <span class="nf">approx_vf_Kong</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Method for approximating vf from Kong. TODO </span>
 
@@ -647,14 +650,17 @@
                 <span class="n">vf_approx</span> <span class="o">=</span> <span class="p">(</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">n</span><span class="o">*</span><span class="n">n</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">jf</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">area_avg</span><span class="p">(</span><span class="s1">&#39;alpha&#39;</span><span class="p">)))</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="nb">abs</span><span class="p">(</span><span class="n">rstar</span><span class="p">))</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">n</span><span class="p">)</span>
                 <span class="n">midas_dict</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;vf&#39;</span><span class="p">:</span> <span class="n">vf_approx</span><span class="p">})</span>
 
-        <span class="k">return</span>
+        <span class="k">return</span></div>
+
     
+<div class="viewcode-block" id="Condition.calc_vf_lee">
+<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.calc_vf_lee">[docs]</a>
     <span class="k">def</span> <span class="nf">calc_vf_lee</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">K</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Calculate vf, jf, vr based on Lee et al. (2002) equation</span>
 
 <span class="sd">        Really a model proposed by Bosio and Malnes</span>
 
-<span class="sd">        .. math:: vf = frac{ 1 }{ \\sqrt{1 - \\alpha^{2} / 2} } * sqrt{ frac{ 2 \\Delta p }{K \\rho_{f}} } </span>
+<span class="sd">        .. math:: v_{f} = \\frac{ 1 }{ \\sqrt{1 - \\alpha^{2} / 2} } * \\sqrt{ \\frac{ 2 \\Delta p }{K \\rho_{f}} } </span>
 <span class="sd">        </span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -679,12 +685,15 @@
                     <span class="n">vr_lee</span> <span class="o">=</span> <span class="n">vg</span> <span class="o">-</span> <span class="n">vf_lee</span>
                 <span class="n">midas_dict</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;vr_lee&#39;</span><span class="p">:</span>  <span class="n">vr_lee</span><span class="p">})</span>
 
-        <span class="k">return</span>
+        <span class="k">return</span></div>
+
     
+<div class="viewcode-block" id="Condition.calc_vf_naive">
+<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.calc_vf_naive">[docs]</a>
     <span class="k">def</span> <span class="nf">calc_vf_naive</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Calculate vf, jf, vr based on single-phase equation</span>
 
-<span class="sd">        .. math::  vf = sqrt{ frac{ 2 \\Delta p }{ \\rho_{f}} } </span>
+<span class="sd">        .. math::  v_{f} = \\sqrt{ \\frac{ 2 \\Delta p }{ \\rho_{f}} } </span>
 <span class="sd">        </span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -712,8 +721,11 @@
                     <span class="n">vr_naive</span> <span class="o">=</span> <span class="n">vg</span> <span class="o">-</span> <span class="n">vf_naive</span>
                 <span class="n">midas_dict</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;vr_naive&#39;</span><span class="p">:</span>  <span class="n">vr_naive</span><span class="p">})</span>
 
-        <span class="k">return</span>
+        <span class="k">return</span></div>
+
     
+<div class="viewcode-block" id="Condition.calc_vr">
+<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.calc_vr">[docs]</a>
     <span class="k">def</span> <span class="nf">calc_vr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">warn_approx</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Method for calculating relative velocity. Will approximate vf if it cannot be found.</span>
 
@@ -754,8 +766,11 @@
                     <span class="n">midas_dict</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;vr&#39;</span><span class="p">:</span> <span class="n">vr</span><span class="p">})</span>
                     
 
-        <span class="k">return</span>
+        <span class="k">return</span></div>
 
+
+<div class="viewcode-block" id="Condition.calc_vgj">
+<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.calc_vgj">[docs]</a>
     <span class="k">def</span> <span class="nf">calc_vgj</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">warn_approx</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Method for calculating Vgj, by doing</span>
 
@@ -789,8 +804,11 @@
                 <span class="n">midas_dict</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;j&#39;</span><span class="p">:</span> <span class="n">j_local</span><span class="p">})</span>
                 <span class="n">midas_dict</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;alpha_j&#39;</span><span class="p">:</span> <span class="n">alpha_j</span><span class="p">})</span>
 
-        <span class="k">return</span>
+        <span class="k">return</span></div>
 
+
+<div class="viewcode-block" id="Condition.calc_grad">
+<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.calc_grad">[docs]</a>
     <span class="k">def</span> <span class="nf">calc_grad</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">recalc</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculates gradient of param based on the data in self. </span>
 <span class="sd">        </span>
@@ -913,8 +931,11 @@
                     <span class="bp">self</span><span class="o">.</span><span class="n">phi</span><span class="p">[</span><span class="n">comp_angle</span><span class="p">][</span><span class="mf">0.0</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">grad_param_name</span><span class="o">+</span><span class="s1">&#39;_total&#39;</span><span class="p">:</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">r_dict</span><span class="p">[</span><span class="mf">0.0</span><span class="p">][</span><span class="n">grad_param_name</span><span class="o">+</span><span class="s1">&#39;_r&#39;</span><span class="p">])</span> <span class="p">})</span>
                     
 
-        <span class="k">return</span>
+        <span class="k">return</span></div>
+
     
+<div class="viewcode-block" id="Condition.fit_spline">
+<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.fit_spline">[docs]</a>
     <span class="k">def</span> <span class="nf">fit_spline</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Fits a RectBivariateSpline for the given param. </span>
 
@@ -961,8 +982,11 @@
         <span class="c1">#print(phi_knots, r_knots)</span>
         <span class="n">spline_interpolant</span> <span class="o">=</span> <span class="n">interpolate</span><span class="o">.</span><span class="n">RectBivariateSpline</span><span class="p">(</span><span class="n">phi_unique</span><span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">180</span><span class="p">,</span> <span class="n">r_unique</span><span class="p">,</span> <span class="n">Vals</span><span class="p">,</span> <span class="n">kx</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">spline_interp</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">param</span><span class="p">:</span> <span class="n">spline_interpolant</span><span class="p">})</span>
-        <span class="k">return</span>
+        <span class="k">return</span></div>
+
     
+<div class="viewcode-block" id="Condition.calc_linear_interp">
+<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.calc_linear_interp">[docs]</a>
     <span class="k">def</span> <span class="nf">calc_linear_interp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Makes a LinearNDInterpolator for the given param. </span>
 <span class="sd">        </span>
@@ -996,8 +1020,11 @@
         <span class="n">linear_interpolant</span> <span class="o">=</span> <span class="n">interpolate</span><span class="o">.</span><span class="n">LinearNDInterpolator</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">phis</span><span class="p">,</span> <span class="n">rs</span><span class="p">)),</span> <span class="n">vals</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">linear_interp</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">param</span><span class="p">:</span> <span class="n">linear_interpolant</span><span class="p">})</span>
 
-        <span class="k">return</span>
+        <span class="k">return</span></div>
+
     
+<div class="viewcode-block" id="Condition.calc_linear_xy_interp">
+<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.calc_linear_xy_interp">[docs]</a>
     <span class="k">def</span> <span class="nf">calc_linear_xy_interp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Makes a LinearNDInterpolator for the given param in x y coords</span>
 <span class="sd">        </span>
@@ -1031,8 +1058,11 @@
         <span class="n">linear_interpolant</span> <span class="o">=</span> <span class="n">interpolate</span><span class="o">.</span><span class="n">LinearNDInterpolator</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">ys</span><span class="p">)),</span> <span class="n">vals</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">linear_xy_interp</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">param</span><span class="p">:</span> <span class="n">linear_interpolant</span><span class="p">})</span>
 
-        <span class="k">return</span>
+        <span class="k">return</span></div>
+
     
+<div class="viewcode-block" id="Condition.max">
+<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.max">[docs]</a>
     <span class="k">def</span> <span class="nf">max</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">recalc</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Return maximum value of param in the Condition</span>
 <span class="sd">        </span>
@@ -1050,8 +1080,11 @@
                     <span class="nb">max</span> <span class="o">=</span> <span class="n">midas_dict</span><span class="p">[</span><span class="n">param</span><span class="p">]</span>
                     <span class="n">location</span> <span class="o">=</span> <span class="n">rstar</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">maxs</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">param</span><span class="p">:</span><span class="nb">max</span><span class="p">})</span>
-        <span class="k">return</span> <span class="p">(</span><span class="nb">max</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="nb">max</span><span class="p">)</span></div>
 
+
+<div class="viewcode-block" id="Condition.max_loc">
+<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.max_loc">[docs]</a>
     <span class="k">def</span> <span class="nf">max_loc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span><span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Return location of maximum param in the Condition</span>
 <span class="sd">        </span>
@@ -1065,8 +1098,11 @@
                     <span class="nb">max</span> <span class="o">=</span> <span class="n">midas_dict</span><span class="p">[</span><span class="n">param</span><span class="p">]</span>
                     <span class="n">location</span> <span class="o">=</span> <span class="p">(</span><span class="n">rstar</span><span class="p">,</span> <span class="n">angle</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="p">(</span><span class="n">location</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">location</span><span class="p">)</span></div>
+
     
+<div class="viewcode-block" id="Condition.min">
+<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.min">[docs]</a>
     <span class="k">def</span> <span class="nf">min</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">recalc</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">nonzero</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Return minimum value of param in the Condition</span>
 <span class="sd">        </span>
@@ -1090,8 +1126,11 @@
                     <span class="nb">min</span> <span class="o">=</span> <span class="n">midas_dict</span><span class="p">[</span><span class="n">param</span><span class="p">]</span>
                     <span class="n">location</span> <span class="o">=</span> <span class="n">rstar</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mins</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">param</span><span class="p">:</span><span class="nb">min</span><span class="p">})</span>
-        <span class="k">return</span> <span class="p">(</span><span class="nb">min</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="nb">min</span><span class="p">)</span></div>
 
+
+<div class="viewcode-block" id="Condition.min_loc">
+<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.min_loc">[docs]</a>
     <span class="k">def</span> <span class="nf">min_loc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span><span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Return minimum value of param in the Condition</span>
 <span class="sd">        </span>
@@ -1108,8 +1147,11 @@
                     <span class="nb">min</span> <span class="o">=</span> <span class="n">midas_dict</span><span class="p">[</span><span class="n">param</span><span class="p">]</span>
                     <span class="n">location</span> <span class="o">=</span> <span class="p">(</span><span class="n">rstar</span><span class="p">,</span> <span class="n">angle</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="p">(</span><span class="n">location</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">location</span><span class="p">)</span></div>
+
     
+<div class="viewcode-block" id="Condition.max_line_loc">
+<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.max_line_loc">[docs]</a>
     <span class="k">def</span> <span class="nf">max_line_loc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">angle</span><span class="p">:</span><span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Return r/R location of maximum value of param at a given angle</span>
 <span class="sd">                          </span>
@@ -1120,8 +1162,11 @@
                 <span class="nb">max</span> <span class="o">=</span> <span class="n">midas_dict</span><span class="p">[</span><span class="n">param</span><span class="p">]</span>
                 <span class="n">location</span> <span class="o">=</span> <span class="n">rstar</span>
 
-        <span class="k">return</span> <span class="p">(</span><span class="n">location</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">location</span><span class="p">)</span></div>
+
     
+<div class="viewcode-block" id="Condition.max_line">
+<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.max_line">[docs]</a>
     <span class="k">def</span> <span class="nf">max_line</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">angle</span><span class="p">:</span><span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Return maximum value of param at a given angle</span>
 <span class="sd">                          </span>
@@ -1132,8 +1177,11 @@
                 <span class="nb">max</span> <span class="o">=</span> <span class="n">midas_dict</span><span class="p">[</span><span class="n">param</span><span class="p">]</span>
                 <span class="n">location</span> <span class="o">=</span> <span class="n">rstar</span>
 
-        <span class="k">return</span> <span class="p">(</span><span class="nb">max</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="nb">max</span><span class="p">)</span></div>
+
     
+<div class="viewcode-block" id="Condition.find_hstar_pos">
+<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.find_hstar_pos">[docs]</a>
     <span class="k">def</span> <span class="nf">find_hstar_pos</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;max_dsm&#39;</span><span class="p">,</span> <span class="n">void_criteria</span> <span class="o">=</span> <span class="mf">0.05</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Returns the vertical distance from the top of the pipe to the bubble layer interface</span>
 <span class="sd">        </span>
@@ -1226,8 +1274,11 @@
             <span class="k">return</span> <span class="n">h_star</span>
 
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Invalid method for find_h_pos&#39;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">NaN</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">NaN</span></div>
 
+
+<div class="viewcode-block" id="Condition.avg">
+<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.avg">[docs]</a>
     <span class="k">def</span> <span class="nf">avg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">include_nonzero</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculates a basic average of a parameter, &quot;param&quot;</span>
 <span class="sd">        </span>
@@ -1247,8 +1298,11 @@
                         <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
                         <span class="n">avg_param</span> <span class="o">+=</span> <span class="n">midas_dict</span><span class="p">[</span><span class="n">param</span><span class="p">]</span>
 
-        <span class="k">return</span> <span class="n">avg_param</span> <span class="o">/</span> <span class="n">count</span>
+        <span class="k">return</span> <span class="n">avg_param</span> <span class="o">/</span> <span class="n">count</span></div>
 
+
+<div class="viewcode-block" id="Condition.area_avg">
+<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.area_avg">[docs]</a>
     <span class="k">def</span> <span class="nf">area_avg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">even_opt</span><span class="o">=</span><span class="s1">&#39;first&#39;</span><span class="p">,</span> <span class="n">recalc</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Method for calculating the area-average of a parameter, &quot;param&quot;</span>
 <span class="sd">        </span>
@@ -1323,8 +1377,11 @@
 
         <span class="n">I</span> <span class="o">=</span> <span class="n">integrate</span><span class="o">.</span><span class="n">simpson</span><span class="p">(</span><span class="n">param_r</span><span class="p">,</span> <span class="n">angles</span><span class="p">,</span> <span class="n">even</span><span class="o">=</span><span class="n">even_opt</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="c1"># Integrate wrt theta, divide by normalized area</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">area_avgs</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">param</span><span class="p">:</span> <span class="n">I</span><span class="p">})</span>
-        <span class="k">return</span> <span class="n">I</span>
+        <span class="k">return</span> <span class="n">I</span></div>
 
+
+<div class="viewcode-block" id="Condition.circ_segment_area_avg">
+<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.circ_segment_area_avg">[docs]</a>
     <span class="k">def</span> <span class="nf">circ_segment_area_avg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">hstar</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">ngridr</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span> <span class="n">ngridphi</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span> <span class="n">int_err</span> <span class="o">=</span> <span class="mi">10</span><span class="o">**-</span><span class="mi">4</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Method for calculating the area-average of a parameter, &quot;param&quot; over the circular segment defined by h</span>
 <span class="sd">        </span>
@@ -1385,8 +1442,11 @@
         <span class="k">elif</span> <span class="n">hstar</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">I</span> <span class="o">=</span> <span class="n">integrate</span><span class="o">.</span><span class="n">dblquad</span><span class="p">(</span><span class="n">interp</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">upper_r_bound_neg</span><span class="p">,</span> <span class="n">epsabs</span><span class="o">=</span><span class="n">int_err</span> <span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">integrate</span><span class="o">.</span><span class="n">dblquad</span><span class="p">(</span><span class="n">dumb_func</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">upper_r_bound_neg</span><span class="p">,</span> <span class="n">epsabs</span><span class="o">=</span><span class="n">int_err</span> <span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 
-        <span class="k">return</span> <span class="n">I</span>
+        <span class="k">return</span> <span class="n">I</span></div>
 
+
+<div class="viewcode-block" id="Condition.circ_segment_void_area_avg">
+<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.circ_segment_void_area_avg">[docs]</a>
     <span class="k">def</span> <span class="nf">circ_segment_void_area_avg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">hstar</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">ngridr</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span> <span class="n">ngridphi</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span> <span class="n">int_err</span> <span class="o">=</span> <span class="mi">10</span><span class="o">**-</span><span class="mi">4</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Method for calculating the void-weighted area-average of a parameter over the circular segment defined by h</span>
 <span class="sd">        </span>
@@ -1448,8 +1508,11 @@
         <span class="k">elif</span> <span class="n">hstar</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">I</span> <span class="o">=</span> <span class="n">integrate</span><span class="o">.</span><span class="n">dblquad</span><span class="p">(</span><span class="n">interp</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">upper_r_bound_neg</span><span class="p">,</span> <span class="n">epsabs</span><span class="o">=</span><span class="n">int_err</span> <span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">integrate</span><span class="o">.</span><span class="n">dblquad</span><span class="p">(</span><span class="n">interp2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">upper_r_bound_neg</span><span class="p">,</span> <span class="n">epsabs</span><span class="o">=</span><span class="n">int_err</span> <span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 
-        <span class="k">return</span> <span class="n">I</span>
+        <span class="k">return</span> <span class="n">I</span></div>
 
+
+<div class="viewcode-block" id="Condition.line_avg">
+<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.line_avg">[docs]</a>
     <span class="k">def</span> <span class="nf">line_avg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">phi_angle</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">even_opt</span><span class="o">=</span><span class="s1">&#39;first&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Line average of param over line defined by phi_angle</span>
 <span class="sd">        </span>
@@ -1500,8 +1563,11 @@
 
         <span class="n">I</span> <span class="o">=</span> <span class="n">integrate</span><span class="o">.</span><span class="n">simpson</span><span class="p">(</span><span class="n">var_for_int</span><span class="p">,</span> <span class="n">r_for_int</span><span class="p">,</span> <span class="n">even</span><span class="o">=</span><span class="n">even_opt</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span> <span class="c1"># Integrate wrt theta, divide by normalized length</span>
 
-        <span class="k">return</span> <span class="n">I</span>
+        <span class="k">return</span> <span class="n">I</span></div>
 
+
+<div class="viewcode-block" id="Condition.line_avg_dev">
+<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.line_avg_dev">[docs]</a>
     <span class="k">def</span> <span class="nf">line_avg_dev</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">phi_angle</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">even_opt</span><span class="o">=</span><span class="s1">&#39;first&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Second moment of param over line defined by phi_angle</span>
 <span class="sd">        </span>
@@ -1554,9 +1620,12 @@
 
         <span class="n">I</span> <span class="o">=</span> <span class="n">integrate</span><span class="o">.</span><span class="n">simpson</span><span class="p">(</span><span class="n">var_for_int</span><span class="p">,</span> <span class="n">r_for_int</span><span class="p">,</span> <span class="n">even</span><span class="o">=</span><span class="n">even_opt</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">area_avg</span><span class="p">(</span><span class="n">param</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="c1"># Integrate wrt theta, divide by normalized length</span>
 
-        <span class="k">return</span> <span class="n">I</span>
+        <span class="k">return</span> <span class="n">I</span></div>
 
 
+
+<div class="viewcode-block" id="Condition.void_area_avg">
+<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.void_area_avg">[docs]</a>
     <span class="k">def</span> <span class="nf">void_area_avg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">even_opt</span><span class="o">=</span><span class="s1">&#39;first&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Method for calculating the void-weighted area-average of a parameter</span>
 <span class="sd">        </span>
@@ -1612,8 +1681,11 @@
         <span class="n">angles</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">angles</span><span class="p">)</span>
 
         <span class="n">I</span> <span class="o">=</span> <span class="n">integrate</span><span class="o">.</span><span class="n">simpson</span><span class="p">(</span><span class="n">param_r</span><span class="p">,</span> <span class="n">angles</span><span class="p">,</span> <span class="n">even</span><span class="o">=</span><span class="n">even_opt</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">area_avg</span><span class="p">(</span><span class="s1">&#39;alpha&#39;</span><span class="p">)</span> <span class="c1"># Integrate wrt theta, divide by normalized area</span>
-        <span class="k">return</span> <span class="n">I</span>
+        <span class="k">return</span> <span class="n">I</span></div>
+
     
+<div class="viewcode-block" id="Condition.interp_area_avg">
+<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.interp_area_avg">[docs]</a>
     <span class="k">def</span> <span class="nf">interp_area_avg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">interp_type</span> <span class="o">=</span> <span class="s1">&#39;linear&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Function to area-average param, using the spline interpolation of param</span>
 
@@ -1636,8 +1708,11 @@
                 <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">linear_interp</span><span class="p">[</span><span class="n">param</span><span class="p">](</span><span class="n">phi</span><span class="p">,</span> <span class="n">r</span><span class="p">)</span> <span class="o">*</span> <span class="n">r</span>
         
         <span class="n">I</span> <span class="o">=</span> <span class="n">integrate</span><span class="o">.</span><span class="n">dblquad</span><span class="p">(</span><span class="n">integrand</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>
-        <span class="k">return</span> <span class="n">I</span>
+        <span class="k">return</span> <span class="n">I</span></div>
 
+
+<div class="viewcode-block" id="Condition.spline_void_area_avg">
+<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.spline_void_area_avg">[docs]</a>
     <span class="k">def</span> <span class="nf">spline_void_area_avg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span><span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Function to void-weighted area-average param over a circular segment defined by h, using the spline interpolation of param</span>
 
@@ -1652,8 +1727,11 @@
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">spline_interp</span><span class="p">[</span><span class="s1">&#39;alpha&#39;</span><span class="p">](</span><span class="n">phi</span> <span class="o">*</span> <span class="mi">180</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="n">r</span><span class="p">)</span> <span class="o">*</span> <span class="n">r</span>
         
         <span class="n">I</span> <span class="o">=</span> <span class="n">integrate</span><span class="o">.</span><span class="n">dblquad</span><span class="p">(</span><span class="n">integrand</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">integrate</span><span class="o">.</span><span class="n">dblquad</span><span class="p">(</span><span class="n">integrand_denom</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="k">return</span> <span class="n">I</span>
+        <span class="k">return</span> <span class="n">I</span></div>
+
     
+<div class="viewcode-block" id="Condition.spline_circ_seg_area_avg">
+<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.spline_circ_seg_area_avg">[docs]</a>
     <span class="k">def</span> <span class="nf">spline_circ_seg_area_avg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">hstar</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">int_err</span> <span class="o">=</span> <span class="mi">10</span><span class="o">**-</span><span class="mi">4</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Function to area-average over a circular segment defined by h, using the spline interpolation of param</span>
 
@@ -1681,8 +1759,11 @@
         <span class="k">elif</span> <span class="n">hstar</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">I</span> <span class="o">=</span> <span class="n">integrate</span><span class="o">.</span><span class="n">dblquad</span><span class="p">(</span><span class="n">integrand</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">upper_r_bound_neg</span><span class="p">,</span> <span class="n">epsabs</span><span class="o">=</span><span class="n">int_err</span> <span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">integrate</span><span class="o">.</span><span class="n">dblquad</span><span class="p">(</span><span class="n">integrand_denom</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">upper_r_bound_neg</span><span class="p">,</span> <span class="n">epsabs</span><span class="o">=</span><span class="n">int_err</span> <span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 
-        <span class="k">return</span> <span class="n">I</span>
+        <span class="k">return</span> <span class="n">I</span></div>
 
+
+<div class="viewcode-block" id="Condition.calc_void_cov">
+<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.calc_void_cov">[docs]</a>
     <span class="k">def</span> <span class="nf">calc_void_cov</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculates the void covariance</span>
 
@@ -1722,8 +1803,11 @@
         <span class="n">I</span> <span class="o">=</span> <span class="n">integrate</span><span class="o">.</span><span class="n">simpson</span><span class="p">(</span><span class="n">param_r_int</span><span class="p">,</span> <span class="n">angles_int</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">area_avg</span><span class="p">(</span><span class="s1">&#39;alpha&#39;</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="c1"># Integrate wrt theta, divide by normalized area</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">void_cov</span> <span class="o">=</span> <span class="n">I</span>
-        <span class="k">return</span> <span class="n">I</span>
+        <span class="k">return</span> <span class="n">I</span></div>
 
+
+<div class="viewcode-block" id="Condition.calc_sigma_alpha">
+<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.calc_sigma_alpha">[docs]</a>
     <span class="k">def</span> <span class="nf">calc_sigma_alpha</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculates the second moment of alpha</span>
 
@@ -1766,8 +1850,11 @@
         <span class="k">if</span> <span class="n">debug</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Calculated sigma_alpha: &#39;</span><span class="p">,</span> <span class="n">I</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">sigma_alpha</span> <span class="o">=</span> <span class="n">I</span>
-        <span class="k">return</span> <span class="n">I</span>
+        <span class="k">return</span> <span class="n">I</span></div>
+
     
+<div class="viewcode-block" id="Condition.calc_mu3_alpha">
+<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.calc_mu3_alpha">[docs]</a>
     <span class="k">def</span> <span class="nf">calc_mu3_alpha</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculates the third moment of alpha</span>
 
@@ -1810,8 +1897,11 @@
         <span class="k">if</span> <span class="n">debug</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Calculated mu3_alpha: &#39;</span><span class="p">,</span> <span class="n">I</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">mu3_alpha</span> <span class="o">=</span> <span class="n">I</span>
-        <span class="k">return</span> <span class="n">I</span>
+        <span class="k">return</span> <span class="n">I</span></div>
 
+
+<div class="viewcode-block" id="Condition.top_bottom">
+<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.top_bottom">[docs]</a>
     <span class="k">def</span> <span class="nf">top_bottom</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">even_opt</span><span class="o">=</span><span class="s1">&#39;first&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Honestly, I forgot what this does</span>
 
@@ -1867,8 +1957,11 @@
         <span class="n">angles</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">angles</span><span class="p">)</span>
 
         <span class="n">I</span> <span class="o">=</span> <span class="n">integrate</span><span class="o">.</span><span class="n">simpson</span><span class="p">(</span><span class="n">param_r</span><span class="p">,</span> <span class="n">angles</span><span class="p">,</span> <span class="n">even</span><span class="o">=</span><span class="n">even_opt</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="c1"># Integrate wrt theta, divide by normalized area</span>
-        <span class="k">return</span> <span class="n">I</span>
+        <span class="k">return</span> <span class="n">I</span></div>
 
+
+<div class="viewcode-block" id="Condition.calc_dpdz">
+<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.calc_dpdz">[docs]</a>
     <span class="k">def</span> <span class="nf">calc_dpdz</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;LM&#39;</span><span class="p">,</span> <span class="n">m</span> <span class="o">=</span> <span class="mf">0.316</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="mf">0.25</span><span class="p">,</span> <span class="n">LM_C</span> <span class="o">=</span> <span class="mi">25</span><span class="p">,</span> <span class="n">k_m</span> <span class="o">=</span> <span class="mf">0.10</span><span class="p">,</span> <span class="n">L</span> <span class="o">=</span> <span class="mi">9999</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Calculates the pressure gradient, dp/dz, according to various methods. Can access later with self.dpdz</span>
 
@@ -1920,8 +2013,11 @@
         
         <span class="bp">self</span><span class="o">.</span><span class="n">dpdz</span> <span class="o">=</span> <span class="n">dpdz</span>
 
-        <span class="k">return</span> <span class="n">dpdz</span>
+        <span class="k">return</span> <span class="n">dpdz</span></div>
 
+
+<div class="viewcode-block" id="Condition.calc_vwvg">
+<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.calc_vwvg">[docs]</a>
     <span class="k">def</span> <span class="nf">calc_vwvg</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculates void weighted Vgj</span>
 
@@ -1931,8 +2027,11 @@
 
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;This guy needs work, probably don&#39;t want to use it&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">vwvg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jgloc</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">area_avg</span><span class="p">(</span><span class="s1">&#39;alpha&#39;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">jgloc</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">area_avg</span><span class="p">(</span><span class="s1">&#39;alpha&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">jgloc</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">area_avg</span><span class="p">(</span><span class="s1">&#39;alpha&#39;</span><span class="p">)</span></div>
+
     
+<div class="viewcode-block" id="Condition.calc_W">
+<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.calc_W">[docs]</a>
     <span class="k">def</span> <span class="nf">calc_W</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculates the wake deficit function, W, from the experimental data</span>
 
@@ -1957,8 +2056,11 @@
                         <span class="s1">&#39;W&#39;</span> <span class="p">:</span> <span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;vr&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="n">vfp</span>
                     <span class="p">})</span>
 
-        <span class="k">return</span>
+        <span class="k">return</span></div>
+
     
+<div class="viewcode-block" id="Condition.calc_mu_eff">
+<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.calc_mu_eff">[docs]</a>
     <span class="k">def</span> <span class="nf">calc_mu_eff</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;Ishii&#39;</span><span class="p">,</span> <span class="n">alpha_max</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Method for calculating effective viscosity. </span>
 <span class="sd">        </span>
@@ -1982,8 +2084,11 @@
 
                 <span class="n">midas_dict</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;mu_eff&#39;</span><span class="p">:</span> <span class="n">mu_eff</span><span class="p">})</span>
 
-        <span class="k">return</span>
+        <span class="k">return</span></div>
+
     
+<div class="viewcode-block" id="Condition.calc_cd">
+<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.calc_cd">[docs]</a>
     <span class="k">def</span> <span class="nf">calc_cd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;Ishii-Zuber&#39;</span><span class="p">,</span> <span class="n">vr_cheat</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Method for calculating drag coefficient </span>
 <span class="sd">        </span>
@@ -2055,8 +2160,11 @@
                         <span class="p">{</span><span class="s1">&#39;cd&#39;</span><span class="p">:</span> <span class="n">cd</span><span class="p">}</span>
                     <span class="p">)</span>
 
-        <span class="k">return</span>
+        <span class="k">return</span></div>
 
+
+<div class="viewcode-block" id="Condition.calc_vr_model">
+<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.calc_vr_model">[docs]</a>
     <span class="k">def</span> <span class="nf">calc_vr_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;wake_1&#39;</span><span class="p">,</span> <span class="n">kw</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.15</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">Lw</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span> <span class="n">kf</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span> <span class="n">iterate_cd</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">quiet</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Method for calculating relative velocity based on models</span>
 <span class="sd">        </span>
@@ -2170,9 +2278,12 @@
             <span class="k">if</span> <span class="n">iterations</span> <span class="o">&gt;</span> <span class="n">MAX_ITERATIONS</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Warning, max iterations exceeded in calculating vr_model&quot;</span><span class="p">)</span>
                 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">old_vr</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">area_avg</span><span class="p">(</span><span class="s1">&#39;vr_model&#39;</span><span class="p">,</span><span class="w"> </span><span class="n">recalc</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-                <span class="k">return</span>
+                <span class="k">return</span></div>
+
 
             
+<div class="viewcode-block" id="Condition.calc_vgj_model">
+<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.calc_vgj_model">[docs]</a>
     <span class="k">def</span> <span class="nf">calc_vgj_model</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Method for calculating local Vgj based on models</span>
 <span class="sd">        </span>
@@ -2189,8 +2300,11 @@
 
                 <span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;vgj_model&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;alpha&#39;</span><span class="p">])</span> <span class="o">*</span> <span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;vr_model&#39;</span><span class="p">]</span>
 
-        <span class="k">return</span>
+        <span class="k">return</span></div>
+
     
+<div class="viewcode-block" id="Condition.calc_aa_values_model">
+<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.calc_aa_values_model">[docs]</a>
     <span class="k">def</span> <span class="nf">calc_aa_values_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;km1_naive&#39;</span><span class="p">,</span> <span class="n">kw</span><span class="o">=-</span><span class="mf">0.98</span><span class="p">,</span> <span class="n">kf</span><span class="o">=-</span><span class="mf">0.083</span><span class="p">,</span> <span class="n">Lw</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span> <span class="n">Cavf</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
 
         <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;km1_naive&#39;</span><span class="p">:</span>
@@ -2200,8 +2314,11 @@
             <span class="n">vr</span> <span class="o">=</span> <span class="n">kw</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">area_avg</span><span class="p">(</span><span class="s1">&#39;alpha&#39;</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">jf</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">area_avg</span><span class="p">(</span><span class="s1">&#39;alpha&#39;</span><span class="p">))</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">area_avg</span><span class="p">(</span><span class="s1">&#39;cd&#39;</span><span class="p">)</span><span class="o">**</span><span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span>  <span class="o">+</span> <span class="n">kf</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">jf</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">area_avg</span><span class="p">(</span><span class="s1">&#39;alpha&#39;</span><span class="p">))</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">vwvgj</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">area_avg</span><span class="p">(</span><span class="s1">&#39;alpha&#39;</span><span class="p">))</span><span class="o">*</span><span class="n">vr</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">aa_vr</span> <span class="o">=</span> <span class="n">vr</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">aa_vr</span> <span class="o">=</span> <span class="n">vr</span></div>
+
     
+<div class="viewcode-block" id="Condition.calc_errors">
+<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.calc_errors">[docs]</a>
     <span class="k">def</span> <span class="nf">calc_errors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param1</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">param2</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Calculates the errors, ε, between two parameters (param1 - param2) in midas_dict</span>
 
@@ -2238,8 +2355,11 @@
                     <span class="n">midas_dict</span><span class="p">[</span><span class="n">param_rel_sq_error_name</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
                     <span class="n">midas_dict</span><span class="p">[</span><span class="n">param_abs_rel_error_name</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
 
-        <span class="k">return</span>
+        <span class="k">return</span></div>
 
+
+<div class="viewcode-block" id="Condition.calc_avg_lat_sep">
+<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.calc_avg_lat_sep">[docs]</a>
     <span class="k">def</span> <span class="nf">calc_avg_lat_sep</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Calculates average lateral separation distance between bubbles</span>
 <span class="sd">        </span>
@@ -2267,8 +2387,11 @@
                     <span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;lambda*&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span>
                     <span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;alpha_lambda&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
 
-        <span class="k">return</span>
+        <span class="k">return</span></div>
+
     
+<div class="viewcode-block" id="Condition.plot_profiles">
+<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.plot_profiles">[docs]</a>
     <span class="k">def</span> <span class="nf">plot_profiles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">save_dir</span> <span class="o">=</span> <span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">x_axis</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> 
                       <span class="n">const_to_plot</span> <span class="o">=</span> <span class="p">[</span><span class="mi">90</span><span class="p">,</span> <span class="mf">67.5</span><span class="p">,</span> <span class="mi">45</span><span class="p">,</span> <span class="mf">22.5</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">include_complement</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> 
                       <span class="n">rotate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">fig_size</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">label_str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">legend_loc</span> <span class="o">=</span> <span class="s1">&#39;best&#39;</span><span class="p">,</span> <span class="n">xlabel_loc</span> <span class="o">=</span> <span class="s1">&#39;center&#39;</span><span class="p">,</span>
@@ -2476,8 +2599,11 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">save_dir</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">param</span><span class="si">}</span><span class="s1">_profile_vs_</span><span class="si">{</span><span class="n">x_axis</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">.png&#39;</span><span class="p">))</span>
             <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-        <span class="k">return</span>   
+        <span class="k">return</span>   </div>
 
+
+<div class="viewcode-block" id="Condition.plot_isoline">
+<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.plot_isoline">[docs]</a>
     <span class="k">def</span> <span class="nf">plot_isoline</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">iso_axis</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">iso_val</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">fig_size</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">plot_res</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> 
                      <span class="n">save_dir</span> <span class="o">=</span> <span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">extra_text</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Plot profiles of param over iso_axis at iso_val </span>
@@ -2521,8 +2647,11 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">save_dir</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">param</span><span class="si">}</span><span class="s2">_iso_</span><span class="si">{</span><span class="n">iso_axis</span><span class="si">}</span><span class="s2">=</span><span class="si">{</span><span class="n">iso_val</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">extra_text</span><span class="si">}</span><span class="s2">.png&quot;</span><span class="p">)</span> <span class="p">)</span>
             <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-        <span class="k">return</span>
+        <span class="k">return</span></div>
 
+
+<div class="viewcode-block" id="Condition.plot_contour">
+<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.plot_contour">[docs]</a>
     <span class="k">def</span> <span class="nf">plot_contour</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">save_dir</span> <span class="o">=</span> <span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">set_max</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">set_min</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">fig_size</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span> <span class="n">label_str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">suppress_colorbar</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                      <span class="n">rot_angle</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">ngridr</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span> <span class="n">ngridphi</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span> <span class="n">colormap</span> <span class="o">=</span> <span class="s1">&#39;hot_r&#39;</span><span class="p">,</span> <span class="n">num_levels</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">level_step</span> <span class="o">=</span> <span class="mf">0.25</span><span class="p">,</span> <span class="n">title</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">title_str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">extra_text</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
                      <span class="n">annotate_h</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">cartesian</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">h_star_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;method&#39;</span><span class="p">:</span> <span class="s1">&#39;max_dsm&#39;</span><span class="p">,</span> <span class="s1">&#39;min_void&#39;</span><span class="p">:</span> <span class="s1">&#39;0.05&#39;</span><span class="p">},</span> <span class="n">plot_measured_points</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -2703,8 +2832,11 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">save_dir</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">param</span><span class="si">}</span><span class="s2">_contours_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">extra_text</span><span class="si">}</span><span class="s2">.png&quot;</span><span class="p">)</span> <span class="p">)</span>
             <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-        <span class="k">return</span>
+        <span class="k">return</span></div>
 
+
+<div class="viewcode-block" id="Condition.plot_surface">
+<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.plot_surface">[docs]</a>
     <span class="k">def</span> <span class="nf">plot_surface</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">save_dir</span> <span class="o">=</span> <span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">rotate_gif</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">elev_angle</span> <span class="o">=</span> <span class="mi">145</span><span class="p">,</span> 
                      <span class="n">azim_angle</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">roll_angle</span> <span class="o">=</span> <span class="mi">180</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">ngridr</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span> <span class="n">ngridphi</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span> 
                      <span class="n">plot_surface_kwargs</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">solid_color</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">label_str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">title_str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -2812,8 +2944,11 @@
             <span class="n">rot_animation</span> <span class="o">=</span> <span class="n">animation</span><span class="o">.</span><span class="n">FuncAnimation</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">rotate</span><span class="p">,</span> <span class="n">frames</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">362</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">interval</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
             <span class="n">rot_animation</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">save_dir</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">param</span><span class="si">}</span><span class="s1">_surface_rotation_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">.gif&#39;</span><span class="p">),</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">80</span><span class="p">)</span>
 
-        <span class="k">return</span>
+        <span class="k">return</span></div>
 
+
+<div class="viewcode-block" id="Condition.plot_spline_contour">
+<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.plot_spline_contour">[docs]</a>
     <span class="k">def</span> <span class="nf">plot_spline_contour</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">save_dir</span> <span class="o">=</span> <span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">set_max</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">set_min</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">fig_size</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>
                      <span class="n">rot_angle</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">ngridr</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span> <span class="n">ngridphi</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span> <span class="n">colormap</span> <span class="o">=</span> <span class="s1">&#39;hot_r&#39;</span><span class="p">,</span> <span class="n">num_levels</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span> <span class="n">title</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                      <span class="n">annotate_h</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">cartesian</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">h_star_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;method&#39;</span><span class="p">:</span> <span class="s1">&#39;max_dsm&#39;</span><span class="p">,</span> <span class="s1">&#39;min_void&#39;</span><span class="p">:</span> <span class="s1">&#39;0.05&#39;</span><span class="p">},</span>
@@ -2910,8 +3045,11 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">save_dir</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">param_label</span><span class="si">}</span><span class="s2">_spline_contours_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">.png&quot;</span><span class="p">)</span> <span class="p">)</span>
             <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-        <span class="k">return</span>
+        <span class="k">return</span></div>
 
+
+<div class="viewcode-block" id="Condition.rough_FR_ID">
+<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.rough_FR_ID">[docs]</a>
     <span class="k">def</span> <span class="nf">rough_FR_ID</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Identifies the flow regime for the given condition, by some rough methods</span>
 
@@ -3504,15 +3642,21 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">FR</span> <span class="o">=</span> <span class="mi">2</span>
         
         <span class="c1">#print(f&quot;Warning: Flow regime not accurately identified for {self.name}, defaulting to {self.FR}&quot;)</span>
-        <span class="k">return</span>
+        <span class="k">return</span></div>
 
+
+<div class="viewcode-block" id="Condition.TD_FR_ID">
+<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.TD_FR_ID">[docs]</a>
     <span class="k">def</span> <span class="nf">TD_FR_ID</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="c1">#dpdxL</span>
 
         <span class="k">return</span></div>
+</div>
 
 
 
+<div class="viewcode-block" id="color_cycle">
+<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.color_cycle">[docs]</a>
 <span class="k">def</span> <span class="nf">color_cycle</span><span class="p">():</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Custom generator for colors</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -3530,8 +3674,11 @@
     <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
         <span class="k">yield</span> <span class="n">var_list</span><span class="p">[</span> <span class="n">i</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">var_list</span><span class="p">)]</span>
-        <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span></div>
 
+
+<div class="viewcode-block" id="marker_cycle">
+<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.marker_cycle">[docs]</a>
 <span class="k">def</span> <span class="nf">marker_cycle</span><span class="p">():</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Custom generator for markers</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -3540,14 +3687,18 @@
     <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
         <span class="k">yield</span> <span class="n">var_list</span><span class="p">[</span> <span class="n">i</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">var_list</span><span class="p">)]</span>
-        <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span></div>
 
+
+<div class="viewcode-block" id="print_tab_keys">
+<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.print_tab_keys">[docs]</a>
 <span class="k">def</span> <span class="nf">print_tab_keys</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Convenience function in case you forget a tab key</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="nb">print</span><span class="p">(</span><span class="n">tab_keys</span><span class="p">)</span>
-    <span class="k">return</span>
+    <span class="k">return</span></div>
+
 
 <span class="n">tab_keys</span> <span class="o">=</span> <span class="p">[</span>
     <span class="s1">&#39;roverR&#39;</span><span class="p">,</span>
