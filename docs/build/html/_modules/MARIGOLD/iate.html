@@ -41,21 +41,12 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../generated/MARIGOLD.Condition.html">MARIGOLD.Condition</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../generated/MARIGOLD.Condition.html#MARIGOLD.Condition"><code class="docutils literal notranslate"><span class="pre">Condition</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../generated/MARIGOLD.Condition.html#MARIGOLD.Condition.__init__"><code class="docutils literal notranslate"><span class="pre">__init__()</span></code></a></li>
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../MARIGOLD.html">MARIGOLD package</a></li>
 </ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="../../generated/MARIGOLD.iate.html">MARIGOLD.iate</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../generated/MARIGOLD.iate.html#MARIGOLD.iate"><code class="docutils literal notranslate"><span class="pre">iate()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="../../generated/MARIGOLD.CFD.html">MARIGOLD.CFD</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../generated/MARIGOLD.misc.html">MARIGOLD.misc</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../generated/MARIGOLD.extracts_and_loads.html">MARIGOLD.extracts_and_loads</a></li>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../MARIGOLD.html">MARIGOLD package</a></li>
 </ul>
 
         </div>
@@ -86,12 +77,13 @@
 <span></span><span class="kn">from</span> <span class="nn">.config</span> <span class="kn">import</span> <span class="o">*</span>
 
 <div class="viewcode-block" id="iate">
-<a class="viewcode-back" href="../../generated/MARIGOLD.iate.html#MARIGOLD.iate">[docs]</a>
-<span class="k">def</span> <span class="nf">iate</span><span class="p">(</span><span class="n">cond</span><span class="p">,</span> <span class="n">query</span><span class="p">,</span> <span class="n">z_step</span> <span class="o">=</span> <span class="mf">0.01</span><span class="p">,</span> <span class="n">dpdz_method</span> <span class="o">=</span> <span class="s1">&#39;LM&#39;</span><span class="p">,</span> <span class="n">void_method</span> <span class="o">=</span> <span class="s1">&#39;driftflux&#39;</span><span class="p">,</span> 
-         <span class="n">LM_C</span> <span class="o">=</span> <span class="mi">40</span><span class="p">,</span> <span class="n">k_m</span> <span class="o">=</span> <span class="mf">0.40</span><span class="p">,</span> <span class="n">LoverD_restriction</span> <span class="o">=</span> <span class="mi">9999</span><span class="p">,</span>      <span class="c1"># Pressure drop calculation arguments</span>
-         <span class="n">cheat</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">elbow</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">quarantine</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>       <span class="c1"># Temporary arguments, fix later</span>
+<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.iate.iate">[docs]</a>
+<span class="k">def</span> <span class="nf">iate</span><span class="p">(</span><span class="n">cond</span><span class="p">,</span> <span class="n">query</span><span class="p">,</span> <span class="n">z_step</span> <span class="o">=</span> <span class="mf">0.01</span><span class="p">,</span>
+         <span class="n">dpdz_method</span> <span class="o">=</span> <span class="s1">&#39;LM&#39;</span><span class="p">,</span> <span class="n">void_method</span> <span class="o">=</span> <span class="s1">&#39;driftflux&#39;</span><span class="p">,</span> <span class="n">mueff_method</span> <span class="o">=</span> <span class="s1">&#39;ishii&#39;</span><span class="p">,</span> <span class="n">cd_method</span> <span class="o">=</span> <span class="s1">&#39;doe&#39;</span><span class="p">,</span>  <span class="c1"># Method arguments</span>
+         <span class="n">LM_C</span> <span class="o">=</span> <span class="mi">40</span><span class="p">,</span> <span class="n">k_m</span> <span class="o">=</span> <span class="mf">0.40</span><span class="p">,</span> <span class="n">LoverD_restriction</span> <span class="o">=</span> <span class="mi">9999</span><span class="p">,</span>                                          <span class="c1"># Pressure drop calculation arguments</span>
+         <span class="n">cheat</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">elbow</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">quarantine</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>                                           <span class="c1"># Temporary arguments, fix later</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Calculate the area-averaged interfacial area concentration at query location based on the 1G IATE</span>
-<span class="sd">    </span>
+
 <span class="sd">    Version History:</span>
 <span class="sd">        &gt; v1: Pressure cheating, jgref substitute for jgatm</span>
 <span class="sd">        &gt; v2: MG update, pressure retrieval, jgatm retrieval</span>
@@ -296,31 +288,40 @@
         <span class="c1">########################################################################################################################</span>
         <span class="c1"># Estimate bubble relative velocity &lt;ur&gt; (See Talley, 2012, 4.2.2.6)</span>
         <span class="n">ur</span> <span class="o">=</span> <span class="mf">0.2</span>        <span class="c1"># Set to constant value of 0.23 m/s by Schilling (2007)</span>
-<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        err = 0.1</span>
-<span class="sd">        while abs(err) &gt; 0.000001:</span>
-<span class="sd">            ReD = rho_f * ur * Db[i] * (1 - alpha[i]) / mu_f    # Bubble Reynolds number</span>
-<span class="sd">            CDe = 24 * (1 + 0.1 * ReD**0.75) / ReD              # Drag coefficient</span>
 
-<span class="sd">            # Relative velocity (Ishii and Chawla, 1979), implemented by Worosz accounting for density difference</span>
-<span class="sd">            ure1 = (4 * grav * Db[i] * (rho_f - rho_gz[i]) * (1 - alpha[i]) / 3 / CDe / rho_f)**0.5</span>
-<span class="sd">            err = (ure1 - ur) / ur</span>
+        <span class="k">if</span> <span class="n">cd_method</span> <span class="o">==</span> <span class="s1">&#39;iter&#39;</span><span class="p">:</span>
+            <span class="n">err</span> <span class="o">=</span> <span class="mf">0.1</span>
+            <span class="k">while</span> <span class="nb">abs</span><span class="p">(</span><span class="n">err</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">0.000001</span><span class="p">:</span>
+                <span class="n">ReD</span> <span class="o">=</span> <span class="n">rho_f</span> <span class="o">*</span> <span class="n">ur</span> <span class="o">*</span> <span class="n">Db</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">alpha</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">/</span> <span class="n">mu_f</span>    <span class="c1"># Bubble Reynolds number</span>
+                <span class="n">CDe</span> <span class="o">=</span> <span class="mi">24</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="mf">0.1</span> <span class="o">*</span> <span class="n">ReD</span><span class="o">**</span><span class="mf">0.75</span><span class="p">)</span> <span class="o">/</span> <span class="n">ReD</span>              <span class="c1"># Drag coefficient</span>
 
-<span class="sd">            ur = ure1</span>
-<span class="sd">        ReD = rho_f * ur * Db[i] * (1 - alpha[i]) / mu_f        # Update bubble Reynolds number</span>
-<span class="sd">        CDwe = 24 * (1 + 0.1 * ReD**0.75) / ReD                 # Update drag coefficient</span>
-<span class="sd">        &#39;&#39;&#39;</span>
+                <span class="c1"># Relative velocity (Ishii and Chawla, 1979), implemented by Worosz accounting for density difference</span>
+                <span class="n">ure1</span> <span class="o">=</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">grav</span> <span class="o">*</span> <span class="n">Db</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">rho_f</span> <span class="o">-</span> <span class="n">rho_gz</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">alpha</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">/</span> <span class="mi">3</span> <span class="o">/</span> <span class="n">CDe</span> <span class="o">/</span> <span class="n">rho_f</span><span class="p">)</span><span class="o">**</span><span class="mf">0.5</span>
+                <span class="n">err</span> <span class="o">=</span> <span class="p">(</span><span class="n">ure1</span> <span class="o">-</span> <span class="n">ur</span><span class="p">)</span> <span class="o">/</span> <span class="n">ur</span>
 
-        <span class="c1"># Original DOE_MATLAB_IAC</span>
-        <span class="n">ReD</span> <span class="o">=</span> <span class="n">rho_f</span> <span class="o">*</span> <span class="n">ur</span> <span class="o">*</span> <span class="n">Db</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">alpha</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">/</span> <span class="n">mu_f</span>
-        <span class="n">CDwe</span> <span class="o">=</span> <span class="mi">24</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="mf">0.1</span> <span class="o">*</span> <span class="n">ReD</span><span class="o">**</span><span class="mf">0.75</span><span class="p">)</span> <span class="o">/</span> <span class="n">ReD</span>
-        <span class="n">ur</span> <span class="o">=</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">grav</span> <span class="o">*</span> <span class="n">Db</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">/</span> <span class="mi">3</span> <span class="o">/</span> <span class="n">CDwe</span><span class="p">)</span><span class="o">**</span><span class="mf">0.5</span>                 <span class="c1"># Interestingly, Yadav keeps 9.8 instead of changing grav for angle</span>
+                <span class="n">ur</span> <span class="o">=</span> <span class="n">ure1</span>
+            <span class="n">ReD</span> <span class="o">=</span> <span class="n">rho_f</span> <span class="o">*</span> <span class="n">ur</span> <span class="o">*</span> <span class="n">Db</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">alpha</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">/</span> <span class="n">mu_f</span>        <span class="c1"># Update bubble Reynolds number</span>
+            <span class="n">CDwe</span> <span class="o">=</span> <span class="mi">24</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="mf">0.1</span> <span class="o">*</span> <span class="n">ReD</span><span class="o">**</span><span class="mf">0.75</span><span class="p">)</span> <span class="o">/</span> <span class="n">ReD</span>                 <span class="c1"># Update drag coefficient</span>
+        <span class="k">elif</span> <span class="n">cd_method</span> <span class="o">==</span> <span class="s1">&#39;doe&#39;</span><span class="p">:</span>
+            <span class="c1"># Original DOE_MATLAB_IAC</span>
+            <span class="n">ReD</span> <span class="o">=</span> <span class="n">rho_f</span> <span class="o">*</span> <span class="n">ur</span> <span class="o">*</span> <span class="n">Db</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">alpha</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">/</span> <span class="n">mu_f</span>
+            <span class="n">CDwe</span> <span class="o">=</span> <span class="mi">24</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="mf">0.1</span> <span class="o">*</span> <span class="n">ReD</span><span class="o">**</span><span class="mf">0.75</span><span class="p">)</span> <span class="o">/</span> <span class="n">ReD</span>
+            <span class="n">ur</span> <span class="o">=</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">grav</span> <span class="o">*</span> <span class="n">Db</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">/</span> <span class="mi">3</span> <span class="o">/</span> <span class="n">CDwe</span><span class="p">)</span><span class="o">**</span><span class="mf">0.5</span>                 <span class="c1"># Interestingly, Yadav keeps 9.8 instead of changing grav for angle</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">CDwe</span> <span class="o">=</span> <span class="n">cond</span><span class="o">.</span><span class="n">calc_cd</span><span class="p">(</span><span class="n">cd_method</span><span class="p">)</span>
+            <span class="n">ur</span> <span class="o">=</span> <span class="n">cond</span><span class="o">.</span><span class="n">calc_vr_method</span><span class="p">()</span>
 
         <span class="c1">########################################################################################################################</span>
         <span class="c1"># Estimate Energy Dissipation Rate and Turbulent Velocity (See Talley, 2012, 4.2.2.3)</span>
         <span class="c1">#   &gt; One-group models written using turbulent fluctuation velocity, while models implemented in TRACE are written using</span>
         <span class="c1">#     dissipation rate</span>
-        <span class="n">mu_m</span> <span class="o">=</span> <span class="n">mu_f</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">alpha</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>                            <span class="c1"># Mixture viscosity</span>
+
+        <span class="k">if</span> <span class="n">mueff_method</span> <span class="o">==</span> <span class="s1">&#39;ishii&#39;</span><span class="p">:</span>
+            <span class="n">cond</span><span class="o">.</span><span class="n">calc_mu_eff</span><span class="p">()</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">mu_m</span> <span class="o">=</span> <span class="n">mu_f</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">alpha</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>                        <span class="c1"># Mixture viscosity</span>
+
         <span class="n">rho_m</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">alpha</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">*</span> <span class="n">rho_f</span> <span class="o">+</span> <span class="n">alpha</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">rho_gz</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>   <span class="c1"># Mixture density</span>
 
         <span class="n">vm</span> <span class="o">=</span> <span class="p">(</span><span class="n">rho_f</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">alpha</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">*</span> <span class="n">vfz</span> <span class="o">+</span> <span class="n">rho_gz</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">alpha</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">vgz</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> \
@@ -421,6 +422,7 @@
         <span class="c1"># Estimate Void Fraction for the next step calculation</span>
 
         <span class="k">if</span> <span class="n">void_method</span> <span class="o">==</span> <span class="s1">&#39;driftflux&#39;</span><span class="p">:</span>      <span class="c1"># Drift Flux Model</span>
+            <span class="c1"># Currently seems broken</span>
 
             <span class="n">j</span> <span class="o">=</span> <span class="n">jgloc</span> <span class="o">+</span> <span class="n">jf</span>
             

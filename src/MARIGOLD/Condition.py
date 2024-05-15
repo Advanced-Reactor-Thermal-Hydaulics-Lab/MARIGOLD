@@ -12,6 +12,11 @@ class Condition:
     So phi[angle][r/R]['alpha'] should give you the void fraction at r/R for phi = angle
     This structure is initialized with zeros for the MIDAS output at the pipe center and wall
 
+    Can also get the data at a local point from calling the condition, syntax
+
+    cond(phi, r, 'param'). Phi is in radians, the arguments can be constants or numpy arrays.
+    Also has an option for interpolation, 'interp_method'
+
 """
 
     debugFID = None
@@ -494,7 +499,7 @@ class Condition:
     def approx_vf(self, n=7) -> None:
         """Method for approximating vf with power-law relation. 
 
-        vf_approx = (n+1)*(2*n+1) / (2*n*n) * (jf / (1-self.area_avg('alpha'))) * (1 - abs(rstar))**(1/n)
+        .. math:: v_{f, approx} = \\frac{(n+1)(2*n+1)}{ (2*n^{2})} * (j_{f} / (1- \\langle \\alpha \\rangle)) * (1 - abs(rstar))**(1/n)
 
         Will not overwrite vf data if it already exists, but will always store data in 
         midas_dict['vf_approx'] even if midas_dict['vf'] has data
@@ -519,7 +524,7 @@ class Condition:
     def approx_vg(self, n=7) -> None:
         """Method for approximating vg with power-law relation. I don't think this makes sense
 
-        vg_approx = (n+1)*(2*n+1) / (2*n*n) * (jg / (self.area_avg('alpha'))) * (1 - abs(rstar))**(1/n)
+        .. math:: v_{g, approx} = \\frac{(n+1)(2*n+1)}{ (2*n^{2})} * (j_{g} / \\langle \\alpha \\rangle) * (1 - abs(rstar))**(1/n)
 
         Will not overwrite vg data if it already exists, but will always store data in 
         midas_dict['vg_approx'] even if midas_dict['ug1'] has data
@@ -564,7 +569,7 @@ class Condition:
 
         Really a model proposed by Bosio and Malnes
 
-        .. math:: vf = frac{ 1 }{ \\sqrt{1 - \\alpha^{2} / 2} } * sqrt{ frac{ 2 \\Delta p }{K \\rho_{f}} } 
+        .. math:: v_{f} = \\frac{ 1 }{ \\sqrt{1 - \\alpha^{2} / 2} } * \\sqrt{ \\frac{ 2 \\Delta p }{K \\rho_{f}} } 
         
         """
 
@@ -594,7 +599,7 @@ class Condition:
     def calc_vf_naive(self):
         """ Calculate vf, jf, vr based on single-phase equation
 
-        .. math::  vf = sqrt{ frac{ 2 \\Delta p }{ \\rho_{f}} } 
+        .. math::  v_{f} = \\sqrt{ \\frac{ 2 \\Delta p }{ \\rho_{f}} } 
         
         """
 

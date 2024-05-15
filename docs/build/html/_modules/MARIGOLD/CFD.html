@@ -1,0 +1,1375 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MARIGOLD.CFD &mdash; MARIGOLD 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=d45e8c67"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            MARIGOLD
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../MARIGOLD.html">MARIGOLD package</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../MARIGOLD.html">MARIGOLD package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">MARIGOLD</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">MARIGOLD.CFD</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for MARIGOLD.CFD</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">.Condition</span> <span class="kn">import</span> <span class="n">Condition</span>
+<span class="kn">from</span> <span class="nn">.config</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">import</span> <span class="nn">subprocess</span>
+
+<span class="sd">&quot;&quot;&quot; Functions for interfacing with CFX</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="write_CFX_BC">
+<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.CFD.write_CFX_BC">[docs]</a>
+<span class="k">def</span> <span class="nf">write_CFX_BC</span><span class="p">(</span><span class="n">cond</span><span class="p">:</span><span class="n">Condition</span><span class="p">,</span> <span class="n">save_dir</span> <span class="o">=</span> <span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="n">z_loc</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">only_90</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Write a csv file for CFX based on cond</span>
+
+<span class="sd">    z_loc can be set by the user, or set to &quot;LoverD&quot; to use the cond L/D information</span>
+
+<span class="sd">    vf information will be taken from condition, or approximated by approx_vf()</span>
+
+<span class="sd">    only_90 option for writing data only down the 90 degree line</span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">only_90</span><span class="p">:</span>
+        <span class="n">csv_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">cond</span><span class="o">.</span><span class="n">run_ID</span><span class="si">}</span><span class="s2">_jf</span><span class="si">{</span><span class="n">cond</span><span class="o">.</span><span class="n">jf</span><span class="si">:</span><span class="s2">0.1f</span><span class="si">}</span><span class="s2">_jg</span><span class="si">{</span><span class="n">cond</span><span class="o">.</span><span class="n">jgref</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">cond</span><span class="o">.</span><span class="n">theta</span><span class="si">}</span><span class="s2">_90deg.csv&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">csv_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">cond</span><span class="o">.</span><span class="n">run_ID</span><span class="si">}</span><span class="s2">_jf</span><span class="si">{</span><span class="n">cond</span><span class="o">.</span><span class="n">jf</span><span class="si">:</span><span class="s2">0.1f</span><span class="si">}</span><span class="s2">_jg</span><span class="si">{</span><span class="n">cond</span><span class="o">.</span><span class="n">jgref</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">cond</span><span class="o">.</span><span class="n">theta</span><span class="si">}</span><span class="s2">.csv&quot;</span>
+
+    <span class="n">path_to_csv</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">save_dir</span><span class="p">,</span> <span class="n">csv_name</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">z_loc</span> <span class="o">==</span> <span class="s1">&#39;LoverD&#39;</span><span class="p">:</span>
+        <span class="n">z_loc</span> <span class="o">=</span> <span class="n">cond</span><span class="o">.</span><span class="n">LoverD</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path_to_csv</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;[Name],,,,,,,,,</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">cond</span><span class="o">.</span><span class="n">run_ID</span><span class="si">}</span><span class="s2">data,,,,,,,,,</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;[Spatial Fields],,,,,,,,,</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;radius,z,phi,,,,,,,</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;[Data],,,,,,,,,</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;radius [mm],z [m],phi [],Velocity u [m s^-1],Velocity v [m s^-1],Velocity w [m s^-1],Volume Fraction [],Velocity u f [m s^-1],Velocity v f [m s^-1],Velocity w f [m s^-1],</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">angle</span><span class="p">,</span> <span class="n">r_dict</span> <span class="ow">in</span> <span class="n">cond</span><span class="o">.</span><span class="n">phi</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">for</span> <span class="n">rstar</span><span class="p">,</span> <span class="n">midas_output</span> <span class="ow">in</span> <span class="n">r_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="k">if</span> <span class="n">only_90</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">angle</span> <span class="o">==</span> <span class="mi">90</span> <span class="ow">or</span> <span class="n">angle</span> <span class="o">==</span> <span class="mi">270</span><span class="p">:</span>
+                            <span class="k">pass</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="k">continue</span>
+                    <span class="n">r</span> <span class="o">=</span> <span class="n">rstar</span> <span class="o">*</span> <span class="mf">12.7</span> <span class="c1"># r/R * R [mm]</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">vf</span> <span class="o">=</span> <span class="n">midas_output</span><span class="p">[</span><span class="s1">&#39;vf&#39;</span><span class="p">]</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">cond</span><span class="o">.</span><span class="n">approx_vf</span><span class="p">()</span>
+                        <span class="n">vf</span> <span class="o">=</span> <span class="n">midas_output</span><span class="p">[</span><span class="s1">&#39;vf&#39;</span><span class="p">]</span>
+
+                    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">r</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="n">z_loc</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="n">angle</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">180</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="mi">0</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="n">midas_output</span><span class="p">[</span><span class="s1">&#39;ug1&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="mi">0</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="n">midas_output</span><span class="p">[</span><span class="s1">&#39;alpha&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="mi">0</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="n">vf</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="mi">0</span><span class="si">}</span><span class="s2">,</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="read_CFX_export">
+<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.CFD.read_CFX_export">[docs]</a>
+<span class="k">def</span> <span class="nf">read_CFX_export</span><span class="p">(</span><span class="n">csv_name</span><span class="p">,</span> <span class="n">jf</span><span class="p">,</span> <span class="n">jgref</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">database</span><span class="p">,</span> <span class="n">jgloc</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Condition</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Read CFX csv export into a MARIGOLD Condition object</span>
+
+<span class="sd">    Must supply jf, jgref, theta, port, database, jgloc, etc. for Condition</span>
+
+<span class="sd">    Returns Condition object</span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">jgloc</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">jgloc</span> <span class="o">=</span> <span class="n">jgref</span>
+    <span class="n">cond</span> <span class="o">=</span> <span class="n">Condition</span><span class="p">(</span><span class="n">jgref</span><span class="p">,</span> <span class="n">jgloc</span><span class="p">,</span> <span class="n">jf</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">database</span><span class="p">)</span>
+    <span class="n">cond</span><span class="o">.</span><span class="n">run_ID</span> <span class="o">=</span> <span class="s1">&#39;CFD&#39;</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">csv_name</span><span class="p">)</span> <span class="k">as</span> <span class="n">fi</span><span class="p">:</span>
+        <span class="n">fi</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>             <span class="c1"># </span>
+        <span class="n">fi</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>             <span class="c1"># [Name]</span>
+        <span class="n">fi</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>             <span class="c1"># port3</span>
+        <span class="n">fi</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>             <span class="c1"># </span>
+        <span class="n">fi</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>             <span class="c1"># [data]</span>
+        <span class="n">variables</span> <span class="o">=</span> <span class="n">fi</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span> <span class="c1"># variables</span>
+
+        <span class="n">variables</span> <span class="o">=</span> <span class="n">variables</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)</span>
+
+        <span class="n">vg_idx</span> <span class="o">=</span> <span class="p">[</span><span class="n">idx</span> <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">variables</span><span class="p">)</span> <span class="k">if</span> <span class="s1">&#39;gas.Velocity&#39;</span> <span class="ow">in</span> <span class="n">s</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">vf_idx</span> <span class="o">=</span> <span class="p">[</span><span class="n">idx</span> <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">variables</span><span class="p">)</span> <span class="k">if</span> <span class="s1">&#39;liquid.Velocity&#39;</span> <span class="ow">in</span> <span class="n">s</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">alpha_idx</span> <span class="o">=</span> <span class="p">[</span><span class="n">idx</span> <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">variables</span><span class="p">)</span> <span class="k">if</span> <span class="s1">&#39;gas.Volume&#39;</span> <span class="ow">in</span> <span class="n">s</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">x_idx</span> <span class="o">=</span> <span class="p">[</span><span class="n">idx</span> <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">variables</span><span class="p">)</span> <span class="k">if</span> <span class="s1">&#39;X [ m ]&#39;</span> <span class="ow">in</span> <span class="n">s</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">y_idx</span> <span class="o">=</span> <span class="p">[</span><span class="n">idx</span> <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">variables</span><span class="p">)</span> <span class="k">if</span> <span class="s1">&#39;Y [ m ]&#39;</span> <span class="ow">in</span> <span class="n">s</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">fi</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">IOError</span><span class="p">:</span>
+                <span class="k">break</span>
+            
+            <span class="k">if</span> <span class="n">data</span> <span class="o">==</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">]:</span>
+                <span class="k">break</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">x_idx</span><span class="p">])</span>
+                <span class="n">y</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">y_idx</span><span class="p">])</span>
+                <span class="n">vg</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">vg_idx</span><span class="p">])</span>
+                <span class="n">vf</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">vf_idx</span><span class="p">])</span>
+                <span class="n">alpha</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">alpha_idx</span><span class="p">])</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">variables</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Problem data:&quot;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">x_idx</span><span class="p">,</span> <span class="n">y_idx</span><span class="p">,</span> <span class="n">vg_idx</span><span class="p">,</span> <span class="n">vf_idx</span><span class="p">,</span> <span class="n">alpha_idx</span><span class="p">)</span>
+
+            <span class="n">data_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;ug1&#39;</span><span class="p">:</span> <span class="n">vg</span><span class="p">,</span> <span class="s1">&#39;vf&#39;</span><span class="p">:</span> <span class="n">vf</span><span class="p">,</span> <span class="s1">&#39;alpha&#39;</span><span class="p">:</span> <span class="n">alpha</span><span class="p">}</span>
+            
+            <span class="n">roverR</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">x</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">y</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="mf">0.0127</span>
+            <span class="n">phi_angle</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> <span class="o">*</span> <span class="mi">180</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">cond</span><span class="o">.</span><span class="n">phi</span><span class="p">[</span><span class="n">phi_angle</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">roverR</span><span class="p">:</span><span class="n">data_dict</span><span class="p">})</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">cond</span><span class="o">.</span><span class="n">phi</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">phi_angle</span><span class="p">:{}})</span>
+                <span class="n">cond</span><span class="o">.</span><span class="n">phi</span><span class="p">[</span><span class="n">phi_angle</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">roverR</span><span class="p">:</span><span class="n">data_dict</span><span class="p">})</span>
+
+    <span class="k">return</span> <span class="n">cond</span></div>
+
+
+
+<div class="viewcode-block" id="make_ICEM_pipe_mesh">
+<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.CFD.make_ICEM_pipe_mesh">[docs]</a>
+<span class="k">def</span> <span class="nf">make_ICEM_pipe_mesh</span><span class="p">(</span><span class="n">r_divs</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">theta_divs</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">z_divs</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">o_point</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">L</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> 
+                        <span class="n">case_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">turb_model</span> <span class="o">=</span> <span class="s1">&#39;ke&#39;</span><span class="p">,</span> <span class="n">Ref</span> <span class="o">=</span> <span class="mi">20000</span><span class="p">,</span> <span class="n">growth_ratio</span> <span class="o">=</span> <span class="mf">1.2</span><span class="p">,</span> 
+                        <span class="n">fluent_translator_path</span> <span class="o">=</span> <span class="s2">&quot;/apps/cent7/ansys22/v221/icemcfd/linux64_amd/icemcfd/output-interfaces/fluent6&quot;</span><span class="p">,</span>
+                        <span class="n">cleanup</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Function for making an O-grid pipe mesh using ANSYS ICEM</span>
+
+<span class="sd">    Adjusts first layer based on selected turbulence model, Ref</span>
+
+<span class="sd">    o_point is the point where the mesh changes from the circular segments near the wall to the central square</span>
+
+<span class="sd">    Writes a mesh replay file, runs ICEM using command check_call(&#39;module load ansys &amp;&amp; icemcfd -x ./mesh_replay.rpl &gt; auto_cfx_run.log&#39;, shell=True)</span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Assuming water</span>
+    <span class="n">rho</span> <span class="o">=</span> <span class="mi">998</span>
+    <span class="n">mu</span> <span class="o">=</span> <span class="mf">0.001</span>
+
+    <span class="n">Uinf</span> <span class="o">=</span> <span class="n">Ref</span> <span class="o">*</span> <span class="n">mu</span> <span class="o">/</span> <span class="p">(</span><span class="n">rho</span> <span class="o">*</span> <span class="n">L</span><span class="p">)</span>
+
+    <span class="n">Cf</span> <span class="o">=</span> <span class="mf">0.026</span> <span class="o">/</span> <span class="n">Ref</span><span class="o">**</span><span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="mi">7</span><span class="p">)</span>
+    <span class="n">tau_wall</span> <span class="o">=</span> <span class="n">Cf</span> <span class="o">*</span> <span class="n">rho</span> <span class="o">*</span> <span class="n">Uinf</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="mi">2</span>
+    <span class="n">Ufric</span> <span class="o">=</span> <span class="p">(</span><span class="n">tau_wall</span> <span class="o">/</span> <span class="n">rho</span><span class="p">)</span><span class="o">**</span><span class="mf">0.5</span>
+
+    <span class="k">if</span> <span class="n">turb_model</span> <span class="o">==</span> <span class="s1">&#39;ke&#39;</span><span class="p">:</span> 
+        <span class="n">yplus</span> <span class="o">=</span> <span class="mi">30</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">yplus</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="n">first_layer</span> <span class="o">=</span> <span class="n">yplus</span><span class="o">*</span><span class="n">mu</span> <span class="o">/</span> <span class="p">(</span><span class="n">Ufric</span> <span class="o">*</span> <span class="n">rho</span><span class="p">)</span>
+    
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;mesh_replay.rpl&quot;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fi</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="se">\</span>
+<span class="se">\</span>
+<span class="s1">ic_set_global geo_cad 0 toptol_userset</span><span class="se">\n\</span>
+<span class="s1">ic_set_global geo_cad 0.0 toler</span><span class="se">\n\</span>
+<span class="s1">ic_undo_group_begin </span><span class="se">\n\</span>
+<span class="s1">ic_geo_new_family GEOM</span><span class="se">\n\</span>
+<span class="s1">ic_boco_set_part_color GEOM</span><span class="se">\n\</span>
+<span class="s1">ic_empty_tetin </span><span class="se">\n\</span>
+<span class="s1">ic_point </span><span class="se">{{}}</span><span class="s1"> GEOM pnt.00 0,0,0</span><span class="se">\n\</span>
+<span class="s1">ic_undo_group_end </span><span class="se">\n\</span>
+<span class="s1">ic_undo_group_begin </span><span class="se">\n\</span>
+<span class="s1">ic_point </span><span class="se">{{}}</span><span class="s1"> GEOM pnt.01 0,0,2.54</span><span class="se">\n\</span>
+<span class="s1">ic_undo_group_end </span><span class="se">\n\</span>
+<span class="s1">ic_set_global geo_cad 0 toptol_userset</span><span class="se">\n\</span>
+<span class="s1">ic_set_global geo_cad 0.001 toler</span><span class="se">\n\</span>
+<span class="s1">ic_set_global geo_cad 0.001 toler</span><span class="se">\n\</span>
+<span class="s1">ic_set_global geo_cad 0.001 toler</span><span class="se">\n\</span>
+<span class="s1">ic_undo_group_begin </span><span class="se">\n\</span>
+<span class="s1">ic_surface cyl GEOM srf.00 </span><span class="se">{{</span><span class="s1">pnt.00 pnt.01 0.0127 0.0127 1 1</span><span class="se">}}\n\</span>
+<span class="s1">ic_set_global geo_cad 0.001 toler</span><span class="se">\n\</span>
+<span class="s1">ic_set_dormant_pickable point 0 </span><span class="se">{{}}\n\</span>
+<span class="s1">ic_set_dormant_pickable curve 0 </span><span class="se">{{}}\n\</span>
+<span class="s1">ic_undo_group_end </span><span class="se">\n\</span>
+<span class="s1">ic_undo_group_begin </span><span class="se">\n\</span>
+<span class="s1">ic_geo_new_family SOLID</span><span class="se">\n\</span>
+<span class="s1">ic_boco_set_part_color SOLID</span><span class="se">\n\</span>
+<span class="s1">ic_hex_initialize_blocking </span><span class="se">{{}}</span><span class="s1"> SOLID 0 101</span><span class="se">\n\</span>
+<span class="s1">ic_hex_unblank_blocks </span><span class="se">\n\</span>
+<span class="s1">ic_hex_multi_grid_level 0</span><span class="se">\n\</span>
+<span class="s1">ic_hex_projection_limit 0</span><span class="se">\n\</span>
+<span class="s1">ic_hex_default_bunching_law default 2.0</span><span class="se">\n\</span>
+<span class="s1">ic_hex_floating_grid off</span><span class="se">\n\</span>
+<span class="s1">ic_hex_transfinite_degree 1</span><span class="se">\n\</span>
+<span class="s1">ic_hex_unstruct_face_type one_tri</span><span class="se">\n\</span>
+<span class="s1">ic_hex_set_unstruct_face_method uniform_quad</span><span class="se">\n\</span>
+<span class="s1">ic_hex_set_n_tetra_smoothing_steps 20</span><span class="se">\n\</span>
+<span class="s1">ic_hex_error_messages off_minor</span><span class="se">\n\</span>
+<span class="s1">ic_hex_set_piercing 0</span><span class="se">\n\</span>
+<span class="s1">ic_undo_group_end </span><span class="se">\n\</span>
+<span class="s1">ic_hex_find_comp_curve srf.00.C1</span><span class="se">\n\</span>
+<span class="s1">ic_undo_group_begin </span><span class="se">\n\</span>
+<span class="s1">ic_hex_undo_major_start set_edge_projection</span><span class="se">\n\</span>
+<span class="s1">ic_hex_set_edge_projection 26 42 0 1 srf.00.C1</span><span class="se">\n\</span>
+<span class="s1">ic_hex_set_edge_projection 38 42 0 1 srf.00.C1</span><span class="se">\n\</span>
+<span class="s1">ic_hex_set_edge_projection 22 38 0 1 srf.00.C1</span><span class="se">\n\</span>
+<span class="s1">ic_hex_set_edge_projection 22 26 0 1 srf.00.C1</span><span class="se">\n\</span>
+<span class="s1">ic_hex_undo_major_end set_edge_projection</span><span class="se">\n\</span>
+<span class="s1">ic_undo_group_end </span><span class="se">\n\</span>
+<span class="s1">ic_hex_find_comp_curve srf.00.C0</span><span class="se">\n\</span>
+<span class="s1">ic_undo_group_begin </span><span class="se">\n\</span>
+<span class="s1">ic_hex_undo_major_start set_edge_projection</span><span class="se">\n\</span>
+<span class="s1">ic_hex_set_edge_projection 25 41 0 1 srf.00.C0</span><span class="se">\n\</span>
+<span class="s1">ic_hex_set_edge_projection 37 41 0 1 srf.00.C0</span><span class="se">\n\</span>
+<span class="s1">ic_hex_set_edge_projection 21 37 0 1 srf.00.C0</span><span class="se">\n\</span>
+<span class="s1">ic_hex_set_edge_projection 21 25 0 1 srf.00.C0</span><span class="se">\n\</span>
+<span class="s1">ic_hex_undo_major_end set_edge_projection</span><span class="se">\n\</span>
+<span class="s1">ic_undo_group_end </span><span class="se">\n\</span>
+<span class="s1">ic_undo_group_begin </span><span class="se">\n\</span>
+<span class="s1">ic_hex_project_to_surface GEOM SOLID</span><span class="se">\n\</span>
+<span class="s1">ic_undo_group_end </span><span class="se">\n\</span>
+<span class="s1">ic_hex_mark_blocks unmark</span><span class="se">\n\</span>
+<span class="s1">ic_undo_group_begin </span><span class="se">\n\</span>
+<span class="s1">ic_hex_mark_blocks superblock 13</span><span class="se">\n\</span>
+<span class="s1">ic_undo_group_end </span><span class="se">\n\</span>
+<span class="s1">ic_undo_group_begin </span><span class="se">\n\</span>
+<span class="s1">ic_hex_mark_blocks face_neighbors corners </span><span class="se">{{</span><span class="s1"> 22 38 26 42 </span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1"> 21 37 25 41 </span><span class="se">}}\n\</span>
+<span class="s1">ic_undo_group_end </span><span class="se">\n\</span>
+<span class="s1">ic_undo_group_begin </span><span class="se">\n\</span>
+<span class="s1">ic_hex_ogrid 1 m GEOM SOLID -version 50</span><span class="se">\n\</span>
+<span class="s1">ic_hex_mark_blocks unmark</span><span class="se">\n\</span>
+<span class="s1">ic_undo_group_end </span><span class="se">\n\</span>
+<span class="s1">ic_hex_mark_blocks unmark</span><span class="se">\n\</span>
+<span class="se">\</span>
+<span class="s1">ic_hex_set_node_location x </span><span class="si">{</span><span class="n">o_point</span><span class="si">}</span><span class="s1"> y </span><span class="si">{</span><span class="n">o_point</span><span class="si">}</span><span class="s1"> z 0 -csys global node_numbers </span><span class="se">{{</span><span class="s1">  77  </span><span class="se">}}\n\</span>
+<span class="s1">ic_hex_set_node_location x </span><span class="si">{</span><span class="o">-</span><span class="n">o_point</span><span class="si">}</span><span class="s1"> y </span><span class="si">{</span><span class="n">o_point</span><span class="si">}</span><span class="s1"> z 0 -csys global node_numbers </span><span class="se">{{</span><span class="s1">  69  </span><span class="se">}}\n\</span>
+<span class="s1">ic_hex_set_node_location x </span><span class="si">{</span><span class="o">-</span><span class="n">o_point</span><span class="si">}</span><span class="s1"> y </span><span class="si">{</span><span class="o">-</span><span class="n">o_point</span><span class="si">}</span><span class="s1"> z 0 -csys global node_numbers </span><span class="se">{{</span><span class="s1">  65  </span><span class="se">}}\n\</span>
+<span class="s1">ic_hex_set_node_location x </span><span class="si">{</span><span class="n">o_point</span><span class="si">}</span><span class="s1"> y </span><span class="si">{</span><span class="o">-</span><span class="n">o_point</span><span class="si">}</span><span class="s1"> z 0 -csys global node_numbers </span><span class="se">{{</span><span class="s1">  73  </span><span class="se">}}\n\</span>
+<span class="se">\</span>
+<span class="s1">ic_hex_set_node_location x </span><span class="si">{</span><span class="n">o_point</span><span class="si">}</span><span class="s1"> y </span><span class="si">{</span><span class="n">o_point</span><span class="si">}</span><span class="s1"> z 2.54 -csys global node_numbers </span><span class="se">{{</span><span class="s1">  78  </span><span class="se">}}\n\</span>
+<span class="s1">ic_hex_set_node_location x </span><span class="si">{</span><span class="o">-</span><span class="n">o_point</span><span class="si">}</span><span class="s1"> y </span><span class="si">{</span><span class="n">o_point</span><span class="si">}</span><span class="s1"> z 2.54 -csys global node_numbers </span><span class="se">{{</span><span class="s1">  70  </span><span class="se">}}\n\</span>
+<span class="s1">ic_hex_set_node_location x </span><span class="si">{</span><span class="o">-</span><span class="n">o_point</span><span class="si">}</span><span class="s1"> y </span><span class="si">{</span><span class="o">-</span><span class="n">o_point</span><span class="si">}</span><span class="s1"> z 2.54 -csys global node_numbers </span><span class="se">{{</span><span class="s1">  66  </span><span class="se">}}\n\</span>
+<span class="s1">ic_hex_set_node_location x </span><span class="si">{</span><span class="n">o_point</span><span class="si">}</span><span class="s1"> y </span><span class="si">{</span><span class="o">-</span><span class="n">o_point</span><span class="si">}</span><span class="s1"> z 2.54 -csys global node_numbers </span><span class="se">{{</span><span class="s1">  74  </span><span class="se">}}\n\</span>
+<span class="se">\</span>
+<span class="s1">ic_undo_group_begin </span><span class="se">\n\</span>
+<span class="s1">ic_hex_set_mesh 26 42 n </span><span class="si">{</span><span class="n">theta_divs</span><span class="si">}</span><span class="s1"> h1 10000000000.0 h2 10000000000.0 r1 2 r2 2 lmax 1e+10 default unlocked</span><span class="se">\n\</span>
+<span class="s1">ic_undo_group_end </span><span class="se">\n\</span>
+<span class="s1">ic_undo_group_begin </span><span class="se">\n\</span>
+<span class="s1">ic_hex_set_mesh 26 42 n </span><span class="si">{</span><span class="n">theta_divs</span><span class="si">}</span><span class="s1"> h1rel 501326007289.0 h2rel 501326007289.0 r1 2 r2 2 lmax 1e+10 default copy_to_parallel unlocked</span><span class="se">\n\</span>
+<span class="s1">ic_undo_group_begin </span><span class="se">\n\</span>
+<span class="s1">ic_undo_group_end </span><span class="se">\n\</span>
+<span class="s1">ic_undo_group_end </span><span class="se">\n\</span>
+<span class="s1">ic_undo_group_begin </span><span class="se">\n\</span>
+<span class="s1">ic_hex_set_mesh 38 42 n </span><span class="si">{</span><span class="n">theta_divs</span><span class="si">}</span><span class="s1"> h1rel 501326007289.0 h2rel 501326007289.0 r1 2 r2 2 lmax 1e+10 default copy_to_parallel unlocked</span><span class="se">\n\</span>
+<span class="s1">ic_undo_group_end </span><span class="se">\n\</span>
+<span class="s1">ic_undo_group_begin </span><span class="se">\n\</span>
+<span class="s1">ic_hex_set_mesh 38 42 n </span><span class="si">{</span><span class="n">theta_divs</span><span class="si">}</span><span class="s1"> h1rel 501326007289.0 h2rel 501326007289.0 r1 2 r2 2 lmax 1e+10 default copy_to_parallel unlocked</span><span class="se">\n\</span>
+<span class="s1">ic_undo_group_begin </span><span class="se">\n\</span>
+<span class="s1">ic_undo_group_end </span><span class="se">\n\</span>
+<span class="s1">ic_undo_group_end </span><span class="se">\n\</span>
+<span class="s1">ic_undo_group_begin </span><span class="se">\n\</span>
+<span class="s1">ic_hex_set_mesh 26 70 n </span><span class="si">{</span><span class="n">r_divs</span><span class="si">}</span><span class="s1"> h1rel 0.0 h2rel 0.0 r1 2 r2 2 lmax 0 default copy_to_parallel unlocked</span><span class="se">\n\</span>
+<span class="s1">ic_undo_group_end </span><span class="se">\n\</span>
+<span class="s1">ic_undo_group_begin </span><span class="se">\n\</span>
+<span class="s1">ic_hex_set_mesh 26 70 n </span><span class="si">{</span><span class="n">r_divs</span><span class="si">}</span><span class="s1"> h1rel </span><span class="si">{</span><span class="n">first_layer</span><span class="si">}</span><span class="s1"> h2rel 1.31233595801 r1 </span><span class="si">{</span><span class="n">growth_ratio</span><span class="si">}</span><span class="s1"> r2 2 lmax 0 default copy_to_parallel unlocked</span><span class="se">\n\</span>
+<span class="s1">ic_undo_group_begin </span><span class="se">\n\</span>
+<span class="s1">ic_undo_group_end </span><span class="se">\n\</span>
+<span class="s1">ic_undo_group_end </span><span class="se">\n\</span>
+<span class="s1">ic_undo_group_begin </span><span class="se">\n\</span>
+<span class="s1">ic_hex_set_mesh 25 26 n </span><span class="si">{</span><span class="n">z_divs</span><span class="si">}</span><span class="s1"> h1rel 3937007874.02 h2rel 3937007874.02 r1 2 r2 2 lmax 1e+10 default copy_to_parallel unlocked</span><span class="se">\n\</span>
+<span class="s1">ic_undo_group_end </span><span class="se">\n\</span>
+<span class="s1">ic_undo_group_begin </span><span class="se">\n\</span>
+<span class="s1">ic_hex_set_mesh 25 26 n </span><span class="si">{</span><span class="n">z_divs</span><span class="si">}</span><span class="s1"> h1rel 3937007874.02 h2rel 3937007874.02 r1 2 r2 2 lmax 1e+10 default copy_to_parallel unlocked</span><span class="se">\n\</span>
+<span class="s1">ic_undo_group_begin </span><span class="se">\n\</span>
+<span class="s1">ic_undo_group_end </span><span class="se">\n\</span>
+<span class="s1">ic_undo_group_end </span><span class="se">\n\</span>
+<span class="s1">ic_hex_create_mesh GEOM SOLID proj 2 dim_to_mesh 3</span><span class="se">\n\</span>
+<span class="s1">ic_hex_write_file ./hex.uns GEOM SOLID proj 2 dim_to_mesh 3 no_boco</span><span class="se">\n\</span>
+<span class="s1">ic_uns_load ./hex.uns 3 0 </span><span class="se">{{}}</span><span class="s1"> 1</span><span class="se">\n\</span>
+<span class="s1">ic_uns_update_family_type visible </span><span class="se">{{</span><span class="s1">GEOM ORFN SOLID</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">!LINE_2 QUAD_4 !HEXA_8</span><span class="se">}}</span><span class="s1"> update 0</span><span class="se">\n\</span>
+<span class="s1">ic_boco_solver </span><span class="se">\n\</span>
+<span class="s1">ic_boco_clear_icons </span><span class="se">\n\</span>
+<span class="s1">ic_uns_update_family_type visible </span><span class="se">{{</span><span class="s1">ORFN SOLID</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">!LINE_2 QUAD_4 !HEXA_8</span><span class="se">}}</span><span class="s1"> update 0</span><span class="se">\n\</span>
+<span class="s1">ic_uns_update_family_type visible </span><span class="se">{{</span><span class="s1">GEOM ORFN SOLID</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">!LINE_2 QUAD_4 !HEXA_8</span><span class="se">}}</span><span class="s1"> update 0</span><span class="se">\n\</span>
+<span class="s1">ic_uns_create_selection_subset 0</span><span class="se">\n\</span>
+<span class="s1">ic_uns_create_selection_edgelist 1</span><span class="se">\n\</span>
+<span class="s1">ic_uns_subset_configure uns_sel_0 -draw_nodes 1</span><span class="se">\n\</span>
+<span class="s1">ic_uns_update_family_type visible </span><span class="se">{{</span><span class="s1">GEOM ORFN SOLID</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">!LINE_2 !QUAD_4 !HEXA_8</span><span class="se">}}</span><span class="s1"> update 0</span><span class="se">\n\</span>
+<span class="s1">ic_uns_subset_configure uns_sel_0 -width 0</span><span class="se">\n\</span>
+<span class="s1">ic_uns_subset_configure uns_sel_0 -draw_nodes 0</span><span class="se">\n\</span>
+<span class="s1">ic_uns_uniqify uns_sel_0</span><span class="se">\n\</span>
+<span class="s1">ic_uns_subset_visible uns_sel_0 0</span><span class="se">\n\</span>
+<span class="s1">ic_uns_create_selection_edgelist 0</span><span class="se">\n\</span>
+<span class="s1">ic_uns_subset_delete uns_sel_0</span><span class="se">\n\</span>
+<span class="s1">ic_undo_group_begin </span><span class="se">\n\</span>
+<span class="s1">ic_undo_group_end </span><span class="se">\n\</span>
+<span class="s1">ic_undo_group_begin </span><span class="se">\n\</span>
+<span class="s1">ic_geo_set_part surface srf.00.S2 OUTLET 1</span><span class="se">\n\</span>
+<span class="s1">ic_uns_update_family_type visible </span><span class="se">{{</span><span class="s1">GEOM OUTLET ORFN SOLID</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">!LINE_2 !QUAD_4 !HEXA_8</span><span class="se">}}</span><span class="s1"> update 0</span><span class="se">\n\</span>
+<span class="s1">ic_delete_empty_parts </span><span class="se">\n\</span>
+<span class="s1">ic_undo_group_end </span><span class="se">\n\</span>
+<span class="s1">ic_undo_group_begin </span><span class="se">\n\</span>
+<span class="s1">ic_geo_set_part surface srf.00.S1 INLET 1</span><span class="se">\n\</span>
+<span class="s1">ic_uns_update_family_type visible </span><span class="se">{{</span><span class="s1">INLET GEOM OUTLET ORFN SOLID</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">!LINE_2 !QUAD_4 !HEXA_8</span><span class="se">}}</span><span class="s1"> update 0</span><span class="se">\n\</span>
+<span class="s1">ic_delete_empty_parts </span><span class="se">\n\</span>
+<span class="s1">ic_undo_group_end </span><span class="se">\n\</span>
+<span class="s1">ic_uns_update_family_type visible </span><span class="se">{{</span><span class="s1">GEOM OUTLET ORFN SOLID</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">!LINE_2 !QUAD_4 !HEXA_8</span><span class="se">}}</span><span class="s1"> update 0</span><span class="se">\n\</span>
+<span class="s1">ic_uns_update_family_type visible </span><span class="se">{{</span><span class="s1">INLET GEOM OUTLET ORFN SOLID</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">!LINE_2 !QUAD_4 !HEXA_8</span><span class="se">}}</span><span class="s1"> update 0</span><span class="se">\n\</span>
+<span class="s1">ic_uns_update_family_type visible </span><span class="se">{{</span><span class="s1">INLET OUTLET ORFN SOLID</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">!LINE_2 !QUAD_4 !HEXA_8</span><span class="se">}}</span><span class="s1"> update 0</span><span class="se">\n\</span>
+<span class="s1">ic_uns_update_family_type visible </span><span class="se">{{</span><span class="s1">INLET GEOM OUTLET ORFN SOLID</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">!LINE_2 !QUAD_4 !HEXA_8</span><span class="se">}}</span><span class="s1"> update 0</span><span class="se">\n\</span>
+<span class="s1">ic_geo_rename_family GEOM WALLS 0</span><span class="se">\n\</span>
+<span class="s1">ic_geo_rename_family GEOM WALLS 1</span><span class="se">\n\</span>
+<span class="s1">ic_hex_write_file ./hex.uns WALLS SOLID OUTLET INLET proj 2 dim_to_mesh 3 no_boco</span><span class="se">\n\</span>
+<span class="s1">ic_unload_mesh </span><span class="se">\n\</span>
+<span class="s1">ic_delete_empty_parts </span><span class="se">\n\</span>
+<span class="s1">ic_uns_load ./hex.uns 3 0 </span><span class="se">{{}}</span><span class="s1"> 1</span><span class="se">\n\</span>
+<span class="s1">ic_uns_update_family_type visible </span><span class="se">{{</span><span class="s1">INLET OUTLET ORFN WALLS SOLID</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">!LINE_2 QUAD_4 !HEXA_8</span><span class="se">}}</span><span class="s1"> update 0</span><span class="se">\n\</span>
+<span class="s1">ic_boco_solver </span><span class="se">\n\</span>
+<span class="s1">ic_boco_clear_icons </span><span class="se">\n\</span>
+<span class="s1">ic_boco_solver </span><span class="se">\n\</span>
+<span class="s1">ic_boco_solver </span><span class="se">{{</span><span class="s1">Ansys Fluent</span><span class="se">}}\n\</span>
+<span class="s1">ic_solution_set_solver </span><span class="se">{{</span><span class="s1">Ansys Fluent</span><span class="se">}}</span><span class="s1"> 1</span><span class="se">\n\</span>
+<span class="s1">ic_boco_save ./ansys.fbc</span><span class="se">\n\</span>
+<span class="s1">ic_boco_save_atr ./ansys.atr</span><span class="se">\n\</span>
+<span class="s1">ic_delete_empty_parts </span><span class="se">\n\</span>
+<span class="s1">ic_delete_empty_parts </span><span class="se">\n\</span>
+<span class="s1">ic_save_tetin project1.tin 0 0 </span><span class="se">{{}}</span><span class="s1"> </span><span class="se">{{}}</span><span class="s1"> 0 0 1</span><span class="se">\n\</span>
+<span class="s1">ic_uns_check_duplicate_numbers </span><span class="se">\n\</span>
+<span class="s1">ic_save_unstruct project1.uns 1 </span><span class="se">{{}}</span><span class="s1"> </span><span class="se">{{}}</span><span class="s1"> </span><span class="se">{{}}\n\</span>
+<span class="s1">ic_uns_set_modified 1</span><span class="se">\n\</span>
+<span class="s1">ic_hex_save_blocking project1.blk</span><span class="se">\n\</span>
+<span class="s1">ic_boco_solver </span><span class="se">\n\</span>
+<span class="s1">ic_boco_solver </span><span class="se">{{</span><span class="s1">Ansys Fluent</span><span class="se">}}\n\</span>
+<span class="s1">ic_solution_set_solver </span><span class="se">{{</span><span class="s1">Ansys Fluent</span><span class="se">}}</span><span class="s1"> 1</span><span class="se">\n\</span>
+<span class="s1">ic_boco_save project1.fbc</span><span class="se">\n\</span>
+<span class="s1">ic_boco_save_atr project1.atr</span><span class="se">\n\</span>
+<span class="s1">ic_save_project_file ./project1.prj </span><span class="se">{{</span><span class="s1">array\ set\ file_name\ \</span><span class="se">{{</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    catia_dir .</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    parts_dir .</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    domain_loaded 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    cart_file_loaded 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    cart_file </span><span class="se">{{}}}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    domain_saved project1.uns</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    archive </span><span class="se">{{}}}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    med_replay </span><span class="se">{{}}}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    topology_dir .</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    ugparts_dir .</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    icons </span><span class="se">{{{{</span><span class="s1">$env(ICEM_ACN)/lib/ai_env/icons</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">$env(ICEM_ACN)/lib/va/EZCAD/icons</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">$env(ICEM_ACN)/lib/icons</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">$env(ICEM_ACN)/lib/va/CABIN/icons</span><span class="se">}}}}}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    tetin project1.tin</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    family_boco project1.fbc</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    iges_dir .</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    solver_params_loaded 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    attributes_loaded 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    project_lock </span><span class="se">{{}}}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    attributes project1.atr</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    domain project1.uns</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    domains_dir .</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    settings_loaded 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    settings project1.prj</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    blocking project1.blk</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    hexa_replay </span><span class="se">{{}}}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    transfer_dir .</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    mesh_dir .</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    family_topo </span><span class="se">{{}}}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    gemsparts_dir .</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    family_boco_loaded 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    tetin_loaded 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    project_dir .</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    topo_mulcad_out </span><span class="se">{{}}}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    solver_params </span><span class="se">{{}}}}</span><span class="s1"> \</span><span class="se">}}</span><span class="s1"> array\ set\ options\ \</span><span class="se">{{</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    expert 1</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    remote_path </span><span class="se">{{}}}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    tree_disp_quad 2</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    tree_disp_pyra 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    evaluate_diagnostic 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    histo_show_default 1</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    select_toggle_corners 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    remove_all 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    keep_existing_file_names 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    record_journal 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    edit_wait 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    face_mode 1</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    select_mode all</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    med_save_emergency_tetin 1</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    user_name adix</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    diag_which all</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    uns_warn_if_display 500000</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    bubble_delay 1000</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    external_num 1</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    tree_disp_tri 2</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    apply_all 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    default_solver </span><span class="se">{{</span><span class="s1">Ansys Fluent</span><span class="se">}}}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    temporary_directory </span><span class="se">{{}}}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    flood_select_angle 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    home_after_load 1</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    project_active 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    histo_color_by_quality_default 1</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    undo_logging 1</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    tree_disp_hexa 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    histo_solid_default 1</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    host_name brown-a016.rcac.purdue.edu</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    xhidden_full 1</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    replay_internal_editor 1</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    editor </span><span class="se">{{}}}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    mouse_color orange</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    clear_undo 1</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    remote_acn </span><span class="se">{{}}}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    remote_sh csh</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    tree_disp_penta 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    n_processors 1</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    remote_host </span><span class="se">{{}}}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    save_to_new 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    quality_info Quality</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    tree_disp_node 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    med_save_emergency_mesh 1</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    redtext_color red</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    tree_disp_line 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    select_edge_mode 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    use_dlremote 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    max_mesh_map_size 1024</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    show_tris 1</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    remote_user </span><span class="se">{{}}}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    enable_idle 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    auto_save_views 1</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    max_cad_map_size 512</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    display_origin 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    uns_warn_user_if_display 1000000</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    detail_info 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    win_java_help 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    show_factor 1</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    boundary_mode all</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    clean_up_tmp_files 1</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    auto_fix_uncovered_faces 1</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    med_save_emergency_blocking 1</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    max_binary_tetin 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    tree_disp_tetra 0</span><span class="se">}}</span><span class="s1"> \</span><span class="se">}}</span><span class="s1"> array\ set\ disp_options\ \</span><span class="se">{{</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    uns_dualmesh 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    uns_warn_if_display 500000</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    uns_normals_colored 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    uns_icons 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    uns_locked_elements 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    uns_shrink_npos 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    uns_node_type None</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    uns_icons_normals_vol 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    uns_bcfield 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    backup Solid/wire</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    uns_nodes 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    uns_only_edges 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    uns_surf_bounds 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    uns_wide_lines 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    uns_vol_bounds 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    uns_displ_orient Triad</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    uns_orientation 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    uns_directions 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    uns_thickness 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    uns_shell_diagnostic 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    uns_normals 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    uns_couplings 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    uns_periodicity 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    uns_single_surfaces 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    uns_midside_nodes 1</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    uns_shrink 100</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    uns_multiple_surfaces 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    uns_no_inner 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    uns_enums 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    uns_disp Wire</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    uns_bcfield_name </span><span class="se">{{}}}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    uns_color_by_quality 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    uns_changes 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    uns_cut_delay_count 1000</span><span class="se">}}</span><span class="s1"> \</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">set icon_size1 24</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">set icon_size2 35</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">set thickness_defined 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">set solver_type 1</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">set solver_setup -1</span><span class="se">}}</span><span class="s1"> array\ set\ prism_values\ \</span><span class="se">{{</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    n_triangle_smoothing_steps 5</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    min_smoothing_steps 6</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    first_layer_smoothing_steps 1</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    new_volume </span><span class="se">{{}}}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    height </span><span class="se">{{}}}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    prism_height_limit </span><span class="se">{{}}}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    interpolate_heights 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    n_tetra_smoothing_steps 10</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    do_checks </span><span class="se">{{}}}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    delete_standalone 1</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    ortho_weight 0.50</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    max_aspect_ratio </span><span class="se">{{}}}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    ratio_max </span><span class="se">{{}}}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    incremental_write 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    total_height </span><span class="se">{{}}}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    use_prism_v10 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    intermediate_write 1</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    delete_base_triangles </span><span class="se">{{}}}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    ratio_multiplier </span><span class="se">{{}}}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    verbosity_level 1</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    refine_prism_boundary 1</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    max_size_ratio </span><span class="se">{{}}}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    triangle_quality </span><span class="se">{{}}}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    max_prism_angle 180</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    tetra_smooth_limit 0.3</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    max_jump_factor 5</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    use_existing_quad_layers 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    layers 3</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    fillet 0.10</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    into_orphan 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    init_dir_from_prev </span><span class="se">{{}}}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    blayer_2d 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    do_not_allow_sticking </span><span class="se">{{}}}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    top_family </span><span class="se">{{}}}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    law exponential</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    min_smoothing_val 0.1</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    auto_reduction 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    stop_columns 1</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    stair_step 1</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    smoothing_steps 12</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    side_family </span><span class="se">{{}}}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    min_prism_quality 0.01</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    ratio 1.2</span><span class="se">}}</span><span class="s1"> \</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">set aie_current_flavor </span><span class="se">{{}}}}</span><span class="s1"> array\ set\ vid_options\ \</span><span class="se">{{</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    auxiliary 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    show_name 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    inherit 1</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    default_part GEOM</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    new_srf_topo 1</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    DelPerFlag 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    show_item_name 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    composite_tolerance 1.0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    replace 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    same_pnt_tol 1e-4</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    tdv_axes 1</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    vid_mode 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    DelBlkPerFlag 0</span><span class="se">}}</span><span class="s1"> \</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">set savedTreeVisibility </span><span class="se">{{</span><span class="s1">geomNode 1 geom_subsetNode 0 geomPointNode 0 geomCurveNode 0 geomSurfNode 2 meshNode 1 mesh_subsetNode 0 meshLineNode 0 meshShellNode 2 meshQuadNode 2 meshVolumeNode 0 meshHexaNode 0 blockingNode 1 block_subsetNode 2 block_vertNode 0 block_edgeNode 0 block_faceNode 0 block_blockNode 0 block_meshNode 0 topoNode 2 topo-root 2 partNode 2 part-INLET 2 part-OUTLET 2 part-SOLID 2 part-VORFN 0 part-WALLS 2</span><span class="se">}}}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">set last_view </span><span class="se">{{</span><span class="s1">rot </span><span class="se">{{</span><span class="s1">3.19905930365e-05 0.999933204826 0.00429823005183 0.0107289367044</span><span class="se">}}</span><span class="s1"> scale </span><span class="se">{{</span><span class="s1">12258.8222189 12258.8222189 12258.8222189</span><span class="se">}}</span><span class="s1"> center </span><span class="se">{{</span><span class="s1">0 0 1.2700001001400001</span><span class="se">}}</span><span class="s1"> pos </span><span class="se">{{</span><span class="s1">-93.0 19.0 0</span><span class="se">}}}}}}</span><span class="s1"> array\ set\ cut_info\ \</span><span class="se">{{</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    active 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    whole 1</span><span class="se">}}</span><span class="s1"> \</span><span class="se">}}</span><span class="s1"> array\ set\ hex_option\ \</span><span class="se">{{</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    default_bunching_ratio 2.0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    floating_grid 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    project_to_topo 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    n_tetra_smoothing_steps 20</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    sketching_mode 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    trfDeg 1</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    wr_hexa7 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    hexa_projection_mode 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    smooth_ogrid 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    find_worst 1-3</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    hexa_verbose_mode 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    old_eparams 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    uns_face_mesh_method uniform_quad</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    multigrid_level 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    uns_face_mesh one_tri</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    check_blck 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    proj_limit 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    check_inv 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    project_bspline 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    hexa_update_mode 1</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    default_bunching_law BiGeometric</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    worse_criterion Quality</span><span class="se">}}</span><span class="s1"> \</span><span class="se">}}</span><span class="s1"> array\ set\ saved_views\ \</span><span class="se">{{</span><span class="s1"> </span><span class="se">{{</span><span class="s1">    views </span><span class="se">{{}}}}</span><span class="s1"> \</span><span class="se">}}}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">ICEM CFD</span><span class="se">}}\n\</span>
+<span class="s1">ic_exec </span><span class="si">{</span><span class="n">fluent_translator_path</span><span class="si">}</span><span class="s1"> -dom ./hex.uns -b project1.fbc ./</span><span class="si">{</span><span class="n">case_name</span><span class="si">}</span><span class="s1">.msh</span><span class="se">\n\</span>
+<span class="s1">ic_uns_num_couplings </span><span class="se">\n\</span>
+<span class="s1">ic_undo_group_begin </span><span class="se">\n\</span>
+<span class="s1">ic_uns_create_diagnostic_edgelist 1 </span><span class="se">\n\</span>
+<span class="s1">ic_uns_diagnostic subset all diag_type uncovered fix_fam FIX_UNCOVERED diag_verb </span><span class="se">{{</span><span class="s1">Uncovered faces</span><span class="se">}}</span><span class="s1"> fams </span><span class="se">{{}}</span><span class="s1"> busy_off 1 quiet 1 </span><span class="se">\n\</span>
+<span class="s1">ic_uns_create_diagnostic_edgelist 0 </span><span class="se">\n\</span>
+<span class="s1">ic_undo_group_end </span><span class="se">\n\</span>
+<span class="s1">ic_uns_min_metric Quality </span><span class="se">{{}}</span><span class="s1"> </span><span class="se">{{}}</span><span class="s1"> </span><span class="se">\n\</span>
+<span class="s1">ic_exit</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">fi</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">subprocess</span><span class="o">.</span><span class="n">check_call</span><span class="p">(</span><span class="s2">&quot;ml ansys&quot;</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">CalledProcessError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Continuing...&quot;</span><span class="p">)</span>
+    <span class="n">subprocess</span><span class="o">.</span><span class="n">check_call</span><span class="p">(</span><span class="s1">&#39;icemcfd -x ./mesh_replay.rpl &gt; auto_cfx_run.log&#39;</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">cleanup</span><span class="p">:</span>
+        <span class="n">subprocess</span><span class="o">.</span><span class="n">check_call</span><span class="p">(</span><span class="s1">&#39;rm mesh_replay.rpl&#39;</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">subprocess</span><span class="o">.</span><span class="n">check_call</span><span class="p">(</span><span class="s1">&#39;rm project1.*&#39;</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">subprocess</span><span class="o">.</span><span class="n">check_call</span><span class="p">(</span><span class="s1">&#39;rm ansys.*&#39;</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">subprocess</span><span class="o">.</span><span class="n">check_call</span><span class="p">(</span><span class="s1">&#39;rm hex.uns&#39;</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">return</span></div>
+
+
+
+<div class="viewcode-block" id="calculate_CL_Ryan">
+<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.CFD.calculate_CL_Ryan">[docs]</a>
+<span class="k">def</span> <span class="nf">calculate_CL_Ryan</span><span class="p">(</span><span class="n">jf</span><span class="p">,</span> <span class="n">jg</span><span class="p">,</span> <span class="n">theta</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">Db</span> <span class="o">=</span> <span class="mf">0.0018</span><span class="p">,</span> <span class="n">testing</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Calculates the lift coefficient based on Ryan et al. (2023) method (i.e. DFM at various angles)</span>
+
+<span class="sd">    Also applies Sharma correction</span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">j</span> <span class="o">=</span> <span class="n">jg</span> <span class="o">+</span> <span class="n">jf</span>
+
+    <span class="k">if</span> <span class="n">theta</span> <span class="o">==</span> <span class="mi">90</span><span class="p">:</span>
+        <span class="n">C0</span> <span class="o">=</span> <span class="mf">1.05</span>
+        <span class="n">Vgj</span> <span class="o">=</span> <span class="mf">0.112</span>
+    <span class="k">elif</span> <span class="n">theta</span> <span class="o">==</span> <span class="mi">80</span><span class="p">:</span>
+        <span class="n">C0</span> <span class="o">=</span> <span class="mf">1.042</span>
+        <span class="n">Vgj</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.134</span>
+    <span class="k">elif</span> <span class="n">theta</span> <span class="o">==</span> <span class="mi">60</span><span class="p">:</span>
+        <span class="n">C0</span> <span class="o">=</span> <span class="mf">1.008</span>
+        <span class="n">Vgj</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.19</span>
+    <span class="k">elif</span> <span class="n">theta</span> <span class="o">==</span> <span class="mi">30</span><span class="p">:</span>
+        <span class="n">C0</span> <span class="o">=</span> <span class="mf">0.988</span>
+        <span class="n">Vgj</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.159</span>
+    <span class="k">elif</span> <span class="n">theta</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">C0</span> <span class="o">=</span> <span class="mf">0.986</span>
+        <span class="n">Vgj</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.248</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Did not recognize </span><span class="si">%f</span><span class="s1">, defaulting to vertical&#39;</span> <span class="o">%</span> <span class="n">theta</span><span class="p">)</span>
+        <span class="n">C0</span> <span class="o">=</span> <span class="mf">1.05</span>
+        <span class="n">Vgj</span> <span class="o">=</span> <span class="mf">0.112</span>
+    
+    <span class="n">alpha90</span> <span class="o">=</span> <span class="n">jg</span> <span class="o">/</span> <span class="p">(</span><span class="mf">1.05</span><span class="o">*</span><span class="n">j</span> <span class="o">+</span> <span class="mf">0.112</span><span class="p">)</span>
+    <span class="n">S90</span> <span class="o">=</span> <span class="p">(</span><span class="n">jg</span> <span class="o">/</span> <span class="n">alpha90</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">jf</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">alpha90</span><span class="p">))</span>
+
+    <span class="n">alpha</span> <span class="o">=</span> <span class="n">jg</span> <span class="o">/</span> <span class="p">(</span><span class="n">C0</span><span class="o">*</span><span class="n">j</span> <span class="o">+</span> <span class="n">Vgj</span><span class="p">)</span>
+    
+    <span class="n">S</span> <span class="o">=</span> <span class="p">(</span><span class="n">jg</span> <span class="o">/</span> <span class="n">alpha</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">jf</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">alpha</span><span class="p">)</span> <span class="p">)</span>
+
+    <span class="n">I</span> <span class="o">=</span> <span class="p">(</span><span class="n">S</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">S90</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="c1">#print(I, theta, alpha, alpha90)</span>
+
+    <span class="k">if</span> <span class="n">testing</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">I</span>
+
+    <span class="c1">### Tomiyama lift coefficient ###</span>
+    <span class="n">vr</span> <span class="o">=</span> <span class="n">jf</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">alpha</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">S</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">g</span> <span class="o">=</span> <span class="mf">9.81</span>
+    <span class="c1"># Hardcoded air/water properties</span>
+    <span class="n">rhof</span> <span class="o">=</span> <span class="mi">998</span>
+    <span class="n">rhog</span> <span class="o">=</span> <span class="mf">1.225</span>
+    <span class="n">sigma</span> <span class="o">=</span> <span class="mf">0.072</span>
+    <span class="n">muf</span> <span class="o">=</span> <span class="mf">0.001</span>
+
+    <span class="n">Eo</span> <span class="o">=</span> <span class="n">g</span> <span class="o">*</span> <span class="p">(</span><span class="n">rhof</span> <span class="o">-</span> <span class="n">rhog</span><span class="p">)</span> <span class="o">*</span> <span class="n">Db</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="n">sigma</span>
+    <span class="n">Reb</span> <span class="o">=</span> <span class="n">rhof</span> <span class="o">*</span> <span class="n">Db</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">vr</span><span class="p">)</span> <span class="o">/</span> <span class="n">muf</span>
+
+    <span class="n">f</span> <span class="o">=</span> <span class="mf">0.00105</span><span class="o">*</span><span class="n">Eo</span><span class="o">**</span><span class="mi">3</span><span class="o">-</span><span class="mf">0.0159</span><span class="o">*</span><span class="n">Eo</span><span class="o">**</span><span class="mi">2</span><span class="o">-</span><span class="mf">0.0204</span><span class="o">*</span><span class="n">Eo</span><span class="o">+</span><span class="mf">0.474</span>
+    <span class="n">CL_T</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="mf">0.288</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">tanh</span><span class="p">(</span><span class="mf">0.1221</span> <span class="o">*</span> <span class="n">Reb</span><span class="p">),</span> <span class="n">f</span><span class="p">)</span>
+
+    <span class="c1">### Sharma correction ###</span>
+    <span class="n">Ref</span> <span class="o">=</span> <span class="n">rhof</span> <span class="o">*</span> <span class="n">jf</span> <span class="o">*</span> <span class="mf">0.0254</span> <span class="o">/</span> <span class="n">muf</span> <span class="c1"># Hardcoded diameter!!!</span>
+    <span class="n">f_sharma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span> <span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">Ref</span><span class="p">,</span> <span class="mf">5e4</span><span class="p">)</span> <span class="o">-</span> <span class="mf">5e4</span><span class="p">)</span> <span class="o">/</span> <span class="o">-</span><span class="mf">1.22e5</span> <span class="p">)</span>
+
+    <span class="n">CL</span> <span class="o">=</span> <span class="n">CL_T</span> <span class="o">*</span> <span class="n">I</span> <span class="o">*</span> <span class="n">f_sharma</span>
+    <span class="k">return</span> <span class="n">CL</span></div>
+
+
+<div class="viewcode-block" id="write_CCL">
+<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.CFD.write_CCL">[docs]</a>
+<span class="k">def</span> <span class="nf">write_CCL</span><span class="p">(</span><span class="n">mom_source</span> <span class="o">=</span> <span class="s1">&#39;normal_drag_mom_source&#39;</span><span class="p">,</span> <span class="n">ccl_name</span> <span class="o">=</span> <span class="s1">&#39;auto_setup.ccl&#39;</span><span class="p">,</span>
+                          <span class="n">inDataFile</span><span class="o">=</span> <span class="s1">&#39;/home/adix/CFD/exp_BCs/in_H_0.csv&#39;</span><span class="p">,</span> 
+                          <span class="n">outDataFile</span> <span class="o">=</span> <span class="s1">&#39;/home/adix/CFD/exp_BCs/out_H_0.csv&#39;</span><span class="p">,</span> 
+                          <span class="n">Db</span><span class="o">=</span><span class="mf">0.0018</span><span class="p">,</span> <span class="n">CL</span> <span class="o">=</span> <span class="mf">0.25</span><span class="p">,</span> <span class="n">CTD</span> <span class="o">=</span> <span class="mf">0.25</span><span class="p">,</span> <span class="n">theta</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">mdot</span> <span class="o">=</span> <span class="mf">2.02277</span><span class="p">,</span>
+                          <span class="n">Kf</span> <span class="o">=</span> <span class="mf">0.083</span><span class="p">,</span> <span class="n">Kw</span> <span class="o">=</span> <span class="mf">0.98</span><span class="p">,</span> <span class="n">CD</span> <span class="o">=</span> <span class="mf">0.44</span><span class="p">,</span> <span class="n">jf</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span> <span class="n">jg</span> <span class="o">=</span> <span class="mf">0.11</span><span class="p">,</span>
+                          <span class="n">num_iter</span> <span class="o">=</span> <span class="mi">10000</span><span class="p">,</span> <span class="n">resid_target</span> <span class="o">=</span> <span class="mf">1e-6</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Function to write the CCL file that CFX reads</span>
+
+<span class="sd">    Can use different momentum source terms, current options are</span>
+<span class="sd">    - &quot;drag_model&quot;, drag force calculated with </span>
+<span class="sd">    - &quot;IS&quot;, </span>
+<span class="sd">    - &quot;normal_drag_mom_source&quot;, regular drag formulation</span>
+
+<span class="sd">    Other important simulation parameters</span>
+<span class="sd">    - Db, bubble diameter</span>
+<span class="sd">    - mdot, mass flow rate for BC</span>
+<span class="sd">    - CL, lift coefficient. Can set to a constant, &#39;tomiyama&#39;, or &#39;ryan_DFM&#39;. For the latter cases, also need jf and jg. They both also use Sharma&#39;s lift modification</span>
+<span class="sd">    - CTD, turbulent dispersion coefficient. Using Lopez-de-Bertodano model</span>
+<span class="sd">    - CD, drag coefficient</span>
+<span class="sd">    - Kf, Kw, for relative velocity model</span>
+<span class="sd">    - jf, jg, needed for lift coefficient models</span>
+<span class="sd">    - num_iter, number of iterations</span>
+<span class="sd">    - resid_target, residual convergence criteria</span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">inDataFile</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">infi</span><span class="p">:</span>
+        <span class="n">trash</span> <span class="o">=</span> <span class="n">infi</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+        <span class="n">InletData</span> <span class="o">=</span> <span class="n">infi</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="c1"># Name of function in csv</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">outDataFile</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">infi</span><span class="p">:</span>
+        <span class="n">trash</span> <span class="o">=</span> <span class="n">infi</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+        <span class="n">OutletData</span> <span class="o">=</span> <span class="n">infi</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="c1"># Name of function in csv</span>
+    <span class="n">CD_CFX</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="n">mom_source</span> <span class="o">==</span> <span class="s1">&#39;IS&#39;</span><span class="p">:</span>
+        <span class="n">mom_source_to_write</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;ISfx&#39;</span><span class="p">,</span> <span class="s1">&#39;ISfy&#39;</span><span class="p">,</span> <span class="s1">&#39;ISfz&#39;</span><span class="p">,</span> <span class="s1">&#39;ISgx&#39;</span><span class="p">,</span> <span class="s1">&#39;ISgy&#39;</span><span class="p">,</span> <span class="s1">&#39;ISgz&#39;</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="n">mom_source</span> <span class="o">==</span> <span class="s1">&#39;drag_model&#39;</span><span class="p">:</span>
+        <span class="n">mom_source_to_write</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;FDLx&#39;</span><span class="p">,</span> <span class="s1">&#39;FDLy&#39;</span><span class="p">,</span> <span class="s1">&#39;FDLz&#39;</span><span class="p">,</span> <span class="s1">&#39;FDGx&#39;</span><span class="p">,</span> <span class="s1">&#39;FDGy&#39;</span><span class="p">,</span> <span class="s1">&#39;FDGz&#39;</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="n">mom_source</span> <span class="o">==</span> <span class="s1">&#39;normal_drag_mom_source&#39;</span><span class="p">:</span>
+        <span class="n">mom_source_to_write</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;FDLx&#39;</span><span class="p">,</span> <span class="s1">&#39;FDLy&#39;</span><span class="p">,</span> <span class="s1">&#39;FDLz&#39;</span><span class="p">,</span> <span class="s1">&#39;FDGx&#39;</span><span class="p">,</span> <span class="s1">&#39;FDGy&#39;</span><span class="p">,</span> <span class="s1">&#39;FDGz&#39;</span><span class="p">]</span>
+        <span class="n">Kf</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">Kw</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">mom_source_to_write</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;0 [kg m^-2 s^-2]&#39;</span><span class="p">,</span> <span class="s1">&#39;0 [kg m^-2 s^-2]&#39;</span><span class="p">,</span> <span class="s1">&#39;0 [kg m^-2 s^-2]&#39;</span><span class="p">,</span> <span class="s1">&#39;0 [kg m^-2 s^-2]&#39;</span><span class="p">,</span> <span class="s1">&#39;0 [kg m^-2 s^-2]&#39;</span><span class="p">,</span> <span class="s1">&#39;0 [kg m^-2 s^-2]&#39;</span><span class="p">]</span>
+        <span class="n">CD_CFX</span> <span class="o">=</span> <span class="n">CD</span>
+
+    <span class="k">if</span> <span class="n">CL</span> <span class="o">==</span> <span class="s1">&#39;tomiyama&#39;</span><span class="p">:</span>
+        <span class="n">lift_string</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Option = Tomiyama </span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+
+        <span class="k">if</span> <span class="n">CL</span> <span class="o">==</span> <span class="s1">&#39;ryan_DFM&#39;</span><span class="p">:</span>
+            <span class="n">CL</span> <span class="o">=</span> <span class="n">calculate_CL_Ryan</span><span class="p">(</span><span class="n">jf</span><span class="o">=</span><span class="n">jf</span><span class="p">,</span> <span class="n">jg</span><span class="o">=</span><span class="n">jg</span><span class="p">,</span> <span class="n">theta</span><span class="o">=</span><span class="n">theta</span><span class="p">,</span> <span class="n">Db</span><span class="o">=</span><span class="n">Db</span><span class="p">)</span>
+
+        <span class="n">lift_string</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Lift Coefficient = </span><span class="si">{</span><span class="n">CL</span><span class="si">}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">Option = Lift Coefficient </span><span class="se">\n</span><span class="s2">&quot;</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">ccl_name</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fi</span><span class="p">:</span>
+
+        <span class="n">strToWrite</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\</span>
+<span class="se">\</span>
+<span class="s2">LIBRARY: </span><span class="se">\n\</span>
+<span class="s2">CEL: </span><span class="se">\n\</span>
+<span class="s2">EXPRESSIONS: </span><span class="se">\n\</span>
+<span class="s2">CD = 0.44 </span><span class="se">\n\</span>
+<span class="s2">FDGx = - 3/4 * CD / (gas.Mean Particle Diameter) * (gas.Volume Fraction) * liquid.density * (vrNorm) * (gas.u - liquid.u) </span><span class="se">\n\</span>
+<span class="s2">FDGy = - 3/4 * CD / (gas.Mean Particle Diameter) * (gas.Volume Fraction) * liquid.density* (vrNorm) * (gas.v - liquid.v) </span><span class="se">\n\</span>
+<span class="s2">FDGz = - 3/4 * CD / (gas.Mean Particle Diameter) * (gas.Volume Fraction) * liquid.density* (vrNorm) * (gas.w - liquidWEff) </span><span class="se">\n\</span>
+<span class="s2">FDLx = 3/4 * CD / (gas.Mean Particle Diameter) * (gas.Volume Fraction) * liquid.density * (vrNorm) * (gas.u - liquid.u) </span><span class="se">\n\</span>
+<span class="s2">FDLy = 3/4 * CD / (gas.Mean Particle Diameter) * (gas.Volume Fraction) * liquid.density * (vrNorm) * (gas.v - liquid.v) </span><span class="se">\n\</span>
+<span class="s2">FDLz = 3/4 * CD / (gas.Mean Particle Diameter) * (gas.Volume Fraction) * liquid.density * (vrNorm) * (gas.w- liquidWEff) </span><span class="se">\n\</span>
+<span class="s2">Kf = </span><span class="si">{</span><span class="n">Kf</span><span class="si">}</span><span class="s2"> </span><span class="se">\n\</span>
+<span class="s2">Kw = </span><span class="si">{</span><span class="n">Kw</span><span class="si">}</span><span class="s2"> </span><span class="se">\n\</span>
+<span class="s2">facilitytheta = </span><span class="si">{</span><span class="n">theta</span><span class="si">}</span><span class="s2"> </span><span class="se">\n\</span>
+<span class="s2">gravy = -9.81 [m s^-2]*cos(facilitytheta* pi / 180) </span><span class="se">\n\</span>
+<span class="s2">gravz = -9.81 [m s^-2]*sin(facilitytheta* pi / 180) </span><span class="se">\n\</span>
+<span class="s2">liquidWEff = (1 - Kf - Kw * gas.Volume Fraction * CD^(1/3) ) * liquid.w </span><span class="se">\n\</span>
+<span class="s2">phi = if(y&gt;0 [m], pi/2+atan(x/y), 3*pi/2+atan(x/y)) </span><span class="se">\n\</span>
+<span class="s2">radius = sqrt(x^2 + y^2) </span><span class="se">\n\</span>
+<span class="s2">vrNorm = sqrt( (gas.u - liquid.u)^2+ (gas.v - liquid.v)^2+ (gas.w - liquidWEff)^2 ) </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">FUNCTION: </span><span class="si">{</span><span class="n">InletData</span><span class="si">}</span><span class="s2"> </span><span class="se">\n\</span>
+<span class="s2">Argument Units = [mm], [m], [] </span><span class="se">\n\</span>
+<span class="s2">Option = Profile Data </span><span class="se">\n\</span>
+<span class="s2">Reference Coord Frame = Coord 0 </span><span class="se">\n\</span>
+<span class="s2">Spatial Fields = radius, z, phi </span><span class="se">\n\</span>
+<span class="s2">DATA FIELD: Velocity u </span><span class="se">\n\</span>
+<span class="s2">Field Name = Velocity u </span><span class="se">\n\</span>
+<span class="s2">Parameter List = U,Velocity r Component,Wall U,Wall Velocity r Component </span><span class="se">\n\</span>
+<span class="s2">Result Units = [m s^-1] </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">DATA FIELD: Velocity u f </span><span class="se">\n\</span>
+<span class="s2">Field Name = Velocity u f </span><span class="se">\n\</span>
+<span class="s2">Parameter List = U,Velocity r Component,Wall U,Wall Velocity r Component </span><span class="se">\n\</span>
+<span class="s2">Result Units = [m s^-1] </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">DATA FIELD: Velocity v </span><span class="se">\n\</span>
+<span class="s2">Field Name = Velocity v </span><span class="se">\n\</span>
+<span class="s2">Parameter List = V,Velocity Theta Component,Wall V,Wall Velocity Theta Component </span><span class="se">\n\</span>
+<span class="s2">Result Units = [m s^-1] </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">DATA FIELD: Velocity v f </span><span class="se">\n\</span>
+<span class="s2">Field Name = Velocity v f </span><span class="se">\n\</span>
+<span class="s2">Parameter List = V,Velocity Theta Component,Wall V,Wall Velocity Theta Component </span><span class="se">\n\</span>
+<span class="s2">Result Units = [m s^-1] </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">DATA FIELD: Velocity w </span><span class="se">\n\</span>
+<span class="s2">Field Name = Velocity w </span><span class="se">\n\</span>
+<span class="s2">Parameter List = Velocity Axial Component,W,Wall Velocity Axial Component,Wall W </span><span class="se">\n\</span>
+<span class="s2">Result Units = [m s^-1] </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">DATA FIELD: Velocity w f </span><span class="se">\n\</span>
+<span class="s2">Field Name = Velocity w f </span><span class="se">\n\</span>
+<span class="s2">Parameter List = Velocity Axial Component,W,Wall Velocity Axial Component,Wall W </span><span class="se">\n\</span>
+<span class="s2">Result Units = [m s^-1] </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">DATA FIELD: Volume Fraction </span><span class="se">\n\</span>
+<span class="s2">Field Name = Volume Fraction </span><span class="se">\n\</span>
+<span class="s2">Parameter List = Volume Fraction </span><span class="se">\n\</span>
+<span class="s2">Result Units = [] </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">DATA SOURCE: </span><span class="se">\n\</span>
+<span class="s2">File Name = </span><span class="si">{</span><span class="n">inDataFile</span><span class="si">}</span><span class="s2"> </span><span class="se">\n\</span>
+<span class="s2">Option = From File </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">FUNCTION: </span><span class="si">{</span><span class="n">OutletData</span><span class="si">}</span><span class="s2"> </span><span class="se">\n\</span>
+<span class="s2">Argument Units = [mm], [m], [] </span><span class="se">\n\</span>
+<span class="s2">Option = Profile Data </span><span class="se">\n\</span>
+<span class="s2">Reference Coord Frame = Coord 0 </span><span class="se">\n\</span>
+<span class="s2">Spatial Fields = radius, z, phi </span><span class="se">\n\</span>
+<span class="s2">DATA FIELD: Velocity u </span><span class="se">\n\</span>
+<span class="s2">Field Name = Velocity u </span><span class="se">\n\</span>
+<span class="s2">Parameter List = U,Velocity r Component,Wall U,Wall Velocity r Component </span><span class="se">\n\</span>
+<span class="s2">Result Units = [m s^-1] </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">DATA FIELD: Velocity u f </span><span class="se">\n\</span>
+<span class="s2">Field Name = Velocity u f </span><span class="se">\n\</span>
+<span class="s2">Result Units = [m s^-1] </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">DATA FIELD: Velocity v </span><span class="se">\n\</span>
+<span class="s2">Field Name = Velocity v </span><span class="se">\n\</span>
+<span class="s2">Parameter List = V,Velocity Theta Component,Wall V,Wall Velocity Theta Component </span><span class="se">\n\</span>
+<span class="s2">Result Units = [m s^-1] </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">DATA FIELD: Velocity v f </span><span class="se">\n\</span>
+<span class="s2">Field Name = Velocity v f </span><span class="se">\n\</span>
+<span class="s2">Result Units = [m s^-1] </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">DATA FIELD: Velocity w </span><span class="se">\n\</span>
+<span class="s2">Field Name = Velocity w </span><span class="se">\n\</span>
+<span class="s2">Parameter List = Velocity Axial Component,W,Wall Velocity Axial Component,Wall W </span><span class="se">\n\</span>
+<span class="s2">Result Units = [m s^-1] </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">DATA FIELD: Velocity w f </span><span class="se">\n\</span>
+<span class="s2">Field Name = Velocity w f </span><span class="se">\n\</span>
+<span class="s2">Result Units = [m s^-1] </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">DATA FIELD: Volume Fraction </span><span class="se">\n\</span>
+<span class="s2">Field Name = Volume Fraction </span><span class="se">\n\</span>
+<span class="s2">Parameter List = Volume Fraction </span><span class="se">\n\</span>
+<span class="s2">Result Units = [] </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">DATA SOURCE: </span><span class="se">\n\</span>
+<span class="s2">File Name = </span><span class="si">{</span><span class="n">outDataFile</span><span class="si">}</span><span class="s2"> </span><span class="se">\n\</span>
+<span class="s2">Option = From File </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">MATERIAL: Air Ideal Gas </span><span class="se">\n\</span>
+<span class="s2">Material Description = Air Ideal Gas (constant Cp) </span><span class="se">\n\</span>
+<span class="s2">Material Group = Air Data, Calorically Perfect Ideal Gases </span><span class="se">\n\</span>
+<span class="s2">Option = Pure Substance </span><span class="se">\n\</span>
+<span class="s2">Thermodynamic State = Gas </span><span class="se">\n\</span>
+<span class="s2">PROPERTIES: </span><span class="se">\n\</span>
+<span class="s2">Option = General Material </span><span class="se">\n\</span>
+<span class="s2">EQUATION OF STATE: </span><span class="se">\n\</span>
+<span class="s2">Molar Mass = 28.96 [kg kmol^-1] </span><span class="se">\n\</span>
+<span class="s2">Option = Ideal Gas </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">SPECIFIC HEAT CAPACITY: </span><span class="se">\n\</span>
+<span class="s2">Option = Value </span><span class="se">\n\</span>
+<span class="s2">Specific Heat Capacity = 1.0044E+03 [J kg^-1 K^-1] </span><span class="se">\n\</span>
+<span class="s2">Specific Heat Type = Constant Pressure </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">REFERENCE STATE: </span><span class="se">\n\</span>
+<span class="s2">Option = Specified Point </span><span class="se">\n\</span>
+<span class="s2">Reference Pressure = 1 [atm] </span><span class="se">\n\</span>
+<span class="s2">Reference Specific Enthalpy = 0. [J/kg] </span><span class="se">\n\</span>
+<span class="s2">Reference Specific Entropy = 0. [J/kg/K] </span><span class="se">\n\</span>
+<span class="s2">Reference Temperature = 25 [C] </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">DYNAMIC VISCOSITY: </span><span class="se">\n\</span>
+<span class="s2">Dynamic Viscosity = 1.831E-05 [kg m^-1 s^-1] </span><span class="se">\n\</span>
+<span class="s2">Option = Value </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">THERMAL CONDUCTIVITY: </span><span class="se">\n\</span>
+<span class="s2">Option = Value </span><span class="se">\n\</span>
+<span class="s2">Thermal Conductivity = 2.61E-2 [W m^-1 K^-1] </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">ABSORPTION COEFFICIENT: </span><span class="se">\n\</span>
+<span class="s2">Absorption Coefficient = 0.01 [m^-1] </span><span class="se">\n\</span>
+<span class="s2">Option = Value </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">SCATTERING COEFFICIENT: </span><span class="se">\n\</span>
+<span class="s2">Option = Value </span><span class="se">\n\</span>
+<span class="s2">Scattering Coefficient = 0.0 [m^-1] </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">REFRACTIVE INDEX: </span><span class="se">\n\</span>
+<span class="s2">Option = Value </span><span class="se">\n\</span>
+<span class="s2">Refractive Index = 1.0 [m m^-1] </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">MATERIAL: Water </span><span class="se">\n\</span>
+<span class="s2">Material Description = Water (liquid) </span><span class="se">\n\</span>
+<span class="s2">Material Group = Water Data, Constant Property Liquids </span><span class="se">\n\</span>
+<span class="s2">Option = Pure Substance </span><span class="se">\n\</span>
+<span class="s2">Thermodynamic State = Liquid </span><span class="se">\n\</span>
+<span class="s2">PROPERTIES: </span><span class="se">\n\</span>
+<span class="s2">Option = General Material </span><span class="se">\n\</span>
+<span class="s2">EQUATION OF STATE: </span><span class="se">\n\</span>
+<span class="s2">Density = 997.0 [kg m^-3] </span><span class="se">\n\</span>
+<span class="s2">Molar Mass = 18.02 [kg kmol^-1] </span><span class="se">\n\</span>
+<span class="s2">Option = Value </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">SPECIFIC HEAT CAPACITY: </span><span class="se">\n\</span>
+<span class="s2">Option = Value </span><span class="se">\n\</span>
+<span class="s2">Specific Heat Capacity = 4181.7 [J kg^-1 K^-1] </span><span class="se">\n\</span>
+<span class="s2">Specific Heat Type = Constant Pressure </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">REFERENCE STATE: </span><span class="se">\n\</span>
+<span class="s2">Option = Specified Point </span><span class="se">\n\</span>
+<span class="s2">Reference Pressure = 1 [atm] </span><span class="se">\n\</span>
+<span class="s2">Reference Specific Enthalpy = 0.0 [J/kg] </span><span class="se">\n\</span>
+<span class="s2">Reference Specific Entropy = 0.0 [J/kg/K] </span><span class="se">\n\</span>
+<span class="s2">Reference Temperature = 25 [C] </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">DYNAMIC VISCOSITY: </span><span class="se">\n\</span>
+<span class="s2">Dynamic Viscosity = 8.899E-4 [kg m^-1 s^-1] </span><span class="se">\n\</span>
+<span class="s2">Option = Value </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">THERMAL CONDUCTIVITY: </span><span class="se">\n\</span>
+<span class="s2">Option = Value </span><span class="se">\n\</span>
+<span class="s2">Thermal Conductivity = 0.6069 [W m^-1 K^-1] </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">ABSORPTION COEFFICIENT: </span><span class="se">\n\</span>
+<span class="s2">Absorption Coefficient = 1.0 [m^-1] </span><span class="se">\n\</span>
+<span class="s2">Option = Value </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">SCATTERING COEFFICIENT: </span><span class="se">\n\</span>
+<span class="s2">Option = Value </span><span class="se">\n\</span>
+<span class="s2">Scattering Coefficient = 0.0 [m^-1] </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">REFRACTIVE INDEX: </span><span class="se">\n\</span>
+<span class="s2">Option = Value </span><span class="se">\n\</span>
+<span class="s2">Refractive Index = 1.0 [m m^-1] </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">THERMAL EXPANSIVITY: </span><span class="se">\n\</span>
+<span class="s2">Option = Value </span><span class="se">\n\</span>
+<span class="s2">Thermal Expansivity = 2.57E-04 [K^-1] </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">FLOW: Flow Analysis 1 </span><span class="se">\n\</span>
+<span class="s2">SOLUTION UNITS: </span><span class="se">\n\</span>
+<span class="s2">Angle Units = [rad] </span><span class="se">\n\</span>
+<span class="s2">Length Units = [m] </span><span class="se">\n\</span>
+<span class="s2">Mass Units = [kg] </span><span class="se">\n\</span>
+<span class="s2">Solid Angle Units = [sr] </span><span class="se">\n\</span>
+<span class="s2">Temperature Units = [K] </span><span class="se">\n\</span>
+<span class="s2">Time Units = [s] </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">ANALYSIS TYPE: </span><span class="se">\n\</span>
+<span class="s2">Option = Steady State </span><span class="se">\n\</span>
+<span class="s2">EXTERNAL SOLVER COUPLING: </span><span class="se">\n\</span>
+<span class="s2">Option = None </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">DOMAIN: Default Domain </span><span class="se">\n\</span>
+<span class="s2">Coord Frame = Coord 0 </span><span class="se">\n\</span>
+<span class="s2">Domain Type = Fluid </span><span class="se">\n\</span>
+<span class="s2">Location = SOLID </span><span class="se">\n\</span>
+<span class="s2">BOUNDARY: inlet </span><span class="se">\n\</span>
+<span class="s2">Boundary Type = INLET </span><span class="se">\n\</span>
+<span class="s2">Location = INLET </span><span class="se">\n\</span>
+<span class="s2">Use Profile Data = False </span><span class="se">\n\</span>
+<span class="s2">BOUNDARY CONDITIONS: </span><span class="se">\n\</span>
+<span class="s2">FLOW REGIME: </span><span class="se">\n\</span>
+<span class="s2">Option = Subsonic </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">MASS AND MOMENTUM: </span><span class="se">\n\</span>
+<span class="s2">Option = Fluid Velocity </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">TURBULENCE: </span><span class="se">\n\</span>
+<span class="s2">Option = Medium Intensity and Eddy Viscosity Ratio </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">FLUID: gas </span><span class="se">\n\</span>
+<span class="s2">BOUNDARY CONDITIONS: </span><span class="se">\n\</span>
+<span class="s2">VELOCITY: </span><span class="se">\n\</span>
+<span class="s2">Option = Cartesian Velocity Components </span><span class="se">\n\</span>
+<span class="s2">U = 0 [m s^-1] </span><span class="se">\n\</span>
+<span class="s2">V = 0 [m s^-1] </span><span class="se">\n\</span>
+<span class="s2">W = </span><span class="si">{</span><span class="n">InletData</span><span class="si">}</span><span class="s2">.Velocity v(radius,z,phi) </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">VOLUME FRACTION: </span><span class="se">\n\</span>
+<span class="s2">Option = Value </span><span class="se">\n\</span>
+<span class="s2">Volume Fraction = </span><span class="si">{</span><span class="n">InletData</span><span class="si">}</span><span class="s2">.Volume Fraction(radius,z,phi) </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">FLUID: liquid </span><span class="se">\n\</span>
+<span class="s2">BOUNDARY CONDITIONS: </span><span class="se">\n\</span>
+<span class="s2">FLOW DIRECTION: </span><span class="se">\n\</span>
+<span class="s2">Option = Normal to Boundary Condition </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">VELOCITY: </span><span class="se">\n\</span>
+<span class="s2">Mass Flow Rate = </span><span class="si">{</span><span class="n">mdot</span><span class="si">}</span><span class="s2"> [kg s^-1] </span><span class="se">\n\</span>
+<span class="s2">Option = Mass Flow Rate </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">VOLUME FRACTION: </span><span class="se">\n\</span>
+<span class="s2">Option = Value </span><span class="se">\n\</span>
+<span class="s2">Volume Fraction = 1-</span><span class="si">{</span><span class="n">InletData</span><span class="si">}</span><span class="s2">.Volume Fraction(radius,z,phi) </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">BOUNDARY: outlet </span><span class="se">\n\</span>
+<span class="s2">Boundary Type = OUTLET </span><span class="se">\n\</span>
+<span class="s2">Location = OUTLET </span><span class="se">\n\</span>
+<span class="s2">BOUNDARY CONDITIONS: </span><span class="se">\n\</span>
+<span class="s2">FLOW REGIME: </span><span class="se">\n\</span>
+<span class="s2">Option = Subsonic </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">MASS AND MOMENTUM: </span><span class="se">\n\</span>
+<span class="s2">Option = Average Static Pressure </span><span class="se">\n\</span>
+<span class="s2">Pressure Profile Blend = 0.05 </span><span class="se">\n\</span>
+<span class="s2">Relative Pressure = 0 [Pa] </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">PRESSURE AVERAGING: </span><span class="se">\n\</span>
+<span class="s2">Option = Average Over Whole Outlet </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">BOUNDARY: walls </span><span class="se">\n\</span>
+<span class="s2">Boundary Type = WALL </span><span class="se">\n\</span>
+<span class="s2">Location = WALLS </span><span class="se">\n\</span>
+<span class="s2">Use Profile Data = False </span><span class="se">\n\</span>
+<span class="s2">BOUNDARY CONDITIONS: </span><span class="se">\n\</span>
+<span class="s2">MASS AND MOMENTUM: </span><span class="se">\n\</span>
+<span class="s2">Option = Fluid Dependent </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">WALL CONTACT MODEL: </span><span class="se">\n\</span>
+<span class="s2">Option = Use Volume Fraction </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">WALL ROUGHNESS: </span><span class="se">\n\</span>
+<span class="s2">Option = Smooth Wall </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">FLUID: gas </span><span class="se">\n\</span>
+<span class="s2">BOUNDARY CONDITIONS: </span><span class="se">\n\</span>
+<span class="s2">MASS AND MOMENTUM: </span><span class="se">\n\</span>
+<span class="s2">Option = No Slip Wall </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">FLUID: liquid </span><span class="se">\n\</span>
+<span class="s2">BOUNDARY CONDITIONS: </span><span class="se">\n\</span>
+<span class="s2">MASS AND MOMENTUM: </span><span class="se">\n\</span>
+<span class="s2">Option = No Slip Wall </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">DOMAIN MODELS: </span><span class="se">\n\</span>
+<span class="s2">BUOYANCY MODEL: </span><span class="se">\n\</span>
+<span class="s2">Buoyancy Reference Density = 998 [kg m^-3] </span><span class="se">\n\</span>
+<span class="s2">Gravity X Component = 0 [m s^-2] </span><span class="se">\n\</span>
+<span class="s2">Gravity Y Component = gravy </span><span class="se">\n\</span>
+<span class="s2">Gravity Z Component = gravz </span><span class="se">\n\</span>
+<span class="s2">Option = Buoyant </span><span class="se">\n\</span>
+<span class="s2">BUOYANCY REFERENCE LOCATION: </span><span class="se">\n\</span>
+<span class="s2">Option = Automatic </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">DOMAIN MOTION: </span><span class="se">\n\</span>
+<span class="s2">Option = Stationary </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">MESH DEFORMATION: </span><span class="se">\n\</span>
+<span class="s2">Option = None </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">REFERENCE PRESSURE: </span><span class="se">\n\</span>
+<span class="s2">Reference Pressure = 1 [atm] </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">FLUID DEFINITION: gas </span><span class="se">\n\</span>
+<span class="s2">Material = Air Ideal Gas </span><span class="se">\n\</span>
+<span class="s2">Option = Material Library </span><span class="se">\n\</span>
+<span class="s2">MORPHOLOGY: </span><span class="se">\n\</span>
+<span class="s2">Mean Diameter = </span><span class="si">{</span><span class="n">Db</span><span class="si">}</span><span class="s2"> [m] </span><span class="se">\n\</span>
+<span class="s2">Minimum Volume Fraction = 0.000001 </span><span class="se">\n\</span>
+<span class="s2">Option = Dispersed Fluid </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">FLUID DEFINITION: liquid </span><span class="se">\n\</span>
+<span class="s2">Material = Water </span><span class="se">\n\</span>
+<span class="s2">Option = Material Library </span><span class="se">\n\</span>
+<span class="s2">MORPHOLOGY: </span><span class="se">\n\</span>
+<span class="s2">Minimum Volume Fraction = 0.000001 </span><span class="se">\n\</span>
+<span class="s2">Option = Continuous Fluid </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">FLUID MODELS: </span><span class="se">\n\</span>
+<span class="s2">COMBUSTION MODEL: </span><span class="se">\n\</span>
+<span class="s2">Option = None </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">FLUID: gas </span><span class="se">\n\</span>
+<span class="s2">FLUID BUOYANCY MODEL: </span><span class="se">\n\</span>
+<span class="s2">Option = Density Difference </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">TURBULENCE MODEL: </span><span class="se">\n\</span>
+<span class="s2">Option = Dispersed Phase Zero Equation </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">FLUID: liquid </span><span class="se">\n\</span>
+<span class="s2">FLUID BUOYANCY MODEL: </span><span class="se">\n\</span>
+<span class="s2">Option = Density Difference </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">TURBULENCE MODEL: </span><span class="se">\n\</span>
+<span class="s2">Option = k epsilon </span><span class="se">\n\</span>
+<span class="s2">BUOYANCY TURBULENCE: </span><span class="se">\n\</span>
+<span class="s2">Option = None </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">TURBULENT WALL FUNCTIONS: </span><span class="se">\n\</span>
+<span class="s2">Option = Scalable </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">HEAT TRANSFER MODEL: </span><span class="se">\n\</span>
+<span class="s2">Fluid Temperature = 25 [C] </span><span class="se">\n\</span>
+<span class="s2">Homogeneous Model = False </span><span class="se">\n\</span>
+<span class="s2">Option = Isothermal </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">THERMAL RADIATION MODEL: </span><span class="se">\n\</span>
+<span class="s2">Option = None </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">TURBULENCE MODEL: </span><span class="se">\n\</span>
+<span class="s2">Homogeneous Model = False </span><span class="se">\n\</span>
+<span class="s2">Option = Fluid Dependent </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">FLUID PAIR: gas | liquid </span><span class="se">\n\</span>
+<span class="s2">Surface Tension Coefficient = 0.072 [N m^-1] </span><span class="se">\n\</span>
+<span class="s2">INTERPHASE TRANSFER MODEL: </span><span class="se">\n\</span>
+<span class="s2">Minimum Volume Fraction for Area Density = 0.000001 </span><span class="se">\n\</span>
+<span class="s2">Option = Particle Model </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">MASS TRANSFER: </span><span class="se">\n\</span>
+<span class="s2">Option = None </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">MOMENTUM TRANSFER: </span><span class="se">\n\</span>
+<span class="s2">DRAG FORCE: </span><span class="se">\n\</span>
+<span class="s2">Drag Coefficient = </span><span class="si">{</span><span class="n">CD_CFX</span><span class="si">}</span><span class="s2"> </span><span class="se">\n\</span>
+<span class="s2">Option = Drag Coefficient </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">LIFT FORCE: </span><span class="se">\n\</span>
+<span class="si">{</span><span class="n">lift_string</span><span class="si">}</span><span class="se">\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">TURBULENT DISPERSION FORCE: </span><span class="se">\n\</span>
+<span class="s2">Option = Lopez de Bertodano </span><span class="se">\n\</span>
+<span class="s2">Turbulent Dispersion Coefficient = </span><span class="si">{</span><span class="n">CTD</span><span class="si">}</span><span class="s2"> </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">VIRTUAL MASS FORCE: </span><span class="se">\n\</span>
+<span class="s2">Option = None </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">WALL LUBRICATION FORCE: </span><span class="se">\n\</span>
+<span class="s2">Lubrication Coefficient C1 = -0.01 </span><span class="se">\n\</span>
+<span class="s2">Lubrication Coefficient C2 = 0.05 </span><span class="se">\n\</span>
+<span class="s2">Option = Antal </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">TURBULENCE TRANSFER: </span><span class="se">\n\</span>
+<span class="s2">ENHANCED TURBULENCE PRODUCTION MODEL: </span><span class="se">\n\</span>
+<span class="s2">Option = Sato Enhanced Eddy Viscosity </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">INITIALISATION: </span><span class="se">\n\</span>
+<span class="s2">Option = Automatic </span><span class="se">\n\</span>
+<span class="s2">FLUID: gas </span><span class="se">\n\</span>
+<span class="s2">INITIAL CONDITIONS: </span><span class="se">\n\</span>
+<span class="s2">Velocity Type = Cartesian </span><span class="se">\n\</span>
+<span class="s2">CARTESIAN VELOCITY COMPONENTS: </span><span class="se">\n\</span>
+<span class="s2">Option = Automatic</span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">VOLUME FRACTION: </span><span class="se">\n\</span>
+<span class="s2">Option = Automatic </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">FLUID: liquid </span><span class="se">\n\</span>
+<span class="s2">INITIAL CONDITIONS: </span><span class="se">\n\</span>
+<span class="s2">Velocity Type = Cartesian </span><span class="se">\n\</span>
+<span class="s2">CARTESIAN VELOCITY COMPONENTS: </span><span class="se">\n\</span>
+<span class="s2">Option = Automatic</span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">TURBULENCE INITIAL CONDITIONS: </span><span class="se">\n\</span>
+<span class="s2">Option = Medium Intensity and Eddy Viscosity Ratio </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">VOLUME FRACTION: </span><span class="se">\n\</span>
+<span class="s2">Option = Automatic</span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">INITIAL CONDITIONS: </span><span class="se">\n\</span>
+<span class="s2">STATIC PRESSURE: </span><span class="se">\n\</span>
+<span class="s2">Option = Automatic </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">MULTIPHASE MODELS: </span><span class="se">\n\</span>
+<span class="s2">Homogeneous Model = False </span><span class="se">\n\</span>
+<span class="s2">FREE SURFACE MODEL: </span><span class="se">\n\</span>
+<span class="s2">Option = None </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">SUBDOMAIN: fluid </span><span class="se">\n\</span>
+<span class="s2">Coord Frame = Coord 0 </span><span class="se">\n\</span>
+<span class="s2">Location = SOLID </span><span class="se">\n\</span>
+<span class="s2">FLUID: gas </span><span class="se">\n\</span>
+<span class="s2">SOURCES: </span><span class="se">\n\</span>
+<span class="s2">MOMENTUM SOURCE: </span><span class="se">\n\</span>
+<span class="s2">GENERAL MOMENTUM SOURCE: </span><span class="se">\n\</span>
+<span class="s2">Momentum Source Coefficient = 1000000 [kg m^-3 s^-1] </span><span class="se">\n\</span>
+<span class="s2">Momentum Source X Component = </span><span class="si">{</span><span class="n">mom_source_to_write</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="si">}</span><span class="s2"> </span><span class="se">\n\</span>
+<span class="s2">Momentum Source Y Component = </span><span class="si">{</span><span class="n">mom_source_to_write</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="si">}</span><span class="s2"> </span><span class="se">\n\</span>
+<span class="s2">Momentum Source Z Component = </span><span class="si">{</span><span class="n">mom_source_to_write</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span><span class="si">}</span><span class="s2"> </span><span class="se">\n\</span>
+<span class="s2">Option = Cartesian Components </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">FLUID: liquid </span><span class="se">\n\</span>
+<span class="s2">SOURCES: </span><span class="se">\n\</span>
+<span class="s2">MOMENTUM SOURCE: </span><span class="se">\n\</span>
+<span class="s2">GENERAL MOMENTUM SOURCE: </span><span class="se">\n\</span>
+<span class="s2">Momentum Source Coefficient = 1000000 [kg m^-3 s^-1] </span><span class="se">\n\</span>
+<span class="s2">Momentum Source X Component = </span><span class="si">{</span><span class="n">mom_source_to_write</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> </span><span class="se">\n\</span>
+<span class="s2">Momentum Source Y Component = </span><span class="si">{</span><span class="n">mom_source_to_write</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2"> </span><span class="se">\n\</span>
+<span class="s2">Momentum Source Z Component = </span><span class="si">{</span><span class="n">mom_source_to_write</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="si">}</span><span class="s2"> </span><span class="se">\n\</span>
+<span class="s2">Option = Cartesian Components </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">OUTPUT CONTROL: </span><span class="se">\n\</span>
+<span class="s2">RESULTS: </span><span class="se">\n\</span>
+<span class="s2">File Compression Level = Default </span><span class="se">\n\</span>
+<span class="s2">Option = Standard </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">SOLVER CONTROL: </span><span class="se">\n\</span>
+<span class="s2">Optimization Level = 3 </span><span class="se">\n\</span>
+<span class="s2">Turbulence Numerics = High Resolution </span><span class="se">\n\</span>
+<span class="s2">ADVECTION SCHEME: </span><span class="se">\n\</span>
+<span class="s2">Option = High Resolution </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">CONVERGENCE CONTROL: </span><span class="se">\n\</span>
+<span class="s2">Length Scale Option = Conservative </span><span class="se">\n\</span>
+<span class="s2">Maximum Number of Iterations = </span><span class="si">{</span><span class="n">num_iter</span><span class="si">}</span><span class="s2"> </span><span class="se">\n\</span>
+<span class="s2">Minimum Number of Iterations = 1 </span><span class="se">\n\</span>
+<span class="s2">Timescale Control = Auto Timescale </span><span class="se">\n\</span>
+<span class="s2">Timescale Factor = 0.5 </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">CONVERGENCE CRITERIA: </span><span class="se">\n\</span>
+<span class="s2">Conservation Target = 0.01 </span><span class="se">\n\</span>
+<span class="s2">Residual Target = </span><span class="si">{</span><span class="n">resid_target</span><span class="si">}</span><span class="s2"> </span><span class="se">\n\</span>
+<span class="s2">Residual Type = RMS </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">DYNAMIC MODEL CONTROL: </span><span class="se">\n\</span>
+<span class="s2">Global Dynamic Model Control = On </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">INTERRUPT CONTROL: </span><span class="se">\n\</span>
+<span class="s2">Option = Any Interrupt </span><span class="se">\n\</span>
+<span class="s2">CONVERGENCE CONDITIONS: </span><span class="se">\n\</span>
+<span class="s2">Option = Default Conditions </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">MULTIPHASE CONTROL: </span><span class="se">\n\</span>
+<span class="s2">Initial Volume Fraction Smoothing = Volume-Weighted </span><span class="se">\n\</span>
+<span class="s2">Optimization Level = 3 </span><span class="se">\n\</span>
+<span class="s2">Volume Fraction Coupling = Coupled </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">COMMAND FILE: </span><span class="se">\n\</span>
+<span class="s2">Version = 22.2 </span><span class="se">\n\</span>
+<span class="s2">END&quot;</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="n">strToWrite</span><span class="p">,</span> <span class="n">file</span> <span class="o">=</span> <span class="n">fi</span><span class="p">)</span>
+        <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="make_CFX_case">
+<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.CFD.make_CFX_case">[docs]</a>
+<span class="k">def</span> <span class="nf">make_CFX_case</span><span class="p">(</span><span class="n">case_name</span><span class="p">,</span> <span class="n">mesh_name</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">ccl_name</span><span class="o">=</span><span class="s1">&#39;auto_setup&#39;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Makes CFX case based on CCL file</span>
+
+<span class="sd">    Takes &quot;setup_ccl&quot; and writes a case file, &quot;casename.def&quot;</span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">mesh_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">mesh_name</span> <span class="o">=</span> <span class="n">case_name</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;CFXPre_Commands.pre&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fi</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\</span>
+<span class="s2"># CFX-Pre commands</span><span class="se">\n\</span>
+<span class="se">\n\</span>
+<span class="s2">COMMAND FILE:</span><span class="se">\n\</span>
+<span class="s2">  CFX Pre Version = 22.1</span><span class="se">\n\</span>
+<span class="s2">END</span><span class="se">\n\</span>
+<span class="se">\n\</span>
+<span class="s2">&gt;load mode=new</span><span class="se">\n\</span>
+<span class="s2">&gt; update</span><span class="se">\n\</span>
+<span class="se">\n\</span>
+<span class="s2">&gt; gtmImport filename=</span><span class="si">{</span><span class="n">mesh_name</span><span class="si">}</span><span class="s2">.msh, type=Fluent, units=m, genOpt= -n, nameStrategy=Assembly</span><span class="se">\n\</span>
+<span class="s2">&gt; update</span><span class="se">\n\</span>
+<span class="se">\n\</span>
+<span class="s2">&gt;importccl filename=</span><span class="si">{</span><span class="n">ccl_name</span><span class="si">}</span><span class="s2">.ccl, mode=replace, autoLoadLibrary=none</span><span class="se">\n\</span>
+<span class="s2">&gt; update</span><span class="se">\n\</span>
+<span class="se">\n\</span>
+<span class="s2">&gt;writeCaseFile filename=./</span><span class="si">{</span><span class="n">case_name</span><span class="si">}</span><span class="s2">.def, operation=write def file</span><span class="se">\n\</span>
+<span class="s2">&gt; update</span><span class="se">\n\</span>
+<span class="se">\n\</span>
+<span class="s2">&gt; quit &quot;</span><span class="p">,</span> <span class="n">file</span> <span class="o">=</span> <span class="n">fi</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;$</span><span class="se">\n</span><span class="s1">cfx5pre -s CFXPre_Commands.pre&#39;</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">subprocess</span><span class="o">.</span><span class="n">check_call</span><span class="p">(</span><span class="s2">&quot;ml ansys&quot;</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">CalledProcessError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Continuing...&quot;</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">subprocess</span><span class="o">.</span><span class="n">check_call</span><span class="p">(</span><span class="s1">&#39;cfx5pre -s CFXPre_Commands.pre -line &gt; auto_cfx_run.log&#39;</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">CalledProcessError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">returncode</span><span class="p">)</span>
+    <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="run_CFX_case">
+<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.CFD.run_CFX_case">[docs]</a>
+<span class="k">def</span> <span class="nf">run_CFX_case</span><span class="p">(</span><span class="n">case_name</span><span class="p">,</span> <span class="n">parallel</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">npart</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span> <span class="n">init_fi</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">interactive</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Runs CFX case case_name.def</span>
+
+<span class="sd">    Must be in the same directory, or a full path (without the .def extension) supplied</span>
+
+<span class="sd">    Can run in parallel, specify the number of cores with npart</span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">subprocess</span><span class="o">.</span><span class="n">check_call</span><span class="p">(</span><span class="s2">&quot;ml ansys&quot;</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">CalledProcessError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Continuing...&quot;</span><span class="p">)</span>
+
+    <span class="n">run_string</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;cfx5solve -def </span><span class="si">{</span><span class="n">case_name</span><span class="si">}</span><span class="s2">.def -monitor </span><span class="si">{</span><span class="n">case_name</span><span class="si">}</span><span class="s2">_001.out -double&quot;</span>
+    
+    <span class="k">if</span> <span class="n">parallel</span><span class="p">:</span>
+        <span class="n">run_string</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot; -par -par-local -part </span><span class="si">{</span><span class="n">npart</span><span class="si">}</span><span class="s2">&quot;</span>
+
+    <span class="k">if</span> <span class="n">init_fi</span><span class="p">:</span>
+        <span class="n">run_string</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot; -initial-file </span><span class="si">{</span><span class="n">init_fi</span><span class="si">}</span><span class="s2">&quot;</span>
+
+    <span class="k">if</span> <span class="n">interactive</span><span class="p">:</span>
+        <span class="n">run_string</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot; -interactive&quot;</span>
+    
+    <span class="n">run_string</span> <span class="o">+=</span> <span class="s2">&quot; &gt; auto_cfx_run.log&quot;</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;$</span><span class="si">{</span><span class="n">run_string</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">subprocess</span><span class="o">.</span><span class="n">check_call</span><span class="p">(</span><span class="n">run_string</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">return</span></div>
+
+
+
+<div class="viewcode-block" id="post_process_CFX_case">
+<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.CFD.post_process_CFX_case">[docs]</a>
+<span class="k">def</span> <span class="nf">post_process_CFX_case</span><span class="p">(</span><span class="n">case_name</span><span class="p">,</span> <span class="n">template</span> <span class="o">=</span> <span class="s1">&#39;CFX&#39;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Post-process a CFX case, case_name.res</span>
+
+<span class="sd">    Must have a template available, &quot;CFX&quot; is the default. Might need to set it up beforehand based on a .cst file</span>
+
+<span class="sd">    TODO update to export csv file that can be read into MARIGOLD Condition</span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;CFXPost_Commands.cse&quot;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fi</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="se">\</span>
+<span class="se">\</span>
+<span class="s1">COMMAND FILE:</span><span class="se">\n\</span>
+<span class="s1">  CFX Post Version = 22.1</span><span class="se">\n\</span>
+<span class="s1">END</span><span class="se">\n\</span>
+<span class="se">\n\</span>
+<span class="s1">DATA READER:</span><span class="se">\n\</span>
+<span class="s1">  Clear All Objects = false</span><span class="se">\n\</span>
+<span class="s1">  Append Results = false</span><span class="se">\n\</span>
+<span class="s1">  Edit Case Names = false</span><span class="se">\n\</span>
+<span class="s1">  Multi Configuration File Load Option = Last Case</span><span class="se">\n\</span>
+<span class="s1">  Open in New View = true</span><span class="se">\n\</span>
+<span class="s1">  Keep Camera Position = true</span><span class="se">\n\</span>
+<span class="s1">  Load Particle Tracks = true</span><span class="se">\n\</span>
+<span class="s1">  Multi Configuration File Load Option = Last Case</span><span class="se">\n\</span>
+<span class="s1">  Construct Variables From Fourier Coefficients = true</span><span class="se">\n\</span>
+<span class="s1">  Open to Compare = false</span><span class="se">\n\</span>
+<span class="s1">  Files to Compare =</span><span class="se">\n\</span>
+<span class="s1">END</span><span class="se">\n\</span>
+<span class="se">\n\</span>
+<span class="s1">DATA READER:</span><span class="se">\n\</span>
+<span class="s1">  Domains to Load=</span><span class="se">\n\</span>
+<span class="s1">END</span><span class="se">\n\</span>
+<span class="se">\n\</span>
+<span class="s1">&gt;load filename=</span><span class="si">{</span><span class="n">case_name</span><span class="si">}</span><span class="s1">_001.res, force_reload=true</span><span class="se">\n\</span>
+<span class="se">\n\</span>
+<span class="s1">VIEW:View 1</span><span class="se">\n\</span>
+<span class="s1">  Camera Mode = User Specified</span><span class="se">\n\</span>
+<span class="s1">  CAMERA:</span><span class="se">\n\</span>
+<span class="s1">    Option = Pivot Point and Quaternion</span><span class="se">\n\</span>
+<span class="s1">    Pivot Point = 0, 0, 1.27</span><span class="se">\n\</span>
+<span class="s1">    Scale = 1.70237</span><span class="se">\n\</span>
+<span class="s1">    Pan = 0, 0</span><span class="se">\n\</span>
+<span class="s1">    Rotation Quaternion = 0.279848, -0.364705, -0.115917, 0.880476</span><span class="se">\n\</span>
+<span class="s1">  END</span><span class="se">\n\</span>
+<span class="se">\n\</span>
+<span class="s1">END</span><span class="se">\n\</span>
+<span class="se">\n\</span>
+<span class="s1">&gt; update</span><span class="se">\n\</span>
+<span class="s1">&gt;report generatemode=APPEND, loadtemplate=</span><span class="si">{</span><span class="n">template</span><span class="si">}</span><span class="se">\n\</span>
+<span class="se">\n\</span>
+<span class="s1">REPORT:</span><span class="se">\n\</span>
+<span class="s1">  PUBLISH:</span><span class="se">\n\</span>
+<span class="s1">    Generate 3D Viewer Files = Off</span><span class="se">\n\</span>
+<span class="s1">    Report Format = HTML</span><span class="se">\n\</span>
+<span class="s1">    Report Path = </span><span class="si">{</span><span class="n">case_name</span><span class="si">}</span><span class="s1">_Results.html</span><span class="se">\n\</span>
+<span class="s1">    Save Images In Separate Folder = On</span><span class="se">\n\</span>
+<span class="se">\n\</span>
+<span class="s1">  END</span><span class="se">\n\</span>
+<span class="s1">END</span><span class="se">\n\</span>
+<span class="s1">&gt;report save</span><span class="se">\n\</span>
+<span class="s1">EXPORT:</span><span class="se">\n\</span>
+<span class="s1">  ANSYS Export Data = Element Heat Flux</span><span class="se">\n\</span>
+<span class="s1">  ANSYS File Format = ANSYS</span><span class="se">\n\</span>
+<span class="s1">  ANSYS Reference Temperature = 0.0 [K]</span><span class="se">\n\</span>
+<span class="s1">  ANSYS Specify Reference Temperature = Off</span><span class="se">\n\</span>
+<span class="s1">  ANSYS Supplemental HTC = 0.0 [W m^-2 K^-1]</span><span class="se">\n\</span>
+<span class="s1">  Additional Variable List =</span><span class="se">\n\</span>
+<span class="s1">  BC Profile Type = Inlet Velocity</span><span class="se">\n\</span>
+<span class="s1">  CSV Type = CSV</span><span class="se">\n\</span>
+<span class="s1">  Case Name = Case </span><span class="si">{</span><span class="n">case_name</span><span class="si">}</span><span class="s1">_001</span><span class="se">\n\</span>
+<span class="s1">  Export Connectivity = Off</span><span class="se">\n\</span>
+<span class="s1">  Export Coord Frame = Global</span><span class="se">\n\</span>
+<span class="s1">  Export File = </span><span class="si">{</span><span class="n">case_name</span><span class="si">}</span><span class="s1">_port3_phi90.csv</span><span class="se">\n\</span>
+<span class="s1">  Export Geometry = Off</span><span class="se">\n\</span>
+<span class="s1">  Export Location Aliases =</span><span class="se">\n\</span>
+<span class="s1">  Export Node Numbers = Off</span><span class="se">\n\</span>
+<span class="s1">  Export Null Data = On</span><span class="se">\n\</span>
+<span class="s1">  Export Type = Generic</span><span class="se">\n\</span>
+<span class="s1">  Export Units System = Current</span><span class="se">\n\</span>
+<span class="s1">  Export Variable Type = Current</span><span class="se">\n\</span>
+<span class="s1">  External Export Data = None</span><span class="se">\n\</span>
+<span class="s1">  Include File Information = Off</span><span class="se">\n\</span>
+<span class="s1">  Include Header = On</span><span class="se">\n\</span>
+<span class="s1">  Location = inlet</span><span class="se">\n\</span>
+<span class="s1">  Location List = /LINE:port 3 phi 90 rake</span><span class="se">\n\</span>
+<span class="s1">  Null Token = null</span><span class="se">\n\</span>
+<span class="s1">  Overwrite = On</span><span class="se">\n\</span>
+<span class="s1">  Precision = 8</span><span class="se">\n\</span>
+<span class="s1">  Separator = &quot;, &quot;</span><span class="se">\n\</span>
+<span class="s1">  Spatial Variables = X,Y,Z</span><span class="se">\n\</span>
+<span class="s1">  Variable List = X, Y, Z, gas.Velocity w, gas.Volume Fraction, liquid.Velocity w</span><span class="se">\n\</span>
+<span class="s1">  Vector Brackets = ()</span><span class="se">\n\</span>
+<span class="s1">  Vector Display = Scalar</span><span class="se">\n\</span>
+<span class="s1">END</span><span class="se">\n\</span>
+<span class="s1">&gt;export</span><span class="se">\n\</span>
+<span class="s1">EXPORT:</span><span class="se">\n\</span>
+<span class="s1">  ANSYS Export Data = Element Heat Flux</span><span class="se">\n\</span>
+<span class="s1">  ANSYS File Format = ANSYS</span><span class="se">\n\</span>
+<span class="s1">  ANSYS Reference Temperature = 0.0 [K]</span><span class="se">\n\</span>
+<span class="s1">  ANSYS Specify Reference Temperature = Off</span><span class="se">\n\</span>
+<span class="s1">  ANSYS Supplemental HTC = 0.0 [W m^-2 K^-1]</span><span class="se">\n\</span>
+<span class="s1">  Additional Variable List =</span><span class="se">\n\</span>
+<span class="s1">  BC Profile Type = Inlet Velocity</span><span class="se">\n\</span>
+<span class="s1">  CSV Type = CSV</span><span class="se">\n\</span>
+<span class="s1">  Case Name = Case </span><span class="si">{</span><span class="n">case_name</span><span class="si">}</span><span class="s1">_001</span><span class="se">\n\</span>
+<span class="s1">  Export Connectivity = Off</span><span class="se">\n\</span>
+<span class="s1">  Export Coord Frame = Global</span><span class="se">\n\</span>
+<span class="s1">  Export File = </span><span class="si">{</span><span class="n">case_name</span><span class="si">}</span><span class="s1">_port3.csv</span><span class="se">\n\</span>
+<span class="s1">  Export Geometry = Off</span><span class="se">\n\</span>
+<span class="s1">  Export Location Aliases =</span><span class="se">\n\</span>
+<span class="s1">  Export Node Numbers = Off</span><span class="se">\n\</span>
+<span class="s1">  Export Null Data = On</span><span class="se">\n\</span>
+<span class="s1">  Export Type = Generic</span><span class="se">\n\</span>
+<span class="s1">  Export Units System = Current</span><span class="se">\n\</span>
+<span class="s1">  Export Variable Type = Current</span><span class="se">\n\</span>
+<span class="s1">  External Export Data = None</span><span class="se">\n\</span>
+<span class="s1">  Include File Information = Off</span><span class="se">\n\</span>
+<span class="s1">  Include Header = On</span><span class="se">\n\</span>
+<span class="s1">  Location = inlet</span><span class="se">\n\</span>
+<span class="s1">  Location List = /PLANE:port3</span><span class="se">\n\</span>
+<span class="s1">  Null Token = null</span><span class="se">\n\</span>
+<span class="s1">  Overwrite = On</span><span class="se">\n\</span>
+<span class="s1">  Precision = 8</span><span class="se">\n\</span>
+<span class="s1">  Separator = &quot;, &quot;</span><span class="se">\n\</span>
+<span class="s1">  Spatial Variables = X,Y,Z </span><span class="se">\n\</span>
+<span class="s1">  Variable List = gas.Velocity w, gas.Volume Fraction, liquid.Velocity w, X, Y, Z</span><span class="se">\n\</span>
+<span class="s1">  Vector Brackets = ()</span><span class="se">\n\</span>
+<span class="s1">  Vector Display = Scalar</span><span class="se">\n\</span>
+<span class="s1">END</span><span class="se">\n\</span>
+<span class="s1">&gt;export</span><span class="se">\n\</span>
+<span class="se">\n\</span>
+<span class="se">\n\</span>
+<span class="s1">&gt;quit     </span><span class="se">\n\</span>
+<span class="s1">        </span><span class="se">\</span>
+<span class="s1">        &#39;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">fi</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">subprocess</span><span class="o">.</span><span class="n">check_call</span><span class="p">(</span><span class="s2">&quot;ml ansys&quot;</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">CalledProcessError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Continuing...&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">())</span>
+    <span class="n">subprocess</span><span class="o">.</span><span class="n">check_call</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;rm -rf ./</span><span class="si">{</span><span class="n">case_name</span><span class="si">}</span><span class="s1">_Results&#39;</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">subprocess</span><span class="o">.</span><span class="n">check_call</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;cfx5post -play CFXPost_Commands.cse -line &gt; auto_cfx_run.log&#39;</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+
+
+
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, adix.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
