@@ -742,23 +742,39 @@ END \n\
 END \n\
 END \n\
 END \n\
-BOUNDARY: outlet \n\
-Boundary Type = OUTLET \n\
-Location = OUTLET \n\
-BOUNDARY CONDITIONS: \n\
-FLOW REGIME: \n\
-Option = Subsonic \n\
-END \n\
-MASS AND MOMENTUM: \n\
-Option = Average Static Pressure \n\
-Pressure Profile Blend = 0.05 \n\
-Relative Pressure = 0 [Pa] \n\
-END \n\
-PRESSURE AVERAGING: \n\
-Option = Average Over Whole Outlet \n\
-END \n\
-END \n\
-END \n\
+BOUNDARY: outlet\n\
+Boundary Type = OPENING\n\
+Location = OUTLET\n\
+Use Profile Data = False\n\
+BOUNDARY CONDITIONS:\n\
+FLOW DIRECTION:\n\
+Option = Normal to Boundary Condition\n\
+END\n\
+FLOW REGIME:\n\
+Option = Subsonic\n\
+END\n\
+MASS AND MOMENTUM:\n\
+Option = Opening Pressure and Direction\n\
+Relative Pressure = 0 [Pa]\n\
+END\n\
+TURBULENCE:\n\
+Option = Medium Intensity and Eddy Viscosity Ratio\n\
+END\n\
+END\n\
+FLUID: gas\n\
+BOUNDARY CONDITIONS:\n\
+VOLUME FRACTION:\n\
+Option = Zero Gradient\n\
+END\n\
+END\n\
+END\n\
+FLUID: liquid\n\
+BOUNDARY CONDITIONS:\n\
+VOLUME FRACTION:\n\
+Option = Zero Gradient\n\
+END\n\
+END\n\
+END\n\
 BOUNDARY: walls \n\
 Boundary Type = WALL \n\
 Location = WALLS \n\
