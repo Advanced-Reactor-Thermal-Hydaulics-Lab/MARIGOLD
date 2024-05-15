@@ -41,12 +41,8 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../MARIGOLD.html">MARIGOLD package</a></li>
-</ul>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../MARIGOLD.html">MARIGOLD package</a></li>
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../MARIGOLD.html">MARIGOLD</a></li>
 </ul>
 
         </div>
@@ -832,23 +828,39 @@
 <span class="s2">END </span><span class="se">\n\</span>
 <span class="s2">END </span><span class="se">\n\</span>
 <span class="s2">END </span><span class="se">\n\</span>
-<span class="s2">BOUNDARY: outlet </span><span class="se">\n\</span>
-<span class="s2">Boundary Type = OUTLET </span><span class="se">\n\</span>
-<span class="s2">Location = OUTLET </span><span class="se">\n\</span>
-<span class="s2">BOUNDARY CONDITIONS: </span><span class="se">\n\</span>
-<span class="s2">FLOW REGIME: </span><span class="se">\n\</span>
-<span class="s2">Option = Subsonic </span><span class="se">\n\</span>
-<span class="s2">END </span><span class="se">\n\</span>
-<span class="s2">MASS AND MOMENTUM: </span><span class="se">\n\</span>
-<span class="s2">Option = Average Static Pressure </span><span class="se">\n\</span>
-<span class="s2">Pressure Profile Blend = 0.05 </span><span class="se">\n\</span>
-<span class="s2">Relative Pressure = 0 [Pa] </span><span class="se">\n\</span>
-<span class="s2">END </span><span class="se">\n\</span>
-<span class="s2">PRESSURE AVERAGING: </span><span class="se">\n\</span>
-<span class="s2">Option = Average Over Whole Outlet </span><span class="se">\n\</span>
-<span class="s2">END </span><span class="se">\n\</span>
-<span class="s2">END </span><span class="se">\n\</span>
-<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">BOUNDARY: outlet</span><span class="se">\n\</span>
+<span class="s2">Boundary Type = OPENING</span><span class="se">\n\</span>
+<span class="s2">Location = OUTLET</span><span class="se">\n\</span>
+<span class="s2">Use Profile Data = False</span><span class="se">\n\</span>
+<span class="s2">BOUNDARY CONDITIONS:</span><span class="se">\n\</span>
+<span class="s2">FLOW DIRECTION:</span><span class="se">\n\</span>
+<span class="s2">Option = Normal to Boundary Condition</span><span class="se">\n\</span>
+<span class="s2">END</span><span class="se">\n\</span>
+<span class="s2">FLOW REGIME:</span><span class="se">\n\</span>
+<span class="s2">Option = Subsonic</span><span class="se">\n\</span>
+<span class="s2">END</span><span class="se">\n\</span>
+<span class="s2">MASS AND MOMENTUM:</span><span class="se">\n\</span>
+<span class="s2">Option = Opening Pressure and Direction</span><span class="se">\n\</span>
+<span class="s2">Relative Pressure = 0 [Pa]</span><span class="se">\n\</span>
+<span class="s2">END</span><span class="se">\n\</span>
+<span class="s2">TURBULENCE:</span><span class="se">\n\</span>
+<span class="s2">Option = Medium Intensity and Eddy Viscosity Ratio</span><span class="se">\n\</span>
+<span class="s2">END</span><span class="se">\n\</span>
+<span class="s2">END</span><span class="se">\n\</span>
+<span class="s2">FLUID: gas</span><span class="se">\n\</span>
+<span class="s2">BOUNDARY CONDITIONS:</span><span class="se">\n\</span>
+<span class="s2">VOLUME FRACTION:</span><span class="se">\n\</span>
+<span class="s2">Option = Zero Gradient</span><span class="se">\n\</span>
+<span class="s2">END</span><span class="se">\n\</span>
+<span class="s2">END</span><span class="se">\n\</span>
+<span class="s2">END</span><span class="se">\n\</span>
+<span class="s2">FLUID: liquid</span><span class="se">\n\</span>
+<span class="s2">BOUNDARY CONDITIONS:</span><span class="se">\n\</span>
+<span class="s2">VOLUME FRACTION:</span><span class="se">\n\</span>
+<span class="s2">Option = Zero Gradient</span><span class="se">\n\</span>
+<span class="s2">END</span><span class="se">\n\</span>
+<span class="s2">END</span><span class="se">\n\</span>
+<span class="s2">END</span><span class="se">\n\</span>
 <span class="s2">BOUNDARY: walls </span><span class="se">\n\</span>
 <span class="s2">Boundary Type = WALL </span><span class="se">\n\</span>
 <span class="s2">Location = WALLS </span><span class="se">\n\</span>
