@@ -6,6 +6,8 @@
   <title>MARIGOLD.Condition &mdash; MARIGOLD 0.0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/dark_mode_css/general.css?v=c0a7eb24" />
+      <link rel="stylesheet" type="text/css" href="../../_static/dark_mode_css/dark.css?v=70edf1c7" />
 
   
   <!--[if lt IE 9]>
@@ -17,6 +19,8 @@
         <script src="../../_static/documentation_options.js?v=d45e8c67"></script>
         <script src="../../_static/doctools.js?v=888ff710"></script>
         <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../_static/dark_mode_js/default_dark.js?v=fd565c74"></script>
+        <script src="../../_static/dark_mode_js/theme_switcher.js?v=358d3910"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -229,9 +233,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
 
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">phi_in</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">r_in</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">interp_method</span><span class="o">=</span><span class="s1">&#39;None&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-
-<span class="sd">        Returns the value of param at (phi, r). Phi is in radians</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the value of param at (phi, r). Phi is in radians</span>
 <span class="sd">         </span>
 <span class="sd">        Interp options:</span>
 <span class="sd">         - &#39;None&#39;, will try to fetch raw data at this location</span>
@@ -598,8 +600,9 @@
 
 <span class="sd">        .. math:: v_{f, approx} = \\frac{(n+1)(2*n+1)}{ (2*n^{2})} * (j_{f} / (1- \\langle \\alpha \\rangle)) * (1 - abs(rstar))**(1/n)</span>
 
-<span class="sd">        Will not overwrite vf data if it already exists, but will always store data in </span>
-<span class="sd">        midas_dict[&#39;vf_approx&#39;] even if midas_dict[&#39;vf&#39;] has data</span>
+<span class="sd">        Stores:</span>
+<span class="sd">         - &quot;vf_approx&quot; in midas_dict</span>
+<span class="sd">         - &quot;vf&quot;, if it does not alread exist in midas_dict</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -626,8 +629,9 @@
 
 <span class="sd">        .. math:: v_{g, approx} = \\frac{(n+1)(2*n+1)}{ (2*n^{2})} * (j_{g} / \\langle \\alpha \\rangle) * (1 - abs(rstar))**(1/n)</span>
 
-<span class="sd">        Will not overwrite vg data if it already exists, but will always store data in </span>
-<span class="sd">        midas_dict[&#39;vg_approx&#39;] even if midas_dict[&#39;ug1&#39;] has data</span>
+<span class="sd">        Stores:</span>
+<span class="sd">         - &quot;vg_approx&quot; in midas_dict</span>
+<span class="sd">         - &quot;ug1&quot;, if it does not alread exist in midas_dict</span>
 
 <span class="sd">        If you have a lot of group II bubbles this functions&#39; no good</span>
 
@@ -673,6 +677,17 @@
     <span class="k">def</span> <span class="nf">calc_vf_lee</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">K</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Calculate vf, jf, vr based on Lee et al. (2002) equation</span>
 
+<span class="sd">        Inputs:</span>
+<span class="sd">         - None</span>
+
+<span class="sd">        Stores:</span>
+<span class="sd">         - &quot;vf_lee&quot; in midas_dict</span>
+<span class="sd">         - &quot;jf_lee&quot; in midas_dict</span>
+<span class="sd">         - &quot;vr_lee&quot; in midas_dict</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">         - Area-average vf_lee</span>
+
 <span class="sd">        Really a model proposed by Bosio and Malnes</span>
 
 <span class="sd">        .. math:: v_{f} = \\frac{ 1 }{ \\sqrt{1 - \\alpha^{2} / 2} } * \\sqrt{ \\frac{ 2 \\Delta p }{K \\rho_{f}} } </span>
@@ -700,13 +715,24 @@
                     <span class="n">vr_lee</span> <span class="o">=</span> <span class="n">vg</span> <span class="o">-</span> <span class="n">vf_lee</span>
                 <span class="n">midas_dict</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;vr_lee&#39;</span><span class="p">:</span>  <span class="n">vr_lee</span><span class="p">})</span>
 
-        <span class="k">return</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">area_avg</span><span class="p">(</span><span class="s1">&#39;vf_lee&#39;</span><span class="p">)</span></div>
 
     
 <div class="viewcode-block" id="Condition.calc_vf_naive">
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.calc_vf_naive">[docs]</a>
     <span class="k">def</span> <span class="nf">calc_vf_naive</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Calculate vf, jf, vr based on single-phase equation</span>
+
+<span class="sd">        Inputs:</span>
+<span class="sd">         - None</span>
+
+<span class="sd">        Stores:</span>
+<span class="sd">         - &quot;vf_naive&quot; in midas_dict</span>
+<span class="sd">         - &quot;jf_naive&quot; in midas_dict</span>
+<span class="sd">         - &quot;vr_naive&quot; in midas_dict</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">         - Area-average vf_naive</span>
 
 <span class="sd">        .. math::  v_{f} = \\sqrt{ \\frac{ 2 \\Delta p }{ \\rho_{f}} } </span>
 <span class="sd">        </span>
@@ -736,18 +762,25 @@
                     <span class="n">vr_naive</span> <span class="o">=</span> <span class="n">vg</span> <span class="o">-</span> <span class="n">vf_naive</span>
                 <span class="n">midas_dict</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;vr_naive&#39;</span><span class="p">:</span>  <span class="n">vr_naive</span><span class="p">})</span>
 
-        <span class="k">return</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">area_avg</span><span class="p">(</span><span class="s1">&#39;vf_naive&#39;</span><span class="p">)</span></div>
 
     
 <div class="viewcode-block" id="Condition.calc_vr">
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.calc_vr">[docs]</a>
     <span class="k">def</span> <span class="nf">calc_vr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">warn_approx</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Method for calculating relative velocity. Will approximate vf if it cannot be found.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Method for calculating relative velocity. </span>
+<span class="sd">        </span>
+<span class="sd">        Inputs:</span>
+<span class="sd">         - warn_approx, flag for warning if :math`v_r` is not found and function is approximating</span>
 
 <span class="sd">        Note that if vg = 0, then this method says vr = 0. This will happen when no data is present,</span>
 <span class="sd">        such as in the bottom of the pipe in horizontal, when this is not necessarily true</span>
 
-<span class="sd">        warn_approx is a flag to print out a warning statement if vf is being approximated</span>
+<span class="sd">        Stores:</span>
+<span class="sd">         - &#39;vr&#39; in midas_dict</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">         - Area-average vr</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -781,22 +814,24 @@
                     <span class="n">midas_dict</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;vr&#39;</span><span class="p">:</span> <span class="n">vr</span><span class="p">})</span>
                     
 
-        <span class="k">return</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">area_avg</span><span class="p">(</span><span class="s1">&#39;vr&#39;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Condition.calc_vgj">
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.calc_vgj">[docs]</a>
     <span class="k">def</span> <span class="nf">calc_vgj</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">warn_approx</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Method for calculating Vgj, by doing</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Method for calculating Vgj</span>
 
-<span class="sd">        j_local = midas_dict[&#39;alpha&#39;] * midas_dict[&#39;ug1&#39;] + (1 - midas_dict[&#39;alpha&#39;]) * midas_dict[&#39;vf&#39;]</span>
-<span class="sd">        vgj = midas_dict[&#39;ug1&#39;] - j_local</span>
+<span class="sd">        Inputs:</span>
+<span class="sd">         - warn_approx, flag for warning if :math`V_{gj}` is not found and function is approximating</span>
 
-<span class="sd">        stored in midas_dict[&#39;vgj&#39;]</span>
-<span class="sd">        also stores local j, midas_dict[&#39;j&#39;]</span>
+<span class="sd">        Stores:</span>
+<span class="sd">         - &quot;vgj&quot; in midas_dict</span>
+<span class="sd">         - &quot;j&quot; in midas_dict</span>
+<span class="sd">         - &quot;alpha_j&quot; in midas_dict</span>
 
-<span class="sd">        warn_approx is a flag to print out a warning statement if vf is being approximated, which will</span>
-<span class="sd">        happen if not found</span>
+<span class="sd">        Returns:</span>
+<span class="sd">         - Void-weighted area-averaged Vgj</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -819,16 +854,27 @@
                 <span class="n">midas_dict</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;j&#39;</span><span class="p">:</span> <span class="n">j_local</span><span class="p">})</span>
                 <span class="n">midas_dict</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;alpha_j&#39;</span><span class="p">:</span> <span class="n">alpha_j</span><span class="p">})</span>
 
-        <span class="k">return</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">void_area_avg</span><span class="p">(</span><span class="s1">&#39;vgj&#39;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Condition.calc_grad">
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.calc_grad">[docs]</a>
     <span class="k">def</span> <span class="nf">calc_grad</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">recalc</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculates gradient of param based on the data in self. </span>
+
+<span class="sd">        Inputs:</span>
+<span class="sd">         - &quot;param&quot;, string for local parameter to calculate the gradient of</span>
 <span class="sd">        </span>
-<span class="sd">        Stored in self&#39;s midas_dict as grad_param_r, grad_param_phi, etc.</span>
-<span class="sd">        Will only be called once, unless recalc is True.</span>
+<span class="sd">        Stores:</span>
+<span class="sd">         - &quot;grad_&#39;param&#39;_r&quot;</span>
+<span class="sd">         - &quot;grad_&#39;param&#39;_phi&quot;</span>
+<span class="sd">         - &quot;grad_&#39;param&#39;_phinor&quot;</span>
+<span class="sd">         - &quot;grad_&#39;param&#39;_x&quot;</span>
+<span class="sd">         - &quot;grad_&#39;param&#39;_y&quot;</span>
+<span class="sd">         - &quot;grad_&#39;param&#39;_total&quot;</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">         - Area average &quot;grad_&#39;param&#39;_total&quot;</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
         
@@ -946,7 +992,7 @@
                     <span class="bp">self</span><span class="o">.</span><span class="n">phi</span><span class="p">[</span><span class="n">comp_angle</span><span class="p">][</span><span class="mf">0.0</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">grad_param_name</span><span class="o">+</span><span class="s1">&#39;_total&#39;</span><span class="p">:</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">r_dict</span><span class="p">[</span><span class="mf">0.0</span><span class="p">][</span><span class="n">grad_param_name</span><span class="o">+</span><span class="s1">&#39;_r&#39;</span><span class="p">])</span> <span class="p">})</span>
                     
 
-        <span class="k">return</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">area_avg</span><span class="p">(</span><span class="n">grad_param_name</span><span class="o">+</span><span class="s1">&#39;_total&#39;</span><span class="p">)</span></div>
 
     
 <div class="viewcode-block" id="Condition.fit_spline">
@@ -1000,9 +1046,9 @@
         <span class="k">return</span></div>
 
     
-<div class="viewcode-block" id="Condition.calc_linear_interp">
-<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.calc_linear_interp">[docs]</a>
-    <span class="k">def</span> <span class="nf">calc_linear_interp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="Condition.fit_linear_interp">
+<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.fit_linear_interp">[docs]</a>
+    <span class="k">def</span> <span class="nf">fit_linear_interp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Makes a LinearNDInterpolator for the given param. </span>
 <span class="sd">        </span>
 <span class="sd">            Access with self.linear_interp[param], phi in radians</span>
@@ -1038,9 +1084,9 @@
         <span class="k">return</span></div>
 
     
-<div class="viewcode-block" id="Condition.calc_linear_xy_interp">
-<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.calc_linear_xy_interp">[docs]</a>
-    <span class="k">def</span> <span class="nf">calc_linear_xy_interp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="Condition.fit_linear_xy_interp">
+<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.fit_linear_xy_interp">[docs]</a>
+    <span class="k">def</span> <span class="nf">fit_linear_xy_interp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Makes a LinearNDInterpolator for the given param in x y coords</span>
 <span class="sd">        </span>
 <span class="sd">        Can access  with self.linear_xy_interp[param]</span>
@@ -1081,8 +1127,12 @@
     <span class="k">def</span> <span class="nf">max</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">recalc</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Return maximum value of param in the Condition</span>
 <span class="sd">        </span>
-<span class="sd">        By default, saves the data to a dictionary, Condition.maxs</span>
-<span class="sd">        for future reference, unless recalc=True</span>
+<span class="sd">        Inputs:</span>
+<span class="sd">         - param, string of local parameter to find maximum of</span>
+<span class="sd">         - recalc, if already calculated, will pull from dictionary instead of calculating unless this is true</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">         - maximum value of param</span>
 <span class="sd">                          </span>
 <span class="sd">        &quot;&quot;&quot;</span>
         
@@ -1101,9 +1151,13 @@
 <div class="viewcode-block" id="Condition.max_loc">
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.max_loc">[docs]</a>
     <span class="k">def</span> <span class="nf">max_loc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span><span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; Return location of maximum param in the Condition</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Return location of maximum value of param</span>
 <span class="sd">        </span>
-<span class="sd">        returns in the form (r/R, angle in degrees)</span>
+<span class="sd">        Inputs:</span>
+<span class="sd">         - param, string of local parameter to find maximum of</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">         - r/R location of the maximum value of param</span>
 <span class="sd">                          </span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">max</span> <span class="o">=</span> <span class="mi">0</span>
@@ -1121,10 +1175,13 @@
     <span class="k">def</span> <span class="nf">min</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">recalc</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">nonzero</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Return minimum value of param in the Condition</span>
 <span class="sd">        </span>
-<span class="sd">        By default, saves the data to a dictionary, Condition.mins</span>
-<span class="sd">        for future reference, unless recalc=True</span>
+<span class="sd">        Inputs:</span>
+<span class="sd">         - param, string of local parameter to find minimum of</span>
+<span class="sd">         - recalc, if already calculated, will pull from dictionary instead of calculating unless this is true</span>
+<span class="sd">         - nonzero, if true, will exclude points with the param = 0 when finding the minimum</span>
 
-<span class="sd">        nonzero=True will find the smallest nonzero value.</span>
+<span class="sd">        Returns:</span>
+<span class="sd">         - minimum value of param</span>
 <span class="sd">                          </span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -1147,12 +1204,13 @@
 <div class="viewcode-block" id="Condition.min_loc">
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.min_loc">[docs]</a>
     <span class="k">def</span> <span class="nf">min_loc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span><span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; Return minimum value of param in the Condition</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Return location of minimum value of param</span>
 <span class="sd">        </span>
-<span class="sd">        By default, saves the data to a dictionary, Condition.mins</span>
-<span class="sd">        for future reference, unless recalc=True</span>
+<span class="sd">        Inputs:</span>
+<span class="sd">         - param, string of local parameter to find minimum of</span>
 
-<span class="sd">        nonzero option not implemented, TODO</span>
+<span class="sd">        Returns:</span>
+<span class="sd">         - r/R location of the maximum value of param</span>
 <span class="sd">                          </span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">min</span> <span class="o">=</span> <span class="mi">10</span><span class="o">**</span><span class="mi">7</span>
@@ -1168,7 +1226,14 @@
 <div class="viewcode-block" id="Condition.max_line_loc">
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.max_line_loc">[docs]</a>
     <span class="k">def</span> <span class="nf">max_line_loc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">angle</span><span class="p">:</span><span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; Return r/R location of maximum value of param at a given angle</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Return location of maximum value of param at a given angle</span>
+<span class="sd">        </span>
+<span class="sd">        Inputs:</span>
+<span class="sd">         - param, string of local parameter to find maximum of</span>
+<span class="sd">         - angle, angle to search along</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">         - r/R location of the maximum value of param when φ=angle</span>
 <span class="sd">                          </span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">max</span> <span class="o">=</span> <span class="mi">0</span>
@@ -1184,6 +1249,13 @@
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.max_line">[docs]</a>
     <span class="k">def</span> <span class="nf">max_line</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">angle</span><span class="p">:</span><span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Return maximum value of param at a given angle</span>
+<span class="sd">        </span>
+<span class="sd">        Inputs:</span>
+<span class="sd">         - param, string of local parameter to find maximum of</span>
+<span class="sd">         - angle, angle to search along</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">         - maximum value of param when φ=angle</span>
 <span class="sd">                          </span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">max</span> <span class="o">=</span> <span class="mi">0</span>
@@ -1199,15 +1271,22 @@
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.find_hstar_pos">[docs]</a>
     <span class="k">def</span> <span class="nf">find_hstar_pos</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;max_dsm&#39;</span><span class="p">,</span> <span class="n">void_criteria</span> <span class="o">=</span> <span class="mf">0.05</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Returns the vertical distance from the top of the pipe to the bubble layer interface</span>
+
+<span class="sd">        Inputs:</span>
+<span class="sd">         - method</span>
+<span class="sd">         - void_criteria, used in some methods</span>
 <span class="sd">        </span>
 <span class="sd">        Methods for determining bubble layer interface</span>
-<span class="sd">        - max_dsm</span>
-<span class="sd">        - min_grad_y</span>
-<span class="sd">        - max_grad_y</span>
-<span class="sd">        - max_mag_grad_y</span>
-<span class="sd">        - zero_void</span>
-<span class="sd">        - percent_void, search down the phi = 90 line, find largest value of rstar where alpha &lt; min_void</span>
-<span class="sd">        - Ryan_Ref, uses 1.3 - 1.57e-5 * Ref, proposed by Ryan (2022)</span>
+<span class="sd">         - max_dsm</span>
+<span class="sd">         - min_grad_y</span>
+<span class="sd">         - max_grad_y</span>
+<span class="sd">         - max_mag_grad_y</span>
+<span class="sd">         - zero_void</span>
+<span class="sd">         - percent_void, search down the phi = 90 line, find largest value of rstar where alpha &lt; min_void</span>
+<span class="sd">         - Ryan_Ref, uses 1.3 - 1.57e-5 * Ref, proposed by Ryan (2022)</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">         - hstar</span>
 <span class="sd">        </span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -1294,10 +1373,15 @@
 
 <div class="viewcode-block" id="Condition.avg">
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.avg">[docs]</a>
-    <span class="k">def</span> <span class="nf">avg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">include_nonzero</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">avg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">include_zero</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculates a basic average of a parameter, &quot;param&quot;</span>
 <span class="sd">        </span>
-<span class="sd">        Just looks at every param and ensemble-averages them</span>
+<span class="sd">        Inputs:</span>
+<span class="sd">         - param, string of local parameter to find average of</span>
+<span class="sd">         - include_zero, if you want to include when param = 0 in average</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">         - average value of param</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
@@ -1305,7 +1389,7 @@
         <span class="k">for</span> <span class="n">angle</span><span class="p">,</span> <span class="n">r_dict</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">phi</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">for</span> <span class="n">rstar</span><span class="p">,</span> <span class="n">midas_dict</span> <span class="ow">in</span> <span class="n">r_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                 
-                <span class="k">if</span> <span class="n">include_nonzero</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">include_zero</span><span class="p">:</span>
                     <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
                     <span class="n">avg_param</span> <span class="o">+=</span> <span class="n">midas_dict</span><span class="p">[</span><span class="n">param</span><span class="p">]</span>
                 <span class="k">else</span><span class="p">:</span>
@@ -1321,14 +1405,16 @@
     <span class="k">def</span> <span class="nf">area_avg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">even_opt</span><span class="o">=</span><span class="s1">&#39;first&#39;</span><span class="p">,</span> <span class="n">recalc</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Method for calculating the area-average of a parameter, &quot;param&quot;</span>
 <span class="sd">        </span>
-<span class="sd">        param can be anything MIDAS outputs, but usually of interest are &quot;alpha&quot; or &quot;alpha_ug&quot;</span>
-<span class="sd">        If you&#39;re not sure what somethings named, try Condition.phi[90][1.0].keys()</span>
+<span class="sd">        Inputs:</span>
+<span class="sd">         - param, string of local parameter to area-average</span>
+<span class="sd">         - even_opt, passed to integration method</span>
+<span class="sd">         - recalc, if area-average previously calculated, it was stored in a dictionary, and can just pull from there</span>
 
-<span class="sd">        Uses Simpson&#39;s rule for integration, even_opt passed to that. Will save the previously calculated area averages </span>
-<span class="sd">        in Condition.area_avgs[param], and won&#39;t recalculate unless recalc = True</span>
-
-<span class="sd">        Returns the area-averaged parameter, or None if the method failed</span>
-
+<span class="sd">        Returns:</span>
+<span class="sd">         - Area-averaged parameter, or None if the method failed</span>
+<span class="sd">        </span>
+<span class="sd">        Uses Simpson&#39;s rule for integration, specifically scipy.integrate.simpsons</span>
+<span class="sd">        </span>
 <span class="sd">        &quot;&quot;&quot;</span>
         
         <span class="c1"># Check that the parameter that the user requested exists</span>
@@ -1398,14 +1484,18 @@
 <div class="viewcode-block" id="Condition.circ_segment_area_avg">
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.circ_segment_area_avg">[docs]</a>
     <span class="k">def</span> <span class="nf">circ_segment_area_avg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">hstar</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">ngridr</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span> <span class="n">ngridphi</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span> <span class="n">int_err</span> <span class="o">=</span> <span class="mi">10</span><span class="o">**-</span><span class="mi">4</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Method for calculating the area-average of a parameter, &quot;param&quot; over the circular segment defined by h</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Method for calculating the area-average of a parameter, &quot;param&quot; in some circular segment defined by :math:`h^*`</span>
 <span class="sd">        </span>
-<span class="sd">        Basically, if you slice the pipe at h, area average everything above h</span>
+<span class="sd">        Inputs:</span>
+<span class="sd">         - param, string of local parameter to area-average</span>
+<span class="sd">         - hstar, distance from the top of the pipe that defines circular segment</span>
+<span class="sd">         - int_err, acceptable warning for integral error (passed to scipy.integrate.dblquad)</span>
 
-<span class="sd">        to smooth it out, integrate over an interpolated mesh</span>
-
-<span class="sd">        returns integrand result</span>
-
+<span class="sd">        Returns:</span>
+<span class="sd">         - Area-averaged parameter, or None if the method failed</span>
+<span class="sd">        </span>
+<span class="sd">        Uses scipy.integrate.dblquad. May be computationally expensive</span>
+<span class="sd">        </span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># Check that the parameter that the user requested exists</span>
@@ -1437,7 +1527,7 @@
         <span class="n">phis</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">phis</span><span class="p">)</span>
         <span class="n">vals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">vals</span><span class="p">)</span>   
 
-        <span class="n">interp</span> <span class="o">=</span> <span class="n">interpolate</span><span class="o">.</span><span class="n">LinearNDInterpolator</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">rs</span><span class="p">,</span> <span class="n">phis</span><span class="p">)),</span> <span class="n">vals</span><span class="p">)</span>
+        <span class="n">interp</span> <span class="o">=</span> <span class="n">interpolate</span><span class="o">.</span><span class="n">LinearNDInterpolator</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">rs</span><span class="p">,</span> <span class="n">phis</span><span class="p">)),</span> <span class="n">vals</span><span class="p">)</span> <span class="c1"># TODO refactor to use __call__</span>
 
         <span class="c1"># To integrate, need to get the bounds. They&#39;re different depending on if h* &gt; 1</span>
         <span class="k">def</span> <span class="nf">lower_r_bound_pos</span><span class="p">(</span><span class="n">phi</span><span class="p">):</span>
@@ -1463,14 +1553,18 @@
 <div class="viewcode-block" id="Condition.circ_segment_void_area_avg">
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.circ_segment_void_area_avg">[docs]</a>
     <span class="k">def</span> <span class="nf">circ_segment_void_area_avg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">hstar</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">ngridr</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span> <span class="n">ngridphi</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span> <span class="n">int_err</span> <span class="o">=</span> <span class="mi">10</span><span class="o">**-</span><span class="mi">4</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Method for calculating the void-weighted area-average of a parameter over the circular segment defined by h</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Method for calculating the void-weighted area-average of a parameter, &quot;param&quot; in some circular segment defined by :math:`h^*`</span>
 <span class="sd">        </span>
-<span class="sd">        Basically, if you slice the pipe at h, void-weighted area average everything above h</span>
+<span class="sd">        Inputs:</span>
+<span class="sd">         - param, string of local parameter to area-average</span>
+<span class="sd">         - hstar, distance from the top of the pipe that defines circular segment</span>
+<span class="sd">         - int_err, acceptable warning for integral error (passed to scipy.integrate.dblquad)</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">         - Void-weighted rea-averaged parameter, or None if the method failed</span>
 <span class="sd">        </span>
-<span class="sd">        to smooth it out, integrate over an interpolated mesh</span>
-
-<span class="sd">        returns integrand result</span>
-
+<span class="sd">        Uses scipy.integrate.dblquad. May be computationally expensive</span>
+<span class="sd">        </span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># Check that the parameter that the user requested exists</span>
@@ -1529,12 +1623,18 @@
 <div class="viewcode-block" id="Condition.line_avg">
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.line_avg">[docs]</a>
     <span class="k">def</span> <span class="nf">line_avg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">phi_angle</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">even_opt</span><span class="o">=</span><span class="s1">&#39;first&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Line average of param over line defined by phi_angle</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Method for calculating the average value of param across a diameter defined by φ = angle</span>
 <span class="sd">        </span>
-<span class="sd">        Also includes the complementary angle, so the line is a diameter of the pipe</span>
+<span class="sd">        Inputs:</span>
+<span class="sd">         - param, string of local parameter to area-average</span>
+<span class="sd">         - phi_angle, angle to define diameter to integrate across</span>
+<span class="sd">         - even_opt, see :any:area_avg</span>
 
-<span class="sd">        returns integrand result</span>
-
+<span class="sd">        Returns:</span>
+<span class="sd">         - Average value of param along φ = angle</span>
+<span class="sd">        </span>
+<span class="sd">        Uses scipy.integrate.simpsons</span>
+<span class="sd">        </span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># Check that the parameter that the user requested exists</span>
@@ -1584,14 +1684,20 @@
 <div class="viewcode-block" id="Condition.line_avg_dev">
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.line_avg_dev">[docs]</a>
     <span class="k">def</span> <span class="nf">line_avg_dev</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">phi_angle</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">even_opt</span><span class="o">=</span><span class="s1">&#39;first&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Second moment of param over line defined by phi_angle</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Method for calculating the average value of param across a diameter defined by φ = angle</span>
 <span class="sd">        </span>
-<span class="sd">        Also includes the complementary angle, so the line is a diameter of the pipe</span>
+<span class="sd">        Inputs:</span>
+<span class="sd">         - param, string of local parameter to calculate line average deviation</span>
+<span class="sd">         - phi_angle, angle to define diameter to integrate across</span>
+<span class="sd">         - even_opt, see :any:area_avg</span>
 
-<span class="sd">        &lt; param - &lt;param&gt;^2 &gt; / &lt;param&gt;^2</span>
+<span class="sd">        Returns:</span>
+<span class="sd">         - integrand result</span>
+<span class="sd">        </span>
+<span class="sd">        Taking param = :math:`\\psi`, mathematically, this function does</span>
 
-<span class="sd">        returns integrand result</span>
-
+<span class="sd">        .. math:: \\frac{\\langle \\psi - \\langle \\psi^2 \\rangle  \\rangle }{\\langle \\psi \\rangle^2}</span>
+<span class="sd">        </span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># Check that the parameter that the user requested exists</span>
@@ -1642,10 +1748,18 @@
 <div class="viewcode-block" id="Condition.void_area_avg">
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.void_area_avg">[docs]</a>
     <span class="k">def</span> <span class="nf">void_area_avg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">even_opt</span><span class="o">=</span><span class="s1">&#39;first&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Method for calculating the void-weighted area-average of a parameter</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Method for calculating the void-weighted area-average of a parameter, &quot;param&quot;</span>
 <span class="sd">        </span>
-<span class="sd">        &lt;alpha * param&gt; / &lt;alpha&gt;</span>
+<span class="sd">        Inputs:</span>
+<span class="sd">         - param, string of local parameter to area-average</span>
+<span class="sd">         - even_opt, passed to integration method</span>
+<span class="sd">         - recalc, if area-average previously calculated, it was stored in a dictionary, and can just pull from there</span>
 
+<span class="sd">        Returns:</span>
+<span class="sd">         - void-weighted area-averaged parameter, or None if the method failed</span>
+<span class="sd">        </span>
+<span class="sd">        Uses Simpson&#39;s rule for integration, specifically scipy.integrate.simpsons</span>
+<span class="sd">        </span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># Check that the parameter that the user requested exists</span>
@@ -1702,9 +1816,20 @@
 <div class="viewcode-block" id="Condition.interp_area_avg">
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.interp_area_avg">[docs]</a>
     <span class="k">def</span> <span class="nf">interp_area_avg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">interp_type</span> <span class="o">=</span> <span class="s1">&#39;linear&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Function to area-average param, using the spline interpolation of param</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Method for calculating the area-average of a parameter, &quot;param&quot;, based on an interpolation of the data</span>
+<span class="sd">        </span>
+<span class="sd">        Inputs:</span>
+<span class="sd">         - param, string of local parameter to area-average</span>
+<span class="sd">         - interp_type, option for what kind of interpolation to use</span>
 
-<span class="sd">        Returns the intengrand result. May be computationally expensive</span>
+<span class="sd">        Options for interp_type:</span>
+<span class="sd">         - linear, see :any:`fit_linear_interp`</span>
+<span class="sd">         - spline, see :any:`fit_spline`</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">         - area-averaged parameter</span>
+<span class="sd">        </span>
+<span class="sd">        Uses scipy.integrate.dblquad, may be computationally expensive</span>
 <span class="sd">        </span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -1717,7 +1842,7 @@
         
         <span class="k">elif</span> <span class="n">interp_type</span> <span class="o">==</span> <span class="s1">&#39;linear&#39;</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">param</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">linear_interp</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">calc_linear_interp</span><span class="p">(</span><span class="n">param</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">fit_linear_interp</span><span class="p">(</span><span class="n">param</span><span class="p">)</span>
 
             <span class="k">def</span> <span class="nf">integrand</span><span class="p">(</span><span class="n">phi</span><span class="p">,</span> <span class="n">r</span><span class="p">):</span>
                 <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">linear_interp</span><span class="p">[</span><span class="n">param</span><span class="p">](</span><span class="n">phi</span><span class="p">,</span> <span class="n">r</span><span class="p">)</span> <span class="o">*</span> <span class="n">r</span>
@@ -1729,9 +1854,10 @@
 <div class="viewcode-block" id="Condition.spline_void_area_avg">
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.spline_void_area_avg">[docs]</a>
     <span class="k">def</span> <span class="nf">spline_void_area_avg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span><span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Function to void-weighted area-average param over a circular segment defined by h, using the spline interpolation of param</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Function to void-weighted area-average param based on a spline interpolation</span>
 
-<span class="sd">        Returns the intengrand result. May be computationally expensive</span>
+<span class="sd">        Inputs:</span>
+<span class="sd">         - param, string of local parameter to area-average</span>
 <span class="sd">        </span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -1748,9 +1874,17 @@
 <div class="viewcode-block" id="Condition.spline_circ_seg_area_avg">
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.spline_circ_seg_area_avg">[docs]</a>
     <span class="k">def</span> <span class="nf">spline_circ_seg_area_avg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">hstar</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">int_err</span> <span class="o">=</span> <span class="mi">10</span><span class="o">**-</span><span class="mi">4</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Function to area-average over a circular segment defined by h, using the spline interpolation of param</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Function to area-average over a circular segment using the spline interpolation of param</span>
 
-<span class="sd">        Returns the intengrand result. May be computationally expensive</span>
+<span class="sd">        Inputs:</span>
+<span class="sd">         - param, string of local parameter to area-average</span>
+<span class="sd">         - hstar, distance from the top of the pipe that defines circular segment</span>
+<span class="sd">         - int_err, acceptable warning for integral error (passed to scipy.integrate.dblquad)</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">         - integrand result</span>
+
+<span class="sd">        Uses scipy.integrate.dblquad. May be computationally expensive</span>
 <span class="sd">        </span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -1782,9 +1916,18 @@
     <span class="k">def</span> <span class="nf">calc_void_cov</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculates the void covariance</span>
 
-<span class="sd">        Returns &lt;alpha^2&gt;/&lt;alpha&gt;^2</span>
+<span class="sd">        Inputs:</span>
+<span class="sd">         - None</span>
 
-<span class="sd">        Stored in self.void_cov</span>
+<span class="sd">        Stores:</span>
+<span class="sd">         - &quot;void_cov&quot; in self</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">         - void covariance</span>
+
+<span class="sd">        Mathematically performing the operation</span>
+<span class="sd">        </span>
+<span class="sd">        .. math:: \\frac{\\langle \\alpha^2 \\rangle }{\\langle \\alpha \\rangle^2}</span>
 <span class="sd">        </span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -1826,9 +1969,18 @@
     <span class="k">def</span> <span class="nf">calc_sigma_alpha</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculates the second moment of alpha</span>
 
-<span class="sd">        Returns &lt;(alpha-&lt;alpha&gt;)^2&gt;/&lt;alpha&gt;^2</span>
+<span class="sd">        Inputs:</span>
+<span class="sd">         - None</span>
 
-<span class="sd">        Stored in self.sigma_alpha</span>
+<span class="sd">        Stores:</span>
+<span class="sd">         - &quot;sigma_alpha&quot; in self</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">         - second moment of :math:`alpha`</span>
+
+<span class="sd">        Mathematically performing the operation</span>
+
+<span class="sd">        .. math:: \\frac{\\langle (\\alpha - \\langle \\alpha \\rangle)^2 \\rangle }{\\langle \\alpha \\rangle^2}</span>
 <span class="sd">        </span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -1873,9 +2025,18 @@
     <span class="k">def</span> <span class="nf">calc_mu3_alpha</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculates the third moment of alpha</span>
 
-<span class="sd">        Returns &lt;(alpha-&lt;alpha&gt;)^3&gt;/&lt;alpha&gt;^3</span>
+<span class="sd">        Inputs:</span>
+<span class="sd">         - None</span>
 
-<span class="sd">        Stored in self.mu3_alpha</span>
+<span class="sd">        Stores:</span>
+<span class="sd">         - &quot;mu3_alpha&quot; in self</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">         - Third moment of :math:`alpha`</span>
+
+<span class="sd">        Mathematically performing the operation</span>
+
+<span class="sd">        .. math:: \\frac{\\langle (\\alpha - \\langle \\alpha \\rangle)^3 \\rangle }{\\langle \\alpha \\rangle^3}</span>
 <span class="sd">        </span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -1982,8 +2143,8 @@
 
 <span class="sd">        Options:</span>
 <span class="sd">            - method    : Calculation method</span>
-<span class="sd">                &gt; &#39;LM&#39;  : Lockhart Martinelli, assuming turbulent-turbulent, C = LM_C</span>
-<span class="sd">                &gt; &#39;Kim&#39; : Kim-modified Lockhart Martinelli</span>
+<span class="sd">              &gt; &#39;LM&#39;  : Lockhart Martinelli, assuming turbulent-turbulent, C = LM_C</span>
+<span class="sd">              &gt; &#39;Kim&#39; : Kim-modified Lockhart Martinelli</span>
 <span class="sd">            - rho_f     : Liquid phase density</span>
 <span class="sd">            - rho_g     : Gas phase density</span>
 <span class="sd">            - mu_f      : Liquid phase dynamic viscosity</span>
@@ -2048,8 +2209,21 @@
 <div class="viewcode-block" id="Condition.calc_W">
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.calc_W">[docs]</a>
     <span class="k">def</span> <span class="nf">calc_W</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculates the wake deficit function, W, from the experimental data</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculates the third moment of alpha</span>
 
+<span class="sd">        Inputs:</span>
+<span class="sd">         - None</span>
+
+<span class="sd">        Stores:</span>
+<span class="sd">         - &quot;W&quot; in midas_dict</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">         - Area-average W</span>
+
+<span class="sd">        Mathematically performing the operation</span>
+
+<span class="sd">        .. math:: W = \\frac{v_r}{v_f}</span>
+<span class="sd">        </span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">for</span> <span class="n">angle</span><span class="p">,</span> <span class="n">r_dict</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">phi</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
@@ -2071,7 +2245,7 @@
                         <span class="s1">&#39;W&#39;</span> <span class="p">:</span> <span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;vr&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="n">vfp</span>
                     <span class="p">})</span>
 
-        <span class="k">return</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">area_avg</span><span class="p">(</span><span class="s1">&#39;W&#39;</span><span class="p">)</span></div>
 
     
 <div class="viewcode-block" id="Condition.calc_mu_eff">
@@ -2383,18 +2557,29 @@
 <div class="viewcode-block" id="Condition.calc_avg_lat_sep">
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.calc_avg_lat_sep">[docs]</a>
     <span class="k">def</span> <span class="nf">calc_avg_lat_sep</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; Calculates average lateral separation distance between bubbles</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculates average lateral separation distance between bubbles</span>
+
+<span class="sd">        Inputs:</span>
+<span class="sd">         - None</span>
+
+<span class="sd">        Stores:</span>
+<span class="sd">         - &quot;lambda&quot; in midas_dict</span>
+<span class="sd">         - &quot;lambda*&quot; in midas_dict</span>
+<span class="sd">         - &quot;alpha_lambda&quot; in midas_dict</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">         - Area-average :math:`\\lambda`</span>
+
+<span class="sd">        Assuming</span>
+
+<span class="sd">        .. math:: \\lambda = \\frac{v_g}{f}</span>
+
+<span class="sd">        Where :math:`f` is the bubble frequency. Also estimates the void fraction based on this :math:`\\lambda`,</span>
+
+<span class="sd">        .. math:: \\alpha = \\frac{D_{sm,1}}{\\lambda}</span>
 <span class="sd">        </span>
-<span class="sd">        Average lateral separation, λ given by</span>
-<span class="sd">        λ = ugl / f</span>
-
-<span class="sd">        stores in midas dict under lambda. Also estimates α based on λ,</span>
-
-<span class="sd">        α ~ Db / λ</span>
-
-<span class="sd">        Mirrors the data</span>
-
 <span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">mirror</span><span class="p">()</span>
 
         <span class="k">for</span> <span class="n">angle</span><span class="p">,</span> <span class="n">r_dict</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">phi</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
@@ -2409,7 +2594,7 @@
                     <span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;lambda*&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span>
                     <span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;alpha_lambda&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
 
-        <span class="k">return</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">area_avg</span><span class="p">(</span><span class="s1">&#39;lambda&#39;</span><span class="p">)</span></div>
 
     
 <div class="viewcode-block" id="Condition.plot_profiles">
@@ -3075,10 +3260,17 @@
     <span class="k">def</span> <span class="nf">rough_FR_ID</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Identifies the flow regime for the given condition, by some rough methods</span>
 
+<span class="sd">        Inputs:</span>
+<span class="sd">         - None</span>
+
+<span class="sd">        Stores:</span>
+<span class="sd">         - &quot;FR&quot; in self</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">         - FR</span>
+
 <span class="sd">        First checks if it matches any given by previous researchers, or the hierarchical</span>
 <span class="sd">        clustering algorithm results</span>
-
-<span class="sd">        Stored in self.FR</span>
 
 <span class="sd">        1 = bubbly</span>
 <span class="sd">        2 = plug</span>
@@ -3664,15 +3856,20 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">FR</span> <span class="o">=</span> <span class="mi">2</span>
         
         <span class="c1">#print(f&quot;Warning: Flow regime not accurately identified for {self.name}, defaulting to {self.FR}&quot;)</span>
-        <span class="k">return</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">FR</span></div>
 
 
 <div class="viewcode-block" id="Condition.TD_FR_ID">
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.TD_FR_ID">[docs]</a>
     <span class="k">def</span> <span class="nf">TD_FR_ID</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; This function estimates the flow regime based on Taitel and Dukler&#39;s method</span>
+
+<span class="sd">        Not implemented yet</span>
+<span class="sd">        </span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1">#dpdxL</span>
 
-        <span class="k">return</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">FR</span></div>
 </div>
 
 

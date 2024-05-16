@@ -7,6 +7,8 @@
   <title>MARIGOLD &mdash; MARIGOLD 0.0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/dark_mode_css/general.css?v=c0a7eb24" />
+      <link rel="stylesheet" type="text/css" href="_static/dark_mode_css/dark.css?v=70edf1c7" />
 
   
   <!--[if lt IE 9]>
@@ -19,6 +21,8 @@
         <script src="_static/doctools.js?v=888ff710"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        <script src="_static/dark_mode_js/default_dark.js?v=fd565c74"></script>
+        <script src="_static/dark_mode_js/theme_switcher.js?v=358d3910"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -61,8 +65,6 @@
 <li class="toctree-l4"><a class="reference internal" href="#MARIGOLD.Condition.Condition.calc_dpdz"><code class="docutils literal notranslate"><span class="pre">Condition.calc_dpdz()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#MARIGOLD.Condition.Condition.calc_errors"><code class="docutils literal notranslate"><span class="pre">Condition.calc_errors()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#MARIGOLD.Condition.Condition.calc_grad"><code class="docutils literal notranslate"><span class="pre">Condition.calc_grad()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#MARIGOLD.Condition.Condition.calc_linear_interp"><code class="docutils literal notranslate"><span class="pre">Condition.calc_linear_interp()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#MARIGOLD.Condition.Condition.calc_linear_xy_interp"><code class="docutils literal notranslate"><span class="pre">Condition.calc_linear_xy_interp()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#MARIGOLD.Condition.Condition.calc_mu3_alpha"><code class="docutils literal notranslate"><span class="pre">Condition.calc_mu3_alpha()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#MARIGOLD.Condition.Condition.calc_mu_eff"><code class="docutils literal notranslate"><span class="pre">Condition.calc_mu_eff()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#MARIGOLD.Condition.Condition.calc_sigma_alpha"><code class="docutils literal notranslate"><span class="pre">Condition.calc_sigma_alpha()</span></code></a></li>
@@ -78,6 +80,8 @@
 <li class="toctree-l4"><a class="reference internal" href="#MARIGOLD.Condition.Condition.circ_segment_void_area_avg"><code class="docutils literal notranslate"><span class="pre">Condition.circ_segment_void_area_avg()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#MARIGOLD.Condition.Condition.debugFID"><code class="docutils literal notranslate"><span class="pre">Condition.debugFID</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#MARIGOLD.Condition.Condition.find_hstar_pos"><code class="docutils literal notranslate"><span class="pre">Condition.find_hstar_pos()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#MARIGOLD.Condition.Condition.fit_linear_interp"><code class="docutils literal notranslate"><span class="pre">Condition.fit_linear_interp()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#MARIGOLD.Condition.Condition.fit_linear_xy_interp"><code class="docutils literal notranslate"><span class="pre">Condition.fit_linear_xy_interp()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#MARIGOLD.Condition.Condition.fit_spline"><code class="docutils literal notranslate"><span class="pre">Condition.fit_spline()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#MARIGOLD.Condition.Condition.interp_area_avg"><code class="docutils literal notranslate"><span class="pre">Condition.interp_area_avg()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#MARIGOLD.Condition.Condition.line_avg"><code class="docutils literal notranslate"><span class="pre">Condition.line_avg()</span></code></a></li>
@@ -191,7 +195,9 @@ Also has an option for interpolation, ‘interp_method’</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.TD_FR_ID">
 <span class="sig-name descname"><span class="pre">TD_FR_ID</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.TD_FR_ID"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.TD_FR_ID" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>This function estimates the flow regime based on Taitel and Dukler’s method</p>
+<p>Not implemented yet</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.approx_vf">
@@ -199,8 +205,13 @@ Also has an option for interpolation, ‘interp_method’</p>
 <dd><p>Method for approximating vf with power-law relation.</p>
 <div class="math notranslate nohighlight">
 \[v_{f, approx} = \frac{(n+1)(2*n+1)}{ (2*n^{2})} * (j_{f} / (1- \langle \alpha \rangle)) * (1 - abs(rstar))**(1/n)\]</div>
-<p>Will not overwrite vf data if it already exists, but will always store data in
-midas_dict[‘vf_approx’] even if midas_dict[‘vf’] has data</p>
+<dl class="simple">
+<dt>Stores:</dt><dd><ul class="simple">
+<li><p>“vf_approx” in midas_dict</p></li>
+<li><p>“vf”, if it does not alread exist in midas_dict</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -216,8 +227,13 @@ midas_dict[‘vf_approx’] even if midas_dict[‘vf’] has data</p>
 <dd><p>Method for approximating vg with power-law relation. I don’t think this makes sense</p>
 <div class="math notranslate nohighlight">
 \[v_{g, approx} = \frac{(n+1)(2*n+1)}{ (2*n^{2})} * (j_{g} / \langle \alpha \rangle) * (1 - abs(rstar))**(1/n)\]</div>
-<p>Will not overwrite vg data if it already exists, but will always store data in
-midas_dict[‘vg_approx’] even if midas_dict[‘ug1’] has data</p>
+<dl class="simple">
+<dt>Stores:</dt><dd><ul class="simple">
+<li><p>“vg_approx” in midas_dict</p></li>
+<li><p>“ug1”, if it does not alread exist in midas_dict</p></li>
+</ul>
+</dd>
+</dl>
 <p>If you have a lot of group II bubbles this functions’ no good</p>
 </dd></dl>
 
@@ -225,24 +241,59 @@ midas_dict[‘vg_approx’] even if midas_dict[‘ug1’] has data</p>
 <dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.area_avg">
 <span class="sig-name descname"><span class="pre">area_avg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">param</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">even_opt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'first'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recalc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.area_avg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.area_avg" title="Link to this definition"></a></dt>
 <dd><p>Method for calculating the area-average of a parameter, “param”</p>
-<p>param can be anything MIDAS outputs, but usually of interest are “alpha” or “alpha_ug”
-If you’re not sure what somethings named, try Condition.phi[90][1.0].keys()</p>
-<p>Uses Simpson’s rule for integration, even_opt passed to that. Will save the previously calculated area averages
-in Condition.area_avgs[param], and won’t recalculate unless recalc = True</p>
-<p>Returns the area-averaged parameter, or None if the method failed</p>
+<dl class="simple">
+<dt>Inputs:</dt><dd><ul class="simple">
+<li><p>param, string of local parameter to area-average</p></li>
+<li><p>even_opt, passed to integration method</p></li>
+<li><p>recalc, if area-average previously calculated, it was stored in a dictionary, and can just pull from there</p></li>
+</ul>
+</dd>
+<dt>Returns:</dt><dd><ul class="simple">
+<li><p>Area-averaged parameter, or None if the method failed</p></li>
+</ul>
+</dd>
+</dl>
+<p>Uses Simpson’s rule for integration, specifically scipy.integrate.simpsons</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.avg">
-<span class="sig-name descname"><span class="pre">avg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">param</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_nonzero</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.avg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.avg" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">avg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">param</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_zero</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.avg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.avg" title="Link to this definition"></a></dt>
 <dd><p>Calculates a basic average of a parameter, “param”</p>
-<p>Just looks at every param and ensemble-averages them</p>
+<dl class="simple">
+<dt>Inputs:</dt><dd><ul class="simple">
+<li><p>param, string of local parameter to find average of</p></li>
+<li><p>include_zero, if you want to include when param = 0 in average</p></li>
+</ul>
+</dd>
+<dt>Returns:</dt><dd><ul class="simple">
+<li><p>average value of param</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.calc_W">
 <span class="sig-name descname"><span class="pre">calc_W</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.calc_W"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.calc_W" title="Link to this definition"></a></dt>
-<dd><p>Calculates the wake deficit function, W, from the experimental data</p>
+<dd><p>Calculates the third moment of alpha</p>
+<dl class="simple">
+<dt>Inputs:</dt><dd><ul class="simple">
+<li><p>None</p></li>
+</ul>
+</dd>
+<dt>Stores:</dt><dd><ul class="simple">
+<li><p>“W” in midas_dict</p></li>
+</ul>
+</dd>
+<dt>Returns:</dt><dd><ul class="simple">
+<li><p>Area-average W</p></li>
+</ul>
+</dd>
+</dl>
+<p>Mathematically performing the operation</p>
+<div class="math notranslate nohighlight">
+\[W = \frac{v_r}{v_f}\]</div>
 </dd></dl>
 
 <dl class="py method">
@@ -254,11 +305,28 @@ in Condition.area_avgs[param], and won’t recalculate unless recalc = True</p>
 <dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.calc_avg_lat_sep">
 <span class="sig-name descname"><span class="pre">calc_avg_lat_sep</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.calc_avg_lat_sep"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.calc_avg_lat_sep" title="Link to this definition"></a></dt>
 <dd><p>Calculates average lateral separation distance between bubbles</p>
-<p>Average lateral separation, λ given by
-λ = ugl / f</p>
-<p>stores in midas dict under lambda. Also estimates α based on λ,</p>
-<p>α ~ Db / λ</p>
-<p>Mirrors the data</p>
+<dl class="simple">
+<dt>Inputs:</dt><dd><ul class="simple">
+<li><p>None</p></li>
+</ul>
+</dd>
+<dt>Stores:</dt><dd><ul class="simple">
+<li><p>“lambda” in midas_dict</p></li>
+<li><p>“lambda*” in midas_dict</p></li>
+<li><p>“alpha_lambda” in midas_dict</p></li>
+</ul>
+</dd>
+<dt>Returns:</dt><dd><ul class="simple">
+<li><p>Area-average <span class="math notranslate nohighlight">\(\lambda\)</span></p></li>
+</ul>
+</dd>
+</dl>
+<p>Assuming</p>
+<div class="math notranslate nohighlight">
+\[\lambda = \frac{v_g}{f}\]</div>
+<p>Where <span class="math notranslate nohighlight">\(f\)</span> is the bubble frequency. Also estimates the void fraction based on this <span class="math notranslate nohighlight">\(\lambda\)</span>,</p>
+<div class="math notranslate nohighlight">
+\[\alpha = \frac{D_{sm,1}}{\lambda}\]</div>
 </dd></dl>
 
 <dl class="py method">
@@ -302,12 +370,9 @@ in Condition.area_avgs[param], and won’t recalculate unless recalc = True</p>
 <dd><p>Calculates the pressure gradient, dp/dz, according to various methods. Can access later with self.dpdz</p>
 <dl class="simple">
 <dt>Options:</dt><dd><ul class="simple">
-<li><dl class="simple">
-<dt>method<span class="classifier">Calculation method</span></dt><dd><p>&gt; ‘LM’  : Lockhart Martinelli, assuming turbulent-turbulent, C = LM_C
-&gt; ‘Kim’ : Kim-modified Lockhart Martinelli</p>
-</dd>
-</dl>
-</li>
+<li><p>method    : Calculation method
+&gt; ‘LM’  : Lockhart Martinelli, assuming turbulent-turbulent, C = LM_C
+&gt; ‘Kim’ : Kim-modified Lockhart Martinelli</p></li>
 <li><p>rho_f     : Liquid phase density</p></li>
 <li><p>rho_g     : Gas phase density</p></li>
 <li><p>mu_f      : Liquid phase dynamic viscosity</p></li>
@@ -344,30 +409,48 @@ in Condition.area_avgs[param], and won’t recalculate unless recalc = True</p>
 <dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.calc_grad">
 <span class="sig-name descname"><span class="pre">calc_grad</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">param</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recalc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.calc_grad"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.calc_grad" title="Link to this definition"></a></dt>
 <dd><p>Calculates gradient of param based on the data in self.</p>
-<p>Stored in self’s midas_dict as grad_param_r, grad_param_phi, etc.
-Will only be called once, unless recalc is True.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.calc_linear_interp">
-<span class="sig-name descname"><span class="pre">calc_linear_interp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">param</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.calc_linear_interp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.calc_linear_interp" title="Link to this definition"></a></dt>
-<dd><p>Makes a LinearNDInterpolator for the given param.</p>
-<p>Access with self.linear_interp[param], phi in radians</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.calc_linear_xy_interp">
-<span class="sig-name descname"><span class="pre">calc_linear_xy_interp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">param</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.calc_linear_xy_interp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.calc_linear_xy_interp" title="Link to this definition"></a></dt>
-<dd><p>Makes a LinearNDInterpolator for the given param in x y coords</p>
-<p>Can access  with self.linear_xy_interp[param]</p>
+<dl class="simple">
+<dt>Inputs:</dt><dd><ul class="simple">
+<li><p>“param”, string for local parameter to calculate the gradient of</p></li>
+</ul>
+</dd>
+<dt>Stores:</dt><dd><ul class="simple">
+<li><p>“<a href="#id3"><span class="problematic" id="id4">grad_</span></a>’param’_r”</p></li>
+<li><p>“<a href="#id5"><span class="problematic" id="id6">grad_</span></a>’param’_phi”</p></li>
+<li><p>“<a href="#id7"><span class="problematic" id="id8">grad_</span></a>’param’_phinor”</p></li>
+<li><p>“<a href="#id9"><span class="problematic" id="id10">grad_</span></a>’param’_x”</p></li>
+<li><p>“<a href="#id11"><span class="problematic" id="id12">grad_</span></a>’param’_y”</p></li>
+<li><p>“<a href="#id13"><span class="problematic" id="id14">grad_</span></a>’param’_total”</p></li>
+</ul>
+</dd>
+<dt>Returns:</dt><dd><ul class="simple">
+<li><p>Area average “<a href="#id15"><span class="problematic" id="id16">grad_</span></a>’param’_total”</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.calc_mu3_alpha">
 <span class="sig-name descname"><span class="pre">calc_mu3_alpha</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.calc_mu3_alpha"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.calc_mu3_alpha" title="Link to this definition"></a></dt>
 <dd><p>Calculates the third moment of alpha</p>
-<p>Returns &lt;(alpha-&lt;alpha&gt;)^3&gt;/&lt;alpha&gt;^3</p>
-<p>Stored in self.mu3_alpha</p>
+<dl class="simple">
+<dt>Inputs:</dt><dd><ul class="simple">
+<li><p>None</p></li>
+</ul>
+</dd>
+<dt>Stores:</dt><dd><ul class="simple">
+<li><p>“mu3_alpha” in self</p></li>
+</ul>
+</dd>
+<dt>Returns:</dt><dd><ul class="simple">
+<li><p>Third moment of <span class="math notranslate nohighlight">\(alpha\)</span></p></li>
+</ul>
+</dd>
+</dl>
+<p>Mathematically performing the operation</p>
+<div class="math notranslate nohighlight">
+\[\frac{\langle (\alpha - \langle \alpha \rangle)^3 \rangle }{\langle \alpha \rangle^3}\]</div>
 </dd></dl>
 
 <dl class="py method">
@@ -400,14 +483,45 @@ Will only be called once, unless recalc is True.</p>
 <dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.calc_sigma_alpha">
 <span class="sig-name descname"><span class="pre">calc_sigma_alpha</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.calc_sigma_alpha"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.calc_sigma_alpha" title="Link to this definition"></a></dt>
 <dd><p>Calculates the second moment of alpha</p>
-<p>Returns &lt;(alpha-&lt;alpha&gt;)^2&gt;/&lt;alpha&gt;^2</p>
-<p>Stored in self.sigma_alpha</p>
+<dl class="simple">
+<dt>Inputs:</dt><dd><ul class="simple">
+<li><p>None</p></li>
+</ul>
+</dd>
+<dt>Stores:</dt><dd><ul class="simple">
+<li><p>“sigma_alpha” in self</p></li>
+</ul>
+</dd>
+<dt>Returns:</dt><dd><ul class="simple">
+<li><p>second moment of <span class="math notranslate nohighlight">\(alpha\)</span></p></li>
+</ul>
+</dd>
+</dl>
+<p>Mathematically performing the operation</p>
+<div class="math notranslate nohighlight">
+\[\frac{\langle (\alpha - \langle \alpha \rangle)^2 \rangle }{\langle \alpha \rangle^2}\]</div>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.calc_vf_lee">
 <span class="sig-name descname"><span class="pre">calc_vf_lee</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">K</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.calc_vf_lee"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.calc_vf_lee" title="Link to this definition"></a></dt>
 <dd><p>Calculate vf, jf, vr based on Lee et al. (2002) equation</p>
+<dl class="simple">
+<dt>Inputs:</dt><dd><ul class="simple">
+<li><p>None</p></li>
+</ul>
+</dd>
+<dt>Stores:</dt><dd><ul class="simple">
+<li><p>“vf_lee” in midas_dict</p></li>
+<li><p>“jf_lee” in midas_dict</p></li>
+<li><p>“vr_lee” in midas_dict</p></li>
+</ul>
+</dd>
+<dt>Returns:</dt><dd><ul class="simple">
+<li><p>Area-average vf_lee</p></li>
+</ul>
+</dd>
+</dl>
 <p>Really a model proposed by Bosio and Malnes</p>
 <div class="math notranslate nohighlight">
 \[v_{f} = \frac{ 1 }{ \sqrt{1 - \alpha^{2} / 2} } * \sqrt{ \frac{ 2 \Delta p }{K \rho_{f}} }\]</div>
@@ -417,6 +531,22 @@ Will only be called once, unless recalc is True.</p>
 <dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.calc_vf_naive">
 <span class="sig-name descname"><span class="pre">calc_vf_naive</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.calc_vf_naive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.calc_vf_naive" title="Link to this definition"></a></dt>
 <dd><p>Calculate vf, jf, vr based on single-phase equation</p>
+<dl class="simple">
+<dt>Inputs:</dt><dd><ul class="simple">
+<li><p>None</p></li>
+</ul>
+</dd>
+<dt>Stores:</dt><dd><ul class="simple">
+<li><p>“vf_naive” in midas_dict</p></li>
+<li><p>“jf_naive” in midas_dict</p></li>
+<li><p>“vr_naive” in midas_dict</p></li>
+</ul>
+</dd>
+<dt>Returns:</dt><dd><ul class="simple">
+<li><p>Area-average vf_naive</p></li>
+</ul>
+</dd>
+</dl>
 <div class="math notranslate nohighlight">
 \[v_{f} = \sqrt{ \frac{ 2 \Delta p }{ \rho_{f}} }\]</div>
 </dd></dl>
@@ -424,13 +554,23 @@ Will only be called once, unless recalc is True.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.calc_vgj">
 <span class="sig-name descname"><span class="pre">calc_vgj</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">warn_approx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.calc_vgj"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.calc_vgj" title="Link to this definition"></a></dt>
-<dd><p>Method for calculating Vgj, by doing</p>
-<p>j_local = midas_dict[‘alpha’] * midas_dict[‘ug1’] + (1 - midas_dict[‘alpha’]) * midas_dict[‘vf’]
-vgj = midas_dict[‘ug1’] - j_local</p>
-<p>stored in midas_dict[‘vgj’]
-also stores local j, midas_dict[‘j’]</p>
-<p>warn_approx is a flag to print out a warning statement if vf is being approximated, which will
-happen if not found</p>
+<dd><p>Method for calculating Vgj</p>
+<dl class="simple">
+<dt>Inputs:</dt><dd><ul class="simple">
+<li><p>warn_approx, flag for warning if :math`V_{gj}` is not found and function is approximating</p></li>
+</ul>
+</dd>
+<dt>Stores:</dt><dd><ul class="simple">
+<li><p>“vgj” in midas_dict</p></li>
+<li><p>“j” in midas_dict</p></li>
+<li><p>“alpha_j” in midas_dict</p></li>
+</ul>
+</dd>
+<dt>Returns:</dt><dd><ul class="simple">
+<li><p>Void-weighted area-averaged Vgj</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -444,17 +584,47 @@ happen if not found</p>
 <dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.calc_void_cov">
 <span class="sig-name descname"><span class="pre">calc_void_cov</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.calc_void_cov"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.calc_void_cov" title="Link to this definition"></a></dt>
 <dd><p>Calculates the void covariance</p>
-<p>Returns &lt;alpha^2&gt;/&lt;alpha&gt;^2</p>
-<p>Stored in self.void_cov</p>
+<dl class="simple">
+<dt>Inputs:</dt><dd><ul class="simple">
+<li><p>None</p></li>
+</ul>
+</dd>
+<dt>Stores:</dt><dd><ul class="simple">
+<li><p>“void_cov” in self</p></li>
+</ul>
+</dd>
+<dt>Returns:</dt><dd><ul class="simple">
+<li><p>void covariance</p></li>
+</ul>
+</dd>
+</dl>
+<p>Mathematically performing the operation</p>
+<div class="math notranslate nohighlight">
+\[\frac{\langle \alpha^2 \rangle }{\langle \alpha \rangle^2}\]</div>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.calc_vr">
 <span class="sig-name descname"><span class="pre">calc_vr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">warn_approx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.calc_vr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.calc_vr" title="Link to this definition"></a></dt>
-<dd><p>Method for calculating relative velocity. Will approximate vf if it cannot be found.</p>
+<dd><p>Method for calculating relative velocity.</p>
+<dl class="simple">
+<dt>Inputs:</dt><dd><ul class="simple">
+<li><p>warn_approx, flag for warning if :math`v_r` is not found and function is approximating</p></li>
+</ul>
+</dd>
+</dl>
 <p>Note that if vg = 0, then this method says vr = 0. This will happen when no data is present,
 such as in the bottom of the pipe in horizontal, when this is not necessarily true</p>
-<p>warn_approx is a flag to print out a warning statement if vf is being approximated</p>
+<dl class="simple">
+<dt>Stores:</dt><dd><ul class="simple">
+<li><p>‘vr’ in midas_dict</p></li>
+</ul>
+</dd>
+<dt>Returns:</dt><dd><ul class="simple">
+<li><p>Area-average vr</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -473,7 +643,7 @@ such as in the bottom of the pipe in horizontal, when this is not necessarily tr
 </ul>
 </dd>
 <dt>Stores:</dt><dd><ul class="simple">
-<li><p>“<a href="#id3"><span class="problematic" id="id4">vr_</span></a>’method_name’” in midas_dict</p></li>
+<li><p>“<a href="#id17"><span class="problematic" id="id18">vr_</span></a>’method_name’” in midas_dict</p></li>
 <li><p>“vr_model” in midas_dict</p></li>
 </ul>
 </dd>
@@ -500,19 +670,39 @@ such as in the bottom of the pipe in horizontal, when this is not necessarily tr
 <dl class="py method">
 <dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.circ_segment_area_avg">
 <span class="sig-name descname"><span class="pre">circ_segment_area_avg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">param</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hstar</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ngridr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">25</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ngridphi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">25</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">int_err</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0001</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.circ_segment_area_avg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.circ_segment_area_avg" title="Link to this definition"></a></dt>
-<dd><p>Method for calculating the area-average of a parameter, “param” over the circular segment defined by h</p>
-<p>Basically, if you slice the pipe at h, area average everything above h</p>
-<p>to smooth it out, integrate over an interpolated mesh</p>
-<p>returns integrand result</p>
+<dd><p>Method for calculating the area-average of a parameter, “param” in some circular segment defined by <span class="math notranslate nohighlight">\(h^*\)</span></p>
+<dl class="simple">
+<dt>Inputs:</dt><dd><ul class="simple">
+<li><p>param, string of local parameter to area-average</p></li>
+<li><p>hstar, distance from the top of the pipe that defines circular segment</p></li>
+<li><p>int_err, acceptable warning for integral error (passed to scipy.integrate.dblquad)</p></li>
+</ul>
+</dd>
+<dt>Returns:</dt><dd><ul class="simple">
+<li><p>Area-averaged parameter, or None if the method failed</p></li>
+</ul>
+</dd>
+</dl>
+<p>Uses scipy.integrate.dblquad. May be computationally expensive</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.circ_segment_void_area_avg">
 <span class="sig-name descname"><span class="pre">circ_segment_void_area_avg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">param</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hstar</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ngridr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">25</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ngridphi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">25</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">int_err</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0001</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.circ_segment_void_area_avg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.circ_segment_void_area_avg" title="Link to this definition"></a></dt>
-<dd><p>Method for calculating the void-weighted area-average of a parameter over the circular segment defined by h</p>
-<p>Basically, if you slice the pipe at h, void-weighted area average everything above h</p>
-<p>to smooth it out, integrate over an interpolated mesh</p>
-<p>returns integrand result</p>
+<dd><p>Method for calculating the void-weighted area-average of a parameter, “param” in some circular segment defined by <span class="math notranslate nohighlight">\(h^*\)</span></p>
+<dl class="simple">
+<dt>Inputs:</dt><dd><ul class="simple">
+<li><p>param, string of local parameter to area-average</p></li>
+<li><p>hstar, distance from the top of the pipe that defines circular segment</p></li>
+<li><p>int_err, acceptable warning for integral error (passed to scipy.integrate.dblquad)</p></li>
+</ul>
+</dd>
+<dt>Returns:</dt><dd><ul class="simple">
+<li><p>Void-weighted rea-averaged parameter, or None if the method failed</p></li>
+</ul>
+</dd>
+</dl>
+<p>Uses scipy.integrate.dblquad. May be computationally expensive</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -524,14 +714,41 @@ such as in the bottom of the pipe in horizontal, when this is not necessarily tr
 <dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.find_hstar_pos">
 <span class="sig-name descname"><span class="pre">find_hstar_pos</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'max_dsm'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">void_criteria</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.find_hstar_pos"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.find_hstar_pos" title="Link to this definition"></a></dt>
 <dd><p>Returns the vertical distance from the top of the pipe to the bubble layer interface</p>
-<p>Methods for determining bubble layer interface
-- max_dsm
-- min_grad_y
-- max_grad_y
-- max_mag_grad_y
-- zero_void
-- percent_void, search down the phi = 90 line, find largest value of rstar where alpha &lt; min_void
-- Ryan_Ref, uses 1.3 - 1.57e-5 * Ref, proposed by Ryan (2022)</p>
+<dl class="simple">
+<dt>Inputs:</dt><dd><ul class="simple">
+<li><p>method</p></li>
+<li><p>void_criteria, used in some methods</p></li>
+</ul>
+</dd>
+<dt>Methods for determining bubble layer interface</dt><dd><ul class="simple">
+<li><p>max_dsm</p></li>
+<li><p>min_grad_y</p></li>
+<li><p>max_grad_y</p></li>
+<li><p>max_mag_grad_y</p></li>
+<li><p>zero_void</p></li>
+<li><p>percent_void, search down the phi = 90 line, find largest value of rstar where alpha &lt; min_void</p></li>
+<li><p>Ryan_Ref, uses 1.3 - 1.57e-5 * Ref, proposed by Ryan (2022)</p></li>
+</ul>
+</dd>
+<dt>Returns:</dt><dd><ul class="simple">
+<li><p>hstar</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.fit_linear_interp">
+<span class="sig-name descname"><span class="pre">fit_linear_interp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">param</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.fit_linear_interp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.fit_linear_interp" title="Link to this definition"></a></dt>
+<dd><p>Makes a LinearNDInterpolator for the given param.</p>
+<p>Access with self.linear_interp[param], phi in radians</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.fit_linear_xy_interp">
+<span class="sig-name descname"><span class="pre">fit_linear_xy_interp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">param</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.fit_linear_xy_interp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.fit_linear_xy_interp" title="Link to this definition"></a></dt>
+<dd><p>Makes a LinearNDInterpolator for the given param in x y coords</p>
+<p>Can access  with self.linear_xy_interp[param]</p>
 </dd></dl>
 
 <dl class="py method">
@@ -544,70 +761,165 @@ such as in the bottom of the pipe in horizontal, when this is not necessarily tr
 <dl class="py method">
 <dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.interp_area_avg">
 <span class="sig-name descname"><span class="pre">interp_area_avg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">param</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interp_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'linear'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.interp_area_avg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.interp_area_avg" title="Link to this definition"></a></dt>
-<dd><p>Function to area-average param, using the spline interpolation of param</p>
-<p>Returns the intengrand result. May be computationally expensive</p>
+<dd><p>Method for calculating the area-average of a parameter, “param”, based on an interpolation of the data</p>
+<dl class="simple">
+<dt>Inputs:</dt><dd><ul class="simple">
+<li><p>param, string of local parameter to area-average</p></li>
+<li><p>interp_type, option for what kind of interpolation to use</p></li>
+</ul>
+</dd>
+<dt>Options for interp_type:</dt><dd><ul class="simple">
+<li><p>linear, see <a class="reference internal" href="#MARIGOLD.Condition.Condition.fit_linear_interp" title="MARIGOLD.Condition.Condition.fit_linear_interp"><code class="xref any py py-meth docutils literal notranslate"><span class="pre">fit_linear_interp</span></code></a></p></li>
+<li><p>spline, see <a class="reference internal" href="#MARIGOLD.Condition.Condition.fit_spline" title="MARIGOLD.Condition.Condition.fit_spline"><code class="xref any py py-meth docutils literal notranslate"><span class="pre">fit_spline</span></code></a></p></li>
+</ul>
+</dd>
+<dt>Returns:</dt><dd><ul class="simple">
+<li><p>area-averaged parameter</p></li>
+</ul>
+</dd>
+</dl>
+<p>Uses scipy.integrate.dblquad, may be computationally expensive</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.line_avg">
 <span class="sig-name descname"><span class="pre">line_avg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">param</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi_angle</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">even_opt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'first'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.line_avg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.line_avg" title="Link to this definition"></a></dt>
-<dd><p>Line average of param over line defined by phi_angle</p>
-<p>Also includes the complementary angle, so the line is a diameter of the pipe</p>
-<p>returns integrand result</p>
+<dd><p>Method for calculating the average value of param across a diameter defined by φ = angle</p>
+<dl class="simple">
+<dt>Inputs:</dt><dd><ul class="simple">
+<li><p>param, string of local parameter to area-average</p></li>
+<li><p>phi_angle, angle to define diameter to integrate across</p></li>
+<li><p>even_opt, see :any:area_avg</p></li>
+</ul>
+</dd>
+<dt>Returns:</dt><dd><ul class="simple">
+<li><p>Average value of param along φ = angle</p></li>
+</ul>
+</dd>
+</dl>
+<p>Uses scipy.integrate.simpsons</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.line_avg_dev">
 <span class="sig-name descname"><span class="pre">line_avg_dev</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">param</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi_angle</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">even_opt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'first'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.line_avg_dev"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.line_avg_dev" title="Link to this definition"></a></dt>
-<dd><p>Second moment of param over line defined by phi_angle</p>
-<p>Also includes the complementary angle, so the line is a diameter of the pipe</p>
-<p>&lt; param - &lt;param&gt;^2 &gt; / &lt;param&gt;^2</p>
-<p>returns integrand result</p>
+<dd><p>Method for calculating the average value of param across a diameter defined by φ = angle</p>
+<dl class="simple">
+<dt>Inputs:</dt><dd><ul class="simple">
+<li><p>param, string of local parameter to calculate line average deviation</p></li>
+<li><p>phi_angle, angle to define diameter to integrate across</p></li>
+<li><p>even_opt, see :any:area_avg</p></li>
+</ul>
+</dd>
+<dt>Returns:</dt><dd><ul class="simple">
+<li><p>integrand result</p></li>
+</ul>
+</dd>
+</dl>
+<p>Taking param = <span class="math notranslate nohighlight">\(\psi\)</span>, mathematically, this function does</p>
+<div class="math notranslate nohighlight">
+\[\frac{\langle \psi - \langle \psi^2 \rangle  \rangle }{\langle \psi \rangle^2}\]</div>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.max">
 <span class="sig-name descname"><span class="pre">max</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">param</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recalc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.max"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.max" title="Link to this definition"></a></dt>
 <dd><p>Return maximum value of param in the Condition</p>
-<p>By default, saves the data to a dictionary, Condition.maxs
-for future reference, unless recalc=True</p>
+<dl class="simple">
+<dt>Inputs:</dt><dd><ul class="simple">
+<li><p>param, string of local parameter to find maximum of</p></li>
+<li><p>recalc, if already calculated, will pull from dictionary instead of calculating unless this is true</p></li>
+</ul>
+</dd>
+<dt>Returns:</dt><dd><ul class="simple">
+<li><p>maximum value of param</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.max_line">
 <span class="sig-name descname"><span class="pre">max_line</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">param</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">angle</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.max_line"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.max_line" title="Link to this definition"></a></dt>
 <dd><p>Return maximum value of param at a given angle</p>
+<dl class="simple">
+<dt>Inputs:</dt><dd><ul class="simple">
+<li><p>param, string of local parameter to find maximum of</p></li>
+<li><p>angle, angle to search along</p></li>
+</ul>
+</dd>
+<dt>Returns:</dt><dd><ul class="simple">
+<li><p>maximum value of param when φ=angle</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.max_line_loc">
 <span class="sig-name descname"><span class="pre">max_line_loc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">param</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">angle</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.max_line_loc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.max_line_loc" title="Link to this definition"></a></dt>
-<dd><p>Return r/R location of maximum value of param at a given angle</p>
+<dd><p>Return location of maximum value of param at a given angle</p>
+<dl class="simple">
+<dt>Inputs:</dt><dd><ul class="simple">
+<li><p>param, string of local parameter to find maximum of</p></li>
+<li><p>angle, angle to search along</p></li>
+</ul>
+</dd>
+<dt>Returns:</dt><dd><ul class="simple">
+<li><p>r/R location of the maximum value of param when φ=angle</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.max_loc">
 <span class="sig-name descname"><span class="pre">max_loc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">param</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span></span></span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.max_loc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.max_loc" title="Link to this definition"></a></dt>
-<dd><p>Return location of maximum param in the Condition</p>
-<p>returns in the form (r/R, angle in degrees)</p>
+<dd><p>Return location of maximum value of param</p>
+<dl class="simple">
+<dt>Inputs:</dt><dd><ul class="simple">
+<li><p>param, string of local parameter to find maximum of</p></li>
+</ul>
+</dd>
+<dt>Returns:</dt><dd><ul class="simple">
+<li><p>r/R location of the maximum value of param</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.min">
 <span class="sig-name descname"><span class="pre">min</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">param</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recalc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nonzero</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.min"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.min" title="Link to this definition"></a></dt>
 <dd><p>Return minimum value of param in the Condition</p>
-<p>By default, saves the data to a dictionary, Condition.mins
-for future reference, unless recalc=True</p>
-<p>nonzero=True will find the smallest nonzero value.</p>
+<dl class="simple">
+<dt>Inputs:</dt><dd><ul class="simple">
+<li><p>param, string of local parameter to find minimum of</p></li>
+<li><p>recalc, if already calculated, will pull from dictionary instead of calculating unless this is true</p></li>
+<li><p>nonzero, if true, will exclude points with the param = 0 when finding the minimum</p></li>
+</ul>
+</dd>
+<dt>Returns:</dt><dd><ul class="simple">
+<li><p>minimum value of param</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.min_loc">
 <span class="sig-name descname"><span class="pre">min_loc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">param</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.min_loc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.min_loc" title="Link to this definition"></a></dt>
-<dd><p>Return minimum value of param in the Condition</p>
-<p>By default, saves the data to a dictionary, Condition.mins
-for future reference, unless recalc=True</p>
-<p>nonzero option not implemented, TODO</p>
+<dd><p>Return location of minimum value of param</p>
+<dl class="simple">
+<dt>Inputs:</dt><dd><ul class="simple">
+<li><p>param, string of local parameter to find minimum of</p></li>
+</ul>
+</dd>
+<dt>Returns:</dt><dd><ul class="simple">
+<li><p>r/R location of the maximum value of param</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -728,9 +1040,22 @@ data, if that hasn’t already been done</p>
 <dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.rough_FR_ID">
 <span class="sig-name descname"><span class="pre">rough_FR_ID</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.rough_FR_ID"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.rough_FR_ID" title="Link to this definition"></a></dt>
 <dd><p>Identifies the flow regime for the given condition, by some rough methods</p>
+<dl class="simple">
+<dt>Inputs:</dt><dd><ul class="simple">
+<li><p>None</p></li>
+</ul>
+</dd>
+<dt>Stores:</dt><dd><ul class="simple">
+<li><p>“FR” in self</p></li>
+</ul>
+</dd>
+<dt>Returns:</dt><dd><ul class="simple">
+<li><p>FR</p></li>
+</ul>
+</dd>
+</dl>
 <p>First checks if it matches any given by previous researchers, or the hierarchical
 clustering algorithm results</p>
-<p>Stored in self.FR</p>
 <p>1 = bubbly
 2 = plug
 3 = slug
@@ -743,15 +1068,32 @@ clustering algorithm results</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.spline_circ_seg_area_avg">
 <span class="sig-name descname"><span class="pre">spline_circ_seg_area_avg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">param</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hstar</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">int_err</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0001</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.spline_circ_seg_area_avg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.spline_circ_seg_area_avg" title="Link to this definition"></a></dt>
-<dd><p>Function to area-average over a circular segment defined by h, using the spline interpolation of param</p>
-<p>Returns the intengrand result. May be computationally expensive</p>
+<dd><p>Function to area-average over a circular segment using the spline interpolation of param</p>
+<dl class="simple">
+<dt>Inputs:</dt><dd><ul class="simple">
+<li><p>param, string of local parameter to area-average</p></li>
+<li><p>hstar, distance from the top of the pipe that defines circular segment</p></li>
+<li><p>int_err, acceptable warning for integral error (passed to scipy.integrate.dblquad)</p></li>
+</ul>
+</dd>
+<dt>Returns:</dt><dd><ul class="simple">
+<li><p>integrand result</p></li>
+</ul>
+</dd>
+</dl>
+<p>Uses scipy.integrate.dblquad. May be computationally expensive</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.spline_void_area_avg">
 <span class="sig-name descname"><span class="pre">spline_void_area_avg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">param</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.spline_void_area_avg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.spline_void_area_avg" title="Link to this definition"></a></dt>
-<dd><p>Function to void-weighted area-average param over a circular segment defined by h, using the spline interpolation of param</p>
-<p>Returns the intengrand result. May be computationally expensive</p>
+<dd><p>Function to void-weighted area-average param based on a spline interpolation</p>
+<dl class="simple">
+<dt>Inputs:</dt><dd><ul class="simple">
+<li><p>param, string of local parameter to area-average</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -765,8 +1107,20 @@ a good way of doing so.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.void_area_avg">
 <span class="sig-name descname"><span class="pre">void_area_avg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">param</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">even_opt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'first'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.void_area_avg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.void_area_avg" title="Link to this definition"></a></dt>
-<dd><p>Method for calculating the void-weighted area-average of a parameter</p>
-<p>&lt;alpha * param&gt; / &lt;alpha&gt;</p>
+<dd><p>Method for calculating the void-weighted area-average of a parameter, “param”</p>
+<dl class="simple">
+<dt>Inputs:</dt><dd><ul class="simple">
+<li><p>param, string of local parameter to area-average</p></li>
+<li><p>even_opt, passed to integration method</p></li>
+<li><p>recalc, if area-average previously calculated, it was stored in a dictionary, and can just pull from there</p></li>
+</ul>
+</dd>
+<dt>Returns:</dt><dd><ul class="simple">
+<li><p>void-weighted area-averaged parameter, or None if the method failed</p></li>
+</ul>
+</dd>
+</dl>
+<p>Uses Simpson’s rule for integration, specifically scipy.integrate.simpsons</p>
 </dd></dl>
 
 </dd></dl>

@@ -23,12 +23,18 @@ extensions = [
     'sphinx.ext.viewcode',
     'sphinx.ext.napoleon',
     'sphinx.ext.autodoc',
-    'sphinx.ext.autosummary'
+    'sphinx.ext.autosummary',
+    'sphinx_rtd_dark_mode'
 ]
 
 templates_path = ['_templates']
 exclude_patterns = []
 
+autodoc_default_options = {
+    "members": True,
+    "undoc-members": True,
+    "private-members": True
+}
 
 numpydoc_show_class_members = False
 

@@ -155,9 +155,7 @@ class Condition:
         return self.name
 
     def __call__(self, phi_in:np.ndarray, r_in:np.ndarray, param:str, interp_method='None') -> np.ndarray:
-        """
-
-        Returns the value of param at (phi, r). Phi is in radians
+        """Returns the value of param at (phi, r). Phi is in radians
          
         Interp options:
          - 'None', will try to fetch raw data at this location
@@ -516,8 +514,9 @@ class Condition:
 
         .. math:: v_{f, approx} = \\frac{(n+1)(2*n+1)}{ (2*n^{2})} * (j_{f} / (1- \\langle \\alpha \\rangle)) * (1 - abs(rstar))**(1/n)
 
-        Will not overwrite vf data if it already exists, but will always store data in 
-        midas_dict['vf_approx'] even if midas_dict['vf'] has data
+        Stores:
+         - "vf_approx" in midas_dict
+         - "vf", if it does not alread exist in midas_dict
 
         """
 
@@ -541,8 +540,9 @@ class Condition:
 
         .. math:: v_{g, approx} = \\frac{(n+1)(2*n+1)}{ (2*n^{2})} * (j_{g} / \\langle \\alpha \\rangle) * (1 - abs(rstar))**(1/n)
 
-        Will not overwrite vg data if it already exists, but will always store data in 
-        midas_dict['vg_approx'] even if midas_dict['ug1'] has data
+        Stores:
+         - "vg_approx" in midas_dict
+         - "ug1", if it does not alread exist in midas_dict
 
         If you have a lot of group II bubbles this functions' no good
 
@@ -582,6 +582,17 @@ class Condition:
     def calc_vf_lee(self, K=1):
         """ Calculate vf, jf, vr based on Lee et al. (2002) equation
 
+        Inputs:
+         - None
+
+        Stores:
+         - "vf_lee" in midas_dict
+         - "jf_lee" in midas_dict
+         - "vr_lee" in midas_dict
+
+        Returns:
+         - Area-average vf_lee
+
         Really a model proposed by Bosio and Malnes
 
         .. math:: v_{f} = \\frac{ 1 }{ \\sqrt{1 - \\alpha^{2} / 2} } * \\sqrt{ \\frac{ 2 \\Delta p }{K \\rho_{f}} } 
@@ -609,10 +620,21 @@ class Condition:
                     vr_lee = vg - vf_lee
                 midas_dict.update({'vr_lee':  vr_lee})
 
-        return
+        return self.area_avg('vf_lee')
     
     def calc_vf_naive(self):
         """ Calculate vf, jf, vr based on single-phase equation
+
+        Inputs:
+         - None
+
+        Stores:
+         - "vf_naive" in midas_dict
+         - "jf_naive" in midas_dict
+         - "vr_naive" in midas_dict
+
+        Returns:
+         - Area-average vf_naive
 
         .. math::  v_{f} = \\sqrt{ \\frac{ 2 \\Delta p }{ \\rho_{f}} } 
         
@@ -642,15 +664,22 @@ class Condition:
                     vr_naive = vg - vf_naive
                 midas_dict.update({'vr_naive':  vr_naive})
 
-        return
+        return self.area_avg('vf_naive')
     
     def calc_vr(self, warn_approx = True) -> None:
-        """Method for calculating relative velocity. Will approximate vf if it cannot be found.
+        """Method for calculating relative velocity. 
+        
+        Inputs:
+         - warn_approx, flag for warning if :math`v_r` is not found and function is approximating
 
         Note that if vg = 0, then this method says vr = 0. This will happen when no data is present,
         such as in the bottom of the pipe in horizontal, when this is not necessarily true
 
-        warn_approx is a flag to print out a warning statement if vf is being approximated
+        Stores:
+         - 'vr' in midas_dict
+
+        Returns:
+         - Area-average vr
 
         """
 
@@ -684,19 +713,21 @@ class Condition:
                     midas_dict.update({'vr': vr})
                     
 
-        return
+        return self.area_avg('vr')
 
     def calc_vgj(self, warn_approx = True) -> None:
-        """Method for calculating Vgj, by doing
+        """Method for calculating Vgj
 
-        j_local = midas_dict['alpha'] * midas_dict['ug1'] + (1 - midas_dict['alpha']) * midas_dict['vf']
-        vgj = midas_dict['ug1'] - j_local
+        Inputs:
+         - warn_approx, flag for warning if :math`V_{gj}` is not found and function is approximating
 
-        stored in midas_dict['vgj']
-        also stores local j, midas_dict['j']
+        Stores:
+         - "vgj" in midas_dict
+         - "j" in midas_dict
+         - "alpha_j" in midas_dict
 
-        warn_approx is a flag to print out a warning statement if vf is being approximated, which will
-        happen if not found
+        Returns:
+         - Void-weighted area-averaged Vgj
 
         """
 
@@ -719,13 +750,24 @@ class Condition:
                 midas_dict.update({'j': j_local})
                 midas_dict.update({'alpha_j': alpha_j})
 
-        return
+        return self.void_area_avg('vgj')
 
     def calc_grad(self, param: str, recalc = False) -> None:
         """Calculates gradient of param based on the data in self. 
+
+        Inputs:
+         - "param", string for local parameter to calculate the gradient of
         
-        Stored in self's midas_dict as grad_param_r, grad_param_phi, etc.
-        Will only be called once, unless recalc is True.
+        Stores:
+         - "grad_'param'_r"
+         - "grad_'param'_phi"
+         - "grad_'param'_phinor"
+         - "grad_'param'_x"
+         - "grad_'param'_y"
+         - "grad_'param'_total"
+
+        Returns:
+         - Area average "grad_'param'_total"
 
         """
         
@@ -843,7 +885,7 @@ class Condition:
                     self.phi[comp_angle][0.0].update({grad_param_name+'_total': deepcopy(r_dict[0.0][grad_param_name+'_r']) })
                     
 
-        return
+        return self.area_avg(grad_param_name+'_total')
     
     def fit_spline(self, param: str) -> None:
         """Fits a RectBivariateSpline for the given param. 
@@ -893,7 +935,7 @@ class Condition:
         self.spline_interp.update({param: spline_interpolant})
         return
     
-    def calc_linear_interp(self, param: str) -> None:
+    def fit_linear_interp(self, param: str) -> None:
         """Makes a LinearNDInterpolator for the given param. 
         
             Access with self.linear_interp[param], phi in radians
@@ -928,7 +970,7 @@ class Condition:
 
         return
     
-    def calc_linear_xy_interp(self, param: str) -> None:
+    def fit_linear_xy_interp(self, param: str) -> None:
         """ Makes a LinearNDInterpolator for the given param in x y coords
         
         Can access  with self.linear_xy_interp[param]
@@ -966,8 +1008,12 @@ class Condition:
     def max(self, param: str, recalc=False) -> float:
         """ Return maximum value of param in the Condition
         
-        By default, saves the data to a dictionary, Condition.maxs
-        for future reference, unless recalc=True
+        Inputs:
+         - param, string of local parameter to find maximum of
+         - recalc, if already calculated, will pull from dictionary instead of calculating unless this is true
+
+        Returns:
+         - maximum value of param
                           
         """
         
@@ -983,9 +1029,13 @@ class Condition:
         return (max)
 
     def max_loc(self, param: str)-> tuple:
-        """ Return location of maximum param in the Condition
+        """ Return location of maximum value of param
         
-        returns in the form (r/R, angle in degrees)
+        Inputs:
+         - param, string of local parameter to find maximum of
+
+        Returns:
+         - r/R location of the maximum value of param
                           
         """
         max = 0
@@ -1000,10 +1050,13 @@ class Condition:
     def min(self, param: str, recalc = False, nonzero=False)-> float:
         """ Return minimum value of param in the Condition
         
-        By default, saves the data to a dictionary, Condition.mins
-        for future reference, unless recalc=True
+        Inputs:
+         - param, string of local parameter to find minimum of
+         - recalc, if already calculated, will pull from dictionary instead of calculating unless this is true
+         - nonzero, if true, will exclude points with the param = 0 when finding the minimum
 
-        nonzero=True will find the smallest nonzero value.
+        Returns:
+         - minimum value of param
                           
         """
 
@@ -1023,12 +1076,13 @@ class Condition:
         return (min)
 
     def min_loc(self, param: str)-> float:
-        """ Return minimum value of param in the Condition
+        """ Return location of minimum value of param
         
-        By default, saves the data to a dictionary, Condition.mins
-        for future reference, unless recalc=True
+        Inputs:
+         - param, string of local parameter to find minimum of
 
-        nonzero option not implemented, TODO
+        Returns:
+         - r/R location of the maximum value of param
                           
         """
         min = 10**7
@@ -1041,7 +1095,14 @@ class Condition:
         return (location)
     
     def max_line_loc(self, param: str, angle:float) -> float:
-        """ Return r/R location of maximum value of param at a given angle
+        """ Return location of maximum value of param at a given angle
+        
+        Inputs:
+         - param, string of local parameter to find maximum of
+         - angle, angle to search along
+
+        Returns:
+         - r/R location of the maximum value of param when φ=angle
                           
         """
         max = 0
@@ -1054,6 +1115,13 @@ class Condition:
     
     def max_line(self, param: str, angle:float) -> float:
         """ Return maximum value of param at a given angle
+        
+        Inputs:
+         - param, string of local parameter to find maximum of
+         - angle, angle to search along
+
+        Returns:
+         - maximum value of param when φ=angle
                           
         """
         max = 0
@@ -1066,15 +1134,22 @@ class Condition:
     
     def find_hstar_pos(self, method='max_dsm', void_criteria = 0.05) -> float:
         """ Returns the vertical distance from the top of the pipe to the bubble layer interface
+
+        Inputs:
+         - method
+         - void_criteria, used in some methods
         
         Methods for determining bubble layer interface
-        - max_dsm
-        - min_grad_y
-        - max_grad_y
-        - max_mag_grad_y
-        - zero_void
-        - percent_void, search down the phi = 90 line, find largest value of rstar where alpha < min_void
-        - Ryan_Ref, uses 1.3 - 1.57e-5 * Ref, proposed by Ryan (2022)
+         - max_dsm
+         - min_grad_y
+         - max_grad_y
+         - max_mag_grad_y
+         - zero_void
+         - percent_void, search down the phi = 90 line, find largest value of rstar where alpha < min_void
+         - Ryan_Ref, uses 1.3 - 1.57e-5 * Ref, proposed by Ryan (2022)
+
+        Returns:
+         - hstar
         
         """
 
@@ -1158,10 +1233,15 @@ class Condition:
         print('Invalid method for find_h_pos')
         return np.NaN
 
-    def avg(self, param: str, include_nonzero=False) -> float:
+    def avg(self, param: str, include_zero=True) -> float:
         """Calculates a basic average of a parameter, "param"
         
-        Just looks at every param and ensemble-averages them
+        Inputs:
+         - param, string of local parameter to find average of
+         - include_zero, if you want to include when param = 0 in average
+
+        Returns:
+         - average value of param
 
         """
         count = 0
@@ -1169,7 +1249,7 @@ class Condition:
         for angle, r_dict in self.phi.items():
             for rstar, midas_dict in r_dict.items():
                 
-                if include_nonzero:
+                if include_zero:
                     count += 1
                     avg_param += midas_dict[param]
                 else:
@@ -1182,14 +1262,16 @@ class Condition:
     def area_avg(self, param: str, even_opt='first', recalc = True) -> float:
         """Method for calculating the area-average of a parameter, "param"
         
-        param can be anything MIDAS outputs, but usually of interest are "alpha" or "alpha_ug"
-        If you're not sure what somethings named, try Condition.phi[90][1.0].keys()
+        Inputs:
+         - param, string of local parameter to area-average
+         - even_opt, passed to integration method
+         - recalc, if area-average previously calculated, it was stored in a dictionary, and can just pull from there
 
-        Uses Simpson's rule for integration, even_opt passed to that. Will save the previously calculated area averages 
-        in Condition.area_avgs[param], and won't recalculate unless recalc = True
-
-        Returns the area-averaged parameter, or None if the method failed
-
+        Returns:
+         - Area-averaged parameter, or None if the method failed
+        
+        Uses Simpson's rule for integration, specifically scipy.integrate.simpsons
+        
         """
         
         # Check that the parameter that the user requested exists
@@ -1256,14 +1338,18 @@ class Condition:
         return I
 
     def circ_segment_area_avg(self, param:str, hstar:float, ngridr=25, ngridphi=25, int_err = 10**-4) -> float:
-        """Method for calculating the area-average of a parameter, "param" over the circular segment defined by h
+        """Method for calculating the area-average of a parameter, "param" in some circular segment defined by :math:`h^*`
         
-        Basically, if you slice the pipe at h, area average everything above h
+        Inputs:
+         - param, string of local parameter to area-average
+         - hstar, distance from the top of the pipe that defines circular segment
+         - int_err, acceptable warning for integral error (passed to scipy.integrate.dblquad)
 
-        to smooth it out, integrate over an interpolated mesh
-
-        returns integrand result
-
+        Returns:
+         - Area-averaged parameter, or None if the method failed
+        
+        Uses scipy.integrate.dblquad. May be computationally expensive
+        
         """
 
         # Check that the parameter that the user requested exists
@@ -1295,7 +1381,7 @@ class Condition:
         phis = np.asarray(phis)
         vals = np.asarray(vals)   
 
-        interp = interpolate.LinearNDInterpolator(list(zip(rs, phis)), vals)
+        interp = interpolate.LinearNDInterpolator(list(zip(rs, phis)), vals) # TODO refactor to use __call__
 
         # To integrate, need to get the bounds. They're different depending on if h* > 1
         def lower_r_bound_pos(phi):
@@ -1318,14 +1404,18 @@ class Condition:
         return I
 
     def circ_segment_void_area_avg(self, param:str, hstar:float, ngridr=25, ngridphi=25, int_err = 10**-4) -> float:
-        """Method for calculating the void-weighted area-average of a parameter over the circular segment defined by h
+        """Method for calculating the void-weighted area-average of a parameter, "param" in some circular segment defined by :math:`h^*`
         
-        Basically, if you slice the pipe at h, void-weighted area average everything above h
+        Inputs:
+         - param, string of local parameter to area-average
+         - hstar, distance from the top of the pipe that defines circular segment
+         - int_err, acceptable warning for integral error (passed to scipy.integrate.dblquad)
+
+        Returns:
+         - Void-weighted rea-averaged parameter, or None if the method failed
         
-        to smooth it out, integrate over an interpolated mesh
-
-        returns integrand result
-
+        Uses scipy.integrate.dblquad. May be computationally expensive
+        
         """
 
         # Check that the parameter that the user requested exists
@@ -1381,12 +1471,18 @@ class Condition:
         return I
 
     def line_avg(self, param:str, phi_angle:float, even_opt='first') -> float:
-        """Line average of param over line defined by phi_angle
+        """Method for calculating the average value of param across a diameter defined by φ = angle
         
-        Also includes the complementary angle, so the line is a diameter of the pipe
+        Inputs:
+         - param, string of local parameter to area-average
+         - phi_angle, angle to define diameter to integrate across
+         - even_opt, see :any:area_avg
 
-        returns integrand result
-
+        Returns:
+         - Average value of param along φ = angle
+        
+        Uses scipy.integrate.simpsons
+        
         """
 
         # Check that the parameter that the user requested exists
@@ -1433,14 +1529,20 @@ class Condition:
         return I
 
     def line_avg_dev(self, param:str, phi_angle:float, even_opt='first') -> float:
-        """Second moment of param over line defined by phi_angle
+        """Method for calculating the average value of param across a diameter defined by φ = angle
         
-        Also includes the complementary angle, so the line is a diameter of the pipe
+        Inputs:
+         - param, string of local parameter to calculate line average deviation
+         - phi_angle, angle to define diameter to integrate across
+         - even_opt, see :any:area_avg
 
-        < param - <param>^2 > / <param>^2
+        Returns:
+         - integrand result
+        
+        Taking param = :math:`\\psi`, mathematically, this function does
 
-        returns integrand result
-
+        .. math:: \\frac{\\langle \\psi - \\langle \\psi^2 \\rangle  \\rangle }{\\langle \\psi \\rangle^2}
+        
         """
 
         # Check that the parameter that the user requested exists
@@ -1488,10 +1590,18 @@ class Condition:
 
 
     def void_area_avg(self, param: str, even_opt='first') -> float:
-        """Method for calculating the void-weighted area-average of a parameter
+        """Method for calculating the void-weighted area-average of a parameter, "param"
         
-        <alpha * param> / <alpha>
+        Inputs:
+         - param, string of local parameter to area-average
+         - even_opt, passed to integration method
+         - recalc, if area-average previously calculated, it was stored in a dictionary, and can just pull from there
 
+        Returns:
+         - void-weighted area-averaged parameter, or None if the method failed
+        
+        Uses Simpson's rule for integration, specifically scipy.integrate.simpsons
+        
         """
 
         # Check that the parameter that the user requested exists
@@ -1545,9 +1655,20 @@ class Condition:
         return I
     
     def interp_area_avg(self, param:str, interp_type = 'linear') -> float:
-        """Function to area-average param, using the spline interpolation of param
+        """Method for calculating the area-average of a parameter, "param", based on an interpolation of the data
+        
+        Inputs:
+         - param, string of local parameter to area-average
+         - interp_type, option for what kind of interpolation to use
 
-        Returns the intengrand result. May be computationally expensive
+        Options for interp_type:
+         - linear, see :any:`fit_linear_interp`
+         - spline, see :any:`fit_spline`
+
+        Returns:
+         - area-averaged parameter
+        
+        Uses scipy.integrate.dblquad, may be computationally expensive
         
         """
 
@@ -1560,7 +1681,7 @@ class Condition:
         
         elif interp_type == 'linear':
             if param not in self.linear_interp.keys():
-                self.calc_linear_interp(param)
+                self.fit_linear_interp(param)
 
             def integrand(phi, r):
                 return self.linear_interp[param](phi, r) * r
@@ -1569,9 +1690,10 @@ class Condition:
         return I
 
     def spline_void_area_avg(self, param:str) -> float:
-        """Function to void-weighted area-average param over a circular segment defined by h, using the spline interpolation of param
+        """Function to void-weighted area-average param based on a spline interpolation
 
-        Returns the intengrand result. May be computationally expensive
+        Inputs:
+         - param, string of local parameter to area-average
         
         """
 
@@ -1585,9 +1707,17 @@ class Condition:
         return I
     
     def spline_circ_seg_area_avg(self, param:str, hstar:float, int_err = 10**-4) -> float:
-        """Function to area-average over a circular segment defined by h, using the spline interpolation of param
+        """Function to area-average over a circular segment using the spline interpolation of param
 
-        Returns the intengrand result. May be computationally expensive
+        Inputs:
+         - param, string of local parameter to area-average
+         - hstar, distance from the top of the pipe that defines circular segment
+         - int_err, acceptable warning for integral error (passed to scipy.integrate.dblquad)
+
+        Returns:
+         - integrand result
+
+        Uses scipy.integrate.dblquad. May be computationally expensive
         
         """
 
@@ -1616,9 +1746,18 @@ class Condition:
     def calc_void_cov(self):
         """Calculates the void covariance
 
-        Returns <alpha^2>/<alpha>^2
+        Inputs:
+         - None
 
-        Stored in self.void_cov
+        Stores:
+         - "void_cov" in self
+
+        Returns:
+         - void covariance
+
+        Mathematically performing the operation
+        
+        .. math:: \\frac{\\langle \\alpha^2 \\rangle }{\\langle \\alpha \\rangle^2}
         
         """
 
@@ -1657,9 +1796,18 @@ class Condition:
     def calc_sigma_alpha(self):
         """Calculates the second moment of alpha
 
-        Returns <(alpha-<alpha>)^2>/<alpha>^2
+        Inputs:
+         - None
 
-        Stored in self.sigma_alpha
+        Stores:
+         - "sigma_alpha" in self
+
+        Returns:
+         - second moment of :math:`alpha`
+
+        Mathematically performing the operation
+
+        .. math:: \\frac{\\langle (\\alpha - \\langle \\alpha \\rangle)^2 \\rangle }{\\langle \\alpha \\rangle^2}
         
         """
 
@@ -1701,9 +1849,18 @@ class Condition:
     def calc_mu3_alpha(self):
         """Calculates the third moment of alpha
 
-        Returns <(alpha-<alpha>)^3>/<alpha>^3
+        Inputs:
+         - None
 
-        Stored in self.mu3_alpha
+        Stores:
+         - "mu3_alpha" in self
+
+        Returns:
+         - Third moment of :math:`alpha`
+
+        Mathematically performing the operation
+
+        .. math:: \\frac{\\langle (\\alpha - \\langle \\alpha \\rangle)^3 \\rangle }{\\langle \\alpha \\rangle^3}
         
         """
 
@@ -1804,8 +1961,8 @@ class Condition:
 
         Options:
             - method    : Calculation method
-                > 'LM'  : Lockhart Martinelli, assuming turbulent-turbulent, C = LM_C
-                > 'Kim' : Kim-modified Lockhart Martinelli
+              > 'LM'  : Lockhart Martinelli, assuming turbulent-turbulent, C = LM_C
+              > 'Kim' : Kim-modified Lockhart Martinelli
             - rho_f     : Liquid phase density
             - rho_g     : Gas phase density
             - mu_f      : Liquid phase dynamic viscosity
@@ -1864,8 +2021,21 @@ class Condition:
         return self.jgloc / self.area_avg('alpha')
     
     def calc_W(self):
-        """Calculates the wake deficit function, W, from the experimental data
+        """Calculates the third moment of alpha
 
+        Inputs:
+         - None
+
+        Stores:
+         - "W" in midas_dict
+
+        Returns:
+         - Area-average W
+
+        Mathematically performing the operation
+
+        .. math:: W = \\frac{v_r}{v_f}
+        
         """
 
         for angle, r_dict in self.phi.items():
@@ -1887,7 +2057,7 @@ class Condition:
                         'W' : midas_dict['vr'] / vfp
                     })
 
-        return
+        return self.area_avg('W')
     
     def calc_mu_eff(self, method='Ishii', alpha_max = 1.0):
         """Method for effective/mixture viscosity
@@ -2178,18 +2348,29 @@ the newly calculated :math:`v_{r}` or not
         return
 
     def calc_avg_lat_sep(self):
-        """ Calculates average lateral separation distance between bubbles
+        """Calculates average lateral separation distance between bubbles
+
+        Inputs:
+         - None
+
+        Stores:
+         - "lambda" in midas_dict
+         - "lambda*" in midas_dict
+         - "alpha_lambda" in midas_dict
+
+        Returns:
+         - Area-average :math:`\\lambda`
+
+        Assuming
+
+        .. math:: \\lambda = \\frac{v_g}{f}
+
+        Where :math:`f` is the bubble frequency. Also estimates the void fraction based on this :math:`\\lambda`,
+
+        .. math:: \\alpha = \\frac{D_{sm,1}}{\\lambda}
         
-        Average lateral separation, λ given by
-        λ = ugl / f
-
-        stores in midas dict under lambda. Also estimates α based on λ,
-
-        α ~ Db / λ
-
-        Mirrors the data
-
         """
+
         self.mirror()
 
         for angle, r_dict in self.phi.items():
@@ -2204,7 +2385,7 @@ the newly calculated :math:`v_{r}` or not
                     midas_dict['lambda*'] = np.inf
                     midas_dict['alpha_lambda'] = 0
 
-        return
+        return self.area_avg('lambda')
     
     def plot_profiles(self, param, save_dir = '.', show=True, x_axis='r', 
                       const_to_plot = [90, 67.5, 45, 22.5, 0], include_complement = True, 
@@ -2852,10 +3033,17 @@ the newly calculated :math:`v_{r}` or not
     def rough_FR_ID(self) -> None:
         """Identifies the flow regime for the given condition, by some rough methods
 
+        Inputs:
+         - None
+
+        Stores:
+         - "FR" in self
+
+        Returns:
+         - FR
+
         First checks if it matches any given by previous researchers, or the hierarchical
         clustering algorithm results
-
-        Stored in self.FR
 
         1 = bubbly
         2 = plug
@@ -3441,12 +3629,17 @@ the newly calculated :math:`v_{r}` or not
                 self.FR = 2
         
         #print(f"Warning: Flow regime not accurately identified for {self.name}, defaulting to {self.FR}")
-        return
+        return self.FR
 
     def TD_FR_ID(self) -> None:
+        """ This function estimates the flow regime based on Taitel and Dukler's method
+
+        Not implemented yet
+        
+        """
         #dpdxL
 
-        return
+        return self.FR
 
 
 def color_cycle():
