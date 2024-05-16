@@ -20,8 +20,20 @@ class Condition:
 """
 
     debugFID = None
-    def __init__(self, jgref:float, jgloc:float, jf:float, theta:int, port:str, database:str, fluids = 'air-water') -> None:
+    def __init__(self, jgref:float, jgloc:float, jf:float, theta:int, port:str, database:str, fluids = 'air-water', g = 9.81) -> None:
         """ Initialize Condition object
+
+        Inputs:
+        - jgref, reference superficial gas velocity
+        - jgloc, local superficial gas velocity
+        - jf, superficial liquid velocity
+        - theta, angle of inclination of flow direction (0° is horizontal, 90° is vertical upwards)
+        - port, string to denote the port
+        - database, string to associate what database this data is from
+
+        Optional inputs:
+        - fluids, what fluid pair to use as the gas and liquid
+        - g, gravitational acceleration. In case you're on Mars
 
         Implemented Fluids:
         - air-water, uses properties at atmospheric conditions
@@ -125,6 +137,9 @@ class Condition:
         
         else:
             raise NotImplementedError(f"{fluids} not available, try 'air-water'")
+        
+        self.g = g
+        return
 
     def __eq__(self, __o: object) -> bool:
         if isinstance(__o, Condition):
@@ -1875,12 +1890,21 @@ class Condition:
         return
     
     def calc_mu_eff(self, method='Ishii', alpha_max = 1.0):
-        """Method for calculating effective viscosity. 
+        """Method for effective/mixture viscosity
         
-        Also calculates mixture viscosity, stored in μ_eff and μ_m, resepectively. 
-        Note that this fuction does mirror the data
+        Inputs:
+         - method, what method to use for modeling :math:`\\mu_{eff}`
+         - alpha_max, parameter for some models
+        
+        Stores:
+         - "mu_eff" in midas_dict 
+         - "mu_m" in midas_dict
 
-        Right now the only method implemented is Ishii's
+        Options for method:
+         - Ishii, :math:`\\mu_{eff} = \\mu_{m} = \\mu_{f} (1 - \\frac{\\alpha}{ \\alpha_{max} })^{-2.5 \\alpha_{max} \\frac{\\mu_g + 0.4 \\mu_g}{\\mu_g + \\mu_g} }`
+
+        Returns:
+         - area average effective viscosity
 
         """
 
@@ -1889,7 +1913,7 @@ class Condition:
         for angle, r_dict in self.phi.items():
             for rstar, midas_dict in r_dict.items():
 
-                if method == 'Ishii':
+                if method.lower() == 'ishii':
                     mu_m = self.mu_f * (1 - midas_dict['alpha'] / alpha_max)**(-2.5*alpha_max * (self.mu_g + 0.4*self.mu_f) / (self.mu_g + self.mu_f)  )
                     mu_eff = mu_m
 
@@ -1897,18 +1921,27 @@ class Condition:
 
                 midas_dict.update({'mu_eff': mu_eff})
 
-        return
+        return self.area_avg('mu_eff')
     
-    def calc_cd(self, method='Ishii-Zuber', vr_cheat = False):
-        """ Method for calculating drag coefficient 
+    def calc_cd(self, method='Ishii-Zuber', vr_cheat = False, limit = None):
+        """Method for calculating drag coefficient
         
-        If vr = 0, assume cd = 0
+        Inputs:
+         - method, what method to use for modeling :math:`C_{D}`
+         - vr_cheat, flag to use "vr" from midas_dict or "vr_model" when calculating :math:`Re_{b}`
+         - limit, if supplied, will limit the drag coefficient to the given maximum value. For instance, 0.44 like in CFX
+        
+        Stores:
+         - "cd" in midas_dict 
+         - "Reb" in midas_dict. Calculated by :math:`Re_{b} = \\frac{(1 - \\alpha) \\rho_{f} v_{r} D_{sm,1} }{\\mu_{m}}`. \ 
+:math:`\\mu_{m}` comes from :any:`calc_mu_eff`
 
-        Options are Ishii-Zuber and Schiller-Naumann, but both use
-        Reb = (1 - midas_dict['alpha']) * midas_dict['Dsm1'] * rho_f * midas_dict['vr'] / midas_dict['mu_m']\
-        
-        vr from calc_vr()
-        mu_m from calc_mu_eff()
+        Options for method:
+         - Ishii-Zuber, :math:`C_{D} = \\frac{24}{Re_{b}} (1 + 0.1 Re_{b}^{0.75})`
+         - Schiller-Naumann, :math:`C_{D} = \\frac{24}{Re_{b}} (1 + 0.15 Re_{b}^{0.687})`. Here, :math:`Re_{b}` uses :math:`\\mu_{f}`
+
+        Returns:
+         - area average drag coefficient
 
         """
 
@@ -1922,15 +1955,11 @@ class Condition:
                 else:
 
                     if 'vr_model' not in midas_dict.keys(): # Initialize for iteration
-                        midas_dict.update(
-                            {'vr_model': -1}
-                        )
+                        midas_dict.update({'vr_model': -1})
 
                     Reb = (1 - midas_dict['alpha']) * midas_dict['Dsm1'] * self.rho_f * abs(midas_dict['vr_model']) / midas_dict['mu_m']
 
-                midas_dict.update(
-                        {'Reb': Reb}
-                    )
+                midas_dict.update({'Reb': Reb})
 
                 if method == 'Ishii-Zuber' or method == 'IZ' or method == 'Ishii':
 
@@ -1939,54 +1968,41 @@ class Condition:
                     else:
                         cd = 0
 
-                    midas_dict.update(
-                        {'cd': cd}
-                    )
-
-                elif method == 'Ishii-Zuber-limited':
-
-                    if Reb > 0:
-                        cd = max(0.44, 24/Reb * (1 + 0.1*Reb**0.75))
-                    else:
-                        cd = 0
-
-                    midas_dict.update(
-                        {'cd': cd}
-                    )
-
-                elif method == 'Schiller-Naumann-limited':
-                    cd = max(0.44, 24/Reb * (1 + 0.15*Reb**0.687))
-
-                    midas_dict.update(
-                        {'cd': cd}
-                    )
-
                 elif method == 'Schiller-Naumann':
                     Reb = (1 - midas_dict['alpha']) * midas_dict['Dsm1'] * self.rho_f * abs(midas_dict['vr_model']) / self.mu_f
 
                     cd = 24/Reb * (1 + 0.15*Reb**0.687)
 
-                    midas_dict.update(
-                        {'cd': cd}
-                    )
+                if limit is not None:
+                    cd = max(limit, cd)
+                midas_dict.update({'cd': cd})
 
-        return
+        return self.area_avg('cd')
 
-    def calc_vr_model(self, method='wake_1', kw = -0.15, n=1, Lw = 5, kf = 0.1, iterate_cd = True, quiet = True):
+    def calc_vr_model(self, method='km1_simp', kw = -0.98, n=1, Lw = 5, kf = 0.089, iterate_cd = True, quiet = True):
         """Method for calculating relative velocity based on models
         
-        Stored under "vr_method" in midas_dict as well as "vr_model"
+        Inputs:
+         - method, what method to use for modeling :math:`v_{r}`
+         - kw, wake coeffieient for some models
+         - n, exponent for some models
+         - Lw, really :math:`L_{w}^{*}`, effective wake length divided by the bubble diameter
+         - kf, fluid coefficient for some models
+         - iterate_cd, flag to pass to :any:`calc_cd`. Basically whether to iterate to calculate :math:`C_{D}` based on \
+the newly calculated :math:`v_{r}` or not
+         - quiet, flag for extra debugging messages
+        
+        Stores:
+         - "vr_'method_name'" in midas_dict 
+         - "vr_model" in midas_dict 
 
-        TODO implement Ishii-Chawla
+        Options for method:
+         - "km1_simp", most up to date :math:`v_{r} = K_{f} - K_{w}  \\alpha  v_{f}  C_{d}^{1/3}`
+         - "Ishii-Chawla", :math:`v_{r} = \\sqrt{2} (\\frac{\\sigma g \\Delta \\rho}{\\rho_{f}^{2}})^{1/4}`
+         - A bunch of obsolete ones that I haven't deleted but probably should
 
-        Implemented options:
-        - "wake_1" vr = - kw * vf * Cd**(1./3)
-        - "wake_alpha" vr = - kw * (1-α)^n * vf * Cd**(1./3)
-        - "wake_alpha2" vr = - kw *  (α*(1-α))^n * vf * Cd**(1./3)
-        - "wake_lambda" = - kw * vf * Cd**(1./3) * Db**(2./3) * λ**(-2./3)
-
-        Lw really Lw*, effective wake length divided by the bubble diameter
-
+        Returns:
+         - area average relative velocity calculated by the model
 
         """
 
@@ -2059,6 +2075,9 @@ class Condition:
 
                         if abs(angle - self.random_point[0] ) < 0.001 and abs(rstar - self.random_point[1] ) < 0.001:
                             print(self.random_point, (0.5 - Lw), kw * midas_dict['alpha']**n *midas_dict['cd']**(1./3) *(np.pi/4)**(1/3)* (0.5**(1./3) - Lw**(1/3)) )
+
+                    elif method.lower() == 'ishii-chawla' or method.lower() == 'ishii' or method.lower() == 'ishii chawla':
+                        vr = np.sqrt(2) * (self.sigma * self.g * (self.rho_f - self.rho_g) / (self.rho_f**2))**0.25
                     
                     else:
                         print(f"{method} not implemented")
@@ -2080,12 +2099,15 @@ class Condition:
                 if not quiet:
                     print(f"vr_model converged in {iterations} iterations")
                     print(old_vr, self.area_avg('vr_model', recalc=True))
-                return
+                return self.area_avg("vr_model")
             
             if iterations > MAX_ITERATIONS:
                 print("Warning, max iterations exceeded in calculating vr_model")
                 print(f"{old_vr - self.area_avg('vr_model', recalc=True)}")
                 return
+            
+        
+        return self.area_avg("vr_model")
 
             
     def calc_vgj_model(self):

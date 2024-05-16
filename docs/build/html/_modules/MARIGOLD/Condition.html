@@ -94,8 +94,20 @@
 <span class="sd">&quot;&quot;&quot;</span>
 
     <span class="n">debugFID</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">jgref</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">jgloc</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">jf</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">theta</span><span class="p">:</span><span class="nb">int</span><span class="p">,</span> <span class="n">port</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">database</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">fluids</span> <span class="o">=</span> <span class="s1">&#39;air-water&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">jgref</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">jgloc</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">jf</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">theta</span><span class="p">:</span><span class="nb">int</span><span class="p">,</span> <span class="n">port</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">database</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">fluids</span> <span class="o">=</span> <span class="s1">&#39;air-water&#39;</span><span class="p">,</span> <span class="n">g</span> <span class="o">=</span> <span class="mf">9.81</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Initialize Condition object</span>
+
+<span class="sd">        Inputs:</span>
+<span class="sd">        - jgref, reference superficial gas velocity</span>
+<span class="sd">        - jgloc, local superficial gas velocity</span>
+<span class="sd">        - jf, superficial liquid velocity</span>
+<span class="sd">        - theta, angle of inclination of flow direction (0° is horizontal, 90° is vertical upwards)</span>
+<span class="sd">        - port, string to denote the port</span>
+<span class="sd">        - database, string to associate what database this data is from</span>
+
+<span class="sd">        Optional inputs:</span>
+<span class="sd">        - fluids, what fluid pair to use as the gas and liquid</span>
+<span class="sd">        - g, gravitational acceleration. In case you&#39;re on Mars</span>
 
 <span class="sd">        Implemented Fluids:</span>
 <span class="sd">        - air-water, uses properties at atmospheric conditions</span>
@@ -199,6 +211,9 @@
         
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">fluids</span><span class="si">}</span><span class="s2"> not available, try &#39;air-water&#39;&quot;</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">g</span> <span class="o">=</span> <span class="n">g</span>
+        <span class="k">return</span>
 
     <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">__o</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">__o</span><span class="p">,</span> <span class="n">Condition</span><span class="p">):</span>
@@ -2062,12 +2077,21 @@
 <div class="viewcode-block" id="Condition.calc_mu_eff">
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.calc_mu_eff">[docs]</a>
     <span class="k">def</span> <span class="nf">calc_mu_eff</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;Ishii&#39;</span><span class="p">,</span> <span class="n">alpha_max</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Method for calculating effective viscosity. </span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Method for effective/mixture viscosity</span>
 <span class="sd">        </span>
-<span class="sd">        Also calculates mixture viscosity, stored in μ_eff and μ_m, resepectively. </span>
-<span class="sd">        Note that this fuction does mirror the data</span>
+<span class="sd">        Inputs:</span>
+<span class="sd">         - method, what method to use for modeling :math:`\\mu_{eff}`</span>
+<span class="sd">         - alpha_max, parameter for some models</span>
+<span class="sd">        </span>
+<span class="sd">        Stores:</span>
+<span class="sd">         - &quot;mu_eff&quot; in midas_dict </span>
+<span class="sd">         - &quot;mu_m&quot; in midas_dict</span>
 
-<span class="sd">        Right now the only method implemented is Ishii&#39;s</span>
+<span class="sd">        Options for method:</span>
+<span class="sd">         - Ishii, :math:`\\mu_{eff} = \\mu_{m} = \\mu_{f} (1 - \\frac{\\alpha}{ \\alpha_{max} })^{-2.5 \\alpha_{max} \\frac{\\mu_g + 0.4 \\mu_g}{\\mu_g + \\mu_g} }`</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">         - area average effective viscosity</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -2076,7 +2100,7 @@
         <span class="k">for</span> <span class="n">angle</span><span class="p">,</span> <span class="n">r_dict</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">phi</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">for</span> <span class="n">rstar</span><span class="p">,</span> <span class="n">midas_dict</span> <span class="ow">in</span> <span class="n">r_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
 
-                <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;Ishii&#39;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">method</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;ishii&#39;</span><span class="p">:</span>
                     <span class="n">mu_m</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mu_f</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;alpha&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="n">alpha_max</span><span class="p">)</span><span class="o">**</span><span class="p">(</span><span class="o">-</span><span class="mf">2.5</span><span class="o">*</span><span class="n">alpha_max</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mu_g</span> <span class="o">+</span> <span class="mf">0.4</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">mu_f</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mu_g</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">mu_f</span><span class="p">)</span>  <span class="p">)</span>
                     <span class="n">mu_eff</span> <span class="o">=</span> <span class="n">mu_m</span>
 
@@ -2084,21 +2108,30 @@
 
                 <span class="n">midas_dict</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;mu_eff&#39;</span><span class="p">:</span> <span class="n">mu_eff</span><span class="p">})</span>
 
-        <span class="k">return</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">area_avg</span><span class="p">(</span><span class="s1">&#39;mu_eff&#39;</span><span class="p">)</span></div>
 
     
 <div class="viewcode-block" id="Condition.calc_cd">
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.calc_cd">[docs]</a>
-    <span class="k">def</span> <span class="nf">calc_cd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;Ishii-Zuber&#39;</span><span class="p">,</span> <span class="n">vr_cheat</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; Method for calculating drag coefficient </span>
+    <span class="k">def</span> <span class="nf">calc_cd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;Ishii-Zuber&#39;</span><span class="p">,</span> <span class="n">vr_cheat</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">limit</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Method for calculating drag coefficient</span>
 <span class="sd">        </span>
-<span class="sd">        If vr = 0, assume cd = 0</span>
+<span class="sd">        Inputs:</span>
+<span class="sd">         - method, what method to use for modeling :math:`C_{D}`</span>
+<span class="sd">         - vr_cheat, flag to use &quot;vr&quot; from midas_dict or &quot;vr_model&quot; when calculating :math:`Re_{b}`</span>
+<span class="sd">         - limit, if supplied, will limit the drag coefficient to the given maximum value. For instance, 0.44 like in CFX</span>
+<span class="sd">        </span>
+<span class="sd">        Stores:</span>
+<span class="sd">         - &quot;cd&quot; in midas_dict </span>
+<span class="sd">         - &quot;Reb&quot; in midas_dict. Calculated by :math:`Re_{b} = \\frac{(1 - \\alpha) \\rho_{f} v_{r} D_{sm,1} }{\\mu_{m}}`. \ </span>
+<span class="sd">:math:`\\mu_{m}` comes from :any:`calc_mu_eff`</span>
 
-<span class="sd">        Options are Ishii-Zuber and Schiller-Naumann, but both use</span>
-<span class="sd">        Reb = (1 - midas_dict[&#39;alpha&#39;]) * midas_dict[&#39;Dsm1&#39;] * rho_f * midas_dict[&#39;vr&#39;] / midas_dict[&#39;mu_m&#39;]\</span>
-<span class="sd">        </span>
-<span class="sd">        vr from calc_vr()</span>
-<span class="sd">        mu_m from calc_mu_eff()</span>
+<span class="sd">        Options for method:</span>
+<span class="sd">         - Ishii-Zuber, :math:`C_{D} = \\frac{24}{Re_{b}} (1 + 0.1 Re_{b}^{0.75})`</span>
+<span class="sd">         - Schiller-Naumann, :math:`C_{D} = \\frac{24}{Re_{b}} (1 + 0.15 Re_{b}^{0.687})`. Here, :math:`Re_{b}` uses :math:`\\mu_{f}`</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">         - area average drag coefficient</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -2112,15 +2145,11 @@
                 <span class="k">else</span><span class="p">:</span>
 
                     <span class="k">if</span> <span class="s1">&#39;vr_model&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">midas_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span> <span class="c1"># Initialize for iteration</span>
-                        <span class="n">midas_dict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
-                            <span class="p">{</span><span class="s1">&#39;vr_model&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">}</span>
-                        <span class="p">)</span>
+                        <span class="n">midas_dict</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;vr_model&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">})</span>
 
                     <span class="n">Reb</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;alpha&#39;</span><span class="p">])</span> <span class="o">*</span> <span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;Dsm1&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">rho_f</span> <span class="o">*</span> <span class="nb">abs</span><span class="p">(</span><span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;vr_model&#39;</span><span class="p">])</span> <span class="o">/</span> <span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;mu_m&#39;</span><span class="p">]</span>
 
-                <span class="n">midas_dict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
-                        <span class="p">{</span><span class="s1">&#39;Reb&#39;</span><span class="p">:</span> <span class="n">Reb</span><span class="p">}</span>
-                    <span class="p">)</span>
+                <span class="n">midas_dict</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;Reb&#39;</span><span class="p">:</span> <span class="n">Reb</span><span class="p">})</span>
 
                 <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;Ishii-Zuber&#39;</span> <span class="ow">or</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;IZ&#39;</span> <span class="ow">or</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;Ishii&#39;</span><span class="p">:</span>
 
@@ -2129,57 +2158,44 @@
                     <span class="k">else</span><span class="p">:</span>
                         <span class="n">cd</span> <span class="o">=</span> <span class="mi">0</span>
 
-                    <span class="n">midas_dict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
-                        <span class="p">{</span><span class="s1">&#39;cd&#39;</span><span class="p">:</span> <span class="n">cd</span><span class="p">}</span>
-                    <span class="p">)</span>
-
-                <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;Ishii-Zuber-limited&#39;</span><span class="p">:</span>
-
-                    <span class="k">if</span> <span class="n">Reb</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                        <span class="n">cd</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mf">0.44</span><span class="p">,</span> <span class="mi">24</span><span class="o">/</span><span class="n">Reb</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="mf">0.1</span><span class="o">*</span><span class="n">Reb</span><span class="o">**</span><span class="mf">0.75</span><span class="p">))</span>
-                    <span class="k">else</span><span class="p">:</span>
-                        <span class="n">cd</span> <span class="o">=</span> <span class="mi">0</span>
-
-                    <span class="n">midas_dict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
-                        <span class="p">{</span><span class="s1">&#39;cd&#39;</span><span class="p">:</span> <span class="n">cd</span><span class="p">}</span>
-                    <span class="p">)</span>
-
-                <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;Schiller-Naumann-limited&#39;</span><span class="p">:</span>
-                    <span class="n">cd</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mf">0.44</span><span class="p">,</span> <span class="mi">24</span><span class="o">/</span><span class="n">Reb</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="mf">0.15</span><span class="o">*</span><span class="n">Reb</span><span class="o">**</span><span class="mf">0.687</span><span class="p">))</span>
-
-                    <span class="n">midas_dict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
-                        <span class="p">{</span><span class="s1">&#39;cd&#39;</span><span class="p">:</span> <span class="n">cd</span><span class="p">}</span>
-                    <span class="p">)</span>
-
                 <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;Schiller-Naumann&#39;</span><span class="p">:</span>
                     <span class="n">Reb</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;alpha&#39;</span><span class="p">])</span> <span class="o">*</span> <span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;Dsm1&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">rho_f</span> <span class="o">*</span> <span class="nb">abs</span><span class="p">(</span><span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;vr_model&#39;</span><span class="p">])</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">mu_f</span>
 
                     <span class="n">cd</span> <span class="o">=</span> <span class="mi">24</span><span class="o">/</span><span class="n">Reb</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="mf">0.15</span><span class="o">*</span><span class="n">Reb</span><span class="o">**</span><span class="mf">0.687</span><span class="p">)</span>
 
-                    <span class="n">midas_dict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
-                        <span class="p">{</span><span class="s1">&#39;cd&#39;</span><span class="p">:</span> <span class="n">cd</span><span class="p">}</span>
-                    <span class="p">)</span>
+                <span class="k">if</span> <span class="n">limit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">cd</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">limit</span><span class="p">,</span> <span class="n">cd</span><span class="p">)</span>
+                <span class="n">midas_dict</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;cd&#39;</span><span class="p">:</span> <span class="n">cd</span><span class="p">})</span>
 
-        <span class="k">return</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">area_avg</span><span class="p">(</span><span class="s1">&#39;cd&#39;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Condition.calc_vr_model">
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.calc_vr_model">[docs]</a>
-    <span class="k">def</span> <span class="nf">calc_vr_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;wake_1&#39;</span><span class="p">,</span> <span class="n">kw</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.15</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">Lw</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span> <span class="n">kf</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span> <span class="n">iterate_cd</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">quiet</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">calc_vr_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;km1_simp&#39;</span><span class="p">,</span> <span class="n">kw</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.98</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">Lw</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span> <span class="n">kf</span> <span class="o">=</span> <span class="mf">0.089</span><span class="p">,</span> <span class="n">iterate_cd</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">quiet</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Method for calculating relative velocity based on models</span>
 <span class="sd">        </span>
-<span class="sd">        Stored under &quot;vr_method&quot; in midas_dict as well as &quot;vr_model&quot;</span>
+<span class="sd">        Inputs:</span>
+<span class="sd">         - method, what method to use for modeling :math:`v_{r}`</span>
+<span class="sd">         - kw, wake coeffieient for some models</span>
+<span class="sd">         - n, exponent for some models</span>
+<span class="sd">         - Lw, really :math:`L_{w}^{*}`, effective wake length divided by the bubble diameter</span>
+<span class="sd">         - kf, fluid coefficient for some models</span>
+<span class="sd">         - iterate_cd, flag to pass to :any:`calc_cd`. Basically whether to iterate to calculate :math:`C_{D}` based on \</span>
+<span class="sd">the newly calculated :math:`v_{r}` or not</span>
+<span class="sd">         - quiet, flag for extra debugging messages</span>
+<span class="sd">        </span>
+<span class="sd">        Stores:</span>
+<span class="sd">         - &quot;vr_&#39;method_name&#39;&quot; in midas_dict </span>
+<span class="sd">         - &quot;vr_model&quot; in midas_dict </span>
 
-<span class="sd">        TODO implement Ishii-Chawla</span>
+<span class="sd">        Options for method:</span>
+<span class="sd">         - &quot;km1_simp&quot;, most up to date :math:`v_{r} = K_{f} - K_{w}  \\alpha  v_{f}  C_{d}^{1/3}`</span>
+<span class="sd">         - &quot;Ishii-Chawla&quot;, :math:`v_{r} = \\sqrt{2} (\\frac{\\sigma g \\Delta \\rho}{\\rho_{f}^{2}})^{1/4}`</span>
+<span class="sd">         - A bunch of obsolete ones that I haven&#39;t deleted but probably should</span>
 
-<span class="sd">        Implemented options:</span>
-<span class="sd">        - &quot;wake_1&quot; vr = - kw * vf * Cd**(1./3)</span>
-<span class="sd">        - &quot;wake_alpha&quot; vr = - kw * (1-α)^n * vf * Cd**(1./3)</span>
-<span class="sd">        - &quot;wake_alpha2&quot; vr = - kw *  (α*(1-α))^n * vf * Cd**(1./3)</span>
-<span class="sd">        - &quot;wake_lambda&quot; = - kw * vf * Cd**(1./3) * Db**(2./3) * λ**(-2./3)</span>
-
-<span class="sd">        Lw really Lw*, effective wake length divided by the bubble diameter</span>
-
+<span class="sd">        Returns:</span>
+<span class="sd">         - area average relative velocity calculated by the model</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -2252,6 +2268,9 @@
 
                         <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">angle</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">random_point</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="p">)</span> <span class="o">&lt;</span> <span class="mf">0.001</span> <span class="ow">and</span> <span class="nb">abs</span><span class="p">(</span><span class="n">rstar</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">random_point</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="p">)</span> <span class="o">&lt;</span> <span class="mf">0.001</span><span class="p">:</span>
                             <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">random_point</span><span class="p">,</span> <span class="p">(</span><span class="mf">0.5</span> <span class="o">-</span> <span class="n">Lw</span><span class="p">),</span> <span class="n">kw</span> <span class="o">*</span> <span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;alpha&#39;</span><span class="p">]</span><span class="o">**</span><span class="n">n</span> <span class="o">*</span><span class="n">midas_dict</span><span class="p">[</span><span class="s1">&#39;cd&#39;</span><span class="p">]</span><span class="o">**</span><span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span> <span class="o">*</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">4</span><span class="p">)</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span><span class="o">*</span> <span class="p">(</span><span class="mf">0.5</span><span class="o">**</span><span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span> <span class="o">-</span> <span class="n">Lw</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">))</span> <span class="p">)</span>
+
+                    <span class="k">elif</span> <span class="n">method</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;ishii-chawla&#39;</span> <span class="ow">or</span> <span class="n">method</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;ishii&#39;</span> <span class="ow">or</span> <span class="n">method</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;ishii chawla&#39;</span><span class="p">:</span>
+                        <span class="n">vr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sigma</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">g</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rho_f</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">rho_g</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rho_f</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span><span class="o">**</span><span class="mf">0.25</span>
                     
                     <span class="k">else</span><span class="p">:</span>
                         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">method</span><span class="si">}</span><span class="s2"> not implemented&quot;</span><span class="p">)</span>
@@ -2273,12 +2292,15 @@
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">quiet</span><span class="p">:</span>
                     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;vr_model converged in </span><span class="si">{</span><span class="n">iterations</span><span class="si">}</span><span class="s2"> iterations&quot;</span><span class="p">)</span>
                     <span class="nb">print</span><span class="p">(</span><span class="n">old_vr</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">area_avg</span><span class="p">(</span><span class="s1">&#39;vr_model&#39;</span><span class="p">,</span> <span class="n">recalc</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
-                <span class="k">return</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">area_avg</span><span class="p">(</span><span class="s2">&quot;vr_model&quot;</span><span class="p">)</span>
             
             <span class="k">if</span> <span class="n">iterations</span> <span class="o">&gt;</span> <span class="n">MAX_ITERATIONS</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Warning, max iterations exceeded in calculating vr_model&quot;</span><span class="p">)</span>
                 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">old_vr</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">area_avg</span><span class="p">(</span><span class="s1">&#39;vr_model&#39;</span><span class="p">,</span><span class="w"> </span><span class="n">recalc</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-                <span class="k">return</span></div>
+                <span class="k">return</span>
+            
+        
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">area_avg</span><span class="p">(</span><span class="s2">&quot;vr_model&quot;</span><span class="p">)</span></div>
 
 
             

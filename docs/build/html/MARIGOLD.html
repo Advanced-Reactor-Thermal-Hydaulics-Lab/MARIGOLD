@@ -176,7 +176,7 @@
 <span id="condition-object"></span><h2>Condition object<a class="headerlink" href="#module-MARIGOLD.Condition" title="Link to this heading"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="MARIGOLD.Condition.Condition">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">MARIGOLD.Condition.</span></span><span class="sig-name descname"><span class="pre">Condition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">jgref</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jgloc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">database</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fluids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'air-water'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">MARIGOLD.Condition.</span></span><span class="sig-name descname"><span class="pre">Condition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">jgref</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jgloc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">database</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fluids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'air-water'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">g</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">9.81</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Class to handle the local probe data</p>
 <p>Data is stored in the Condition.phi property. It’s actually 3 layers of dictionary
@@ -263,13 +263,37 @@ in Condition.area_avgs[param], and won’t recalculate unless recalc = True</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.calc_cd">
-<span class="sig-name descname"><span class="pre">calc_cd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Ishii-Zuber'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vr_cheat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.calc_cd"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.calc_cd" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">calc_cd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Ishii-Zuber'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vr_cheat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.calc_cd"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.calc_cd" title="Link to this definition"></a></dt>
 <dd><p>Method for calculating drag coefficient</p>
-<p>If vr = 0, assume cd = 0</p>
-<p>Options are Ishii-Zuber and Schiller-Naumann, but both use
-Reb = (1 - midas_dict[‘alpha’]) * midas_dict[‘Dsm1’] * rho_f * midas_dict[‘vr’] / midas_dict[‘mu_m’]
-vr from calc_vr()
-mu_m from calc_mu_eff()</p>
+<blockquote>
+<div><dl class="simple">
+<dt>Inputs:</dt><dd><ul class="simple">
+<li><p>method, what method to use for modeling <span class="math notranslate nohighlight">\(C_{D}\)</span></p></li>
+<li><p>vr_cheat, flag to use “vr” from midas_dict or “vr_model” when calculating <span class="math notranslate nohighlight">\(Re_{b}\)</span></p></li>
+<li><p>limit, if supplied, will limit the drag coefficient to the given maximum value. For instance, 0.44 like in CFX</p></li>
+</ul>
+</dd>
+<dt>Stores:</dt><dd><ul class="simple">
+<li><p>“cd” in midas_dict</p></li>
+<li><p>“Reb” in midas_dict. Calculated by <span class="math notranslate nohighlight">\(Re_{b} = \frac{(1 - \alpha) \rho_{f} v_{r} D_{sm,1} }{\mu_{m}}\)</span>. </p></li>
+</ul>
+</dd>
+</dl>
+</div></blockquote>
+<p><span class="math notranslate nohighlight">\(\mu_{m}\)</span> comes from <a class="reference internal" href="#MARIGOLD.Condition.Condition.calc_mu_eff" title="MARIGOLD.Condition.Condition.calc_mu_eff"><code class="xref any py py-meth docutils literal notranslate"><span class="pre">calc_mu_eff</span></code></a></p>
+<blockquote>
+<div><dl class="simple">
+<dt>Options for method:</dt><dd><ul class="simple">
+<li><p>Ishii-Zuber, <span class="math notranslate nohighlight">\(C_{D} = \frac{24}{Re_{b}} (1 + 0.1 Re_{b}^{0.75})\)</span></p></li>
+<li><p>Schiller-Naumann, <span class="math notranslate nohighlight">\(C_{D} = \frac{24}{Re_{b}} (1 + 0.15 Re_{b}^{0.687})\)</span>. Here, <span class="math notranslate nohighlight">\(Re_{b}\)</span> uses <span class="math notranslate nohighlight">\(\mu_{f}\)</span></p></li>
+</ul>
+</dd>
+<dt>Returns:</dt><dd><ul class="simple">
+<li><p>area average drag coefficient</p></li>
+</ul>
+</dd>
+</dl>
+</div></blockquote>
 </dd></dl>
 
 <dl class="py method">
@@ -349,10 +373,27 @@ Will only be called once, unless recalc is True.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.calc_mu_eff">
 <span class="sig-name descname"><span class="pre">calc_mu_eff</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Ishii'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha_max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.calc_mu_eff"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.calc_mu_eff" title="Link to this definition"></a></dt>
-<dd><p>Method for calculating effective viscosity.</p>
-<p>Also calculates mixture viscosity, stored in μ_eff and μ_m, resepectively.
-Note that this fuction does mirror the data</p>
-<p>Right now the only method implemented is Ishii’s</p>
+<dd><p>Method for effective/mixture viscosity</p>
+<dl class="simple">
+<dt>Inputs:</dt><dd><ul class="simple">
+<li><p>method, what method to use for modeling <span class="math notranslate nohighlight">\(\mu_{eff}\)</span></p></li>
+<li><p>alpha_max, parameter for some models</p></li>
+</ul>
+</dd>
+<dt>Stores:</dt><dd><ul class="simple">
+<li><p>“mu_eff” in midas_dict</p></li>
+<li><p>“mu_m” in midas_dict</p></li>
+</ul>
+</dd>
+<dt>Options for method:</dt><dd><ul class="simple">
+<li><p>Ishii, <span class="math notranslate nohighlight">\(\mu_{eff} = \mu_{m} = \mu_{f} (1 - \frac{\alpha}{ \alpha_{max} })^{-2.5 \alpha_{max} \frac{\mu_g + 0.4 \mu_g}{\mu_g + \mu_g} }\)</span></p></li>
+</ul>
+</dd>
+<dt>Returns:</dt><dd><ul class="simple">
+<li><p>area average effective viscosity</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -418,16 +459,35 @@ such as in the bottom of the pipe in horizontal, when this is not necessarily tr
 
 <dl class="py method">
 <dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.calc_vr_model">
-<span class="sig-name descname"><span class="pre">calc_vr_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'wake_1'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kw</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-0.15</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Lw</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kf</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iterate_cd</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quiet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.calc_vr_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.calc_vr_model" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">calc_vr_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'km1_simp'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kw</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-0.98</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Lw</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kf</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.089</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iterate_cd</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quiet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.calc_vr_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.calc_vr_model" title="Link to this definition"></a></dt>
 <dd><p>Method for calculating relative velocity based on models</p>
-<p>Stored under “vr_method” in midas_dict as well as “vr_model”</p>
-<p>TODO implement Ishii-Chawla</p>
-<p>Implemented options:
-- “wake_1” vr = - kw * vf * Cd**(1./3)
-- “wake_alpha” vr = - kw * (1-α)^n * vf * Cd**(1./3)
-- “wake_alpha2” vr = - kw *  (α*(1-α))^n * vf * Cd**(1./3)
-- “wake_lambda” = - kw * vf * Cd**(1./3) * Db**(2./3) * λ**(-2./3)</p>
-<p>Lw really Lw*, effective wake length divided by the bubble diameter</p>
+<dl class="simple">
+<dt>Inputs:</dt><dd><ul class="simple">
+<li><p>method, what method to use for modeling <span class="math notranslate nohighlight">\(v_{r}\)</span></p></li>
+<li><p>kw, wake coeffieient for some models</p></li>
+<li><p>n, exponent for some models</p></li>
+<li><p>Lw, really <span class="math notranslate nohighlight">\(L_{w}^{*}\)</span>, effective wake length divided by the bubble diameter</p></li>
+<li><p>kf, fluid coefficient for some models</p></li>
+<li><p>iterate_cd, flag to pass to <a class="reference internal" href="#MARIGOLD.Condition.Condition.calc_cd" title="MARIGOLD.Condition.Condition.calc_cd"><code class="xref any py py-meth docutils literal notranslate"><span class="pre">calc_cd</span></code></a>. Basically whether to iterate to calculate <span class="math notranslate nohighlight">\(C_{D}\)</span> based on the newly calculated <span class="math notranslate nohighlight">\(v_{r}\)</span> or not</p></li>
+<li><p>quiet, flag for extra debugging messages</p></li>
+</ul>
+</dd>
+<dt>Stores:</dt><dd><ul class="simple">
+<li><p>“<a href="#id3"><span class="problematic" id="id4">vr_</span></a>’method_name’” in midas_dict</p></li>
+<li><p>“vr_model” in midas_dict</p></li>
+</ul>
+</dd>
+<dt>Options for method:</dt><dd><ul class="simple">
+<li><p>“km1_simp”, most up to date <span class="math notranslate nohighlight">\(v_{r} = K_{f} - K_{w}  \alpha  v_{f}  C_{d}^{1/3}\)</span></p></li>
+<li><p>“Ishii-Chawla”, <span class="math notranslate nohighlight">\(v_{r} = \sqrt{2} (\frac{\sigma g \Delta \rho}{\rho_{f}^{2}})^{1/4}\)</span></p></li>
+<li><p>A bunch of obsolete ones that I haven’t deleted but probably should</p></li>
+</ul>
+</dd>
+<dt>Returns:</dt><dd><ul class="simple">
+<li><p>area average relative velocity calculated by the model</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
