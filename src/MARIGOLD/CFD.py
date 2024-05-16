@@ -775,6 +775,7 @@ Option = Zero Gradient\n\
 END\n\
 END\n\
 END\n\
+END\n\
 BOUNDARY: walls \n\
 Boundary Type = WALL \n\
 Location = WALLS \n\
