@@ -63,3 +63,11 @@ def comp_cond(cond1:Condition, cond2:Condition, tag = 'run_ID') -> Condition:
 
     return compCond
 
+def write_excel(cond):
+    """ Export data from a condition to an excel sheet
+    
+    # TODO
+    """
+
+
+    return
