@@ -1,26 +1,51 @@
 from .config import *
 
-def iate(cond, query, z_step = 0.01,
-         dpdz_method = 'LM', void_method = 'driftflux', mueff_method = 'ishii', cd_method = 'doe',  # Method arguments
-         LM_C = 40, k_m = 0.40, LoverD_restriction = 9999,                                          # Pressure drop calculation arguments
-         cheat = True, elbow = False, quarantine = True):                                           # Temporary arguments, fix later
-    """ Calculate the area-averaged interfacial area concentration at query location based on the 1G IATE
+def iate_1d_1g(
+        # Basic inputs
+        cond, query, z_step,
+        
+        # IATE Coefficients
+        C_WE = None, C_RC = None, C_TI = None, alpha_max = 0.75, C = 3, We_cr = 6, acrit_flag = 0, acrit = 0.13, C0 = 1.20,
+
+        # Method arguments
+        dpdz_method = 'LM', cd_method = 'doe', void_method = 'driftflux',
+
+        # Pressure drop calculation arguments
+        LM_C = 40, k_m = 0.40, LoverD_restriction = None,
+
+        # Temporary arguments
+        cheat = True, elbow = False):
+    """ Calculate the area-averaged interfacial area concentration at query location based on the 1D 1G IATE
 
     Version History:
-        > v1: Pressure cheating, jgref substitute for jgatm
-        > v2: MG update, pressure retrieval, jgatm retrieval
-        > v3: Yadav methods, incorporation of COV terms, support for elbows, VU, VD, horizontal
+     - v1: Pressure cheating, jgref substitute for jgatm
+     - v2: MG update, pressure retrieval, jgatm retrieval
+     - v3: Yadav methods, incorporation of COV terms, support for elbows, VU, VD, horizontal
     
     Inputs:
-        > cond:             Condition object, part of MARIGOLD framework
-        > query:            L/D endpoint
-        > z_step:           Axial mesh cell size [-]
-        > void_method:      Void fraction prediction method, 'driftflux' or 'continuity'
+     - cond:            Condition object, part of MARIGOLD framework
+     - query:           L/D endpoint
+     - z_step:          Axial mesh cell size [-]
+
+     - C_WE:            Wake entrainment coefficient
+     - C_RC:            Random collision coefficient
+     - C_TI:            Turbulent impact coefficient
+     - alpha_max:       Maximum void fraction, used for random collision calculation
+     - C:               C
+     - We_cr:           Weber number criterion, used for turbulent impact calculation
+     - acrit_flag:      Enable/disable shutting off turbulence-based mechanisms beyond a critical void fraction
+     - acrit:           Critical void fraction for shutting off turbulence-based mechanisms
+     - C0:              Drift flux coefficient
+
+     - dpdz_method:     Pressure drop prediction method, 'LM' or 'Kim'
+     - cd_method:       Drag coefficient prediction method, 'iter' or 'doe'
+     - void_method:     Void fraction prediction method, 'driftflux' or 'continuity'
 
     Notes:
-        > IATE coefficients are currently set to default values depending on geometry
-            > Probably want to make these all optional arguments, set default values for 90 straight pipe, and input other values for different geometries outside of IATE function
-            > Same goes for COV models?
+     - Isn't this script nice and clean? Follow good coding practices, kids. - David
+     - IATE coefficients set as optional inputs, with default values set depending on geometry
+     - COV terms being implemented in Condition.py, not incorporated into this function yet
+     - vgz calculation in elbow and dissipation length regions still need to be implemented
     """
 
     # MARIGOLD retrieval
@@ -29,14 +54,14 @@ def iate(cond, query, z_step = 0.01,
     LoverD          = cond.LoverD                               # Condition L/D
 
     # Yadav
-    RoverD = 9      # Make into optional input
+    '''
+    RoverD          = 9                                         # Make into optional input
     R_curv          = RoverD * Dh                               # Radius of curvature of elbow/bend
+    L_curv          = np.pi/2 * R_curv                          # This assumes 90\degree elbow    
 
-    # May want to include arc of the bend?
-    # Ah, yes
-    L_elb = np.pi/2 * R_curv        # This assumes 90\degree elbow
     # So, Yadav defines under Expcond.m the length of the vertical section -- I think this is how he toggles between VU, H, VD, elbow
     # Instead, we probably would want to have an input switch indicating which mode of IATE we're executing
+    '''
 
     ############################################################################################################################
     #                                                                                                                          #
@@ -46,10 +71,10 @@ def iate(cond, query, z_step = 0.01,
     # expcond.m
 
     p_atm           = 101325                                    # Ambient pressure [Pa]
-    rho_f           = 998.0                                     # Liquid phase density [kg/m**3]
-    rho_g           = 1.204                                     # Gas phase density [kg/m**3]
-    mu_f            = 0.001002                                  # Viscosity of water [Pa-s]
-    sigma           = 0.0728                                    # Surface tension of air/water [N/m]
+    rho_f           = cond.rho_f                                # Liquid phase density [kg/m**3]
+    rho_g           = cond.rho_g                                # Gas phase density [kg/m**3]
+    mu_f            = cond.mu_f                                 # Viscosity of water [Pa-s]
+    sigma           = cond.sigma                                # Surface tension of air/water [N/m]
     grav            = 9.81*np.sin((theta)*np.pi/180)            # Gravity constant (added by Drew to account for pipe inclination)
 
     # Worosz
@@ -62,45 +87,33 @@ def iate(cond, query, z_step = 0.01,
     #                                                                                                                          #
     ############################################################################################################################
     # coeff.m
-    
-    C_WE            = 0.002                                     # Wake entrainment coefficient, Talley
-    C_RC            = 0.004                                     # Random collision coefficient
-    C_TI            = 0.085                                     # Turbulent impact coefficient
-    
-    alpha_max       = 0.75
-    C               = 3                                         # What is this
-    We_cr           = 6                                         # Weber number criterion
-
-    acrit_flag      = 0
-    acrit           = 0.13
-    # C_WE            = 0.004                                     # Wake entrainment coefficient, Worosz
-
-    C0              = 1.20                                      # Drift Flux Model
 
     # Yadav
+    # Switching the logic around would make the code faster (seeing that a variable == None skips block)
+    # I like seeing all of the coefficients grouped by geometry, though
     if theta == 90 and elbow == False:
-        C_WE        = 0.002
-        C_RC        = 0.004
-        C_TI        = 0.085
-
-        alpha_max   = 0.75
-        C           = 3
-        We_cr       = 6
+        if C_WE == None:
+            C_WE        = 0.002
+        if C_RC == None:
+            C_RC        = 0.004        
+        if C_TI == None:
+            C_TI        = 0.085
 
     elif theta == 0 and elbow == False:
-        C_RC        = 0.003
-        C_TI        = 0.014
-
-        We_cr       = 5
+        if C_WE == None:
+            C_WE        = 0.000
+        if C_RC == None:
+            C_RC        = 0.003
+        if C_TI == None:
+            C_TI        = 0.014
 
     elif elbow == True:
-        C_RC        = 0.012
-        C_TI        = 0.085
-
-        We_cr       = 6
-        
-        slip        = 0.91                                      # Slip at port P4 (<<vg>>/<<vf>>)
-        Const1      = 0.05                                      # Constant in the correlation for velocity
+        if C_WE == None:
+            C_WE        = 0.000
+        if C_RC == None:
+            C_RC        = 0.012
+        if C_TI == None:
+            C_TI        = 0.085
     
     ############################################################################################################################
     #                                                                                                                          #
@@ -112,13 +125,16 @@ def iate(cond, query, z_step = 0.01,
     # Yadav
     # Temporary, Yadav implemented as a bunch of arrays. There must be a better way to do this.
     # calc_void_cov in Condition.py may be useful
-    if theta == 90 and elbow == False:
+    if theta == 90 and elbow == False:      # Vertical, no elbow
         COV_RC      = 1
         COV_TI      = 1
-    elif theta == 0 and elbow == False:
+    elif theta == 0 and elbow == False:     # Horizontal, no elbow, look at Ran's work?
         COV_RC      = 1
         COV_TI      = 1
-    elif elbow == True:
+    elif elbow == True:                     # Elbow, look at Shoxu's work?
+        COV_RC      = 1
+        COV_TI      = 1
+    else:                                   # Inclined, look at Drew's work?
         COV_RC      = 1
         COV_TI      = 1
 
@@ -174,18 +190,11 @@ def iate(cond, query, z_step = 0.01,
     
     jf              = cond.jf                                   # [m/s]
     jgloc           = cond.jgloc                                # [m/s]
-
-    if 'jgatm' in dir(cond):
-        jgatm       = cond.jgatm
-    else:
-        print("Warning: jgatm not found. Defaulting to jgref")
-        jgatm       = cond.jgref
+    jgatm           = cond.jgatm                                # [m/s]
     
-    p               = (jgatm * p_atm / jgloc) - p_atm           # Back-calculate local corrected gauge pressure
-
-	# Local Pressure along the test section
-    omegaz = 1 - (z_mesh - z_mesh[0]) * abs(dpdz / (p + p_atm))
-    pz = (p + p_atm) * omegaz
+    # Local Pressure along the test section
+    p = (jgatm * p_atm / jgloc) - p_atm                         # Back-calculate local corrected gauge pressure
+    pz = (p + p_atm) * (1 - (z_mesh - z_mesh[0]) * abs(dpdz / (p + p_atm)))
     
 	# Local gas density along the test section
     rho_gz = rho_g * pz / p_atm                                 # Talley
@@ -203,13 +212,12 @@ def iate(cond, query, z_step = 0.01,
             break
             
         jgloc = jgatm * p_atm / pz[i]                           # Talley used jgP1 and pressure at P1 instead of jgatm and p_atm
-
         vgz[i] = jgloc / alpha[i]                               # Estimate void weighted velocity
         vfz = jf / (1 - alpha[i])
 
         ########################################################################################################################
         # Estimate bubble relative velocity <ur> (See Talley, 2012, 4.2.2.6)
-        ur = 0.2        # Set to constant value of 0.23 m/s by Schilling (2007)
+        ur = 0.2                                                    # Set to constant value of 0.23 m/s by Schilling (2007)
 
         if cd_method == 'iter':
             err = 0.1
@@ -224,26 +232,19 @@ def iate(cond, query, z_step = 0.01,
                 ur = ure1
             ReD = rho_f * ur * Db[i] * (1 - alpha[i]) / mu_f        # Update bubble Reynolds number
             CDwe = 24 * (1 + 0.1 * ReD**0.75) / ReD                 # Update drag coefficient
+
         elif cd_method == 'doe':
             # Original DOE_MATLAB_IAC
             ReD = rho_f * ur * Db[i] * (1 - alpha[i]) / mu_f
             CDwe = 24 * (1 + 0.1 * ReD**0.75) / ReD
             ur = (4 * grav * Db[i] / 3 / CDwe)**0.5                 # Interestingly, Yadav keeps 9.8 instead of changing grav for angle
-        else:
-            CDwe = cond.calc_cd(cd_method)
-            ur = cond.calc_vr_method()
 
         ########################################################################################################################
         # Estimate Energy Dissipation Rate and Turbulent Velocity (See Talley, 2012, 4.2.2.3)
         #   > One-group models written using turbulent fluctuation velocity, while models implemented in TRACE are written using
         #     dissipation rate
 
-        if mueff_method == 'ishii':
-            cond.calc_mu_eff()
-
-        else:
-            mu_m = mu_f / (1 - alpha[i])                        # Mixture viscosity
-
+        mu_m = mu_f / (1 - alpha[i])                            # Mixture viscosity, given by Ishii and Chawla (Eq. 4-10 in Kim, 1999)
         rho_m = (1 - alpha[i]) * rho_f + alpha[i] * rho_gz[i]   # Mixture density
 
         vm = (rho_f * (1 - alpha[i]) * vfz + rho_gz[i] * alpha[i] * vgz[i]) \
@@ -268,24 +269,26 @@ def iate(cond, query, z_step = 0.01,
         elif elbow == True:
             SWE[i] = 0
             
-            if quarantine == False:
-                # Yadav calculates vgz differently if solving in elbow region and dissipation length region
-                '''
-                beta_diss = 0.18-7.6E-7*Rem  # dissipation coefficient
-                Sratio = 0.1; # Sratio = S/S0 (strength of elbow effect)
+            # Yadav calculates vgz differently if solving in elbow region and dissipation length region
+            '''
+            # Probably want to define these coefficients along with the COEFFICIENT block, if implemented?
+            slip = 0.91
+            Const1 = 0.05
 
-                # Elbow elbow
-                vgzP4 = slip*jf/(1-alpha[zstep_v])
-                
-                L_D = 0.3156
-                deltaz = z[i]-z[zstep_v]
-                slope = (vgzP4-vgz[zstep_v])/L_D
-                vgz[i] = vgz[zstep_v]+slope*(deltaz)
-                
-                # Dissipation elbow
-                Sratio = np.exp(-beta_diss*(z[i]-z[zstep_v+24])/Dh)
-                vgz[i] = vgzP4*(1+Const1*np.log(Sratio))
-                '''
+            beta_diss = 0.18 - 7.6E-7 * Rem     # Dissipation coefficient
+            Sratio = 0.1;                       # Sratio = S/S0 (strength of elbow effect)
+
+            # Elbow region
+            vgzP4 = slip * jf / (1 - alpha[zstep_v])            
+            L_D = 0.3156
+            deltaz = z[i] - z[zstep_v]
+            slope = (vgzP4 - vgz[zstep_v]) / L_D
+            vgz[i] = vgz[zstep_v] + slope * (deltaz)
+            
+            # Dissipation region
+            Sratio = np.exp(-beta_diss * (z[i] - z[zstep_v+24]) / Dh)
+            vgz[i] = vgzP4 * (1 + Const1 * np.log(Sratio))
+            '''
         
         # Sink due to Random Collisions	
         RC1 = ut * ai[i]**2 / alpha_max**(1/3) / (alpha_max**(1/3) - alpha[i]**(1/3))
