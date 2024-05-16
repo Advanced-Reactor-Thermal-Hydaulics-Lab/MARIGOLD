@@ -15,7 +15,7 @@ def iate_1d_1g(
 
         # Temporary arguments
         cheat = True, elbow = False):
-    """ Calculate the area-averaged interfacial area concentration at query location based on the 1G IATE
+    """ Calculate the area-averaged interfacial area concentration at query location based on the 1D 1G IATE
 
     Version History:
      - v1: Pressure cheating, jgref substitute for jgatm
@@ -42,9 +42,10 @@ def iate_1d_1g(
      - void_method:     Void fraction prediction method, 'driftflux' or 'continuity'
 
     Notes:
-     - IATE coefficients are currently set to default values depending on geometry
-     - Probably want to make these all optional arguments, set default values for 90 straight pipe, and input other values for different geometries outside of IATE function
-     - Same goes for COV models?
+     - Isn't this script nice and clean? Follow good coding practices, kids. - David
+     - IATE coefficients set as optional inputs, with default values set depending on geometry
+     - COV terms being implemented in Condition.py, not incorporated into this function yet
+     - vgz calculation in elbow and dissipation length regions still need to be implemented
     """
 
     # MARIGOLD retrieval
@@ -88,20 +89,31 @@ def iate_1d_1g(
     # coeff.m
 
     # Yadav
+    # Switching the logic around would make the code faster (seeing that a variable == None skips block)
+    # I like seeing all of the coefficients grouped by geometry, though
     if theta == 90 and elbow == False:
-        C_WE        = 0.002
-        C_RC        = 0.004
-        C_TI        = 0.085
+        if C_WE == None:
+            C_WE        = 0.002
+        if C_RC == None:
+            C_RC        = 0.004        
+        if C_TI == None:
+            C_TI        = 0.085
 
     elif theta == 0 and elbow == False:
-        C_WE        = 0.000
-        C_RC        = 0.003
-        C_TI        = 0.014
+        if C_WE == None:
+            C_WE        = 0.000
+        if C_RC == None:
+            C_RC        = 0.003
+        if C_TI == None:
+            C_TI        = 0.014
 
     elif elbow == True:
-        C_WE        = 0.000
-        C_RC        = 0.012
-        C_TI        = 0.085
+        if C_WE == None:
+            C_WE        = 0.000
+        if C_RC == None:
+            C_RC        = 0.012
+        if C_TI == None:
+            C_TI        = 0.085
     
     ############################################################################################################################
     #                                                                                                                          #
@@ -178,12 +190,7 @@ def iate_1d_1g(
     
     jf              = cond.jf                                   # [m/s]
     jgloc           = cond.jgloc                                # [m/s]
-
-    if 'jgatm' in dir(cond):
-        jgatm       = cond.jgatm
-    else:
-        print("Warning: jgatm not found. Defaulting to jgref")
-        jgatm       = cond.jgref
+    jgatm           = cond.jgatm                                # [m/s]
     
     # Local Pressure along the test section
     p = (jgatm * p_atm / jgloc) - p_atm                         # Back-calculate local corrected gauge pressure
