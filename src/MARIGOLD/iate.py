@@ -46,6 +46,8 @@ def iate_1d_1g(
      - IATE coefficients set as optional inputs, with default values set depending on geometry
      - COV terms being implemented in Condition.py, not incorporated into this function yet
      - vgz calculation in elbow and dissipation length regions still need to be implemented
+     - There must be something wrong with drift flux void fraction calculation
+     - Modify MG for Yadav data extraction
     """
 
     # MARIGOLD retrieval
