@@ -186,7 +186,12 @@ def iate_1d_1g(
         Db[0]       = cond.void_area_avg("Dsm1") / 1000         # [m]
     
     # Pressure drop [Pa/m]
-    dpdz            = cond.calc_dpdz(method=dpdz_method, LM_C=LM_C, k_m=k_m, L=(LoverD_restriction*Dh))
+    if LoverD_restriction == None:
+        L = None
+    else:
+        L = LoverD_restriction*Dh
+
+    dpdz            = cond.calc_dpdz(method=dpdz_method, LM_C=LM_C, k_m=k_m, L=L)
     
     jf              = cond.jf                                   # [m/s]
     jgloc           = cond.jgloc                                # [m/s]
