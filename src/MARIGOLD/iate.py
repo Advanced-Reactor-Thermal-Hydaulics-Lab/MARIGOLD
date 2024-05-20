@@ -360,12 +360,12 @@ def iate_1d_1g(
             
             # Drift Velocity
             # Applicable for void fractions less than 20%; for void fractions greater than 30%, use Kataoka and Ishii 1987 for drift-velocity
-            vgj = (2**0.5) * (sigma * grav * (rho_f - rho_gz[i]) / (rho_f**2))**(0.25)
+            vgj = (2**0.5) * (sigma * grav * (rho_f - rho_gz[i]) / (rho_f**2))**0.25 * (1 - alpha[i])**(1.75)
             
             # C0 = 1.20 - 0.2*((rho_gz[i]/rho_f)**0.5)    # Super tiny number, also Worosz MATLAB script has + instead of -?
             # alpha[i+1] = (jgloc) / (C0 * j + vgj)
 
-            alpha[i+1] = (jgloc) / (C0 * j + vgj * (1 - alpha[i])**(1.75))            
+            alpha[i+1] = (jgloc) / (C0 * j + vgj)
 
         elif void_method == 'continuity':   # Continuity
 
