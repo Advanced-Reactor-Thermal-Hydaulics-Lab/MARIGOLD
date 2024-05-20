@@ -2097,7 +2097,7 @@ class Condition:
 
         return self.area_avg('mu_eff')
     
-    def calc_cd(self, method='Ishii-Zuber', vr_cheat = False, limit = None):
+    def calc_cd(self, method='Ishii-Zuber', vr_cheat = False, limit = 0):
         """Method for calculating drag coefficient
         
         Inputs:
@@ -2147,8 +2147,21 @@ class Condition:
 
                     cd = 24/Reb * (1 + 0.15*Reb**0.687)
 
-                if limit is not None:
-                    cd = max(limit, cd)
+                if limit.lower() == "tomiyama":
+                    eo = self.g * (self.rho_f - self.rho_g) * midas_dict['Dsm2']
+                    limit = 8/3 * eo / (eo + 4)
+                    midas_dict.update({'eo': eo})
+                    
+                elif limit.lower() == 'ishii-chawla':
+                    eo = self.g * (self.rho_f - self.rho_g) * midas_dict['Dsm2']
+                    limit = min(2/3*np.sqrt(eo), 8/3)
+                    midas_dict.update({'eo': eo})
+                
+                elif type(limit) is not float or type(limit) is not int:
+                    raise NotImplementedError(f"{limit} not a valid type for limiting behavior. Please enter Eo2, Ishii-Chawla, or set a constant limit (e.g. limit = 0.44)")
+                
+                cd = max(limit, cd) # Either 0, set by user, or set by above string
+
                 midas_dict.update({'cd': cd})
 
         return self.area_avg('cd')

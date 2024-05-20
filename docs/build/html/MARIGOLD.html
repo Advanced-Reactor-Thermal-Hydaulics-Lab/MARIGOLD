@@ -112,7 +112,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#module-MARIGOLD.iate">iate</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.iate.iate"><code class="docutils literal notranslate"><span class="pre">iate()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.iate.iate_1d_1g"><code class="docutils literal notranslate"><span class="pre">iate_1d_1g()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#module-MARIGOLD.CFD">CFD Functions</a><ul>
@@ -1147,24 +1147,40 @@ a good way of doing so.</p>
 <section id="module-MARIGOLD.iate">
 <span id="iate"></span><h2>iate<a class="headerlink" href="#module-MARIGOLD.iate" title="Link to this heading"></a></h2>
 <dl class="py function">
-<dt class="sig sig-object py" id="MARIGOLD.iate.iate">
-<span class="sig-prename descclassname"><span class="pre">MARIGOLD.iate.</span></span><span class="sig-name descname"><span class="pre">iate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cond</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">query</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z_step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dpdz_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'LM'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">void_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'driftflux'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mueff_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ishii'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cd_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'doe'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">LM_C</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">40</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k_m</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">LoverD_restriction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">9999</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cheat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elbow</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quarantine</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/MARIGOLD/iate.html#iate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.iate.iate" title="Link to this definition"></a></dt>
-<dd><p>Calculate the area-averaged interfacial area concentration at query location based on the 1G IATE</p>
+<dt class="sig sig-object py" id="MARIGOLD.iate.iate_1d_1g">
+<span class="sig-prename descclassname"><span class="pre">MARIGOLD.iate.</span></span><span class="sig-name descname"><span class="pre">iate_1d_1g</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cond</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">query</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z_step</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">C_WE</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">C_RC</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">C_TI</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha_max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.75</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">C</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">We_cr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">acrit_flag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">acrit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.13</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">C0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dpdz_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'LM'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cd_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'doe'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">void_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'driftflux'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">LM_C</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">40</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k_m</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">LoverD_restriction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cheat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elbow</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/MARIGOLD/iate.html#iate_1d_1g"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.iate.iate_1d_1g" title="Link to this definition"></a></dt>
+<dd><p>Calculate the area-averaged interfacial area concentration at query location based on the 1D 1G IATE</p>
 <dl class="simple">
-<dt>Version History:</dt><dd><p>&gt; v1: Pressure cheating, jgref substitute for jgatm
-&gt; v2: MG update, pressure retrieval, jgatm retrieval
-&gt; v3: Yadav methods, incorporation of COV terms, support for elbows, VU, VD, horizontal</p>
+<dt>Version History:</dt><dd><ul class="simple">
+<li><p>v1: Pressure cheating, jgref substitute for jgatm</p></li>
+<li><p>v2: MG update, pressure retrieval, jgatm retrieval</p></li>
+<li><p>v3: Yadav methods, incorporation of COV terms, support for elbows, VU, VD, horizontal</p></li>
+</ul>
 </dd>
-<dt>Inputs:</dt><dd><p>&gt; cond:             Condition object, part of MARIGOLD framework
-&gt; query:            L/D endpoint
-&gt; z_step:           Axial mesh cell size [-]
-&gt; void_method:      Void fraction prediction method, ‘driftflux’ or ‘continuity’</p>
+<dt>Inputs:</dt><dd><ul class="simple">
+<li><p>cond:            Condition object, part of MARIGOLD framework</p></li>
+<li><p>query:           L/D endpoint</p></li>
+<li><p>z_step:          Axial mesh cell size [-]</p></li>
+<li><p>C_WE:            Wake entrainment coefficient</p></li>
+<li><p>C_RC:            Random collision coefficient</p></li>
+<li><p>C_TI:            Turbulent impact coefficient</p></li>
+<li><p>alpha_max:       Maximum void fraction, used for random collision calculation</p></li>
+<li><p>C:               C</p></li>
+<li><p>We_cr:           Weber number criterion, used for turbulent impact calculation</p></li>
+<li><p>acrit_flag:      Enable/disable shutting off turbulence-based mechanisms beyond a critical void fraction</p></li>
+<li><p>acrit:           Critical void fraction for shutting off turbulence-based mechanisms</p></li>
+<li><p>C0:              Drift flux coefficient</p></li>
+<li><p>dpdz_method:     Pressure drop prediction method, ‘LM’ or ‘Kim’</p></li>
+<li><p>cd_method:       Drag coefficient prediction method, ‘iter’ or ‘doe’</p></li>
+<li><p>void_method:     Void fraction prediction method, ‘driftflux’ or ‘continuity’</p></li>
+</ul>
 </dd>
-<dt>Notes:</dt><dd><dl class="simple">
-<dt>&gt; IATE coefficients are currently set to default values depending on geometry</dt><dd><p>&gt; Probably want to make these all optional arguments, set default values for 90 straight pipe, and input other values for different geometries outside of IATE function
-&gt; Same goes for COV models?</p>
-</dd>
-</dl>
+<dt>Notes:</dt><dd><ul class="simple">
+<li><p>Isn’t this script nice and clean? Follow good coding practices, kids. - David</p></li>
+<li><p>IATE coefficients set as optional inputs, with default values set depending on geometry</p></li>
+<li><p>COV terms being implemented in Condition.py, not incorporated into this function yet</p></li>
+<li><p>vgz calculation in elbow and dissipation length regions still need to be implemented</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>

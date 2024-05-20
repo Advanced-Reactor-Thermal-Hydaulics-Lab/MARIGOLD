@@ -919,33 +919,39 @@ Option = Sato Enhanced Eddy Viscosity \n\
 END \n\
 END \n\
 END \n\
-INITIALISATION: \n\
-Option = Automatic \n\
-FLUID: gas \n\
-INITIAL CONDITIONS: \n\
-Velocity Type = Cartesian \n\
-CARTESIAN VELOCITY COMPONENTS: \n\
+INITIALISATION:\n\
 Option = Automatic\n\
-END \n\
-VOLUME FRACTION: \n\
-Option = Automatic \n\
-END \n\
-END \n\
-END \n\
-FLUID: liquid \n\
-INITIAL CONDITIONS: \n\
-Velocity Type = Cartesian \n\
-CARTESIAN VELOCITY COMPONENTS: \n\
+FLUID: gas\n\
+INITIAL CONDITIONS:\n\
+Velocity Type = Cartesian\n\
+CARTESIAN VELOCITY COMPONENTS:\n\
+Option = Automatic with Value\n\
+U = 0 [m s^-1]\n\
+V = 0 [m s^-1]\n\
+W = 3.5 [m s^-1]\n\
+END\n\
+VOLUME FRACTION:\n\
 Option = Automatic\n\
-END \n\
-TURBULENCE INITIAL CONDITIONS: \n\
-Option = Medium Intensity and Eddy Viscosity Ratio \n\
-END \n\
-VOLUME FRACTION: \n\
+END\n\
+END\n\
+END\n\
+FLUID: liquid\n\
+INITIAL CONDITIONS:\n\
+Velocity Type = Cartesian\n\
+CARTESIAN VELOCITY COMPONENTS:\n\
+Option = Automatic with Value\n\
+U = 0 [m s^-1]\n\
+V = 0 [m s^-1]\n\
+W = 4 [m s^-1]\n\
+END\n\
+TURBULENCE INITIAL CONDITIONS:\n\
+Option = Medium Intensity and Eddy Viscosity Ratio\n\
+END\n\
+VOLUME FRACTION:\n\
 Option = Automatic\n\
-END \n\
-END \n\
-END \n\
+END\n\
+END\n\
+END\n\
 INITIAL CONDITIONS: \n\
 STATIC PRESSURE: \n\
 Option = Automatic \n\
