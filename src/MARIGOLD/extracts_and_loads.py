@@ -604,29 +604,46 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
 
                 potent_ranges = [ [i for i in range(8, 22)], [i for i in range(48, 62)], [i for i in range(87, 101)], [i for i in range(128, 142)], [i for i in range(168, 182)], [i for i in range(209, 223)], [i for i in range(250, 264)], [i for i in range(290, 304)] ]
                 
-                # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
-                # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
-                # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
-                # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
-
                 ws = wb['1']
 
-                jglocs = ['O16', 'O17', 'O18', 'O19', 'O20']
-                try:
-                    jgloc = ws[jglocs[int(re.findall(r'\d+', port)[0])-1]].value
-                    #jgloc = ws[jglocs[int(port.strip('P'))]].value
-                except Exception as e:
-                    print(e)
-                    print(f"Warning: Could not identify port # for {file}, setting jgloc = jgref")
-                    jgloc = jgref
+                jgatm = ws['C3'].value
+                jgref = jgatm
 
-                # Above jglocs not implemented for Ryan templates (DHK)
-                if jgloc is None and sheet_type == 'ryan_template':
-                    print(f"Sheet type identified as {sheet_type}, referencing cell U23 for jgloc")
-                    jgloc = ws['U23'].value
-                elif jgloc is None:
-                    print(f"Warning: jgloc could not be found, setting jgloc = jgref")
-                    jgloc = jgref
+                jglocs = []
+
+                jgloc = jgatm       # Nope. Either need jgloc or P_loc, but I have neither -- how did Yadav get jgloc for his IATE script?
+                '''
+                8 cond x 7 port?
+
+                % exp_z = [0.38, 1.75, 3.12, 3.59, 4.96, 8.16, 12.58];
+
+                titles=['Run1: j_{g}=0.039 [m/s] & j_{f}=0.018 [m/s]'; 'Run2: j_{g}=0.039 [m/s] & j_{f}=0.682 [m/s]'...
+                    ;'Run3: j_{g}=0.136 [m/s] & j_{f}=0.682 [m/s]';'Run4: j_{g}=0.138 [m/s] & j_{f}=2.336 [m/s]';...
+                    'Run5: j_{g}=0.538 [m/s] & j_{f}=5.100 [m/s]';'Run6: j_{g}=1.234 [m/s] & j_{f}=5.100 [m/s]';...
+                    'Run7: j_{g}=0.039 [m/s] & j_{f}=0.064 [m/s]';'Run8: j_{g}=0.039 [m/s] & j_{f}=0.020 [m/s]'];
+
+                jg_exp = [
+                    0.083	0.090	0.099	0.101	0.102	0.104	0.106
+                    0.136	0.148	0.163	0.166	0.168	0.171	0.175	
+                    0.200	0.217	0.237	0.241	0.244	0.248	0.254	
+                    0.072	0.078	0.085	0.087	0.089	0.091	0.095	
+                    0.118	0.128	0.140	0.143	0.145	0.149	0.156	
+                    0.177	0.191	0.207	0.212	0.216	0.222	0.232
+                    0.094	0.101	0.108	0.110	0.113	0.123	0.139
+                    0.141	0.148	0.159	0.162	0.167	0.182	0.206
+                    ]
+                
+                p_exp = [
+                    65707       51705.5     37799.6     34874.5     33378.4     31206.5     28138.4
+                    68051       54277.2     40722.9     37763.4     36191.4     34100.3     30710.1
+                    72326       58793.3     45604.4     42651.8     40976.4     38958.3     35329.6
+                    94527       79201.8     64227.2     60578.2     57737.5     53657.9     46885.2
+                    97147       81952.8     67116.1     63577.4     60495.5     56277.9     49353.5
+                    100801      85731.1     71121.9     67438.5     64391.0     59910.8     52876.7
+                    148848      132598.1    115749.7	111996.5	106153.9	89964.0     68377.4
+                    153108      136853.6    120051.4	116366.2	110189.3	92801.6     69618.0
+                    ];
+                '''
 
                 newCond = Condition(jgref, jgloc, jf, theta, port, sheet_type.split('_')[0])
 
@@ -636,15 +653,15 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                 else:
                     cond = all_conditions[ all_conditions.index(newCond) ]
 
-                cond.run_ID = ws['B2'].value
+                cond.jgatm = jgatm
 
-                # Local corrected gauge pressure can be back-calculated from jgloc and jgatm (DHK)
-                cond.jgatm = ws['D6'].value
-                
-                ws = wb['2']
+                cond.area_avg_void_sheet = ws['J328'].value
+                cond.area_avg_ai_sheet = ws['K328'].value
 
-                cond.area_avg_void_sheet = ws['G266'].value
-                cond.area_avg_ai_sheet = ws['J266'].value
+                # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
+                # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
+                # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
+                # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
 
                 for phi, indices in Q1_ranges:
                     for i in indices:

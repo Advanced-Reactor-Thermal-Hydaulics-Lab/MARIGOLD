@@ -30,7 +30,7 @@ def iate_1d_1g(
      - C_WE:            Wake entrainment coefficient
      - C_RC:            Random collision coefficient
      - C_TI:            Turbulent impact coefficient
-     - alpha_max:       Maximum void fraction, used for random collision calculation
+     - alpha_max:       Maximum void fraction based on HCP bubble distribution, used for random collision calculation
      - C:               C
      - We_cr:           Weber number criterion, used for turbulent impact calculation
      - acrit_flag:      Enable/disable shutting off turbulence-based mechanisms beyond a critical void fraction
