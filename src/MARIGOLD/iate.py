@@ -5,7 +5,7 @@ def iate_1d_1g(
         cond, query, z_step,
         
         # IATE Coefficients
-        C_WE = None, C_RC = None, C_TI = None, alpha_max = 0.75, C = 3, We_cr = 6, acrit_flag = 0, acrit = 0.13, C0 = 1.20,
+        C_WE = None, C_RC = None, C_TI = None, alpha_max = 0.75, C = 3, We_cr = 6, acrit_flag = 0, acrit = 0.13, C_inf = 1.20,
 
         # Method arguments
         dpdz_method = 'LM', cd_method = 'doe', void_method = 'driftflux',
@@ -35,7 +35,7 @@ def iate_1d_1g(
      - We_cr:           Weber number criterion, used for turbulent impact calculation
      - acrit_flag:      Enable/disable shutting off turbulence-based mechanisms beyond a critical void fraction
      - acrit:           Critical void fraction for shutting off turbulence-based mechanisms
-     - C0:              Drift flux coefficient
+     - C_inf:           Drift flux distribution parameter limiting value
 
      - dpdz_method:     Pressure drop prediction method, 'LM' or 'Kim'
      - cd_method:       Drag coefficient prediction method, 'iter' or 'doe'
@@ -362,7 +362,7 @@ def iate_1d_1g(
             # Applicable for void fractions less than 20%; for void fractions greater than 30%, use Kataoka and Ishii 1987 for drift-velocity
             vgj = (2**0.5) * (sigma * grav * (rho_f - rho_gz[i]) / (rho_f**2))**0.25 * (1 - alpha[i])**(1.75)
             
-            # C0 = 1.20 - 0.2*((rho_gz[i]/rho_f)**0.5)    # Super tiny number, also Worosz MATLAB script has + instead of -?
+            C0 = C_inf - (C_inf - 1) * np.sqrt(rho_gz[i]/rho_f)    # Super tiny number, also Worosz MATLAB script has + instead of -?
             # alpha[i+1] = (jgloc) / (C0 * j + vgj)
 
             alpha[i+1] = (jgloc) / (C0 * j + vgj)
