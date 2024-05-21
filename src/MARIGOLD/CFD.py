@@ -1034,6 +1034,10 @@ Optimization Level = 3 \n\
 Volume Fraction Coupling = Coupled \n\
 END \n\
 END \n\
+EXPERT PARAMETERS: \n\
+diffusion coef averaging type = 3 \n\
+stress coef averaging type = 3 \n\
+END \n\
 END \n\
 COMMAND FILE: \n\
 Version = 22.2 \n\
