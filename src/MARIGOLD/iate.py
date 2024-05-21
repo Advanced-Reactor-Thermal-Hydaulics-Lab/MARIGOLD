@@ -362,7 +362,7 @@ def iate_1d_1g(
             # Applicable for void fractions less than 20%; for void fractions greater than 30%, use Kataoka and Ishii 1987 for drift-velocity
             vgj = (2**0.5) * (sigma * grav * (rho_f - rho_gz[i]) / (rho_f**2))**0.25 * (1 - alpha[i])**(1.75)
             
-            C0 = C_inf - (C_inf - 1) * np.sqrt(rho_gz[i]/rho_f)    # Super tiny number, also Worosz MATLAB script has + instead of -?
+            C0 = C_inf - (C_inf - 1) * np.sqrt(rho_gz[i]/rho_f)     # Round tube drift flux distribution parameter
             # alpha[i+1] = (jgloc) / (C0 * j + vgj)
 
             alpha[i+1] = (jgloc) / (C0 * j + vgj)
