@@ -2091,27 +2091,19 @@ class Condition:
 
                 if method.lower() == 'ishii':
                     mu_m = self.mu_f * (1 - midas_dict['alpha'] / alpha_max)**(-2.5*alpha_max * (self.mu_g + 0.4*self.mu_f) / (self.mu_g + self.mu_f)  )
-                    mu_eff = mu_m
-                if method.lower() == 'ishii':
-                    mu_m = self.mu_f * (1 - midas_dict['alpha'] / alpha_max)**(-2.5*alpha_max * (self.mu_g + 0.4*self.mu_f) / (self.mu_g + self.mu_f)  )
 
-                    midas_dict.update({'mu_m': mu_eff})
                 elif method.lower() == 'ishii_AA':
                     mu_m = self.mu_f * (1 - alpha_avg / alpha_max)**(-2.5*alpha_max * (self.mu_g + 0.4*self.mu_f) / (self.mu_g + self.mu_f)  )
-                
+                    
                 elif method.lower() == 'avg_void':
                     mu_m = self.mu_f / (1 - alpha_avg)
-                elif method.lower() == 'ishii_AA':
-                    mu_m = self.mu_f * (1 - alpha_avg / alpha_max)**(-2.5*alpha_max * (self.mu_g + 0.4*self.mu_f) / (self.mu_g + self.mu_f)  )
-                
-                elif method.lower() == 'avg_void':
-                    mu_m = self.mu_f / (1 - alpha_avg)
+
                 mu_eff = mu_m
+                mu_m = mu_eff
 
                 midas_dict.update({'mu_eff': mu_eff})
                 midas_dict.update({'mu_m': mu_m})
 
-        return self.area_avg('mu_eff')
         return self.area_avg('mu_eff')
     
 
@@ -2134,6 +2126,7 @@ class Condition:
 
         Returns:
          - area average drag coefficient
+         """
 
     def calc_cd(self, method='Ishii-Zuber', vr_cheat = False, limit = 0):
         """Method for calculating drag coefficient
