@@ -1826,7 +1826,7 @@ class Condition:
             for rstar, midas_dict in r_dict.items():
                 if rstar >= 0:
                     rs_temp.append( rstar ) # This is proably equivalent to rs = list(r_dict.keys() ), but I'm paranoid about ordering
-                    vars_temp.append(rstar * (midas_dict['alpha_G2'] - alpha_avg)**2)
+                    vars_temp.append(rstar * (midas_dict['alpha'] - alpha_avg)**2)
                     if debug: print(angle, midas_dict, file=debugFID)
             
             vars = [var for _, var in sorted(zip(rs_temp, vars_temp))]
