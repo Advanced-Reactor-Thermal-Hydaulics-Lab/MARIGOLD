@@ -2,7 +2,10 @@ from .config import *
 
 def iate_1d_1g(
         # Basic inputs
-        cond, query, z_step,
+        query, z_step = 0.01,
+
+        # Initial conditions
+        cond = None, parcel = None,
         
         # IATE Coefficients
         C_WE = None, C_RC = None, C_TI = None, alpha_max = 0.75, C = 3, We_cr = 6, acrit_flag = 0, acrit = 0.13, C_inf = 1.20,
@@ -14,7 +17,8 @@ def iate_1d_1g(
         LM_C = 40, k_m = 0.40, LoverD_restriction = None,
 
         # Temporary arguments
-        cheat = True, elbow = False):
+        elbow = False
+        ):
     """ Calculate the area-averaged interfacial area concentration at query location based on the 1D 1G IATE
 
     Version History:
@@ -50,10 +54,41 @@ def iate_1d_1g(
      - Modify MG for Yadav data extraction
     """
 
+    boopadoopa = True
+
     # MARIGOLD retrieval
-    theta           = cond.theta                                # Pipe inclination angle
-    Dh              = cond.Dh                                   # Hydraulic diameter
-    LoverD          = cond.LoverD                               # Condition L/D
+    if boopadoopa:
+        theta       = cond.theta                                # Pipe inclination angle
+        Dh          = cond.Dh                                   # Hydraulic diameter
+        LoverD      = cond.LoverD                               # Condition L/D
+
+        rho_f       = cond.rho_f                                # Liquid phase density [kg/m**3]
+        rho_g       = cond.rho_g                                # Gas phase density [kg/m**3]
+        mu_f        = cond.mu_f                                 # Viscosity of water [Pa-s]
+        sigma       = cond.sigma                                # Surface tension of air/water [N/m]
+    else:
+        theta       = parcel["theta"]
+        Dh          = parcel["Dh"]
+        LoverD      = parcel["LoverD"]
+
+        rho_f       = parcel["rho_f"]
+        rho_g       = parcel["rho_g"]
+        mu_f        = parcel["mu_f"]
+        sigma       = parcel["sigma"]
+    
+    p_atm           = 101325                                    # Ambient pressure [Pa]
+    grav            = 9.81*np.sin((theta)*np.pi/180)            # Gravity constant (added by Drew to account for pipe inclination)
+
+    R_spec          = 287.058                                   # Specific gas constant for dry air [J/kg-K]
+    T               = 293.15                                    # Ambient absolute temperature [K], for calculating air density as a function of pressure along channel
+    
+    # Mesh generation
+    if query < LoverD+z_step:
+        raise ValueError('Please choose a query L/D downstream of the boundary condition.')
+    
+    z_mesh = np.arange(LoverD, query + z_step, z_step)          # Axial mesh [-]
+    z_mesh = z_mesh * Dh                                        # Axial mesh [m], units necessary for dp calculation
+    z_step = z_step * Dh
 
     # Yadav
     '''
@@ -67,91 +102,48 @@ def iate_1d_1g(
 
     ############################################################################################################################
     #                                                                                                                          #
-    #                                                       CONSTANTS                                                          #
-    #                                                                                                                          #
-    ############################################################################################################################
-    # expcond.m
-
-    p_atm           = 101325                                    # Ambient pressure [Pa]
-    rho_f           = cond.rho_f                                # Liquid phase density [kg/m**3]
-    rho_g           = cond.rho_g                                # Gas phase density [kg/m**3]
-    mu_f            = cond.mu_f                                 # Viscosity of water [Pa-s]
-    sigma           = cond.sigma                                # Surface tension of air/water [N/m]
-    grav            = 9.81*np.sin((theta)*np.pi/180)            # Gravity constant (added by Drew to account for pipe inclination)
-
-    # Worosz
-    R_spec          = 287.058                                   # Specific gas constant for dry air [J/kg-K]
-    T               = 293.15                                    # Ambient absolute temperature [K], for calculating air density as a function of pressure along channel
-    
-    ############################################################################################################################
-    #                                                                                                                          #
     #                                                      COEFFICIENTS                                                        #
     #                                                                                                                          #
     ############################################################################################################################
-    # coeff.m
 
-    # Yadav
-    # Switching the logic around would make the code faster (seeing that a variable == None skips block)
-    # I like seeing all of the coefficients grouped by geometry, though
-    if theta == 90 and elbow == False:
+    if theta == 90 and elbow == False:                          # Vertical, no elbow
         if C_WE == None:
-            C_WE        = 0.002
+            C_WE    = 0.002
         if C_RC == None:
-            C_RC        = 0.004        
+            C_RC    = 0.004        
         if C_TI == None:
-            C_TI        = 0.085
+            C_TI    = 0.085
 
-    elif theta == 0 and elbow == False:
-        if C_WE == None:
-            C_WE        = 0.000
-        if C_RC == None:
-            C_RC        = 0.003
-        if C_TI == None:
-            C_TI        = 0.014
+        COV_RC      = 1
+        COV_TI      = 1
 
-    elif elbow == True:
+    elif theta == 0 and elbow == False:                         # Horizontal, no elbow, look at Ran's work?
         if C_WE == None:
-            C_WE        = 0.000
+            C_WE    = 0.000
         if C_RC == None:
-            C_RC        = 0.012
+            C_RC    = 0.003
         if C_TI == None:
-            C_TI        = 0.085
+            C_TI    = 0.014
+        
+        COV_RC      = 1
+        COV_TI      = 1
+
+    elif elbow == True:                                         # Elbow, look at Shoxu's work?
+        if C_WE == None:
+            C_WE    = 0.000
+        if C_RC == None:
+            C_RC    = 0.012
+        if C_TI == None:
+            C_TI    = 0.085
+        
+        COV_RC      = 1
+        COV_TI      = 1
     
-    ############################################################################################################################
-    #                                                                                                                          #
-    #                                                       COVARIANCE                                                         #
-    #                                                                                                                          #
-    ############################################################################################################################
-    # COV.m
-
-    # Yadav
-    # Temporary, Yadav implemented as a bunch of arrays. There must be a better way to do this.
-    # calc_void_cov in Condition.py may be useful
-    if theta == 90 and elbow == False:      # Vertical, no elbow
-        COV_RC      = 1
-        COV_TI      = 1
-    elif theta == 0 and elbow == False:     # Horizontal, no elbow, look at Ran's work?
-        COV_RC      = 1
-        COV_TI      = 1
-    elif elbow == True:                     # Elbow, look at Shoxu's work?
-        COV_RC      = 1
-        COV_TI      = 1
-    else:                                   # Inclined, look at Drew's work?
-        COV_RC      = 1
-        COV_TI      = 1
-
     ############################################################################################################################
     #                                                                                                                          #
     #                                                   BOUNDARY CONDITIONS                                                    #
     #                                                                                                                          #
     ############################################################################################################################
-    # Mesh generation
-    if query < LoverD+z_step:
-        raise ValueError('Please choose a query L/D downstream of the boundary condition.')
-    
-    z_mesh = np.arange(LoverD, query + z_step, z_step)          # Axial mesh [-]
-    z_mesh = z_mesh * Dh                                        # Axial mesh [m], units necessary for dp calculation
-    z_step = z_step * Dh
     
     # Variable initialization
     ai              = np.empty(len(z_mesh))
@@ -171,33 +163,42 @@ def iate_1d_1g(
     aiexp           = np.empty(len(z_mesh))
     aivg            = np.empty(len(z_mesh))
 
-    aiwe[0]         = 0
-    airc[0]         = 0
-    aiti[0]         = 0
-    aiexp[0]        = 0
-    aivg[0]         = 0
+    if boopadoopa:
+        aiwe[0]     = 0
+        airc[0]     = 0
+        aiti[0]     = 0
+        aiexp[0]    = 0
+        aivg[0]     = 0
 
-    # Apply experimental values as boundary conditions at first node 
-    if cheat:
-        ai[0]       = cond.area_avg_ai_sheet                    # [1/m]
-        alpha[0]    = cond.area_avg_void_sheet                  # [-]
-        Db[0]       = 6 * alpha[0] / ai[0]                      # [m]
-    else:    
         ai[0]       = cond.area_avg("ai")                       # [1/m]
         alpha[0]    = cond.area_avg("alpha")                    # [-]
         Db[0]       = cond.void_area_avg("Dsm1") / 1000         # [m]
-    
-    # Pressure drop [Pa/m]
-    if LoverD_restriction == None:
-        L = None
-    else:
-        L = LoverD_restriction*Dh
+        jf          = cond.jf                                   # [m/s]
+        jgloc       = cond.jgloc                                # [m/s]
+        jgatm       = cond.jgatm                                # [m/s]
 
-    dpdz            = cond.calc_dpdz(method=dpdz_method, LM_C=LM_C, k_m=k_m, L=L)
-    
-    jf              = cond.jf                                   # [m/s]
-    jgloc           = cond.jgloc                                # [m/s]
-    jgatm           = cond.jgatm                                # [m/s]
+        # Pressure drop [Pa/m]
+        if LoverD_restriction == None:
+            L = None
+        else:
+            L = LoverD_restriction*Dh
+
+        dpdz        = cond.calc_dpdz(method=dpdz_method, LM_C=LM_C, k_m=k_m, L=L)
+    else:
+        aiwe[0]     = parcel["aiwe"][-1]
+        airc[0]     = parcel["airc"][-1]
+        aiti[0]     = parcel["aiti"][-1]
+        aiexp[0]    = parcel["aiexp"][-1]
+        aivg[0]     = parcel["aivg"][-1]
+
+        ai[0]       = parcel["ai"][-1]
+        alpha[0]    = parcel["alpha"][-1]
+        Db[0]       = parcel["Db"][-1]
+        jf          = parcel["jf"]
+        jgloc       = parcel["jgloc"]
+        jgatm       = parcel["jgatm"]
+
+        dpdz        = parcel["dpdz"]
     
     # Local Pressure along the test section
     p = (jgatm * p_atm / jgloc) - p_atm                         # Back-calculate local corrected gauge pressure
@@ -212,8 +213,8 @@ def iate_1d_1g(
     #                                                           IATE                                                           #
     #                                                                                                                          #
     ############################################################################################################################
+    
     # Calculate ai(z) to evaluate the steady state one-dim one-group model
-
     for i, z in enumerate(z_mesh):
         if (i+1) >= len(z_mesh):
             break
@@ -323,7 +324,7 @@ def iate_1d_1g(
             # Backwards difference for remaining nodes
             SEXP[i] = -2 / 3 / rho_gz[i] * ai[i] * vgz[i] * (rho_gz[i] - rho_gz[i-1]) / z_step
 
-        # SEXP[i] = -2 / 3 / pz[i] * ai[i] * vgz[i] * (-dpdz)     # Original DOE_MATLAB_IAC
+        # SEXP[i] = -2 / 3 / pz[i] * ai[i] * vgz[i] * (-dpdz)   # Original DOE_MATLAB_IAC
         
         # Source/sink due to Bubble Acceleration (advection in Yadav's script)
         if i <= 2:
@@ -383,4 +384,29 @@ def iate_1d_1g(
         # Estimate Sauter mean diameter for the next step calculation
         Db[i+1] = 6 * alpha[i+1] / ai[i+1]
         
-    return z_mesh, ai, aiti, airc, aiexp, aiwe, aivg, alpha, Db, vgz, pz
+    parcel = {
+        "theta"         : theta,
+        "Dh"            : Dh,
+        "LoverD"        : LoverD,
+        "rho_f"         : rho_f,
+        "rho_g"         : rho_g,
+        "mu_f"          : mu_f,
+        "sigma"         : sigma,
+        "aiti"          : aiti,
+        "airc"          : airc,
+        "aiexp"         : aiexp,
+        "aiwe"          : aiwe,
+        "aivg"          : aivg,
+        "ai"            : ai,
+        "alpha"         : alpha,
+        "Db"            : Db,
+        "jf"            : jf,
+        "jgloc"         : jgloc,
+        "jgatm"         : jgatm,
+        "dpdz"          : dpdz,
+
+        "z_mesh"        : z_mesh,
+        "pz"            : pz
+    }
+
+    return parcel
