@@ -67,7 +67,7 @@ def iate_1d_1g(
     else:
         theta       = parcel["theta"]
         Dh          = parcel["Dh"]
-        LoverD      = parcel["z_mesh"][-1]
+        LoverD      = parcel["z_mesh"][-1] / Dh
 
         rho_f       = parcel["rho_f"]
         rho_g       = parcel["rho_g"]
