@@ -2105,28 +2105,6 @@ class Condition:
                 midas_dict.update({'mu_m': mu_m})
 
         return self.area_avg('mu_eff')
-    
-
-    def calc_cd(self, method='Ishii-Zuber', vr_cheat = False, limit = 0):
-        """Method for calculating drag coefficient
-        
-        Inputs:
-         - method, what method to use for modeling :math:`C_{D}`
-         - vr_cheat, flag to use "vr" from midas_dict or "vr_model" when calculating :math:`Re_{b}`
-         - limit, if supplied, will limit the drag coefficient to the given maximum value. For instance, 0.44 like in CFX
-        
-        Stores:
-         - "cd" in midas_dict 
-         - "Reb" in midas_dict. Calculated by :math:`Re_{b} = \\frac{(1 - \\alpha) \\rho_{f} v_{r} D_{sm,1} }{\\mu_{m}}`. \ 
-:math:`\\mu_{m}` comes from :any:`calc_mu_eff`
-
-        Options for method:
-         - Ishii-Zuber, :math:`C_{D} = \\frac{24}{Re_{b}} (1 + 0.1 Re_{b}^{0.75})`
-         - Schiller-Naumann, :math:`C_{D} = \\frac{24}{Re_{b}} (1 + 0.15 Re_{b}^{0.687})`. Here, :math:`Re_{b}` uses :math:`\\mu_{f}`
-
-        Returns:
-         - area average drag coefficient
-         """
 
     def calc_cd(self, method='Ishii-Zuber', vr_cheat = False, limit = 0):
         """Method for calculating drag coefficient
