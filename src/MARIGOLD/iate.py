@@ -380,25 +380,18 @@ def iate_1d_1g(
         Db[i+1] = 6 * alpha[i+1] / ai[i+1]
         
     parcel = {
-        "theta"         : theta,
-        "Dh"            : Dh,
-        "LoverD"        : LoverD,
-        "rho_f"         : rho_f,
-        "rho_g"         : rho_g,
-        "mu_f"          : mu_f,
-        "sigma"         : sigma,
-        "aiti"          : aiti,
-        "airc"          : airc,
-        "aiexp"         : aiexp,
-        "aiwe"          : aiwe,
-        "aivg"          : aivg,
         "ai"            : ai,
         "alpha"         : alpha,
         "Db"            : Db,
         "jf"            : jf,
         "jgloc"         : jgloc,
         "jgatm"         : jgatm,
-
+        
+        "aiti"          : aiti,
+        "airc"          : airc,
+        "aiexp"         : aiexp,
+        "aiwe"          : aiwe,
+        "aivg"          : aivg,
         "z_mesh"        : z_mesh,
         "pz"            : pz
     }
