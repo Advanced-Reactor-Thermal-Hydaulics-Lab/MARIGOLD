@@ -2,10 +2,7 @@ from .config import *
 
 def iate_1d_1g(
         # Basic inputs
-        query, z_step = 0.01,
-
-        # Initial conditions
-        cond = None, parcel = None,
+        cond, query, z_step = 0.01, parcel = None,        
         
         # IATE Coefficients
         C_WE = None, C_RC = None, C_TI = None, alpha_max = 0.75, C = 3, We_cr = 6, acrit_flag = 0, acrit = 0.13, C_inf = 1.20,
@@ -50,35 +47,26 @@ def iate_1d_1g(
      - IATE coefficients set as optional inputs, with default values set depending on geometry
      - COV terms being implemented in Condition.py, not incorporated into this function yet
      - vgz calculation in elbow and dissipation length regions still need to be implemented
-     - There must be something wrong with drift flux void fraction calculation
      - Modify MG for Yadav data extraction
     """
 
     # MARIGOLD retrieval
-    if cond != None and parcel == None:
-        theta       = cond.theta                                # Pipe inclination angle
-        Dh          = cond.Dh                                   # Hydraulic diameter
-        LoverD      = cond.LoverD                               # Condition L/D
+    theta           = cond.theta                                # Pipe inclination angle
+    Dh              = cond.Dh                                   # Hydraulic diameter
 
-        rho_f       = cond.rho_f                                # Liquid phase density [kg/m**3]
-        rho_g       = cond.rho_g                                # Gas phase density [kg/m**3]
-        mu_f        = cond.mu_f                                 # Viscosity of water [Pa-s]
-        sigma       = cond.sigma                                # Surface tension of air/water [N/m]
-    else:
-        theta       = parcel["theta"]
-        Dh          = parcel["Dh"]
-        LoverD      = parcel["z_mesh"][-1] / Dh
-
-        rho_f       = parcel["rho_f"]
-        rho_g       = parcel["rho_g"]
-        mu_f        = parcel["mu_f"]
-        sigma       = parcel["sigma"]
-    
+    rho_f           = cond.rho_f                                # Liquid phase density [kg/m**3]
+    rho_g           = cond.rho_g                                # Gas phase density [kg/m**3]
+    mu_f            = cond.mu_f                                 # Viscosity of water [Pa-s]
+    sigma           = cond.sigma                                # Surface tension of air/water [N/m]
     p_atm           = 101325                                    # Ambient pressure [Pa]
     grav            = 9.81*np.sin((theta)*np.pi/180)            # Gravity constant (added by Drew to account for pipe inclination)
-
     R_spec          = 287.058                                   # Specific gas constant for dry air [J/kg-K]
     T               = 293.15                                    # Ambient absolute temperature [K], for calculating air density as a function of pressure along channel
+    
+    if parcel == None:
+        LoverD      = cond.LoverD                               # Condition L/D
+    else:
+        LoverD      = parcel["z_mesh"][-1] / Dh
     
     # Mesh generation
     if query < LoverD+z_step:
@@ -172,7 +160,7 @@ def iate_1d_1g(
     aiexp           = np.empty(len(z_mesh))
     aivg            = np.empty(len(z_mesh))
 
-    if cond != None and parcel == None:
+    if parcel == None:
         aiwe[0]     = 0
         airc[0]     = 0
         aiti[0]     = 0
@@ -186,13 +174,6 @@ def iate_1d_1g(
         jgloc       = cond.jgloc                                # [m/s]
         jgatm       = cond.jgatm                                # [m/s]
 
-        # Pressure drop [Pa/m]
-        if LoverD_restriction == None:
-            L = None
-        else:
-            L = LoverD_restriction*Dh
-
-        dpdz        = cond.calc_dpdz(method=dpdz_method, LM_C=LM_C, k_m=k_m, L=L)
     else:
         aiwe[0]     = parcel["aiwe"][-1]
         airc[0]     = parcel["airc"][-1]
@@ -207,7 +188,13 @@ def iate_1d_1g(
         jgloc       = parcel["jgloc"]
         jgatm       = parcel["jgatm"]
 
-        dpdz        = parcel["dpdz"]
+    # Pressure drop [Pa/m]
+    if LoverD_restriction == None:
+        L = None
+    else:
+        L = LoverD_restriction*Dh
+
+    dpdz            = cond.calc_dpdz(method=dpdz_method, LM_C=LM_C, k_m=k_m, L=L)
     
     # Local Pressure along the test section
     p = (jgatm * p_atm / jgloc) - p_atm                         # Back-calculate local corrected gauge pressure
@@ -411,7 +398,6 @@ def iate_1d_1g(
         "jf"            : jf,
         "jgloc"         : jgloc,
         "jgatm"         : jgatm,
-        "dpdz"          : dpdz,
 
         "z_mesh"        : z_mesh,
         "pz"            : pz
