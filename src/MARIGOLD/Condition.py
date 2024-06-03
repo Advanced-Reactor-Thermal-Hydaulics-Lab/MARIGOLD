@@ -1839,26 +1839,42 @@ class Condition:
         for angle, r_dict in self.phi.items():
             for rstar, midas_dict in r_dict.items():
 
-                if method == 'Ishii':
-                    mu_m = mu_f * (1 - midas_dict['alpha'] / alpha_max)**(-2.5*alpha_max * (mu_g + 0.4*mu_f) / (mu_g + mu_f)  )
-                    mu_eff = mu_m
+                if method.lower() == 'ishii':
+                    mu_m = self.mu_f * (1 - midas_dict['alpha'] / alpha_max)**(-2.5*alpha_max * (self.mu_g + 0.4*self.mu_f) / (self.mu_g + self.mu_f)  )
 
                     midas_dict.update({'mu_m': mu_eff})
+                elif method.lower() == 'ishii_AA':
+                    mu_m = self.mu_f * (1 - alpha_avg / alpha_max)**(-2.5*alpha_max * (self.mu_g + 0.4*self.mu_f) / (self.mu_g + self.mu_f)  )
+                
+                elif method.lower() == 'avg_void':
+                    mu_m = self.mu_f / (1 - alpha_avg)
+                mu_eff = mu_m
 
                 midas_dict.update({'mu_eff': mu_eff})
+                midas_dict.update({'mu_m': mu_m})
 
-        return
+        return self.area_avg('mu_eff')
     
-    def calc_cd(self, method='Ishii-Zuber', rho_f = 998, vr_cheat = False, mu_f = 0.001):
-        """ Method for calculating drag coefficient 
-        
-        If vr = 0, assume cd = 0
 
-        Options are Ishii-Zuber and Schiller-Naumann, but both use
-        Reb = (1 - midas_dict['alpha']) * midas_dict['Dsm1'] * rho_f * midas_dict['vr'] / midas_dict['mu_m']\
+    def calc_cd(self, method='Ishii-Zuber', vr_cheat = False, limit = 0):
+        """Method for calculating drag coefficient
         
-        vr from calc_vr()
-        mu_m from calc_mu_eff()
+        Inputs:
+         - method, what method to use for modeling :math:`C_{D}`
+         - vr_cheat, flag to use "vr" from midas_dict or "vr_model" when calculating :math:`Re_{b}`
+         - limit, if supplied, will limit the drag coefficient to the given maximum value. For instance, 0.44 like in CFX
+        
+        Stores:
+         - "cd" in midas_dict 
+         - "Reb" in midas_dict. Calculated by :math:`Re_{b} = \\frac{(1 - \\alpha) \\rho_{f} v_{r} D_{sm,1} }{\\mu_{m}}`. \ 
+:math:`\\mu_{m}` comes from :any:`calc_mu_eff`
+
+        Options for method:
+         - Ishii-Zuber, :math:`C_{D} = \\frac{24}{Re_{b}} (1 + 0.1 Re_{b}^{0.75})`
+         - Schiller-Naumann, :math:`C_{D} = \\frac{24}{Re_{b}} (1 + 0.15 Re_{b}^{0.687})`. Here, :math:`Re_{b}` uses :math:`\\mu_{f}`
+
+        Returns:
+         - area average drag coefficient
 
         """
 
