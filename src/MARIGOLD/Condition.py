@@ -2076,6 +2076,7 @@ class Condition:
 
         Options for method:
          - Ishii, :math:`\\mu_{eff} = \\mu_{m} = \\mu_{f} (1 - \\frac{\\alpha}{ \\alpha_{max} })^{-2.5 \\alpha_{max} \\frac{\\mu_g + 0.4 \\mu_g}{\\mu_g + \\mu_g} }`
+         - Ishii_AA, :math:`\\mu_{eff} = \\mu_{m} = \\mu_{f} (1 - \\frac{\\langle \\alpha \\rangle}{ \\alpha_{max} })^{-2.5 \\alpha_{max} \\frac{\\mu_g + 0.4 \\mu_g}{\\mu_g + \\mu_g} }`
 
         Returns:
          - area average effective viscosity
@@ -2083,6 +2084,7 @@ class Condition:
         """
 
         self.mirror()
+        alpha_avg = self.area_avg('alpha')
                 
         for angle, r_dict in self.phi.items():
             for rstar, midas_dict in r_dict.items():
@@ -2092,13 +2094,18 @@ class Condition:
                     mu_eff = mu_m
 
                     midas_dict.update({'mu_m': mu_eff})
+                elif method.lower() == 'ishii_AA':
+                    mu_m = self.mu_f * (1 - alpha_avg / alpha_max)**(-2.5*alpha_max * (self.mu_g + 0.4*self.mu_f) / (self.mu_g + self.mu_f)  )
+                
+                elif method.lower() == 'avg_void':
+                    mu_m = self.mu_f / (1 - alpha_avg)
 
                 midas_dict.update({'mu_eff': mu_eff})
 
         return self.area_avg('mu_eff')
     
     def calc_cd(self, method='Ishii-Zuber', vr_cheat = False, limit = None):
-        """Method for calculating drag coefficient
+        """ Method for calculating drag coefficient 
         
         Inputs:
          - method, what method to use for modeling :math:`C_{D}`
@@ -2391,6 +2398,70 @@ the newly calculated :math:`v_{r}` or not
 
         return self.area_avg('lambda')
     
+
+    def calc_COV_RC(self, alpha_max = 0.75, alpha_cr = 1.00):
+        """Calculates the experimental Random Collision Covariance based on Talley (2012) method (with modification factor m_RC eliminated), Quan, 05/15
+         - Stored in self.COV_RC
+        
+        """
+     ############################################################################################################################
+    #                                                                                                                          #
+    #                                                       CONSTANTS                                                          #
+    #                                                                                                                          #
+    ############################################################################################################################
+  
+        rho_f        = self.rho_f                                         # Liquid phase density [kg/m**3]
+        rho_g        = self.rho_g                                     # Gas phase density [kg/m**3]
+        # alpha_max = 0.75, Maximum void fraction based on hexagonal-closed-packed (HCP) bubble distribution
+        # alpha_cr = 0.11, Critical alpha to activate Random Collision, Talley (2012), Kong (2018) 
+        Dh           = self.Dh                                         # Hydraulic diameter
+        mu_f         = self.mu_f
+
+        alpha_avg    = self.area_avg('alpha')
+        ai_avg       = self.area_avg('ai')
+        Dsm1_avg     = self.void_area_avg ('Dsm1')   # try void weighted
+        mu_m_avg     = self.void_area_avg ('mu_m') 
+
+        rho_m        = (1 - alpha_avg) * rho_f + alpha_avg * rho_g     # Mixture density
+        v_m          =(rho_f*self.jf+rho_g*self.jgloc)/rho_m           # Mixture velocity                     
+        Rem          = rho_m * v_m * Dh / mu_m_avg                     # Ran Kong
+        #f_TP         = 0.316*(1/(1-alpha_avg)/Rem)**0.25                # Two-phase frictional factor, Kong (2018)
+        f_TP         = 0.316*(mu_m_avg/mu_f/Rem)**0.25                # Two-phase frictional factor, Talley (2012) and Ted (2015)
+        eps          =  f_TP*v_m**3 /2/Dh                                # epsilon for calculating u_t
+            
+        for angle, r_dict in self.phi.items():
+            for rstar, midas_dict in r_dict.items():
+                
+                if midas_dict['alpha'] <= alpha_cr:  # Check if local void fraction is less than or equal to alpha_cr
+                    u_t = 1.4 * eps**(1./3) * (midas_dict['Dsm1']/1000.)**(1./3) 
+                    # print(angle, rstar, Dh, v_m, Rem, f_TP, eps, midas_dict['Dsm1']) # for check
+                else:
+                    u_t = 0  # The turbulence-impact and random- collision are driven by the turbulent fluctuation velocity (u_t).
+
+                COV_loc = u_t * (midas_dict['ai'])**2 / alpha_max**(1/3)*(alpha_max**(1/3)-(midas_dict['alpha'])**(1/3))     
+                
+                midas_dict.update({'u_t': u_t})
+        
+                midas_dict.update({'COV_loc': COV_loc})
+                
+        u_t_avg=self.area_avg ('u_t')
+        if u_t_avg > 0:
+            COV_avg = u_t_avg * ai_avg**2 / alpha_max**(1/3)*(alpha_max**(1/3)-alpha_avg**(1/3))
+            I = self.area_avg('COV_loc') / COV_avg
+        else:
+            COV_avg = 0
+            I = 0
+
+        self.COV_RC = I
+        return I
+
+    
+
+    def calc_COV_TI(self):
+    
+
+        return
+
     def plot_profiles(self, param, save_dir = '.', show=True, x_axis='r', 
                       const_to_plot = [90, 67.5, 45, 22.5, 0], include_complement = True, 
                       rotate=False, fig_size=4, title=True, label_str = '', legend_loc = 'best', xlabel_loc = 'center',
@@ -2825,7 +2896,7 @@ the newly calculated :math:`v_{r}` or not
         else:
             plt.savefig( os.path.join(save_dir, f"{param}_contours_{self.name + extra_text}.png") )
             plt.close()
-        return
+        return ax
 
     def plot_surface(self, param:str, save_dir = '.', show=True, rotate_gif=False, elev_angle = 145, 
                      azim_angle = 0, roll_angle = 180, title=True, ngridr = 50, ngridphi = 50, 
