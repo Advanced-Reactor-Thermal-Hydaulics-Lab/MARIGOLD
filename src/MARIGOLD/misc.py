@@ -5,12 +5,12 @@ def comp_cond(cond1:Condition, cond2:Condition, tag = 'run_ID') -> Condition:
     """ Collate data from cond1 and cond2 into a single condition
     
     Each param will be tagged with "tag", options are
-    * run_ID, use cond.run_ID
-    * jf, use cond.jf
-    * jgloc, use cond.jgloc
-    * port, use cond.port
-    * name, use cond.name
-    * exp_cfd, tag1 -> exp, tag2 -> CFD
+    - run_ID, use cond.run_ID
+    - jf, use cond.jf
+    - jgloc, use cond.jgloc
+    - port, use cond.port
+    - name, use cond.name
+    - exp_cfd, tag1 -> exp, tag2 -> CFD
 
     """
     compCond = Condition(cond1.jgref, cond1.jgloc, cond1.jf, cond1.theta, cond1.port, cond1.database)
@@ -63,3 +63,11 @@ def comp_cond(cond1:Condition, cond2:Condition, tag = 'run_ID') -> Condition:
 
     return compCond
 
+def write_excel(cond):
+    """ Export data from a condition to an excel sheet
+    
+    # TODO
+    """
+
+
+    return

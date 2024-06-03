@@ -12,14 +12,31 @@ class Condition:
     So phi[angle][r/R]['alpha'] should give you the void fraction at r/R for phi = angle
     This structure is initialized with zeros for the MIDAS output at the pipe center and wall
 
+    Can also get the data at a local point from calling the condition, syntax
+
+    cond(phi, r, 'param'). Phi is in radians, the arguments can be constants or numpy arrays.
+    Also has an option for interpolation, 'interp_method'
+
 """
 
     debugFID = None
-    def __init__(self, jgref:float, jgloc:float, jf:float, theta:int, port:str, database:str, fluids = 'air-water') -> None:
+    def __init__(self, jgref:float, jgloc:float, jf:float, theta:int, port:str, database:str, fluids = 'air-water', g = 9.81) -> None:
         """ Initialize Condition object
 
-        implemented fluids:
-        * air-water, uses properties at STP
+        Inputs:
+        - jgref, reference superficial gas velocity
+        - jgloc, local superficial gas velocity
+        - jf, superficial liquid velocity
+        - theta, angle of inclination of flow direction (0° is horizontal, 90° is vertical upwards)
+        - port, string to denote the port
+        - database, string to associate what database this data is from
+
+        Optional inputs:
+        - fluids, what fluid pair to use as the gas and liquid
+        - g, gravitational acceleration. In case you're on Mars
+
+        Implemented Fluids:
+        - air-water, uses properties at atmospheric conditions
         
         """
         self.jgref = jgref
@@ -120,6 +137,9 @@ class Condition:
         
         else:
             raise NotImplementedError(f"{fluids} not available, try 'air-water'")
+        
+        self.g = g
+        return
 
     def __eq__(self, __o: object) -> bool:
         if isinstance(__o, Condition):
@@ -135,15 +155,13 @@ class Condition:
         return self.name
 
     def __call__(self, phi_in:np.ndarray, r_in:np.ndarray, param:str, interp_method='None') -> np.ndarray:
-        """
-
-        Returns the value of param at (phi, r). Phi is in radians
+        """Returns the value of param at (phi, r). Phi is in radians
          
         Interp options:
-         * 'None', will try to fetch raw data at this location
-         * 'linear', linear interpolation
-         * 'spline', spline interpolation
-         * 'linear_xy', cartesian interpolation, phi -> x, r -> y
+         - 'None', will try to fetch raw data at this location
+         - 'linear', linear interpolation
+         - 'spline', spline interpolation
+         - 'linear_xy', cartesian interpolation, phi -> x, r -> y
            
         """
         if type(phi_in) != np.ndarray:
@@ -494,10 +512,11 @@ class Condition:
     def approx_vf(self, n=7) -> None:
         """Method for approximating vf with power-law relation. 
 
-        vf_approx = (n+1)*(2*n+1) / (2*n*n) * (jf / (1-self.area_avg('alpha'))) * (1 - abs(rstar))**(1/n)
+        .. math:: v_{f, approx} = \\frac{(n+1)(2*n+1)}{ (2*n^{2})} * (j_{f} / (1- \\langle \\alpha \\rangle)) * (1 - abs(rstar))**(1/n)
 
-        Will not overwrite vf data if it already exists, but will always store data in 
-        midas_dict['vf_approx'] even if midas_dict['vf'] has data
+        Stores:
+         - "vf_approx" in midas_dict
+         - "vf", if it does not alread exist in midas_dict
 
         """
 
@@ -519,10 +538,11 @@ class Condition:
     def approx_vg(self, n=7) -> None:
         """Method for approximating vg with power-law relation. I don't think this makes sense
 
-        vg_approx = (n+1)*(2*n+1) / (2*n*n) * (jg / (self.area_avg('alpha'))) * (1 - abs(rstar))**(1/n)
+        .. math:: v_{g, approx} = \\frac{(n+1)(2*n+1)}{ (2*n^{2})} * (j_{g} / \\langle \\alpha \\rangle) * (1 - abs(rstar))**(1/n)
 
-        Will not overwrite vg data if it already exists, but will always store data in 
-        midas_dict['vg_approx'] even if midas_dict['ug1'] has data
+        Stores:
+         - "vg_approx" in midas_dict
+         - "ug1", if it does not alread exist in midas_dict
 
         If you have a lot of group II bubbles this functions' no good
 
@@ -562,9 +582,20 @@ class Condition:
     def calc_vf_lee(self, K=1):
         """ Calculate vf, jf, vr based on Lee et al. (2002) equation
 
+        Inputs:
+         - None
+
+        Stores:
+         - "vf_lee" in midas_dict
+         - "jf_lee" in midas_dict
+         - "vr_lee" in midas_dict
+
+        Returns:
+         - Area-average vf_lee
+
         Really a model proposed by Bosio and Malnes
 
-        .. math:: vf = frac{ 1 }{ \\sqrt{1 - \\alpha^{2} / 2} } * sqrt{ frac{ 2 \\Delta p }{K \\rho_{f}} } 
+        .. math:: v_{f} = \\frac{ 1 }{ \\sqrt{1 - \\alpha^{2} / 2} } * \\sqrt{ \\frac{ 2 \\Delta p }{K \\rho_{f}} } 
         
         """
 
@@ -589,12 +620,23 @@ class Condition:
                     vr_lee = vg - vf_lee
                 midas_dict.update({'vr_lee':  vr_lee})
 
-        return
+        return self.area_avg('vf_lee')
     
     def calc_vf_naive(self):
         """ Calculate vf, jf, vr based on single-phase equation
 
-        .. math::  vf = sqrt{ frac{ 2 \\Delta p }{ \\rho_{f}} } 
+        Inputs:
+         - None
+
+        Stores:
+         - "vf_naive" in midas_dict
+         - "jf_naive" in midas_dict
+         - "vr_naive" in midas_dict
+
+        Returns:
+         - Area-average vf_naive
+
+        .. math::  v_{f} = \\sqrt{ \\frac{ 2 \\Delta p }{ \\rho_{f}} } 
         
         """
 
@@ -622,15 +664,22 @@ class Condition:
                     vr_naive = vg - vf_naive
                 midas_dict.update({'vr_naive':  vr_naive})
 
-        return
+        return self.area_avg('vf_naive')
     
     def calc_vr(self, warn_approx = True) -> None:
-        """Method for calculating relative velocity. Will approximate vf if it cannot be found.
+        """Method for calculating relative velocity. 
+        
+        Inputs:
+         - warn_approx, flag for warning if :math`v_r` is not found and function is approximating
 
         Note that if vg = 0, then this method says vr = 0. This will happen when no data is present,
         such as in the bottom of the pipe in horizontal, when this is not necessarily true
 
-        warn_approx is a flag to print out a warning statement if vf is being approximated
+        Stores:
+         - 'vr' in midas_dict
+
+        Returns:
+         - Area-average vr
 
         """
 
@@ -664,19 +713,21 @@ class Condition:
                     midas_dict.update({'vr': vr})
                     
 
-        return
+        return self.area_avg('vr')
 
     def calc_vgj(self, warn_approx = True) -> None:
-        """Method for calculating Vgj, by doing
+        """Method for calculating Vgj
 
-        j_local = midas_dict['alpha'] * midas_dict['ug1'] + (1 - midas_dict['alpha']) * midas_dict['vf']
-        vgj = midas_dict['ug1'] - j_local
+        Inputs:
+         - warn_approx, flag for warning if :math`V_{gj}` is not found and function is approximating
 
-        stored in midas_dict['vgj']
-        also stores local j, midas_dict['j']
+        Stores:
+         - "vgj" in midas_dict
+         - "j" in midas_dict
+         - "alpha_j" in midas_dict
 
-        warn_approx is a flag to print out a warning statement if vf is being approximated, which will
-        happen if not found
+        Returns:
+         - Void-weighted area-averaged Vgj
 
         """
 
@@ -699,13 +750,24 @@ class Condition:
                 midas_dict.update({'j': j_local})
                 midas_dict.update({'alpha_j': alpha_j})
 
-        return
+        return self.void_area_avg('vgj')
 
     def calc_grad(self, param: str, recalc = False) -> None:
         """Calculates gradient of param based on the data in self. 
+
+        Inputs:
+         - "param", string for local parameter to calculate the gradient of
         
-        Stored in self's midas_dict as grad_param_r, grad_param_phi, etc.
-        Will only be called once, unless recalc is True.
+        Stores:
+         - "grad_'param'_r"
+         - "grad_'param'_phi"
+         - "grad_'param'_phinor"
+         - "grad_'param'_x"
+         - "grad_'param'_y"
+         - "grad_'param'_total"
+
+        Returns:
+         - Area average "grad_'param'_total"
 
         """
         
@@ -823,7 +885,7 @@ class Condition:
                     self.phi[comp_angle][0.0].update({grad_param_name+'_total': deepcopy(r_dict[0.0][grad_param_name+'_r']) })
                     
 
-        return
+        return self.area_avg(grad_param_name+'_total')
     
     def fit_spline(self, param: str) -> None:
         """Fits a RectBivariateSpline for the given param. 
@@ -873,7 +935,7 @@ class Condition:
         self.spline_interp.update({param: spline_interpolant})
         return
     
-    def calc_linear_interp(self, param: str) -> None:
+    def fit_linear_interp(self, param: str) -> None:
         """Makes a LinearNDInterpolator for the given param. 
         
             Access with self.linear_interp[param], phi in radians
@@ -908,7 +970,7 @@ class Condition:
 
         return
     
-    def calc_linear_xy_interp(self, param: str) -> None:
+    def fit_linear_xy_interp(self, param: str) -> None:
         """ Makes a LinearNDInterpolator for the given param in x y coords
         
         Can access  with self.linear_xy_interp[param]
@@ -946,8 +1008,12 @@ class Condition:
     def max(self, param: str, recalc=False) -> float:
         """ Return maximum value of param in the Condition
         
-        By default, saves the data to a dictionary, Condition.maxs
-        for future reference, unless recalc=True
+        Inputs:
+         - param, string of local parameter to find maximum of
+         - recalc, if already calculated, will pull from dictionary instead of calculating unless this is true
+
+        Returns:
+         - maximum value of param
                           
         """
         
@@ -963,9 +1029,13 @@ class Condition:
         return (max)
 
     def max_loc(self, param: str)-> tuple:
-        """ Return location of maximum param in the Condition
+        """ Return location of maximum value of param
         
-        returns in the form (r/R, angle in degrees)
+        Inputs:
+         - param, string of local parameter to find maximum of
+
+        Returns:
+         - r/R location of the maximum value of param
                           
         """
         max = 0
@@ -980,10 +1050,13 @@ class Condition:
     def min(self, param: str, recalc = False, nonzero=False)-> float:
         """ Return minimum value of param in the Condition
         
-        By default, saves the data to a dictionary, Condition.mins
-        for future reference, unless recalc=True
+        Inputs:
+         - param, string of local parameter to find minimum of
+         - recalc, if already calculated, will pull from dictionary instead of calculating unless this is true
+         - nonzero, if true, will exclude points with the param = 0 when finding the minimum
 
-        nonzero=True will find the smallest nonzero value.
+        Returns:
+         - minimum value of param
                           
         """
 
@@ -1003,12 +1076,13 @@ class Condition:
         return (min)
 
     def min_loc(self, param: str)-> float:
-        """ Return minimum value of param in the Condition
+        """ Return location of minimum value of param
         
-        By default, saves the data to a dictionary, Condition.mins
-        for future reference, unless recalc=True
+        Inputs:
+         - param, string of local parameter to find minimum of
 
-        nonzero option not implemented, TODO
+        Returns:
+         - r/R location of the maximum value of param
                           
         """
         min = 10**7
@@ -1021,7 +1095,14 @@ class Condition:
         return (location)
     
     def max_line_loc(self, param: str, angle:float) -> float:
-        """ Return r/R location of maximum value of param at a given angle
+        """ Return location of maximum value of param at a given angle
+        
+        Inputs:
+         - param, string of local parameter to find maximum of
+         - angle, angle to search along
+
+        Returns:
+         - r/R location of the maximum value of param when φ=angle
                           
         """
         max = 0
@@ -1034,6 +1115,13 @@ class Condition:
     
     def max_line(self, param: str, angle:float) -> float:
         """ Return maximum value of param at a given angle
+        
+        Inputs:
+         - param, string of local parameter to find maximum of
+         - angle, angle to search along
+
+        Returns:
+         - maximum value of param when φ=angle
                           
         """
         max = 0
@@ -1046,15 +1134,22 @@ class Condition:
     
     def find_hstar_pos(self, method='max_dsm', void_criteria = 0.05) -> float:
         """ Returns the vertical distance from the top of the pipe to the bubble layer interface
+
+        Inputs:
+         - method
+         - void_criteria, used in some methods
         
         Methods for determining bubble layer interface
-        - max_dsm
-        - min_grad_y
-        - max_grad_y
-        - max_mag_grad_y
-        - zero_void
-        - percent_void, search down the phi = 90 line, find largest value of rstar where alpha < min_void
-        - Ryan_Ref, uses 1.3 - 1.57e-5 * Ref, proposed by Ryan (2022)
+         - max_dsm
+         - min_grad_y
+         - max_grad_y
+         - max_mag_grad_y
+         - zero_void
+         - percent_void, search down the phi = 90 line, find largest value of rstar where alpha < min_void
+         - Ryan_Ref, uses 1.3 - 1.57e-5 * Ref, proposed by Ryan (2022)
+
+        Returns:
+         - hstar
         
         """
 
@@ -1138,10 +1233,15 @@ class Condition:
         print('Invalid method for find_h_pos')
         return np.NaN
 
-    def avg(self, param: str, include_nonzero=False) -> float:
+    def avg(self, param: str, include_zero=True) -> float:
         """Calculates a basic average of a parameter, "param"
         
-        Just looks at every param and ensemble-averages them
+        Inputs:
+         - param, string of local parameter to find average of
+         - include_zero, if you want to include when param = 0 in average
+
+        Returns:
+         - average value of param
 
         """
         count = 0
@@ -1149,7 +1249,7 @@ class Condition:
         for angle, r_dict in self.phi.items():
             for rstar, midas_dict in r_dict.items():
                 
-                if include_nonzero:
+                if include_zero:
                     count += 1
                     avg_param += midas_dict[param]
                 else:
@@ -1162,14 +1262,16 @@ class Condition:
     def area_avg(self, param: str, even_opt='first', recalc = True) -> float:
         """Method for calculating the area-average of a parameter, "param"
         
-        param can be anything MIDAS outputs, but usually of interest are "alpha" or "alpha_ug"
-        If you're not sure what somethings named, try Condition.phi[90][1.0].keys()
+        Inputs:
+         - param, string of local parameter to area-average
+         - even_opt, passed to integration method
+         - recalc, if area-average previously calculated, it was stored in a dictionary, and can just pull from there
 
-        Uses Simpson's rule for integration, even_opt passed to that. Will save the previously calculated area averages 
-        in Condition.area_avgs[param], and won't recalculate unless recalc = True
-
-        Returns the area-averaged parameter, or None if the method failed
-
+        Returns:
+         - Area-averaged parameter, or None if the method failed
+        
+        Uses Simpson's rule for integration, specifically scipy.integrate.simpsons
+        
         """
         
         # Check that the parameter that the user requested exists
@@ -1236,14 +1338,18 @@ class Condition:
         return I
 
     def circ_segment_area_avg(self, param:str, hstar:float, ngridr=25, ngridphi=25, int_err = 10**-4) -> float:
-        """Method for calculating the area-average of a parameter, "param" over the circular segment defined by h
+        """Method for calculating the area-average of a parameter, "param" in some circular segment defined by :math:`h^*`
         
-        Basically, if you slice the pipe at h, area average everything above h
+        Inputs:
+         - param, string of local parameter to area-average
+         - hstar, distance from the top of the pipe that defines circular segment
+         - int_err, acceptable warning for integral error (passed to scipy.integrate.dblquad)
 
-        to smooth it out, integrate over an interpolated mesh
-
-        returns integrand result
-
+        Returns:
+         - Area-averaged parameter, or None if the method failed
+        
+        Uses scipy.integrate.dblquad. May be computationally expensive
+        
         """
 
         # Check that the parameter that the user requested exists
@@ -1275,7 +1381,7 @@ class Condition:
         phis = np.asarray(phis)
         vals = np.asarray(vals)   
 
-        interp = interpolate.LinearNDInterpolator(list(zip(rs, phis)), vals)
+        interp = interpolate.LinearNDInterpolator(list(zip(rs, phis)), vals) # TODO refactor to use __call__
 
         # To integrate, need to get the bounds. They're different depending on if h* > 1
         def lower_r_bound_pos(phi):
@@ -1298,14 +1404,18 @@ class Condition:
         return I
 
     def circ_segment_void_area_avg(self, param:str, hstar:float, ngridr=25, ngridphi=25, int_err = 10**-4) -> float:
-        """Method for calculating the void-weighted area-average of a parameter over the circular segment defined by h
+        """Method for calculating the void-weighted area-average of a parameter, "param" in some circular segment defined by :math:`h^*`
         
-        Basically, if you slice the pipe at h, void-weighted area average everything above h
+        Inputs:
+         - param, string of local parameter to area-average
+         - hstar, distance from the top of the pipe that defines circular segment
+         - int_err, acceptable warning for integral error (passed to scipy.integrate.dblquad)
+
+        Returns:
+         - Void-weighted rea-averaged parameter, or None if the method failed
         
-        to smooth it out, integrate over an interpolated mesh
-
-        returns integrand result
-
+        Uses scipy.integrate.dblquad. May be computationally expensive
+        
         """
 
         # Check that the parameter that the user requested exists
@@ -1361,12 +1471,18 @@ class Condition:
         return I
 
     def line_avg(self, param:str, phi_angle:float, even_opt='first') -> float:
-        """Line average of param over line defined by phi_angle
+        """Method for calculating the average value of param across a diameter defined by φ = angle
         
-        Also includes the complementary angle, so the line is a diameter of the pipe
+        Inputs:
+         - param, string of local parameter to area-average
+         - phi_angle, angle to define diameter to integrate across
+         - even_opt, see :any:area_avg
 
-        returns integrand result
-
+        Returns:
+         - Average value of param along φ = angle
+        
+        Uses scipy.integrate.simpsons
+        
         """
 
         # Check that the parameter that the user requested exists
@@ -1413,14 +1529,20 @@ class Condition:
         return I
 
     def line_avg_dev(self, param:str, phi_angle:float, even_opt='first') -> float:
-        """Second moment of param over line defined by phi_angle
+        """Method for calculating the average value of param across a diameter defined by φ = angle
         
-        Also includes the complementary angle, so the line is a diameter of the pipe
+        Inputs:
+         - param, string of local parameter to calculate line average deviation
+         - phi_angle, angle to define diameter to integrate across
+         - even_opt, see :any:area_avg
 
-        < param - <param>^2 > / <param>^2
+        Returns:
+         - integrand result
+        
+        Taking param = :math:`\\psi`, mathematically, this function does
 
-        returns integrand result
-
+        .. math:: \\frac{\\langle \\psi - \\langle \\psi^2 \\rangle  \\rangle }{\\langle \\psi \\rangle^2}
+        
         """
 
         # Check that the parameter that the user requested exists
@@ -1468,10 +1590,18 @@ class Condition:
 
 
     def void_area_avg(self, param: str, even_opt='first') -> float:
-        """Method for calculating the void-weighted area-average of a parameter
+        """Method for calculating the void-weighted area-average of a parameter, "param"
         
-        <alpha * param> / <alpha>
+        Inputs:
+         - param, string of local parameter to area-average
+         - even_opt, passed to integration method
+         - recalc, if area-average previously calculated, it was stored in a dictionary, and can just pull from there
 
+        Returns:
+         - void-weighted area-averaged parameter, or None if the method failed
+        
+        Uses Simpson's rule for integration, specifically scipy.integrate.simpsons
+        
         """
 
         # Check that the parameter that the user requested exists
@@ -1525,9 +1655,20 @@ class Condition:
         return I
     
     def interp_area_avg(self, param:str, interp_type = 'linear') -> float:
-        """Function to area-average param, using the spline interpolation of param
+        """Method for calculating the area-average of a parameter, "param", based on an interpolation of the data
+        
+        Inputs:
+         - param, string of local parameter to area-average
+         - interp_type, option for what kind of interpolation to use
 
-        Returns the intengrand result. May be computationally expensive
+        Options for interp_type:
+         - linear, see :any:`fit_linear_interp`
+         - spline, see :any:`fit_spline`
+
+        Returns:
+         - area-averaged parameter
+        
+        Uses scipy.integrate.dblquad, may be computationally expensive
         
         """
 
@@ -1540,7 +1681,7 @@ class Condition:
         
         elif interp_type == 'linear':
             if param not in self.linear_interp.keys():
-                self.calc_linear_interp(param)
+                self.fit_linear_interp(param)
 
             def integrand(phi, r):
                 return self.linear_interp[param](phi, r) * r
@@ -1549,9 +1690,10 @@ class Condition:
         return I
 
     def spline_void_area_avg(self, param:str) -> float:
-        """Function to void-weighted area-average param over a circular segment defined by h, using the spline interpolation of param
+        """Function to void-weighted area-average param based on a spline interpolation
 
-        Returns the intengrand result. May be computationally expensive
+        Inputs:
+         - param, string of local parameter to area-average
         
         """
 
@@ -1565,9 +1707,17 @@ class Condition:
         return I
     
     def spline_circ_seg_area_avg(self, param:str, hstar:float, int_err = 10**-4) -> float:
-        """Function to area-average over a circular segment defined by h, using the spline interpolation of param
+        """Function to area-average over a circular segment using the spline interpolation of param
 
-        Returns the intengrand result. May be computationally expensive
+        Inputs:
+         - param, string of local parameter to area-average
+         - hstar, distance from the top of the pipe that defines circular segment
+         - int_err, acceptable warning for integral error (passed to scipy.integrate.dblquad)
+
+        Returns:
+         - integrand result
+
+        Uses scipy.integrate.dblquad. May be computationally expensive
         
         """
 
@@ -1596,9 +1746,18 @@ class Condition:
     def calc_void_cov(self):
         """Calculates the void covariance
 
-        Returns <alpha^2>/<alpha>^2
+        Inputs:
+         - None
 
-        Stored in self.void_cov
+        Stores:
+         - "void_cov" in self
+
+        Returns:
+         - void covariance
+
+        Mathematically performing the operation
+        
+        .. math:: \\frac{\\langle \\alpha^2 \\rangle }{\\langle \\alpha \\rangle^2}
         
         """
 
@@ -1637,9 +1796,18 @@ class Condition:
     def calc_sigma_alpha(self):
         """Calculates the second moment of alpha
 
-        Returns <(alpha-<alpha>)^2>/<alpha>^2
+        Inputs:
+         - None
 
-        Stored in self.sigma_alpha
+        Stores:
+         - "sigma_alpha" in self
+
+        Returns:
+         - second moment of :math:`alpha`
+
+        Mathematically performing the operation
+
+        .. math:: \\frac{\\langle (\\alpha - \\langle \\alpha \\rangle)^2 \\rangle }{\\langle \\alpha \\rangle^2}
         
         """
 
@@ -1681,9 +1849,18 @@ class Condition:
     def calc_mu3_alpha(self):
         """Calculates the third moment of alpha
 
-        Returns <(alpha-<alpha>)^3>/<alpha>^3
+        Inputs:
+         - None
 
-        Stored in self.mu3_alpha
+        Stores:
+         - "mu3_alpha" in self
+
+        Returns:
+         - Third moment of :math:`alpha`
+
+        Mathematically performing the operation
+
+        .. math:: \\frac{\\langle (\\alpha - \\langle \\alpha \\rangle)^3 \\rangle }{\\langle \\alpha \\rangle^3}
         
         """
 
@@ -1780,22 +1957,21 @@ class Condition:
         return I
 
     def calc_dpdz(self, method = 'LM', m = 0.316, n = 0.25, LM_C = 25, k_m = 0.10, L = 9999):
-        """
-        Calculates the pressure gradient, dp/dz, according to various methods. Can access later with self.dpdz
+        """ Calculates the pressure gradient, dp/dz, according to various methods. Can access later with self.dpdz
 
-        Inputs:
-            > method    : Calculation method
-                > 'LM'  : Lockhart Martinelli, assuming turbulent-turbulent, C = LM_C
-                > 'Kim' : Kim-modified Lockhart Martinelli
-            > rho_f     : Liquid phase density
-            > rho_g     : Gas phase density
-            > mu_f      : Liquid phase dynamic viscosity
-            > mu_g      : Gas phase dynamic viscosity
-            > m         : Blasius formulation coefficient (Darcy friction factor)
-            > n         : Blasius formulation coefficient (Darcy friction factor)
-            > LM_C      : Chisholm parameter
-            > k_m       : Minor loss coefficient
-            > L         : Length of restriction, only matters for 'Kim' method
+        Options:
+            - method    : Calculation method
+              > 'LM'  : Lockhart Martinelli, assuming turbulent-turbulent, C = LM_C
+              > 'Kim' : Kim-modified Lockhart Martinelli
+            - rho_f     : Liquid phase density
+            - rho_g     : Gas phase density
+            - mu_f      : Liquid phase dynamic viscosity
+            - mu_g      : Gas phase dynamic viscosity
+            - m         : Blasius formulation coefficient (Darcy friction factor)
+            - n         : Blasius formulation coefficient (Darcy friction factor)
+            - LM_C      : Chisholm parameter
+            - k_m       : Minor loss coefficient
+            - L         : Length of restriction, only matters for 'Kim' method
 
         """
         
@@ -1806,12 +1982,16 @@ class Condition:
             f_f = m / Re_f**n
             f_g = m / Re_g**n
 
+            dpdz_f = f_f * 1/self.Dh * self.rho_f * self.jf**2 / 2
+            dpdz_g = f_g * 1/self.Dh * self.rho_g * self.jgloc**2 / 2
+            chi2 = dpdz_f / dpdz_g
+
             phi_f2 = 1 + LM_C/np.sqrt(chi2) + 1 / chi2
             dpdz = phi_f2 * dpdz_f
 
         elif method == 'Kim':
-            Re_f = rho_f * self.jf * self.Dh / self.mu_f
-            Re_g = rho_g * self.jgloc * self.Dh / self.mu_g
+            Re_f = self.rho_f * self.jf * self.Dh / self.mu_f
+            Re_g = self.rho_g * self.jgloc * self.Dh / self.mu_g
 
             f_f = m / Re_f**n
             f_g = m / Re_g**n
@@ -1845,8 +2025,21 @@ class Condition:
         return self.jgloc / self.area_avg('alpha')
     
     def calc_W(self):
-        """Calculates the wake deficit function, W, from the experimental data
+        """Calculates the third moment of alpha
 
+        Inputs:
+         - None
+
+        Stores:
+         - "W" in midas_dict
+
+        Returns:
+         - Area-average W
+
+        Mathematically performing the operation
+
+        .. math:: W = \\frac{v_r}{v_f}
+        
         """
 
         for angle, r_dict in self.phi.items():
@@ -1868,58 +2061,68 @@ class Condition:
                         'W' : midas_dict['vr'] / vfp
                     })
 
-        return
+        return self.area_avg('W')
     
     def calc_mu_eff(self, method='Ishii', alpha_max = 1.0):
-        """Method for calculating effective viscosity. 
+        """Method for effective/mixture viscosity
         
-        Also calculates mixture viscosity, stored in μ_eff and μ_m, resepectively. 
-        Note that this fuction does mirror the data
+        Inputs:
+         - method, what method to use for modeling :math:`\\mu_{eff}`
+         - alpha_max, parameter for some models
+        
+        Stores:
+         - "mu_eff" in midas_dict 
+         - "mu_m" in midas_dict
 
-        Right now the only method implemented is Ishii's
+        Options for method:
+         - Ishii, :math:`\\mu_{eff} = \\mu_{m} = \\mu_{f} (1 - \\frac{\\alpha}{ \\alpha_{max} })^{-2.5 \\alpha_{max} \\frac{\\mu_g + 0.4 \\mu_g}{\\mu_g + \\mu_g} }`
+         - Ishii_AA, :math:`\\mu_{eff} = \\mu_{m} = \\mu_{f} (1 - \\frac{\\langle \\alpha \\rangle}{ \\alpha_{max} })^{-2.5 \\alpha_{max} \\frac{\\mu_g + 0.4 \\mu_g}{\\mu_g + \\mu_g} }`
+
+        Returns:
+         - area average effective viscosity
 
         """
 
         self.mirror()
+        alpha_avg = self.area_avg('alpha')
                 
         for angle, r_dict in self.phi.items():
             for rstar, midas_dict in r_dict.items():
 
-                if method == 'Ishii':
+                if method.lower() == 'ishii':
                     mu_m = self.mu_f * (1 - midas_dict['alpha'] / alpha_max)**(-2.5*alpha_max * (self.mu_g + 0.4*self.mu_f) / (self.mu_g + self.mu_f)  )
                     mu_eff = mu_m
 
                     midas_dict.update({'mu_m': mu_eff})
+                elif method.lower() == 'ishii_AA':
+                    mu_m = self.mu_f * (1 - alpha_avg / alpha_max)**(-2.5*alpha_max * (self.mu_g + 0.4*self.mu_f) / (self.mu_g + self.mu_f)  )
+                
+                elif method.lower() == 'avg_void':
+                    mu_m = self.mu_f / (1 - alpha_avg)
 
                 midas_dict.update({'mu_eff': mu_eff})
 
-        return
+        return self.area_avg('mu_eff')
     
-    # Test different ways of calculating mixture viscosity, 05/15 Quan
-    def calc_mu_eff1(self, method='Ishii', alpha_max = 1.0): 
-        """Method for calculating mixture viscosity using averaged void fraction. 
-        Method from ishii & Zuber 91979) paper
-        """
-
-        alpha_avg = self.area_avg('alpha')
-                
-        if method == 'Ishii':
-            mu_m = self.mu_f * (1 - alpha_avg / alpha_max)**(-2.5*alpha_max * (self.mu_g + 0.4*self.mu_f) / (self.mu_g + self.mu_f)  )
-            mu_eff1 = mu_m
-        else:
-            mu_m = self.mu_f / (1 - alpha_avg)                        
-        return mu_eff1
-    
-    def calc_cd(self, method='Ishii-Zuber', vr_cheat = False):
+    def calc_cd(self, method='Ishii-Zuber', vr_cheat = False, limit = None):
         """ Method for calculating drag coefficient 
         
-        If vr = 0, assume cd = 0
-
-        Options are Ishii-Zuber and Schiller-Naumann, but both use
-        Reb = (1 - midas_dict['alpha']) * midas_dict['Dsm1'] * rho_f * midas_dict['vr'] / midas_dict['mu_m']\
+        Inputs:
+         - method, what method to use for modeling :math:`C_{D}`
+         - vr_cheat, flag to use "vr" from midas_dict or "vr_model" when calculating :math:`Re_{b}`
+         - limit, if supplied, will limit the drag coefficient to the given maximum value. For instance, 0.44 like in CFX
         
-        vr from calc_vr()
-        mu_m from calc_mu_eff()
+        Stores:
+         - "cd" in midas_dict 
+         - "Reb" in midas_dict. Calculated by :math:`Re_{b} = \\frac{(1 - \\alpha) \\rho_{f} v_{r} D_{sm,1} }{\\mu_{m}}`. \ 
+:math:`\\mu_{m}` comes from :any:`calc_mu_eff`
+
+        Options for method:
+         - Ishii-Zuber, :math:`C_{D} = \\frac{24}{Re_{b}} (1 + 0.1 Re_{b}^{0.75})`
+         - Schiller-Naumann, :math:`C_{D} = \\frac{24}{Re_{b}} (1 + 0.15 Re_{b}^{0.687})`. Here, :math:`Re_{b}` uses :math:`\\mu_{f}`
+
+        Returns:
+         - area average drag coefficient
 
         """
 
@@ -1933,15 +2136,11 @@ class Condition:
                 else:
 
                     if 'vr_model' not in midas_dict.keys(): # Initialize for iteration
-                        midas_dict.update(
-                            {'vr_model': -1}
-                        )
+                        midas_dict.update({'vr_model': -1})
 
                     Reb = (1 - midas_dict['alpha']) * midas_dict['Dsm1'] * self.rho_f * abs(midas_dict['vr_model']) / midas_dict['mu_m']
 
-                midas_dict.update(
-                        {'Reb': Reb}
-                    )
+                midas_dict.update({'Reb': Reb})
 
                 if method == 'Ishii-Zuber' or method == 'IZ' or method == 'Ishii':
 
@@ -1950,54 +2149,41 @@ class Condition:
                     else:
                         cd = 0
 
-                    midas_dict.update(
-                        {'cd': cd}
-                    )
-
-                elif method == 'Ishii-Zuber-limited':
-
-                    if Reb > 0:
-                        cd = max(0.44, 24/Reb * (1 + 0.1*Reb**0.75))
-                    else:
-                        cd = 0
-
-                    midas_dict.update(
-                        {'cd': cd}
-                    )
-
-                elif method == 'Schiller-Naumann-limited':
-                    cd = max(0.44, 24/Reb * (1 + 0.15*Reb**0.687))
-
-                    midas_dict.update(
-                        {'cd': cd}
-                    )
-
                 elif method == 'Schiller-Naumann':
                     Reb = (1 - midas_dict['alpha']) * midas_dict['Dsm1'] * self.rho_f * abs(midas_dict['vr_model']) / self.mu_f
 
                     cd = 24/Reb * (1 + 0.15*Reb**0.687)
 
-                    midas_dict.update(
-                        {'cd': cd}
-                    )
+                if limit is not None:
+                    cd = max(limit, cd)
+                midas_dict.update({'cd': cd})
 
-        return
+        return self.area_avg('cd')
 
-    def calc_vr_model(self, method='wake_1', kw = -0.15, n=1, Lw = 5, kf = 0.1, iterate_cd = True, quiet = True):
+    def calc_vr_model(self, method='km1_simp', kw = -0.98, n=1, Lw = 5, kf = 0.089, iterate_cd = True, quiet = True):
         """Method for calculating relative velocity based on models
         
-        Stored under "vr_method" in midas_dict as well as "vr_model"
+        Inputs:
+         - method, what method to use for modeling :math:`v_{r}`
+         - kw, wake coeffieient for some models
+         - n, exponent for some models
+         - Lw, really :math:`L_{w}^{*}`, effective wake length divided by the bubble diameter
+         - kf, fluid coefficient for some models
+         - iterate_cd, flag to pass to :any:`calc_cd`. Basically whether to iterate to calculate :math:`C_{D}` based on \
+the newly calculated :math:`v_{r}` or not
+         - quiet, flag for extra debugging messages
+        
+        Stores:
+         - "vr_'method_name'" in midas_dict 
+         - "vr_model" in midas_dict 
 
-        TODO implement Ishii-Chawla
+        Options for method:
+         - "km1_simp", most up to date :math:`v_{r} = K_{f} - K_{w}  \\alpha  v_{f}  C_{d}^{1/3}`
+         - "Ishii-Chawla", :math:`v_{r} = \\sqrt{2} (\\frac{\\sigma g \\Delta \\rho}{\\rho_{f}^{2}})^{1/4}`
+         - A bunch of obsolete ones that I haven't deleted but probably should
 
-        Implemented options:
-        - "wake_1" vr = - kw * vf * Cd**(1./3)
-        - "wake_alpha" vr = - kw * (1-α)^n * vf * Cd**(1./3)
-        - "wake_alpha2" vr = - kw *  (α*(1-α))^n * vf * Cd**(1./3)
-        - "wake_lambda" = - kw * vf * Cd**(1./3) * Db**(2./3) * λ**(-2./3)
-
-        Lw really Lw*, effective wake length divided by the bubble diameter
-
+        Returns:
+         - area average relative velocity calculated by the model
 
         """
 
@@ -2070,6 +2256,9 @@ class Condition:
 
                         if abs(angle - self.random_point[0] ) < 0.001 and abs(rstar - self.random_point[1] ) < 0.001:
                             print(self.random_point, (0.5 - Lw), kw * midas_dict['alpha']**n *midas_dict['cd']**(1./3) *(np.pi/4)**(1/3)* (0.5**(1./3) - Lw**(1/3)) )
+
+                    elif method.lower() == 'ishii-chawla' or method.lower() == 'ishii' or method.lower() == 'ishii chawla':
+                        vr = np.sqrt(2) * (self.sigma * self.g * (self.rho_f - self.rho_g) / (self.rho_f**2))**0.25
                     
                     else:
                         print(f"{method} not implemented")
@@ -2091,12 +2280,15 @@ class Condition:
                 if not quiet:
                     print(f"vr_model converged in {iterations} iterations")
                     print(old_vr, self.area_avg('vr_model', recalc=True))
-                return
+                return self.area_avg("vr_model")
             
             if iterations > MAX_ITERATIONS:
                 print("Warning, max iterations exceeded in calculating vr_model")
                 print(f"{old_vr - self.area_avg('vr_model', recalc=True)}")
                 return
+            
+        
+        return self.area_avg("vr_model")
 
             
     def calc_vgj_model(self):
@@ -2136,7 +2328,7 @@ class Condition:
         Stores:
          - error, "eps_param1_param2", param1 - param2
          - relative, "eps_rel_param1_param2", (param1 - param2) / param2
-         - absolute relative, "eps_abs_rel_param1_param2", |param1 - param2| / param2
+         - absolute relative, "eps_abs_rel_param1_param2", | param1 - param2 | / param2
          - square, "eps_sq_param1_param2", (param1 - param2)**2
          - relative square, "eps_rel_sq_param1_param2", ((param1 - param2)/param2)**2
 
@@ -2167,18 +2359,29 @@ class Condition:
         return
 
     def calc_avg_lat_sep(self):
-        """ Calculates average lateral separation distance between bubbles
+        """Calculates average lateral separation distance between bubbles
+
+        Inputs:
+         - None
+
+        Stores:
+         - "lambda" in midas_dict
+         - "lambda*" in midas_dict
+         - "alpha_lambda" in midas_dict
+
+        Returns:
+         - Area-average :math:`\\lambda`
+
+        Assuming
+
+        .. math:: \\lambda = \\frac{v_g}{f}
+
+        Where :math:`f` is the bubble frequency. Also estimates the void fraction based on this :math:`\\lambda`,
+
+        .. math:: \\alpha = \\frac{D_{sm,1}}{\\lambda}
         
-        Average lateral separation, λ given by
-        λ = ugl / f
-
-        stores in midas dict under lambda. Also estimates α based on λ,
-
-        α ~ Db / λ
-
-        Mirrors the data
-
         """
+
         self.mirror()
 
         for angle, r_dict in self.phi.items():
@@ -2193,7 +2396,7 @@ class Condition:
                     midas_dict['lambda*'] = np.inf
                     midas_dict['alpha_lambda'] = 0
 
-        return
+        return self.area_avg('lambda')
     
 
     def calc_COV_RC(self, alpha_max = 0.75, alpha_cr = 1.00):
@@ -2905,10 +3108,17 @@ class Condition:
     def rough_FR_ID(self) -> None:
         """Identifies the flow regime for the given condition, by some rough methods
 
+        Inputs:
+         - None
+
+        Stores:
+         - "FR" in self
+
+        Returns:
+         - FR
+
         First checks if it matches any given by previous researchers, or the hierarchical
         clustering algorithm results
-
-        Stored in self.FR
 
         1 = bubbly
         2 = plug
@@ -3494,12 +3704,17 @@ class Condition:
                 self.FR = 2
         
         #print(f"Warning: Flow regime not accurately identified for {self.name}, defaulting to {self.FR}")
-        return
+        return self.FR
 
     def TD_FR_ID(self) -> None:
+        """ This function estimates the flow regime based on Taitel and Dukler's method
+
+        Not implemented yet
+        
+        """
         #dpdxL
 
-        return
+        return self.FR
 
 
 def color_cycle():

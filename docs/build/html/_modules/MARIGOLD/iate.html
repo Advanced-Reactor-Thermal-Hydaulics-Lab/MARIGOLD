@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MARIGOLD.iate &mdash; MARIGOLD 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=d45e8c67"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            MARIGOLD
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../MARIGOLD.html">MARIGOLD package</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../MARIGOLD.html">MARIGOLD package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">MARIGOLD</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">MARIGOLD.iate</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for MARIGOLD.iate</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">.config</span> <span class="kn">import</span> <span class="o">*</span>
+
+<div class="viewcode-block" id="iate">
+<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.iate.iate">[docs]</a>
+<span class="k">def</span> <span class="nf">iate</span><span class="p">(</span><span class="n">cond</span><span class="p">,</span> <span class="n">query</span><span class="p">,</span> <span class="n">z_step</span> <span class="o">=</span> <span class="mf">0.01</span><span class="p">,</span>
+         <span class="n">dpdz_method</span> <span class="o">=</span> <span class="s1">&#39;LM&#39;</span><span class="p">,</span> <span class="n">void_method</span> <span class="o">=</span> <span class="s1">&#39;driftflux&#39;</span><span class="p">,</span> <span class="n">mueff_method</span> <span class="o">=</span> <span class="s1">&#39;ishii&#39;</span><span class="p">,</span> <span class="n">cd_method</span> <span class="o">=</span> <span class="s1">&#39;doe&#39;</span><span class="p">,</span>  <span class="c1"># Method arguments</span>
+         <span class="n">LM_C</span> <span class="o">=</span> <span class="mi">40</span><span class="p">,</span> <span class="n">k_m</span> <span class="o">=</span> <span class="mf">0.40</span><span class="p">,</span> <span class="n">LoverD_restriction</span> <span class="o">=</span> <span class="mi">9999</span><span class="p">,</span>                                          <span class="c1"># Pressure drop calculation arguments</span>
+         <span class="n">cheat</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">elbow</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">quarantine</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>                                           <span class="c1"># Temporary arguments, fix later</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Calculate the area-averaged interfacial area concentration at query location based on the 1G IATE</span>
+
+<span class="sd">    Version History:</span>
+<span class="sd">        &gt; v1: Pressure cheating, jgref substitute for jgatm</span>
+<span class="sd">        &gt; v2: MG update, pressure retrieval, jgatm retrieval</span>
+<span class="sd">        &gt; v3: Yadav methods, incorporation of COV terms, support for elbows, VU, VD, horizontal</span>
+<span class="sd">    </span>
+<span class="sd">    Inputs:</span>
+<span class="sd">        &gt; cond:             Condition object, part of MARIGOLD framework</span>
+<span class="sd">        &gt; query:            L/D endpoint</span>
+<span class="sd">        &gt; z_step:           Axial mesh cell size [-]</span>
+<span class="sd">        &gt; void_method:      Void fraction prediction method, &#39;driftflux&#39; or &#39;continuity&#39;</span>
+
+<span class="sd">    Notes:</span>
+<span class="sd">        &gt; IATE coefficients are currently set to default values depending on geometry</span>
+<span class="sd">            &gt; Probably want to make these all optional arguments, set default values for 90 straight pipe, and input other values for different geometries outside of IATE function</span>
+<span class="sd">            &gt; Same goes for COV models?</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># MARIGOLD retrieval</span>
+    <span class="n">theta</span>           <span class="o">=</span> <span class="n">cond</span><span class="o">.</span><span class="n">theta</span>                                <span class="c1"># Pipe inclination angle</span>
+    <span class="n">Dh</span>              <span class="o">=</span> <span class="n">cond</span><span class="o">.</span><span class="n">Dh</span>                                   <span class="c1"># Hydraulic diameter</span>
+    <span class="n">LoverD</span>          <span class="o">=</span> <span class="n">cond</span><span class="o">.</span><span class="n">LoverD</span>                               <span class="c1"># Condition L/D</span>
+
+    <span class="c1"># Yadav</span>
+    <span class="n">RoverD</span> <span class="o">=</span> <span class="mi">9</span>      <span class="c1"># Make into optional input</span>
+    <span class="n">R_curv</span>          <span class="o">=</span> <span class="n">RoverD</span> <span class="o">*</span> <span class="n">Dh</span>                               <span class="c1"># Radius of curvature of elbow/bend</span>
+
+    <span class="c1"># May want to include arc of the bend?</span>
+    <span class="c1"># Ah, yes</span>
+    <span class="n">L_elb</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span> <span class="o">*</span> <span class="n">R_curv</span>        <span class="c1"># This assumes 90\degree elbow</span>
+    <span class="c1"># So, Yadav defines under Expcond.m the length of the vertical section -- I think this is how he toggles between VU, H, VD, elbow</span>
+    <span class="c1"># Instead, we probably would want to have an input switch indicating which mode of IATE we&#39;re executing</span>
+
+    <span class="c1">############################################################################################################################</span>
+    <span class="c1">#                                                                                                                          #</span>
+    <span class="c1">#                                                       CONSTANTS                                                          #</span>
+    <span class="c1">#                                                                                                                          #</span>
+    <span class="c1">############################################################################################################################</span>
+    <span class="c1"># expcond.m</span>
+
+    <span class="n">p_atm</span>           <span class="o">=</span> <span class="mi">101325</span>                                    <span class="c1"># Ambient pressure [Pa]</span>
+    <span class="n">rho_f</span>           <span class="o">=</span> <span class="mf">998.0</span>                                     <span class="c1"># Liquid phase density [kg/m**3]</span>
+    <span class="n">rho_g</span>           <span class="o">=</span> <span class="mf">1.204</span>                                     <span class="c1"># Gas phase density [kg/m**3]</span>
+    <span class="n">mu_f</span>            <span class="o">=</span> <span class="mf">0.001002</span>                                  <span class="c1"># Viscosity of water [Pa-s]</span>
+    <span class="n">sigma</span>           <span class="o">=</span> <span class="mf">0.0728</span>                                    <span class="c1"># Surface tension of air/water [N/m]</span>
+    <span class="n">grav</span>            <span class="o">=</span> <span class="mf">9.81</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">((</span><span class="n">theta</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">180</span><span class="p">)</span>            <span class="c1"># Gravity constant (added by Drew to account for pipe inclination)</span>
+
+    <span class="c1"># Worosz</span>
+    <span class="n">R_spec</span>          <span class="o">=</span> <span class="mf">287.058</span>                                   <span class="c1"># Specific gas constant for dry air [J/kg-K]</span>
+    <span class="n">T</span>               <span class="o">=</span> <span class="mf">293.15</span>                                    <span class="c1"># Ambient absolute temperature [K], for calculating air density as a function of pressure along channel</span>
+    
+    <span class="c1">############################################################################################################################</span>
+    <span class="c1">#                                                                                                                          #</span>
+    <span class="c1">#                                                      COEFFICIENTS                                                        #</span>
+    <span class="c1">#                                                                                                                          #</span>
+    <span class="c1">############################################################################################################################</span>
+    <span class="c1"># coeff.m</span>
+    
+    <span class="n">C_WE</span>            <span class="o">=</span> <span class="mf">0.002</span>                                     <span class="c1"># Wake entrainment coefficient, Talley</span>
+    <span class="n">C_RC</span>            <span class="o">=</span> <span class="mf">0.004</span>                                     <span class="c1"># Random collision coefficient</span>
+    <span class="n">C_TI</span>            <span class="o">=</span> <span class="mf">0.085</span>                                     <span class="c1"># Turbulent impact coefficient</span>
+    
+    <span class="n">alpha_max</span>       <span class="o">=</span> <span class="mf">0.75</span>
+    <span class="n">C</span>               <span class="o">=</span> <span class="mi">3</span>                                         <span class="c1"># What is this</span>
+    <span class="n">We_cr</span>           <span class="o">=</span> <span class="mi">6</span>                                         <span class="c1"># Weber number criterion</span>
+
+    <span class="n">acrit_flag</span>      <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">acrit</span>           <span class="o">=</span> <span class="mf">0.13</span>
+    <span class="c1"># C_WE            = 0.004                                     # Wake entrainment coefficient, Worosz</span>
+
+    <span class="n">C0</span>              <span class="o">=</span> <span class="mf">1.20</span>                                      <span class="c1"># Drift Flux Model</span>
+
+    <span class="c1"># Yadav</span>
+    <span class="k">if</span> <span class="n">theta</span> <span class="o">==</span> <span class="mi">90</span> <span class="ow">and</span> <span class="n">elbow</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
+        <span class="n">C_WE</span>        <span class="o">=</span> <span class="mf">0.002</span>
+        <span class="n">C_RC</span>        <span class="o">=</span> <span class="mf">0.004</span>
+        <span class="n">C_TI</span>        <span class="o">=</span> <span class="mf">0.085</span>
+
+        <span class="n">alpha_max</span>   <span class="o">=</span> <span class="mf">0.75</span>
+        <span class="n">C</span>           <span class="o">=</span> <span class="mi">3</span>
+        <span class="n">We_cr</span>       <span class="o">=</span> <span class="mi">6</span>
+
+    <span class="k">elif</span> <span class="n">theta</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">elbow</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
+        <span class="n">C_RC</span>        <span class="o">=</span> <span class="mf">0.003</span>
+        <span class="n">C_TI</span>        <span class="o">=</span> <span class="mf">0.014</span>
+
+        <span class="n">We_cr</span>       <span class="o">=</span> <span class="mi">5</span>
+
+    <span class="k">elif</span> <span class="n">elbow</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">C_RC</span>        <span class="o">=</span> <span class="mf">0.012</span>
+        <span class="n">C_TI</span>        <span class="o">=</span> <span class="mf">0.085</span>
+
+        <span class="n">We_cr</span>       <span class="o">=</span> <span class="mi">6</span>
+        
+        <span class="n">slip</span>        <span class="o">=</span> <span class="mf">0.91</span>                                      <span class="c1"># Slip at port P4 (&lt;&lt;vg&gt;&gt;/&lt;&lt;vf&gt;&gt;)</span>
+        <span class="n">Const1</span>      <span class="o">=</span> <span class="mf">0.05</span>                                      <span class="c1"># Constant in the correlation for velocity</span>
+    
+    <span class="c1">############################################################################################################################</span>
+    <span class="c1">#                                                                                                                          #</span>
+    <span class="c1">#                                                       COVARIANCE                                                         #</span>
+    <span class="c1">#                                                                                                                          #</span>
+    <span class="c1">############################################################################################################################</span>
+    <span class="c1"># COV.m</span>
+
+    <span class="c1"># Yadav</span>
+    <span class="c1"># Temporary, Yadav implemented as a bunch of arrays. There must be a better way to do this.</span>
+    <span class="c1"># calc_void_cov in Condition.py may be useful</span>
+    <span class="k">if</span> <span class="n">theta</span> <span class="o">==</span> <span class="mi">90</span> <span class="ow">and</span> <span class="n">elbow</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
+        <span class="n">COV_RC</span>      <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">COV_TI</span>      <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">elif</span> <span class="n">theta</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">elbow</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
+        <span class="n">COV_RC</span>      <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">COV_TI</span>      <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">elif</span> <span class="n">elbow</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">COV_RC</span>      <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">COV_TI</span>      <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="c1">############################################################################################################################</span>
+    <span class="c1">#                                                                                                                          #</span>
+    <span class="c1">#                                                   BOUNDARY CONDITIONS                                                    #</span>
+    <span class="c1">#                                                                                                                          #</span>
+    <span class="c1">############################################################################################################################</span>
+    <span class="c1"># Mesh generation</span>
+    <span class="k">if</span> <span class="n">query</span> <span class="o">&lt;</span> <span class="n">LoverD</span><span class="o">+</span><span class="n">z_step</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Please choose a query L/D downstream of the boundary condition.&#39;</span><span class="p">)</span>
+    
+    <span class="n">z_mesh</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">LoverD</span><span class="p">,</span> <span class="n">query</span> <span class="o">+</span> <span class="n">z_step</span><span class="p">,</span> <span class="n">z_step</span><span class="p">)</span>          <span class="c1"># Axial mesh [-]</span>
+    <span class="n">z_mesh</span> <span class="o">=</span> <span class="n">z_mesh</span> <span class="o">*</span> <span class="n">Dh</span>                                        <span class="c1"># Axial mesh [m], units necessary for dp calculation</span>
+    <span class="n">z_step</span> <span class="o">=</span> <span class="n">z_step</span> <span class="o">*</span> <span class="n">Dh</span>
+    
+    <span class="c1"># Variable initialization</span>
+    <span class="n">ai</span>              <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">z_mesh</span><span class="p">))</span>
+    <span class="n">alpha</span>           <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">z_mesh</span><span class="p">))</span>
+    <span class="n">Db</span>              <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">z_mesh</span><span class="p">))</span>
+    <span class="n">vgz</span>             <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">z_mesh</span><span class="p">))</span>
+    
+    <span class="n">SWE</span>             <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">z_mesh</span><span class="p">))</span>
+    <span class="n">SRC</span>             <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">z_mesh</span><span class="p">))</span>
+    <span class="n">STI</span>             <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">z_mesh</span><span class="p">))</span>
+    <span class="n">SEXP</span>            <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">z_mesh</span><span class="p">))</span>
+    <span class="n">SVG</span>             <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">z_mesh</span><span class="p">))</span>
+    
+    <span class="n">aiwe</span>            <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">z_mesh</span><span class="p">))</span>
+    <span class="n">airc</span>            <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">z_mesh</span><span class="p">))</span>
+    <span class="n">aiti</span>            <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">z_mesh</span><span class="p">))</span>
+    <span class="n">aiexp</span>           <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">z_mesh</span><span class="p">))</span>
+    <span class="n">aivg</span>            <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">z_mesh</span><span class="p">))</span>
+
+    <span class="n">aiwe</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>         <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">airc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>         <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">aiti</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>         <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">aiexp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>        <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">aivg</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>         <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="c1"># Apply experimental values as boundary conditions at first node </span>
+    <span class="k">if</span> <span class="n">cheat</span><span class="p">:</span>
+        <span class="n">ai</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>       <span class="o">=</span> <span class="n">cond</span><span class="o">.</span><span class="n">area_avg_ai_sheet</span>                    <span class="c1"># [1/m]</span>
+        <span class="n">alpha</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>    <span class="o">=</span> <span class="n">cond</span><span class="o">.</span><span class="n">area_avg_void_sheet</span>                  <span class="c1"># [-]</span>
+        <span class="n">Db</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>       <span class="o">=</span> <span class="mi">6</span> <span class="o">*</span> <span class="n">alpha</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">ai</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>                      <span class="c1"># [m]</span>
+    <span class="k">else</span><span class="p">:</span>    
+        <span class="n">ai</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>       <span class="o">=</span> <span class="n">cond</span><span class="o">.</span><span class="n">area_avg</span><span class="p">(</span><span class="s2">&quot;ai&quot;</span><span class="p">)</span>                       <span class="c1"># [1/m]</span>
+        <span class="n">alpha</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>    <span class="o">=</span> <span class="n">cond</span><span class="o">.</span><span class="n">area_avg</span><span class="p">(</span><span class="s2">&quot;alpha&quot;</span><span class="p">)</span>                    <span class="c1"># [-]</span>
+        <span class="n">Db</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>       <span class="o">=</span> <span class="n">cond</span><span class="o">.</span><span class="n">void_area_avg</span><span class="p">(</span><span class="s2">&quot;Dsm1&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="mi">1000</span>         <span class="c1"># [m]</span>
+    
+    <span class="c1"># Pressure drop [Pa/m]</span>
+    <span class="n">dpdz</span>            <span class="o">=</span> <span class="n">cond</span><span class="o">.</span><span class="n">calc_dpdz</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="n">dpdz_method</span><span class="p">,</span> <span class="n">LM_C</span><span class="o">=</span><span class="n">LM_C</span><span class="p">,</span> <span class="n">k_m</span><span class="o">=</span><span class="n">k_m</span><span class="p">,</span> <span class="n">L</span><span class="o">=</span><span class="p">(</span><span class="n">LoverD_restriction</span><span class="o">*</span><span class="n">Dh</span><span class="p">))</span>
+    
+    <span class="n">jf</span>              <span class="o">=</span> <span class="n">cond</span><span class="o">.</span><span class="n">jf</span>                                   <span class="c1"># [m/s]</span>
+    <span class="n">jgloc</span>           <span class="o">=</span> <span class="n">cond</span><span class="o">.</span><span class="n">jgloc</span>                                <span class="c1"># [m/s]</span>
+
+    <span class="k">if</span> <span class="s1">&#39;jgatm&#39;</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">cond</span><span class="p">):</span>
+        <span class="n">jgatm</span>       <span class="o">=</span> <span class="n">cond</span><span class="o">.</span><span class="n">jgatm</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Warning: jgatm not found. Defaulting to jgref&quot;</span><span class="p">)</span>
+        <span class="n">jgatm</span>       <span class="o">=</span> <span class="n">cond</span><span class="o">.</span><span class="n">jgref</span>
+    
+    <span class="n">p</span>               <span class="o">=</span> <span class="p">(</span><span class="n">jgatm</span> <span class="o">*</span> <span class="n">p_atm</span> <span class="o">/</span> <span class="n">jgloc</span><span class="p">)</span> <span class="o">-</span> <span class="n">p_atm</span>           <span class="c1"># Back-calculate local corrected gauge pressure</span>
+
+	<span class="c1"># Local Pressure along the test section</span>
+    <span class="n">omegaz</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="p">(</span><span class="n">z_mesh</span> <span class="o">-</span> <span class="n">z_mesh</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="nb">abs</span><span class="p">(</span><span class="n">dpdz</span> <span class="o">/</span> <span class="p">(</span><span class="n">p</span> <span class="o">+</span> <span class="n">p_atm</span><span class="p">))</span>
+    <span class="n">pz</span> <span class="o">=</span> <span class="p">(</span><span class="n">p</span> <span class="o">+</span> <span class="n">p_atm</span><span class="p">)</span> <span class="o">*</span> <span class="n">omegaz</span>
+    
+	<span class="c1"># Local gas density along the test section</span>
+    <span class="n">rho_gz</span> <span class="o">=</span> <span class="n">rho_g</span> <span class="o">*</span> <span class="n">pz</span> <span class="o">/</span> <span class="n">p_atm</span>                                 <span class="c1"># Talley</span>
+    <span class="c1"># rho_gz = pz / R_spec / T                                  # Worosz, Ideal Gas Law</span>
+    
+    <span class="c1">############################################################################################################################</span>
+    <span class="c1">#                                                                                                                          #</span>
+    <span class="c1">#                                                           IATE                                                           #</span>
+    <span class="c1">#                                                                                                                          #</span>
+    <span class="c1">############################################################################################################################</span>
+    <span class="c1"># Calculate ai(z) to evaluate the steady state one-dim one-group model</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">z</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">z_mesh</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">z_mesh</span><span class="p">):</span>
+            <span class="k">break</span>
+            
+        <span class="n">jgloc</span> <span class="o">=</span> <span class="n">jgatm</span> <span class="o">*</span> <span class="n">p_atm</span> <span class="o">/</span> <span class="n">pz</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>                           <span class="c1"># Talley used jgP1 and pressure at P1 instead of jgatm and p_atm</span>
+
+        <span class="n">vgz</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">jgloc</span> <span class="o">/</span> <span class="n">alpha</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>                               <span class="c1"># Estimate void weighted velocity</span>
+        <span class="n">vfz</span> <span class="o">=</span> <span class="n">jf</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">alpha</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+        <span class="c1">########################################################################################################################</span>
+        <span class="c1"># Estimate bubble relative velocity &lt;ur&gt; (See Talley, 2012, 4.2.2.6)</span>
+        <span class="n">ur</span> <span class="o">=</span> <span class="mf">0.2</span>        <span class="c1"># Set to constant value of 0.23 m/s by Schilling (2007)</span>
+
+        <span class="k">if</span> <span class="n">cd_method</span> <span class="o">==</span> <span class="s1">&#39;iter&#39;</span><span class="p">:</span>
+            <span class="n">err</span> <span class="o">=</span> <span class="mf">0.1</span>
+            <span class="k">while</span> <span class="nb">abs</span><span class="p">(</span><span class="n">err</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">0.000001</span><span class="p">:</span>
+                <span class="n">ReD</span> <span class="o">=</span> <span class="n">rho_f</span> <span class="o">*</span> <span class="n">ur</span> <span class="o">*</span> <span class="n">Db</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">alpha</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">/</span> <span class="n">mu_f</span>    <span class="c1"># Bubble Reynolds number</span>
+                <span class="n">CDe</span> <span class="o">=</span> <span class="mi">24</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="mf">0.1</span> <span class="o">*</span> <span class="n">ReD</span><span class="o">**</span><span class="mf">0.75</span><span class="p">)</span> <span class="o">/</span> <span class="n">ReD</span>              <span class="c1"># Drag coefficient</span>
+
+                <span class="c1"># Relative velocity (Ishii and Chawla, 1979), implemented by Worosz accounting for density difference</span>
+                <span class="n">ure1</span> <span class="o">=</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">grav</span> <span class="o">*</span> <span class="n">Db</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">rho_f</span> <span class="o">-</span> <span class="n">rho_gz</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">alpha</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">/</span> <span class="mi">3</span> <span class="o">/</span> <span class="n">CDe</span> <span class="o">/</span> <span class="n">rho_f</span><span class="p">)</span><span class="o">**</span><span class="mf">0.5</span>
+                <span class="n">err</span> <span class="o">=</span> <span class="p">(</span><span class="n">ure1</span> <span class="o">-</span> <span class="n">ur</span><span class="p">)</span> <span class="o">/</span> <span class="n">ur</span>
+
+                <span class="n">ur</span> <span class="o">=</span> <span class="n">ure1</span>
+            <span class="n">ReD</span> <span class="o">=</span> <span class="n">rho_f</span> <span class="o">*</span> <span class="n">ur</span> <span class="o">*</span> <span class="n">Db</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">alpha</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">/</span> <span class="n">mu_f</span>        <span class="c1"># Update bubble Reynolds number</span>
+            <span class="n">CDwe</span> <span class="o">=</span> <span class="mi">24</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="mf">0.1</span> <span class="o">*</span> <span class="n">ReD</span><span class="o">**</span><span class="mf">0.75</span><span class="p">)</span> <span class="o">/</span> <span class="n">ReD</span>                 <span class="c1"># Update drag coefficient</span>
+        <span class="k">elif</span> <span class="n">cd_method</span> <span class="o">==</span> <span class="s1">&#39;doe&#39;</span><span class="p">:</span>
+            <span class="c1"># Original DOE_MATLAB_IAC</span>
+            <span class="n">ReD</span> <span class="o">=</span> <span class="n">rho_f</span> <span class="o">*</span> <span class="n">ur</span> <span class="o">*</span> <span class="n">Db</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">alpha</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">/</span> <span class="n">mu_f</span>
+            <span class="n">CDwe</span> <span class="o">=</span> <span class="mi">24</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="mf">0.1</span> <span class="o">*</span> <span class="n">ReD</span><span class="o">**</span><span class="mf">0.75</span><span class="p">)</span> <span class="o">/</span> <span class="n">ReD</span>
+            <span class="n">ur</span> <span class="o">=</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">grav</span> <span class="o">*</span> <span class="n">Db</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">/</span> <span class="mi">3</span> <span class="o">/</span> <span class="n">CDwe</span><span class="p">)</span><span class="o">**</span><span class="mf">0.5</span>                 <span class="c1"># Interestingly, Yadav keeps 9.8 instead of changing grav for angle</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">CDwe</span> <span class="o">=</span> <span class="n">cond</span><span class="o">.</span><span class="n">calc_cd</span><span class="p">(</span><span class="n">cd_method</span><span class="p">)</span>
+            <span class="n">ur</span> <span class="o">=</span> <span class="n">cond</span><span class="o">.</span><span class="n">calc_vr_method</span><span class="p">()</span>
+
+        <span class="c1">########################################################################################################################</span>
+        <span class="c1"># Estimate Energy Dissipation Rate and Turbulent Velocity (See Talley, 2012, 4.2.2.3)</span>
+        <span class="c1">#   &gt; One-group models written using turbulent fluctuation velocity, while models implemented in TRACE are written using</span>
+        <span class="c1">#     dissipation rate</span>
+
+        <span class="k">if</span> <span class="n">mueff_method</span> <span class="o">==</span> <span class="s1">&#39;ishii&#39;</span><span class="p">:</span>
+            <span class="n">cond</span><span class="o">.</span><span class="n">calc_mu_eff</span><span class="p">()</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">mu_m</span> <span class="o">=</span> <span class="n">mu_f</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">alpha</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>                        <span class="c1"># Mixture viscosity</span>
+
+        <span class="n">rho_m</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">alpha</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">*</span> <span class="n">rho_f</span> <span class="o">+</span> <span class="n">alpha</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">rho_gz</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>   <span class="c1"># Mixture density</span>
+
+        <span class="n">vm</span> <span class="o">=</span> <span class="p">(</span><span class="n">rho_f</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">alpha</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">*</span> <span class="n">vfz</span> <span class="o">+</span> <span class="n">rho_gz</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">alpha</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">vgz</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> \
+            <span class="o">/</span> <span class="n">rho_m</span>                                             <span class="c1"># Mixture velocity</span>
+        
+        <span class="c1"># Rem = rho_f * vm * Dh / mu_m                          # Mixture Reynolds number</span>
+        <span class="n">Rem</span> <span class="o">=</span> <span class="n">rho_m</span> <span class="o">*</span> <span class="n">vm</span> <span class="o">*</span> <span class="n">Dh</span> <span class="o">/</span> <span class="n">mu_m</span>                            <span class="c1"># Yadav</span>
+        <span class="n">fTW</span> <span class="o">=</span> <span class="mf">0.316</span> <span class="o">*</span> <span class="p">(</span><span class="n">mu_m</span> <span class="o">/</span> <span class="n">mu_f</span><span class="p">)</span><span class="o">**</span><span class="mf">0.25</span> <span class="o">/</span> <span class="n">Rem</span><span class="o">**</span><span class="mf">0.25</span>           <span class="c1"># Two-phase friction factor</span>
+        <span class="n">e</span> <span class="o">=</span> <span class="n">fTW</span> <span class="o">*</span> <span class="p">(</span><span class="n">vm</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">/</span> <span class="n">Dh</span>                              <span class="c1"># Energy dissipation rate (Wu et al., 1998; Kim, 1999)</span>
+        <span class="n">ut</span> <span class="o">=</span> <span class="mf">1.4</span> <span class="o">*</span> <span class="n">e</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span> <span class="o">*</span> <span class="n">Db</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span>                      <span class="c1"># Turbulent velocity (Batchelor, 1951; Rotta, 1972)</span>
+
+        <span class="c1">########################################################################################################################</span>
+        <span class="c1"># Estimate sources &amp; sinks in the Interfacial Area Transport Eqn. (Part 1)</span>
+
+        <span class="c1"># Sink due to Wake Entrainment</span>
+        <span class="k">if</span> <span class="n">theta</span> <span class="o">==</span> <span class="mi">90</span> <span class="ow">and</span> <span class="n">elbow</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>            
+            <span class="n">SWE</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">C_WE</span> <span class="o">*</span> <span class="n">CDwe</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span> <span class="o">*</span> <span class="n">ur</span> <span class="o">*</span> <span class="n">ai</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="mi">3</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+
+        <span class="k">elif</span> <span class="n">theta</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">elbow</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="n">SWE</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        
+        <span class="k">elif</span> <span class="n">elbow</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">SWE</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+            
+            <span class="k">if</span> <span class="n">quarantine</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
+                <span class="c1"># Yadav calculates vgz differently if solving in elbow region and dissipation length region</span>
+<span class="w">                </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">                beta_diss = 0.18-7.6E-7*Rem  # dissipation coefficient</span>
+<span class="sd">                Sratio = 0.1; # Sratio = S/S0 (strength of elbow effect)</span>
+
+<span class="sd">                # Elbow elbow</span>
+<span class="sd">                vgzP4 = slip*jf/(1-alpha[zstep_v])</span>
+<span class="sd">                </span>
+<span class="sd">                L_D = 0.3156</span>
+<span class="sd">                deltaz = z[i]-z[zstep_v]</span>
+<span class="sd">                slope = (vgzP4-vgz[zstep_v])/L_D</span>
+<span class="sd">                vgz[i] = vgz[zstep_v]+slope*(deltaz)</span>
+<span class="sd">                </span>
+<span class="sd">                # Dissipation elbow</span>
+<span class="sd">                Sratio = np.exp(-beta_diss*(z[i]-z[zstep_v+24])/Dh)</span>
+<span class="sd">                vgz[i] = vgzP4*(1+Const1*np.log(Sratio))</span>
+<span class="sd">                &#39;&#39;&#39;</span>
+        
+        <span class="c1"># Sink due to Random Collisions	</span>
+        <span class="n">RC1</span> <span class="o">=</span> <span class="n">ut</span> <span class="o">*</span> <span class="n">ai</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="n">alpha_max</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">alpha_max</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span> <span class="o">-</span> <span class="n">alpha</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">))</span>
+        <span class="n">RC2</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">C</span> <span class="o">*</span> <span class="n">alpha_max</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span> <span class="o">*</span> <span class="n">alpha</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">alpha_max</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span> <span class="o">-</span> <span class="n">alpha</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">)))</span>
+        <span class="n">SRC</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">COV_RC</span> <span class="o">*</span> <span class="n">C_RC</span> <span class="o">*</span> <span class="n">RC1</span> <span class="o">*</span> <span class="n">RC2</span> <span class="o">/</span> <span class="mi">3</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+        
+        <span class="c1"># Source due to Turbulent Impact</span>
+        <span class="n">TI1</span> <span class="o">=</span> <span class="n">ut</span> <span class="o">*</span> <span class="n">ai</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="n">alpha</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">We</span> <span class="o">=</span> <span class="n">rho_f</span> <span class="o">*</span> <span class="n">ut</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">Db</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">/</span> <span class="n">sigma</span>                      <span class="c1"># Weber number criterion</span>
+
+        <span class="k">if</span> <span class="n">We</span> <span class="o">&gt;</span> <span class="n">We_cr</span><span class="p">:</span>
+            <span class="n">TI2</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">We_cr</span> <span class="o">/</span> <span class="n">We</span><span class="p">)</span><span class="o">**</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">We_cr</span> <span class="o">/</span> <span class="n">We</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">TI2</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">STI</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">COV_TI</span> <span class="o">*</span> <span class="n">C_TI</span> <span class="o">*</span> <span class="n">TI1</span> <span class="o">*</span> <span class="n">TI2</span> <span class="o">/</span> <span class="mi">18</span>
+
+        <span class="c1">########################################################################################################################</span>
+        <span class="c1"># Estimate sources &amp; sinks in the Interfacial Area Transport Eqn. (Part 2)</span>
+
+        <span class="c1"># Source due to Bubble Expansion</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;=</span> <span class="mi">2</span><span class="p">:</span>      <span class="c1"># Previously 3, but in MATLAB (1 indexing vs. 0 indexing)</span>
+            <span class="c1"># Forward difference for first node</span>
+            <span class="n">SEXP</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">2</span> <span class="o">/</span> <span class="mi">3</span> <span class="o">/</span> <span class="n">rho_gz</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">ai</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">vgz</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">rho_gz</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">rho_gz</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">/</span> <span class="n">z_step</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Backwards difference for remaining nodes</span>
+            <span class="n">SEXP</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">2</span> <span class="o">/</span> <span class="mi">3</span> <span class="o">/</span> <span class="n">rho_gz</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">ai</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">vgz</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">rho_gz</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">rho_gz</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="n">z_step</span>
+
+        <span class="c1"># SEXP[i] = -2 / 3 / pz[i] * ai[i] * vgz[i] * (-dpdz)     # Original DOE_MATLAB_IAC</span>
+        
+        <span class="c1"># Source/sink due to Bubble Acceleration (advection in Yadav&#39;s script)</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">dvg</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">dvgdz</span> <span class="o">=</span> <span class="mi">0</span>
+
+            <span class="c1"># dvgdz = dvg / z_step                              # Gonna leave this here for a good chuckle</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">dvg</span> <span class="o">=</span> <span class="n">vgz</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">vgz</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">dvgdz</span> <span class="o">=</span> <span class="n">dvg</span> <span class="o">/</span> <span class="n">z_step</span>
+
+        <span class="n">SVG</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">ai</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">dvgdz</span>
+
+        <span class="c1"># Critical void fraction to shut off turbulence-based mechanisms</span>
+        <span class="k">if</span> <span class="n">acrit_flag</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">alpha</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">acrit</span><span class="p">:</span>
+            <span class="n">STI</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">SRC</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="c1">########################################################################################################################</span>
+        <span class="c1"># Estimate Interfacial Area Concentration at an axial location z</span>
+        <span class="n">ai</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>         <span class="o">=</span> <span class="n">ai</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">z_step</span> <span class="o">*</span> <span class="p">(</span><span class="n">STI</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">SWE</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">SRC</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">SEXP</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">SVG</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">/</span> <span class="n">vgz</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">aiti</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>       <span class="o">=</span> <span class="n">aiti</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">z_step</span> <span class="o">*</span> <span class="n">STI</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">/</span> <span class="n">vgz</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">airc</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>       <span class="o">=</span> <span class="n">airc</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">z_step</span> <span class="o">*</span> <span class="n">SRC</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">/</span> <span class="n">vgz</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">aiexp</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>      <span class="o">=</span> <span class="n">aiexp</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">z_step</span> <span class="o">*</span> <span class="n">SEXP</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">/</span> <span class="n">vgz</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">aiwe</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>       <span class="o">=</span> <span class="n">aiwe</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">z_step</span> <span class="o">*</span> <span class="n">SWE</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">/</span> <span class="n">vgz</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">aivg</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>       <span class="o">=</span> <span class="n">aivg</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">z_step</span> <span class="o">*</span> <span class="n">SVG</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">/</span> <span class="n">vgz</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+        <span class="c1"># Estimate Void Fraction for the next step calculation</span>
+
+        <span class="k">if</span> <span class="n">void_method</span> <span class="o">==</span> <span class="s1">&#39;driftflux&#39;</span><span class="p">:</span>      <span class="c1"># Drift Flux Model</span>
+            <span class="c1"># Currently seems broken</span>
+
+            <span class="n">j</span> <span class="o">=</span> <span class="n">jgloc</span> <span class="o">+</span> <span class="n">jf</span>
+            
+            <span class="c1"># Drift Velocity</span>
+            <span class="c1"># Applicable for void fractions less than 20%; for void fractions greater than 30%, use Kataoka and Ishii 1987 for drift-velocity</span>
+            <span class="n">vgj</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="mf">0.5</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">sigma</span> <span class="o">*</span> <span class="n">grav</span> <span class="o">*</span> <span class="p">(</span><span class="n">rho_f</span> <span class="o">-</span> <span class="n">rho_gz</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">/</span> <span class="p">(</span><span class="n">rho_f</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span><span class="o">**</span><span class="p">(</span><span class="mf">0.25</span><span class="p">)</span>
+            
+            <span class="c1"># C0 = 1.20 - 0.2*((rho_gz[i]/rho_f)**0.5)    # Super tiny number, also Worosz MATLAB script has + instead of -?</span>
+            <span class="c1"># alpha[i+1] = (jgloc) / (C0 * j + vgj)</span>
+
+            <span class="n">alpha</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">jgloc</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">C0</span> <span class="o">*</span> <span class="n">j</span> <span class="o">+</span> <span class="n">vgj</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">alpha</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="o">**</span><span class="p">(</span><span class="mf">1.75</span><span class="p">))</span>            
+
+        <span class="k">elif</span> <span class="n">void_method</span> <span class="o">==</span> <span class="s1">&#39;continuity&#39;</span><span class="p">:</span>   <span class="c1"># Continuity</span>
+
+            <span class="c1"># alpha[i+1] = alpha[i] - alpha[i] / pz[i] * -dpdz * z_step</span>
+
+            <span class="c1"># Yadav</span>
+            <span class="c1"># No discernible difference between this method and original continuity method</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;=</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="c1"># Specific form of continuity not involving velocity gradients to avoid starting issue</span>
+                <span class="n">alpha</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">alpha</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">alpha</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">rho_gz</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">rho_gz</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">/</span> <span class="n">rho_gz</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">alpha</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">alpha</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="p">(</span><span class="n">alpha</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span><span class="n">rho_gz</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">vgz</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span> <span class="o">*</span> <span class="p">((</span><span class="n">rho_gz</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">vgz</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">-</span> <span class="p">(</span><span class="n">rho_gz</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">vgz</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
+
+        <span class="c1"># Estimate Sauter mean diameter for the next step calculation</span>
+        <span class="n">Db</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">6</span> <span class="o">*</span> <span class="n">alpha</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">ai</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+        
+    <span class="k">return</span> <span class="n">z_mesh</span><span class="p">,</span> <span class="n">ai</span><span class="p">,</span> <span class="n">aiti</span><span class="p">,</span> <span class="n">airc</span><span class="p">,</span> <span class="n">aiexp</span><span class="p">,</span> <span class="n">aiwe</span><span class="p">,</span> <span class="n">aivg</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">Db</span><span class="p">,</span> <span class="n">vgz</span><span class="p">,</span> <span class="n">pz</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, adix.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
