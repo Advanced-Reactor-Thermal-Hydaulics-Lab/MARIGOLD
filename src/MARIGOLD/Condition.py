@@ -2197,9 +2197,8 @@ class Condition:
     
 
     def calc_COV_RC(self, alpha_max = 0.75, alpha_cr = 1.00):
-        
         """Calculates the experimental Random Collision Covariance based on Talley (2012) method (with modification factor m_RC eliminated), Quan, 05/15
-        Stored in self.COV_RC
+         - Stored in self.COV_RC
         
         """
      ############################################################################################################################
