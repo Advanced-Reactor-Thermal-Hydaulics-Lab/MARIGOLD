@@ -791,9 +791,14 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                 cond.jgatm = ws['D6'].value
                 
                 ws = wb['2']
-
-                cond.area_avg_void_sheet = ws['G266'].value
-                cond.area_avg_ai_sheet = ws['J266'].value
+                
+                if sheet_type == 'ryan_template':
+                    cond.area_avg_void_sheet = ws['G266'].value
+                    cond.area_avg_ai_sheet = ws['J266'].value
+                    
+                elif sheet_type == 'adix_template' or sheet_type == 'adix_template4':
+                    cond.area_avg_void_sheet = ws['G246'].value
+                    cond.area_avg_ai_sheet = ws['J246'].value
                 
                 for phi, indices in Q1_ranges:
                     for i in indices:
