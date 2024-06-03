@@ -54,10 +54,8 @@ def iate_1d_1g(
      - Modify MG for Yadav data extraction
     """
 
-    boopadoopa = True
-
     # MARIGOLD retrieval
-    if boopadoopa:
+    if cond != None and parcel == None:
         theta       = cond.theta                                # Pipe inclination angle
         Dh          = cond.Dh                                   # Hydraulic diameter
         LoverD      = cond.LoverD                               # Condition L/D
@@ -163,7 +161,7 @@ def iate_1d_1g(
     aiexp           = np.empty(len(z_mesh))
     aivg            = np.empty(len(z_mesh))
 
-    if boopadoopa:
+    if cond != None and parcel == None:
         aiwe[0]     = 0
         airc[0]     = 0
         aiti[0]     = 0
