@@ -490,7 +490,7 @@ facilitytheta = {theta} \n\
 gravy = -9.81 [m s^-2]*cos(facilitytheta* pi / 180) \n\
 gravz = -9.81 [m s^-2]*sin(facilitytheta* pi / 180) \n\
 liquidWEff = (1 - Kf - Kw * gas.Volume Fraction * CD^(1/3) ) * liquid.w \n\
-phi = if(y>0 [m], pi/2+atan(x/y), 3*pi/2+atan(x/y)) \n\
+phi = atan2(y, x) \n\
 radius = sqrt(x^2 + y^2) \n\
 vrNorm = sqrt( (gas.u - liquid.u)^2+ (gas.v - liquid.v)^2+ (gas.w - liquidWEff)^2 ) \n\
 END \n\
