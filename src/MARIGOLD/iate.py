@@ -353,7 +353,6 @@ def iate_1d_1g(
         # Estimate Void Fraction for the next step calculation
 
         if void_method == 'driftflux':      # Drift Flux Model
-            # Currently seems broken
 
             j = jgloc + jf
             
