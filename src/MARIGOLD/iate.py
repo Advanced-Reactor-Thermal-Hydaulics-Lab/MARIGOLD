@@ -178,13 +178,13 @@ def iate_1d_1g(
     ########################################################################################################################
     # Pressure drop [Pa/m]
     if restriction == 'elbow':
-        delta_h = (z_mesh - z_mesh[0]) * Dh * 2 / np.pi         # The height of an elbow is going to be its radius
+        delta_h = (z_mesh - z_mesh[0])      * 2 / np.pi         # The height of an elbow is going to be its radius
 
     elif restriction == 'ubend':
         delta_h = 0
 
     else:
-        delta_h = (z_mesh - z_mesh[0]) * Dh                     # Dissipation region is going to be the same as standard VU
+        delta_h = (z_mesh - z_mesh[0])                          # Dissipation region is going to be the same as standard VU
 
     dpdz = cond.calc_dpdz(
         method = dpdz_method, 
@@ -193,10 +193,6 @@ def iate_1d_1g(
         L = (query - LoverD) * Dh
         ) + (rho_f * grav * delta_h)
 
-    print("grav: ", grav)
-    print("delta_h: ", delta_h)
-    print("dpdz: ", dpdz)
-    
     # Local Pressure along the test section
     p = (jgatm * p_atm / jgloc) - p_atm                         # Back-calculate local corrected gauge pressure
     pz = (p + p_atm) * (1 - (z_mesh - z_mesh[0]) * (dpdz / (p + p_atm)))
