@@ -195,7 +195,7 @@ def iate_1d_1g(
     
     # Local Pressure along the test section
     p = (jgatm * p_atm / jgloc) - p_atm                         # Back-calculate local corrected gauge pressure
-    pz = (p + p_atm) * (1 - (z_mesh - z_mesh[0]) * abs(dpdz / (p + p_atm)))
+    pz = (p + p_atm) * (1 - (z_mesh - z_mesh[0]) * (dpdz / (p + p_atm)))
     
 	# Local gas density along the test section
     rho_gz = rho_g * pz / p_atm                                 # Talley
