@@ -41,6 +41,7 @@ def iate_1d_1g(
 
     Notes:
      - Isn't this script nice and clean? Follow good coding practices, kids. - David
+     - Notice some grav terms are made absolute; needs downward flow fixes
      - IATE coefficients set as optional inputs, with default values set depending on geometry
      - COV terms being implemented in Condition.py, not incorporated into this function yet
      - vgz calculation in elbow and dissipation length regions still need to be implemented
@@ -226,7 +227,7 @@ def iate_1d_1g(
                 CDe = 24 * (1 + 0.1 * ReD**0.75) / ReD              # Drag coefficient
 
                 # Relative velocity (Ishii and Chawla, 1979), implemented by Worosz accounting for density difference
-                ure1 = (4 * grav * Db[i] * (rho_f - rho_gz[i]) * (1 - alpha[i]) / 3 / CDe / rho_f)**0.5
+                ure1 = (4 * abs(grav) * Db[i] * (rho_f - rho_gz[i]) * (1 - alpha[i]) / 3 / CDe / rho_f)**0.5
                 err = (ure1 - ur) / ur
 
                 ur = ure1
@@ -237,7 +238,7 @@ def iate_1d_1g(
             # Original DOE_MATLAB_IAC
             ReD = rho_f * ur * Db[i] * (1 - alpha[i]) / mu_f
             CDwe = 24 * (1 + 0.1 * ReD**0.75) / ReD
-            ur = (4 * grav * Db[i] / 3 / CDwe)**0.5                 # Interestingly, Yadav keeps 9.8 instead of changing grav for angle
+            ur = (4 * abs(grav) * Db[i] / 3 / CDwe)**0.5            # Interestingly, Yadav keeps 9.8 instead of changing grav for angle
 
         ########################################################################################################################
         # Estimate Energy Dissipation Rate and Turbulent Velocity (See Talley, 2012, 4.2.2.3)
@@ -352,7 +353,7 @@ def iate_1d_1g(
             
             # Drift Velocity
             # Applicable for void fractions less than 20%; for void fractions greater than 30%, use Kataoka and Ishii 1987 for drift-velocity
-            vgj = (2**0.5) * (sigma * grav * (rho_f - rho_gz[i]) / (rho_f**2))**0.25 * (1 - alpha[i])**(1.75)
+            vgj = (2**0.5) * (sigma * abs(grav) * (rho_f - rho_gz[i]) / (rho_f**2))**0.25 * (1 - alpha[i])**(1.75)
             
             C0 = C_inf - (C_inf - 1) * np.sqrt(rho_gz[i]/rho_f)     # Round tube drift flux distribution parameter
             # alpha[i+1] = (jgloc) / (C0 * j + vgj)
