@@ -799,6 +799,9 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                     query = ['N16', 'N17', 'N18', 'N19', 'N20']
                     cond.p_corrected = ws[query[int(re.findall(r'\d+', port)[0])-1]].value
 
+                    query = ['L16', 'L17', 'L18', 'L19', 'L20']
+                    cond.h_correction = ws[query[int(re.findall(r'\d+', port)[0])-1]].value
+
                 # Local corrected gauge pressure can also be back-calculated from jgloc and jgatm (DHK)
                 cond.jgatm = ws['D6'].value
 
