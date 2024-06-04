@@ -191,7 +191,7 @@ def iate_1d_1g(
         LM_C = LM_C, 
         k_m = k_m, 
         L = (query - LoverD) * Dh
-        ) + ((rho_f * grav * delta_h) / z_mesh -z_mesh[0])      # Pressure gradient from gravity
+        ) + ((rho_f * grav * delta_h) / (z_mesh - z_mesh[0]))   # Pressure gradient from gravity
 
     # Local Pressure along the test section
     p = (jgatm * p_atm / jgloc) - p_atm                         # Back-calculate local corrected gauge pressure
