@@ -178,13 +178,13 @@ def iate_1d_1g(
     ########################################################################################################################
     # Pressure drop [Pa/m]
     if restriction == 'elbow':
-        delta_h = (z_mesh - z_mesh[0]) * 2 / np.pi              # The height of an elbow is going to be its radius
+        delta_h = (z_mesh[-1] - z_mesh[0]) * 2 / np.pi              # The height of an elbow is going to be its radius
 
     elif restriction == 'ubend':
         delta_h = 0
 
     else:
-        delta_h = (z_mesh - z_mesh[0])                          # Dissipation region is going to be the same as standard VU
+        delta_h = (z_mesh[-1] - z_mesh[0])                          # Dissipation region is going to be the same as standard VU
 
     dpdz = cond.calc_dpdz(
         method = dpdz_method, 
