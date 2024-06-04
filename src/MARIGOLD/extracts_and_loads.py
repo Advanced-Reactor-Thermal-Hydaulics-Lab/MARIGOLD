@@ -759,7 +759,7 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                     return
                 
                 ws = wb['1']
-
+                
                 jglocs = ['O16', 'O17', 'O18', 'O19', 'O20']
                 try:
                     jgloc = ws[jglocs[int(re.findall(r'\d+', port)[0])-1]].value
@@ -787,9 +787,21 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
 
                 cond.run_ID = ws['B2'].value
 
-                # Local corrected gauge pressure can be back-calculated from jgloc and jgatm (DHK)
-                cond.jgatm = ws['D6'].value
+                # Gauge pressure (DHK)
+                if sheet_type == 'ryan_template':                
+                    query = ['O23', 'P23', 'Q23', 'R23', 'S23']
+                    cond.p_corrected = ws[query[int(re.findall(r'\d+', port)[0])-1]].value
+
+                elif sheet_type == 'adix_template' or sheet_type == 'adix_template4':
+                    query = ['M16', 'M17', 'M18', 'M19', 'M20']
+                    cond.p_gauge = ws[query[int(re.findall(r'\d+', port)[0])-1]].value
                 
+                    query = ['N16', 'N17', 'N18', 'N19', 'N20']
+                    cond.p_corrected = ws[query[int(re.findall(r'\d+', port)[0])-1]].value
+
+                # Local corrected gauge pressure can also be back-calculated from jgloc and jgatm (DHK)
+                cond.jgatm = ws['D6'].value
+
                 ws = wb['2']
                 
                 if sheet_type == 'ryan_template':
