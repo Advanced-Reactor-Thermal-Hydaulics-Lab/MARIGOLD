@@ -192,6 +192,10 @@ def iate_1d_1g(
         k_m = k_m, 
         L = (query - LoverD) * Dh
         ) + (rho_f * grav * delta_h)
+
+    print("grav: ", grav)
+    print("delta_h: ", delta_h)
+    print("dpdz: ", dpdz)
     
     # Local Pressure along the test section
     p = (jgatm * p_atm / jgloc) - p_atm                         # Back-calculate local corrected gauge pressure
