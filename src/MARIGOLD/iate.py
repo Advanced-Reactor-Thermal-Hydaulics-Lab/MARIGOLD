@@ -191,7 +191,7 @@ def iate_1d_1g(
         LM_C = LM_C, 
         k_m = k_m, 
         L = (query - LoverD) * Dh
-        ) + ((rho_f * grav * delta_h) / (z_mesh - z_mesh[0]))   # Pressure gradient from gravity
+        ) + ((rho_f * grav * delta_h) / (z_mesh[-1] - z_mesh[0]))   # Pressure gradient from gravity
 
     # Local Pressure along the test section
     p = (jgatm * p_atm / jgloc) - p_atm                         # Back-calculate local corrected gauge pressure
@@ -240,9 +240,6 @@ def iate_1d_1g(
             CDwe = 24 * (1 + 0.1 * ReD**0.75) / ReD
             ur = (4 * abs(grav) * Db[i] / 3 / CDwe)**0.5            # Interestingly, Yadav keeps 9.8 instead of changing grav for angle
 
-
-        # DEBUG
-        print("ur: ",ur)
         ########################################################################################################################
         # Estimate Energy Dissipation Rate and Turbulent Velocity (See Talley, 2012, 4.2.2.3)
         #   > One-group models written using turbulent fluctuation velocity, while models implemented in TRACE are written using
@@ -260,8 +257,6 @@ def iate_1d_1g(
         e = fTW * (vm**3) / 2 / Dh                              # Energy dissipation rate (Wu et al., 1998; Kim, 1999)
         ut = 1.4 * e**(1/3) * Db[i]**(1/3)                      # Turbulent velocity (Batchelor, 1951; Rotta, 1972)
         
-        # DEBUG
-        print("ut: ",ut)
         ########################################################################################################################
         # Estimate sources & sinks in the Interfacial Area Transport Eqn. (Part 1)
 
