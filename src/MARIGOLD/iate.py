@@ -49,6 +49,7 @@ def iate_1d_1g(
      - Need a way to compute void fraction across restrictions, void fraction prediction falters
      - Modify MG for Yadav data extraction
      - Revise parcel and cond2 variable names
+     - Revise vgj calculation
     """
 
     # MARIGOLD retrieval and setup
