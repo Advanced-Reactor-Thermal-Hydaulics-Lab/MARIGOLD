@@ -92,7 +92,7 @@ def iate_1d_1g(
     #       c. 'dissipation'
     #       d. Other
     #  4. Else, default to vertical-upward
-    if theta == 0 and restriction == None:                      # Horizontal, no elbow (Yadav)
+    if theta == 0 and restriction == None:      # Horizontal, no elbow (Yadav, 2013)
         if C_WE == None:
             C_WE    = 0.000
         if C_RC == None:
@@ -103,18 +103,18 @@ def iate_1d_1g(
         COV_RC      = 1
         COV_TI      = 1
 
-    elif restriction == 'elbow':                                # Elbow
+    elif restriction == 'elbow':                # Elbow
         if C_WE == None:
             C_WE    = 0.000
         if C_RC == None:
-            C_RC    = 0.012                                     # Yadav reports 0.008
+            C_RC    = 0.012                     # Yadav reports 0.008
         if C_TI == None:
             C_TI    = 0.085
         
         COV_RC      = 1
         COV_TI      = 1
 
-    elif restriction == 'vd':
+    elif restriction == 'vd':                   # Ishii, Paranjape, Kim, and Sun, 2004
         if C_WE == None:
             C_WE    = 0.002
         if C_RC == None:
@@ -125,7 +125,7 @@ def iate_1d_1g(
         COV_RC      = 1
         COV_TI      = 1
 
-    else:                                                       # Default to vertical-upward, no elbow
+    else:                                       # Default to vertical-upward, no elbow (Ishii, Kim, and Uhle, 2002)
         if C_WE == None:
             C_WE    = 0.002
         if C_RC == None:
