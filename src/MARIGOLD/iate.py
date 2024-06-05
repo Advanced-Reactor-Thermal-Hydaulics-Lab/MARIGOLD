@@ -2,7 +2,7 @@ from .config import *
 
 def iate_1d_1g(
         # Basic inputs
-        cond, query, z_step = 0.01, parcel = None,        
+        cond, query, z_step = 0.01, parcel = None, 
         
         # IATE Coefficients
         C_WE = None, C_RC = None, C_TI = None, alpha_max = 0.75, C = 3, We_cr = 6, acrit_flag = 0, acrit = 0.13, C_inf = 1.20,
@@ -14,7 +14,7 @@ def iate_1d_1g(
         LM_C = 40, k_m = 0.40,
 
         # Temporary arguments
-        restriction = None
+        restriction = None, cond2 = None
         ):
     """ Calculate the area-averaged interfacial area concentration at query location based on the 1D 1G IATE
     
@@ -38,6 +38,7 @@ def iate_1d_1g(
      - LM_C:            Lockhart-Martinelli Chisholm parameter
      - k_m:             Minor loss coefficient
      - restriction:     Restriction type, defaults to None, can be set to 'elbow', 'ubend'
+     - cond2:           Second condition object, for possible interpolation
 
     Notes:
      - Isn't this script nice and clean? Follow good coding practices, kids. - David
@@ -47,6 +48,7 @@ def iate_1d_1g(
      - vgz calculation in elbow and dissipation length regions still need to be implemented
      - Need a way to compute void fraction across restrictions, void fraction prediction falters
      - Modify MG for Yadav data extraction
+     - Revise parcel and cond2 variable names
     """
 
     # MARIGOLD retrieval and setup
@@ -177,6 +179,8 @@ def iate_1d_1g(
 
     ########################################################################################################################
     # Pressure drop [Pa/m]
+    p = (jgatm * p_atm / jgloc) - p_atm                         # Back-calculate local corrected gauge pressure
+
     if restriction == 'elbow':
         delta_h = (z_mesh[-1] - z_mesh[0]) * 2 / np.pi              # The height of an elbow is going to be its radius
 
@@ -186,15 +190,17 @@ def iate_1d_1g(
     else:
         delta_h = (z_mesh[-1] - z_mesh[0])                          # Dissipation region is going to be the same as standard VU
 
-    dpdz = cond.calc_dpdz(
-        method = dpdz_method, 
-        LM_C = LM_C, 
-        k_m = k_m, 
-        L = (query - LoverD) * Dh
-        ) + ((rho_f * grav * delta_h) / (z_mesh[-1] - z_mesh[0]))   # Pressure gradient from gravity
+    if cond2 == None:
+        dpdz = cond.calc_dpdz(
+            method = dpdz_method, 
+            LM_C = LM_C, 
+            k_m = k_m, 
+            L = (query - LoverD) * Dh
+            ) + ((rho_f * grav * delta_h) / (z_mesh[-1] - z_mesh[0]))   # Pressure gradient from gravity
+        
+    else:
+        dpdz = (((cond2.jgatm * p_atm / cond2.jgloc) - p_atm) - p) / (cond2.LoverD - LoverD)
 
-    # Local Pressure along the test section
-    p = (jgatm * p_atm / jgloc) - p_atm                         # Back-calculate local corrected gauge pressure
     pz = (p + p_atm) * (1 - (z_mesh - z_mesh[0]) * (dpdz / (p + p_atm)))
     
 	# Local gas density along the test section
