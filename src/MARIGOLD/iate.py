@@ -11,7 +11,7 @@ def iate_1d_1g(
         dpdz_method = 'LM', cd_method = 'doe', void_method = 'driftflux',
 
         # Pressure drop calculation arguments
-        LM_C = 40, k_m = 0.40,
+        LM_C = 40, k_m = 0.10,
 
         # Temporary arguments
         restriction = None, cond2 = None
@@ -92,7 +92,7 @@ def iate_1d_1g(
     #       c. 'dissipation'
     #       d. Other
     #  4. Else, default to vertical-upward
-    if theta == 0 and restriction == None:                      # Horizontal, no elbow, look at Ran's work?
+    if theta == 0 and restriction == None:                      # Horizontal, no elbow (Yadav)
         if C_WE == None:
             C_WE    = 0.000
         if C_RC == None:
@@ -103,13 +103,24 @@ def iate_1d_1g(
         COV_RC      = 1
         COV_TI      = 1
 
-    elif restriction == 'elbow':                                # Elbow, look at Shoxu's work?
+    elif restriction == 'elbow':                                # Elbow
         if C_WE == None:
             C_WE    = 0.000
         if C_RC == None:
-            C_RC    = 0.012
+            C_RC    = 0.012                                     # Yadav reports 0.008
         if C_TI == None:
             C_TI    = 0.085
+        
+        COV_RC      = 1
+        COV_TI      = 1
+
+    elif restriction == 'vd':
+        if C_WE == None:
+            C_WE    = 0.002
+        if C_RC == None:
+            C_RC    = 0.004
+        if C_TI == None:
+            C_TI    = 0.034
         
         COV_RC      = 1
         COV_TI      = 1
@@ -118,7 +129,7 @@ def iate_1d_1g(
         if C_WE == None:
             C_WE    = 0.002
         if C_RC == None:
-            C_RC    = 0.004        
+            C_RC    = 0.004
         if C_TI == None:
             C_TI    = 0.085
         
