@@ -295,7 +295,7 @@ def iate_1d_1g(
             Sratio = 0.1;                       # Sratio = S/S0 (strength of elbow effect)
 
             # Elbow region
-            vgzP4 = slip * jf / (1 - alpha[zstep_v])            
+            vgzP4 = slip * jf / (1 - alpha[zstep_v])
             L_D = 0.3156
             deltaz = z[i] - z[zstep_v]
             slope = (vgzP4 - vgz[zstep_v]) / L_D
