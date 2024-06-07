@@ -467,6 +467,8 @@ def write_CCL(mom_source = 'normal_drag_mom_source', ccl_name = 'auto_setup.ccl'
 
         if CL == 'ryan_DFM':
             CL = calculate_CL_Ryan(jf=jf, jg=jg, theta=theta, Db=Db)
+        elif CL == 'tomi-sharma':
+            CL = 'CL'
 
         lift_string = f"Lift Coefficient = {CL} \nOption = Lift Coefficient \n"
 
@@ -493,6 +495,14 @@ liquidWEff = (1 - Kf - Kw * gas.Volume Fraction * CD^(1/3) ) * liquid.w \n\
 phi = atan2(y, x) \n\
 radius = sqrt(x^2 + y^2) \n\
 vrNorm = sqrt( (gas.u - liquid.u)^2+ (gas.v - liquid.v)^2+ (gas.w - liquidWEff)^2 ) \n\
+Eo = gravz * (liquid.density - gas.density) * ( gas.Mean Particle Diameter )^2 / (Surface Tension Coefficient) \n\
+Eop = gravz * (liquid.density - gas.density) * ( gas.Mean Particle Diameter * (1+0.136*Eo^0.757)^(1/3.) )^2 / (Surface Tension Coefficient) \n\
+Rep = liquid.rho * (gas.w - liquidWEff) * gas.Mean Particle Diameter / liquid.mu \n\
+f = 0.00105*Eop^3-0.0159*Eop^2-0.0204*Eop + 0.474 \n\
+CLtomiyama = min( 0.288*tanh(0.121*Rep) , f )\n\
+Ref = liquid.rho * liquid.w * 0.0254 / liquid.mu\n\
+sharmaFactor = exp( (max(Ref, 5e4) - 5e4) / (-1.22e5) )\n\
+CL = CLtomiyama * sharmaFactor\n\
 END \n\
 FUNCTION: {InletData} \n\
 Argument Units = [mm], [m], [] \n\
