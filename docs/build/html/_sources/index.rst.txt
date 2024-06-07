@@ -6,14 +6,12 @@
 Welcome to MARIGOLD's documentation!
 ====================================
 
-*M*ultiphase *A*nalysis of *R*aw *I*nformation for *G*lobal *O*r *L*ocal *D*ata
+**M**\ ultiphase \ **A**\ nalysis of \ **R**\ aw \ **I**\ nformation for \ **G**\ lobal \ **O**\ r \ **L**\ ocal \ **D**\ ata 
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+   :maxdepth: 4
 
-.. automodapi:: MARIGOLD
-   :no-inheritance-diagram
+   MARIGOLD
 
 
 Indices and tables
