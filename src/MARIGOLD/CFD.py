@@ -500,7 +500,7 @@ Eop = gravz * (liquid.density - gas.density) * ( gas.Mean Particle Diameter * (1
 Rep = liquid.density * (gas.w - liquidWEff) * gas.Mean Particle Diameter / liquid.viscosity \n\
 f = 0.00105*Eop^3-0.0159*Eop^2-0.0204*Eop + 0.474 \n\
 CLtomiyama = min( 0.288*tanh(0.121*Rep) , f )\n\
-Ref = liquid.density * liquid.w * 0.0254 / liquid.viscosity\n\
+Ref = liquid.density * liquid.w * 0.0254 [m] / liquid.viscosity\n\
 sharmaFactor = exp( (max(Ref, 5e4) - 5e4) / (-1.22e5) )\n\
 CL = CLtomiyama * sharmaFactor\n\
 END \n\
