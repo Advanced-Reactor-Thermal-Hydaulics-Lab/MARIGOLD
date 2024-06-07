@@ -2220,7 +2220,7 @@ class Condition:
         mu_m_avg     = self.void_area_avg ('mu_m') 
 
         rho_m        = (1 - alpha_avg) * rho_f + alpha_avg * rho_g     # Mixture density
-        v_m          =(rho_f*self.jf+rho_g*self.jgloc)/rho_m           # Mixture velocity                     
+        v_m          =(rho_f*self.jf+rho_g*self.jgloc)/rho_m           # Mixture velocity, local velocity instead?                     
         Rem          = rho_m * v_m * Dh / mu_m_avg                     # Ran Kong
         #f_TP         = 0.316*(1/(1-alpha_avg)/Rem)**0.25                # Two-phase frictional factor, Kong (2018)
         f_TP         = 0.316*(mu_m_avg/mu_f/Rem)**0.25                # Two-phase frictional factor, Talley (2012) and Ted (2015)
