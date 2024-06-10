@@ -728,7 +728,7 @@ VELOCITY: \n\
 Option = Cartesian Velocity Components \n\
 U = 0 [m s^-1] \n\
 V = 0 [m s^-1] \n\
-W = {InletData}.Velocity v(radius,z,phi) \n\
+W = {InletData}.Velocity w(radius,z,phi) \n\
 END \n\
 VOLUME FRACTION: \n\
 Option = Value \n\
@@ -1088,16 +1088,11 @@ END\n\
 \n\
 > quit ", file = fi)
     print('$\ncfx5pre -s CFXPre_Commands.pre')
-    try:
-        subprocess.check_call("ml ansys", shell=True)
-    except subprocess.CalledProcessError as e:
-        print(e)
-        print("Continuing...")
-    try:
-        subprocess.check_call('cfx5pre -s CFXPre_Commands.pre -line > auto_cfx_run.log', shell=True)
-    except subprocess.CalledProcessError as e:
-        print(e)
-        print(e.returncode)
+    
+    subprocess.run("ml ansys", shell=True)
+    
+    comp_process = subprocess.check_call('cfx5pre -s CFXPre_Commands.pre -line > auto_cfx_run.log', shell=True)
+    print(comp_process)
     return
 
 def run_CFX_case(case_name, parallel=True, npart = 4, init_fi = None, interactive = False):
@@ -1108,11 +1103,8 @@ def run_CFX_case(case_name, parallel=True, npart = 4, init_fi = None, interactiv
     Can run in parallel, specify the number of cores with npart
     
     """
-    try:
-        subprocess.check_call("ml ansys", shell=True)
-    except subprocess.CalledProcessError as e:
-        print(e)
-        print("Continuing...")
+    comp_process = subprocess.run("ml ansys", shell=True)
+    print(comp_process)
 
     run_string = f"cfx5solve -def {case_name}.def -monitor {case_name}_001.out -double"
     
@@ -1128,7 +1120,9 @@ def run_CFX_case(case_name, parallel=True, npart = 4, init_fi = None, interactiv
     run_string += " > auto_cfx_run.log"
 
     print(f"${run_string}")
-    subprocess.check_call(run_string, shell=True)
+    comp_process = subprocess.run(run_string, shell=True)
+    if comp_process.returncode != 0:
+        print(comp_process)
     return
 
 
@@ -1275,7 +1269,8 @@ END\n\
         print("Continuing...")
     print(os.getcwd())
     subprocess.check_call(f'rm -rf ./{case_name}_Results', shell=True)
-    subprocess.check_call(f'cfx5post -play CFXPost_Commands.cse -line > auto_cfx_run.log', shell=True)
+    comp_process = subprocess.run(f'cfx5post -play CFXPost_Commands.cse -line > auto_cfx_run.log', shell=True)
+    print(comp_process)
 
 
 
