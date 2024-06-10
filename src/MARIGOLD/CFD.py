@@ -497,10 +497,10 @@ radius = sqrt(x^2 + y^2) \n\
 vrNorm = sqrt( (gas.u - liquid.u)^2+ (gas.v - liquid.v)^2+ (gas.w - liquidWEff)^2 ) \n\
 Eo = gravz * (liquid.density - gas.density) * ( gas.Mean Particle Diameter )^2 / (Surface Tension Coefficient) \n\
 Eop = gravz * (liquid.density - gas.density) * ( gas.Mean Particle Diameter * (1+0.136*Eo^0.757)^(1/3.) )^2 / (Surface Tension Coefficient) \n\
-Rep = liquid.density * (gas.w - liquidWEff) * gas.Mean Particle Diameter / liquid.viscosity \n\
+Rep = liquid.density * abs(gas.w - liquidWEff) * gas.Mean Particle Diameter / liquid.viscosity \n\
 f = 0.00105*Eop^3-0.0159*Eop^2-0.0204*Eop + 0.474 \n\
 CLtomiyama = min( 0.288*tanh(0.121*Rep) , f )\n\
-Ref = liquid.density * liquid.w * 0.0254 [m] / liquid.viscosity\n\
+Ref = liquid.density * areaAve(liquid.w)@inlet * 0.0254 [m] / liquid.viscosity\n\
 sharmaFactor = exp( (max(Ref, 5e4) - 5e4) / (-1.22e5) )\n\
 CL = CLtomiyama * sharmaFactor\n\
 END \n\
