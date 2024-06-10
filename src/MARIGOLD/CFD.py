@@ -27,6 +27,11 @@ def write_CFX_BC(cond:Condition, save_dir = ".", z_loc = 'LoverD', only_90 = Fal
     if z_loc == 'LoverD':
         z_loc = cond.LoverD
 
+    try:
+        dummy = cond.run_ID
+    except AttributeError:
+        cond.run_ID = cond.port
+
     with open(path_to_csv, "w") as f:
 
         f.write("[Name],,,,,,,,,\n")
