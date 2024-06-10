@@ -16,21 +16,21 @@ def write_CFX_BC(cond:Condition, save_dir = ".", z_loc = 'LoverD', only_90 = Fal
     only_90 option for writing data only down the 90 degree line
     
     """
+    try:
+        dummy = cond.run_ID
+    except AttributeError:
+        cond.run_ID = cond.database
 
     if only_90:
-        csv_name = f"{cond.theta}deg_jf{cond.jf:0.1f}_jg{cond.jgref}_{cond.port}_BC_90deg.csv"
+        csv_name = f"{cond.run_ID}_{cond.theta}deg_jf{cond.jf:0.1f}_jg{cond.jgref}_{cond.port}_BC_90deg.csv"
     else:
-        csv_name = f"{cond.theta}deg_jf{cond.jf:0.1f}_jg{cond.jgref}_{cond.port}_BC.csv"
+        csv_name = f"{cond.run_ID}_{cond.theta}deg_jf{cond.jf:0.1f}_jg{cond.jgref}_{cond.port}_BC.csv"
 
     path_to_csv = os.path.join(save_dir, csv_name)
 
     if z_loc == 'LoverD':
         z_loc = cond.LoverD
 
-    try:
-        dummy = cond.run_ID
-    except AttributeError:
-        cond.run_ID = cond.port
 
     with open(path_to_csv, "w") as f:
 
