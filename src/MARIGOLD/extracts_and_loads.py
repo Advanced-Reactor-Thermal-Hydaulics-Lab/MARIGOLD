@@ -1000,6 +1000,11 @@ def loadProbeData(data_file = 'PITA_Database.dat') -> list:
         data = pickle.load(g)
     return data
 
+def dumpData(data, dump_file = "database.dat"):
+    with open(dump_file, 'wb') as g:
+        pickle.dump(data, g)
+    return
+
 def extractPitotData(dump_file = 'Pitot_Database.dat', in_dir = [], require_terms = [], skip_terms = ['CFD', 'Copy']) -> None:
     Q1_ranges = list(zip([90, 67.5, 45, 22.5, 0], [ [i for i in range(8, 33)], [i for i in range(57, 82)], [i for i in range(108, 133)], [i for i in range(157, 182)], [i for i in range(208, 233)] ]))
 
