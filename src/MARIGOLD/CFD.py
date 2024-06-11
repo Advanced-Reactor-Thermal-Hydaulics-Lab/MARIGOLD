@@ -58,7 +58,7 @@ def write_CFX_BC(cond:Condition, save_dir = ".", z_loc = 'LoverD', only_90 = Fal
 
             for x in np.linspace(-cond.Dh / 2, cond.Dh/2, 100):
                 for y in np.linspace(-cond.Dh / 2, cond.Dh/2, 100):
-                    if np.sqrt(x**2 + y**2) <= cond.Dh:
+                    if np.sqrt(x**2 + y**2) <= cond.Dh/2:
                         f.write(f"{x},{y},{z_loc},{0},{0},{ cond(x, y, 'ug1', interp_method='linear_xy') },{cond(x, y, 'alpha', interp_method='linear_xy')},{0},{0},{cond(x, y, 'vf', interp_method='linear_xy')},\n")
 
         else:
