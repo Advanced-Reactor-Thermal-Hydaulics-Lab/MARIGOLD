@@ -365,7 +365,8 @@ ic_exit\n', file=fi)
     except subprocess.CalledProcessError as e:
         print(e)
         print("Continuing...")
-    subprocess.check_call('icemcfd -x ./mesh_replay.rpl > auto_cfx_run.log', shell=True)
+    comp_process = subprocess.call('icemcfd -x ./mesh_replay.rpl > auto_cfx_run.log', shell=True)
+    print(comp_process)
     if cleanup:
         subprocess.check_call('rm mesh_replay.rpl', shell=True)
         subprocess.check_call('rm project1.*', shell=True)
@@ -535,8 +536,8 @@ Argument Units = [mm], [m], [] \n\
 Option = Profile Data \n\
 Reference Coord Frame = Coord 0 \n\
 Spatial Fields = radius, z, phi \n\
-DATA FIELD: Velocity u \n\
-Field Name = Velocity u \n\
+DATA FIELD: Velocity u g\n\
+Field Name = Velocity u g\n\
 Parameter List = U,Velocity r Component,Wall U,Wall Velocity r Component \n\
 Result Units = [m s^-1] \n\
 END \n\
@@ -545,8 +546,8 @@ Field Name = Velocity u f \n\
 Parameter List = U,Velocity r Component,Wall U,Wall Velocity r Component \n\
 Result Units = [m s^-1] \n\
 END \n\
-DATA FIELD: Velocity v \n\
-Field Name = Velocity v \n\
+DATA FIELD: Velocity v g\n\
+Field Name = Velocity v g\n\
 Parameter List = V,Velocity Theta Component,Wall V,Wall Velocity Theta Component \n\
 Result Units = [m s^-1] \n\
 END \n\
@@ -555,8 +556,8 @@ Field Name = Velocity v f \n\
 Parameter List = V,Velocity Theta Component,Wall V,Wall Velocity Theta Component \n\
 Result Units = [m s^-1] \n\
 END \n\
-DATA FIELD: Velocity w \n\
-Field Name = Velocity w \n\
+DATA FIELD: Velocity w g\n\
+Field Name = Velocity w g\n\
 Parameter List = Velocity Axial Component,W,Wall Velocity Axial Component,Wall W \n\
 Result Units = [m s^-1] \n\
 END \n\
