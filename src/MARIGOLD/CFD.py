@@ -6,7 +6,7 @@ import subprocess
 
 """
 
-def write_CFX_BC(cond:Condition, save_dir = ".", z_loc = 'LoverD', only_90 = False):
+def write_CFX_BC(cond:Condition, save_dir = ".", z_loc = 'LoverD', only_90 = False, interp = False):
     """ Write a csv file for CFX based on cond
 
     z_loc can be set by the user, or set to "LoverD" to use the cond L/D information
@@ -35,22 +35,39 @@ def write_CFX_BC(cond:Condition, save_dir = ".", z_loc = 'LoverD', only_90 = Fal
     with open(path_to_csv, "w") as f:
 
         f.write("[Name],,,,,,,,,\n")
-        f.write(f"{cond.run_ID}data,,,,,,,,,\n")
+        f.write(f"{cond.port}data,,,,,,,,,\n")
         f.write("[Spatial Fields],,,,,,,,,\n")
         f.write("radius,z,phi,,,,,,,\n")
         f.write("[Data],,,,,,,,,\n")
-        f.write("radius [mm],z [m],phi [],Velocity u [m s^-1],Velocity v [m s^-1],Velocity w [m s^-1],Volume Fraction [],Velocity u f [m s^-1],Velocity v f [m s^-1],Velocity w f [m s^-1],\n")
+        
+        if not interp:
+            f.write("radius [mm],z [m],phi [],Velocity u [m s^-1],Velocity v [m s^-1],Velocity w [m s^-1],Volume Fraction [],Velocity u f [m s^-1],Velocity v f [m s^-1],Velocity w f [m s^-1],\n")
 
-        for angle, r_dict in cond.phi.items():
-                for rstar, midas_output in r_dict.items():
-                    if only_90:
-                        if angle == 90 or angle == 270:
-                            pass
-                        else:
-                            continue
-                    r = rstar * 12.7 # r/R * R [mm]
+            for angle, r_dict in cond.phi.items():
+                    for rstar, midas_output in r_dict.items():
+                        if only_90:
+                            if angle == 90 or angle == 270:
+                                pass
+                            else:
+                                continue
+                        r = rstar * 12.7 # r/R * R [mm]
 
-                    f.write(f"{r},{z_loc},{angle * np.pi/180},{0},{0},{midas_output['ug1']},{midas_output['alpha']},{0},{0},{midas_output['vf']},\n")
+                        f.write(f"{r},{z_loc},{angle * np.pi/180},{0},{0},{midas_output['ug1']},{midas_output['alpha']},{0},{0},{midas_output['vf']},\n")
+        elif interp == 'xy':
+            f.write("x [m],y [m],z [m],Velocity u g [m s^-1],Velocity v g [m s^-1],Velocity w g [m s^-1],Volume Fraction [],Velocity u f [m s^-1],Velocity v f [m s^-1],Velocity w f [m s^-1],\n")
+
+            for x in np.linspace(-cond.Dh / 2, cond.Dh/2, 100):
+                for y in np.linspace(-cond.Dh / 2, cond.Dh/2, 100):
+                    if np.sqrt(x**2 + y**2) <= cond.Dh:
+                        f.write(f"{x},{y},{z_loc},{0},{0},{ cond(x, y, 'ug1', interp_method='linear_xy') },{cond(x, y, 'alpha', interp_method='linear_xy')},{0},{0},{cond(x, y, 'vf', interp_method='linear_xy')},\n")
+
+        else:
+            f.write("radius [mm],z [m],phi [],Velocity u g [m s^-1],Velocity v g [m s^-1],Velocity w g [m s^-1],Volume Fraction [],Velocity u f [m s^-1],Velocity v f [m s^-1],Velocity w f [m s^-1],\n")
+
+            for r in np.linspace(0, cond.Dh/2, 100):
+                for phi in np.linspace(0, 2*np.pi, 100):
+                    f.write(f"{r*1000},{z_loc},{phi},{0},{0},{ cond(phi, r, 'ug1', interp_method='linear') },{cond(phi, r, 'alpha', interp_method='linear')},{0},{0},{cond(phi, r, 'vf', interp_method='linear')},\n")
+
 
     return
 
@@ -463,6 +480,8 @@ def write_CCL(mom_source = 'normal_drag_mom_source', ccl_name = 'auto_setup.ccl'
 
     if CL == 'tomiyama':
         lift_string = f"Option = Tomiyama \n"
+    elif CL == 'legendre':
+        lift_string = f"Option = Legendre \n"
     else:
 
         if CL == 'ryan_DFM':
@@ -495,8 +514,8 @@ liquidWEff = (1 - Kf - Kw * gas.Volume Fraction * CD^(1/3) ) * liquid.w \n\
 phi = atan2(y, x) \n\
 radius = sqrt(x^2 + y^2) \n\
 vrNorm = sqrt( (gas.u - liquid.u)^2+ (gas.v - liquid.v)^2+ (gas.w - liquidWEff)^2 ) \n\
-Eo = gravz * (liquid.density - gas.density) * ( gas.Mean Particle Diameter )^2 / (Surface Tension Coefficient) \n\
-Eop = gravz * (liquid.density - gas.density) * ( gas.Mean Particle Diameter * (1+0.136*Eo^0.757)^(1/3.) )^2 / (Surface Tension Coefficient) \n\
+Eo = gravz * (liquid.density - gas.density) * ( gas.Mean Particle Diameter )^2 / (gas | liquid.Surface Tension Coefficient) \n\
+Eop = gravz * (liquid.density - gas.density) * ( gas.Mean Particle Diameter * (1+0.136*Eo^0.757)^(1/3.) )^2 / (gas | liquid.Surface Tension Coefficient) \n\
 Rep = liquid.density * abs(gas.w - liquidWEff) * gas.Mean Particle Diameter / liquid.viscosity \n\
 f = 0.00105*Eop^3-0.0159*Eop^2-0.0204*Eop + 0.474 \n\
 CLtomiyama = min( 0.288*tanh(0.121*Rep) , f )\n\
@@ -1262,11 +1281,9 @@ END\n\
 >quit     \n\
         \
         ', file=fi)
-    try:
-        subprocess.check_call("ml ansys", shell=True)
-    except subprocess.CalledProcessError as e:
-        print(e)
-        print("Continuing...")
+
+    subprocess.run("ml ansys", shell=True)
+
     print(os.getcwd())
     subprocess.check_call(f'rm -rf ./{case_name}_Results', shell=True)
     comp_process = subprocess.run(f'cfx5post -play CFXPost_Commands.cse -line > auto_cfx_run.log', shell=True)
