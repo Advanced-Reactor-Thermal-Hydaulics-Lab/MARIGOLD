@@ -39,10 +39,11 @@ def write_CFX_BC(cond:Condition, save_dir = ".", z_loc = 'LoverD', only_90 = Fal
         f.write("[Name],,,,,,,,,\n")
         f.write(f"{cond.port}data,,,,,,,,,\n")
         f.write("[Spatial Fields],,,,,,,,,\n")
-        f.write("radius,z,phi,,,,,,,\n")
-        f.write("[Data],,,,,,,,,\n")
+        
         
         if not interp:
+            f.write("radius,z,phi,,,,,,,\n")
+            f.write("[Data],,,,,,,,,\n")
             f.write("radius [mm],z [m],phi [],Velocity u [m s^-1],Velocity v [m s^-1],Velocity w [m s^-1],Volume Fraction [],Velocity u f [m s^-1],Velocity v f [m s^-1],Velocity w f [m s^-1],\n")
 
             for angle, r_dict in cond.phi.items():
@@ -56,6 +57,8 @@ def write_CFX_BC(cond:Condition, save_dir = ".", z_loc = 'LoverD', only_90 = Fal
 
                         f.write(f"{r},{z_loc},{angle * np.pi/180},{0},{0},{midas_output['ug1']},{midas_output['alpha']},{0},{0},{midas_output['vf']},\n")
         elif interp == 'xy':
+            f.write("x,y,z,,,,,,,\n")
+            f.write("[Data],,,,,,,,,\n")
             f.write("x [m],y [m],z [m],Velocity u g [m s^-1],Velocity v g [m s^-1],Velocity w g [m s^-1],Volume Fraction [],Velocity u f [m s^-1],Velocity v f [m s^-1],Velocity w f [m s^-1],\n")
 
             for x in np.linspace(-R / 2, R, 100):
@@ -64,11 +67,13 @@ def write_CFX_BC(cond:Condition, save_dir = ".", z_loc = 'LoverD', only_90 = Fal
                         f.write(f"{x},{y},{z_loc},{0},{0},{ cond(x, y, 'ug1', interp_method='linear_xy') },{cond(x, y, 'alpha', interp_method='linear_xy')},{0},{0},{cond(x, y, 'vf', interp_method='linear_xy')},\n")
 
         else:
-            f.write("radius [mm],z [m],phi [],Velocity u g [m s^-1],Velocity v g [m s^-1],Velocity w g [m s^-1],Volume Fraction [],Velocity u f [m s^-1],Velocity v f [m s^-1],Velocity w f [m s^-1],\n")
+            f.write("radius,z,phi,,,,,,,\n")
+            f.write("[Data],,,,,,,,,\n")
+            f.write("radius [m],z [m],phi [],Velocity u g [m s^-1],Velocity v g [m s^-1],Velocity w g [m s^-1],Volume Fraction [],Velocity u f [m s^-1],Velocity v f [m s^-1],Velocity w f [m s^-1],\n")
 
             for r in np.linspace(0, R, 100):
                 for phi in np.linspace(0, 2*np.pi, 100):
-                    f.write(f"{r*1000},{z_loc},{phi},{0},{0},{ cond(phi, r/R, 'ug1', interp_method='linear') },{cond(phi, r/R, 'alpha', interp_method='linear')},{0},{0},{cond(phi, r/R, 'vf', interp_method='linear')},\n")
+                    f.write(f"{r},{z_loc},{phi},{0},{0},{ cond(phi, r/R, 'ug1', interp_method='linear') },{cond(phi, r/R, 'alpha', interp_method='linear')},{0},{0},{cond(phi, r/R, 'vf', interp_method='linear')},\n")
 
 
     return
