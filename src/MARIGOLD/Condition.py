@@ -155,7 +155,7 @@ class Condition:
         return self.name
 
     def __call__(self, phi_in:np.ndarray, r_in:np.ndarray, param:str, interp_method='None') -> np.ndarray:
-        """Returns the value of param at (phi, r). Phi is in radians
+        """Returns the value of param at (phi, r). Phi is in radians, r nondimensional
          
         Interp method:
          - 'None', will try to fetch raw data at this location

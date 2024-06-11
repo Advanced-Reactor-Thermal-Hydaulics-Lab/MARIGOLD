@@ -6,7 +6,7 @@ import subprocess
 
 """
 
-def write_CFX_BC(cond:Condition, save_dir = ".", z_loc = 'LoverD', only_90 = False, interp = False):
+def write_CFX_BC(cond:Condition, save_dir = ".", z_loc = 'LoverD', only_90 = False, interp = False, csv_name = False):
     """ Write a csv file for CFX based on cond
 
     z_loc can be set by the user, or set to "LoverD" to use the cond L/D information
@@ -21,10 +21,11 @@ def write_CFX_BC(cond:Condition, save_dir = ".", z_loc = 'LoverD', only_90 = Fal
     except AttributeError:
         cond.run_ID = cond.database
 
-    if only_90:
-        csv_name = f"{cond.run_ID}_{cond.theta}deg_jf{cond.jf:0.1f}_jg{cond.jgref}_{cond.port}_BC_90deg.csv"
-    else:
-        csv_name = f"{cond.run_ID}_{cond.theta}deg_jf{cond.jf:0.1f}_jg{cond.jgref}_{cond.port}_BC.csv"
+    if not csv_name:
+        if only_90:
+            csv_name = f"{cond.run_ID}_{cond.theta}deg_jf{cond.jf:0.1f}_jg{cond.jgref}_{cond.port}_BC_90deg.csv"
+        else:
+            csv_name = f"{cond.run_ID}_{cond.theta}deg_jf{cond.jf:0.1f}_jg{cond.jgref}_{cond.port}_BC.csv"
 
     path_to_csv = os.path.join(save_dir, csv_name)
 
@@ -33,6 +34,7 @@ def write_CFX_BC(cond:Condition, save_dir = ".", z_loc = 'LoverD', only_90 = Fal
 
 
     with open(path_to_csv, "w") as f:
+        R = cond.Dh/2
 
         f.write("[Name],,,,,,,,,\n")
         f.write(f"{cond.port}data,,,,,,,,,\n")
@@ -56,17 +58,17 @@ def write_CFX_BC(cond:Condition, save_dir = ".", z_loc = 'LoverD', only_90 = Fal
         elif interp == 'xy':
             f.write("x [m],y [m],z [m],Velocity u g [m s^-1],Velocity v g [m s^-1],Velocity w g [m s^-1],Volume Fraction [],Velocity u f [m s^-1],Velocity v f [m s^-1],Velocity w f [m s^-1],\n")
 
-            for x in np.linspace(-cond.Dh / 2, cond.Dh/2, 100):
-                for y in np.linspace(-cond.Dh / 2, cond.Dh/2, 100):
-                    if np.sqrt(x**2 + y**2) <= cond.Dh/2:
+            for x in np.linspace(-R / 2, R, 100):
+                for y in np.linspace(-R, R, 100):
+                    if np.sqrt(x**2 + y**2) <= R:
                         f.write(f"{x},{y},{z_loc},{0},{0},{ cond(x, y, 'ug1', interp_method='linear_xy') },{cond(x, y, 'alpha', interp_method='linear_xy')},{0},{0},{cond(x, y, 'vf', interp_method='linear_xy')},\n")
 
         else:
             f.write("radius [mm],z [m],phi [],Velocity u g [m s^-1],Velocity v g [m s^-1],Velocity w g [m s^-1],Volume Fraction [],Velocity u f [m s^-1],Velocity v f [m s^-1],Velocity w f [m s^-1],\n")
 
-            for r in np.linspace(0, cond.Dh/2, 100):
+            for r in np.linspace(0, R, 100):
                 for phi in np.linspace(0, 2*np.pi, 100):
-                    f.write(f"{r*1000},{z_loc},{phi},{0},{0},{ cond(phi, r, 'ug1', interp_method='linear') },{cond(phi, r, 'alpha', interp_method='linear')},{0},{0},{cond(phi, r, 'vf', interp_method='linear')},\n")
+                    f.write(f"{r*1000},{z_loc},{phi},{0},{0},{ cond(phi, r/R, 'ug1', interp_method='linear') },{cond(phi, r/R, 'alpha', interp_method='linear')},{0},{0},{cond(phi, r/R, 'vf', interp_method='linear')},\n")
 
 
     return
