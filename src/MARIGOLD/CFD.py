@@ -6,7 +6,7 @@ import subprocess
 
 """
 
-def write_CFX_BC(cond:Condition, save_dir = ".", z_loc = 'LoverD', only_90 = False, interp = False, csv_name = False):
+def write_CFX_BC(cond:Condition, save_dir = ".", z_loc = 'LoverD', only_90 = False, interp = False, csv_name = False, ngrid = 100):
     """ Write a csv file for CFX based on cond
 
     z_loc can be set by the user, or set to "LoverD" to use the cond L/D information
@@ -61,19 +61,19 @@ def write_CFX_BC(cond:Condition, save_dir = ".", z_loc = 'LoverD', only_90 = Fal
             f.write("[Data],,,,,,,,,\n")
             f.write("x [m],y [m],z [m],Velocity u g [m s^-1],Velocity v g [m s^-1],Velocity w g [m s^-1],Volume Fraction [],Velocity u f [m s^-1],Velocity v f [m s^-1],Velocity w f [m s^-1],\n")
 
-            for x in np.linspace(-R / 2, R, 100):
-                for y in np.linspace(-R, R, 100):
+            for x in np.linspace(-R / 2, R, ngrid):
+                for y in np.linspace(-R, R, ngrid):
                     if np.sqrt(x**2 + y**2) <= R:
                         f.write(f"{x},{y},{z_loc},{0},{0},{ cond(x, y, 'ug1', interp_method='linear_xy') },{cond(x, y, 'alpha', interp_method='linear_xy')},{0},{0},{cond(x, y, 'vf', interp_method='linear_xy')},\n")
 
         else:
             f.write("radius,z,phi,,,,,,,\n")
             f.write("[Data],,,,,,,,,\n")
-            f.write("radius [m],z [m],phi [],Velocity u g [m s^-1],Velocity v g [m s^-1],Velocity w g [m s^-1],Volume Fraction [],Velocity u f [m s^-1],Velocity v f [m s^-1],Velocity w f [m s^-1],\n")
+            f.write("radius [mm],z [m],phi [],Velocity u g [m s^-1],Velocity v g [m s^-1],Velocity w g [m s^-1],Volume Fraction [],Velocity u f [m s^-1],Velocity v f [m s^-1],Velocity w f [m s^-1],\n")
 
-            for r in np.linspace(0, R, 100):
-                for phi in np.linspace(0, 2*np.pi, 100):
-                    f.write(f"{r},{z_loc},{phi},{0},{0},{ cond(phi, r/R, 'ug1', interp_method='linear') },{cond(phi, r/R, 'alpha', interp_method='linear')},{0},{0},{cond(phi, r/R, 'vf', interp_method='linear')},\n")
+            for r in np.linspace(0, R, ngrid):
+                for phi in np.linspace(0, 2*np.pi, ngrid):
+                    f.write(f"{r*1000},{z_loc},{phi},{0},{0},{ cond(phi, r/R, 'ug1', interp_method='linear') },{cond(phi, r/R, 'alpha', interp_method='linear')},{0},{0},{cond(phi, r/R, 'vf', interp_method='linear')},\n")
 
 
     return
