@@ -203,7 +203,7 @@ class Condition:
             try:
                 return self.linear_interp[param](phi_in, r_in)
             except:
-                self.calc_linear_interp(param)
+                self.fit_linear_interp(param)
                 return self.linear_interp[param](phi_in, r_in)
             
         elif interp_method == 'linear_xy':
