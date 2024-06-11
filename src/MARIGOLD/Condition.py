@@ -212,7 +212,7 @@ class Condition:
             try:
                 return self.linear_xy_interp[param](x, y)
             except:
-                self.calc_linear_xy_interp(param)
+                self.fit_linear_xy_interp(param)
                 return self.linear_xy_interp[param](x, y)
         
         else:
