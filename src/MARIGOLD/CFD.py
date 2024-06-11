@@ -44,7 +44,7 @@ def write_CFX_BC(cond:Condition, save_dir = ".", z_loc = 'LoverD', only_90 = Fal
         if not interp:
             f.write("radius,z,phi,,,,,,,\n")
             f.write("[Data],,,,,,,,,\n")
-            f.write("radius [mm],z [m],phi [],Velocity u [m s^-1],Velocity v [m s^-1],Velocity w [m s^-1],Volume Fraction [],Velocity u f [m s^-1],Velocity v f [m s^-1],Velocity w f [m s^-1],\n")
+            f.write("radius [mm],z [m],phi [],Velocity u g[m s^-1],Velocity v g[m s^-1],Velocity w g[m s^-1],Volume Fraction [],Velocity u f [m s^-1],Velocity v f [m s^-1],Velocity w f [m s^-1],\n")
 
             for angle, r_dict in cond.phi.items():
                     for rstar, midas_output in r_dict.items():
@@ -581,8 +581,8 @@ Argument Units = [mm], [m], [] \n\
 Option = Profile Data \n\
 Reference Coord Frame = Coord 0 \n\
 Spatial Fields = radius, z, phi \n\
-DATA FIELD: Velocity u \n\
-Field Name = Velocity u \n\
+DATA FIELD: Velocity u g\n\
+Field Name = Velocity u g\n\
 Parameter List = U,Velocity r Component,Wall U,Wall Velocity r Component \n\
 Result Units = [m s^-1] \n\
 END \n\
@@ -590,8 +590,8 @@ DATA FIELD: Velocity u f \n\
 Field Name = Velocity u f \n\
 Result Units = [m s^-1] \n\
 END \n\
-DATA FIELD: Velocity v \n\
-Field Name = Velocity v \n\
+DATA FIELD: Velocity v g\n\
+Field Name = Velocity v g\n\
 Parameter List = V,Velocity Theta Component,Wall V,Wall Velocity Theta Component \n\
 Result Units = [m s^-1] \n\
 END \n\
@@ -599,8 +599,8 @@ DATA FIELD: Velocity v f \n\
 Field Name = Velocity v f \n\
 Result Units = [m s^-1] \n\
 END \n\
-DATA FIELD: Velocity w \n\
-Field Name = Velocity w \n\
+DATA FIELD: Velocity w g\n\
+Field Name = Velocity w g\n\
 Parameter List = Velocity Axial Component,W,Wall Velocity Axial Component,Wall W \n\
 Result Units = [m s^-1] \n\
 END \n\
@@ -755,7 +755,7 @@ VELOCITY: \n\
 Option = Cartesian Velocity Components \n\
 U = 0 [m s^-1] \n\
 V = 0 [m s^-1] \n\
-W = {InletData}.Velocity w(radius,z,phi) \n\
+W = {InletData}.Velocity w g(radius,z,phi) \n\
 END \n\
 VOLUME FRACTION: \n\
 Option = Value \n\
