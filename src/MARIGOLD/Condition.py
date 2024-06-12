@@ -2135,7 +2135,7 @@ class Condition:
         return self.area_avg('mu_eff')
     
 
-    def calc_cd(self, method='Ishii-Zuber', vr_cheat = False, limit = 0):
+    def calc_cd(self, method='Ishii-Zuber', vr_cheat = False, limit = 0, const_CD = 0.44):
         """Method for calculating drag coefficient
         
         Inputs:
@@ -2151,6 +2151,7 @@ class Condition:
         Options for method:
          - Ishii-Zuber, :math:`C_{D} = \\frac{24}{Re_{b}} (1 + 0.1 Re_{b}^{0.75})`
          - Schiller-Naumann, :math:`C_{D} = \\frac{24}{Re_{b}} (1 + 0.15 Re_{b}^{0.687})`. Here, :math:`Re_{b}` uses :math:`\\mu_{f}`
+         - const
 
         Returns:
          - area average drag coefficient
@@ -2180,10 +2181,14 @@ class Condition:
                     else:
                         cd = 0
 
-                elif method == 'Schiller-Naumann':
+                elif method.lower() == 'schiller-naumann':
                     Reb = (1 - midas_dict['alpha']) * midas_dict['Dsm1'] * self.rho_f * abs(midas_dict['vr_model']) / self.mu_f
 
                     cd = 24/Reb * (1 + 0.15*Reb**0.687)
+                
+                elif method == 'constant' or method == 'const':
+                    cd = const_CD
+
                 if type(limit) == str:
                     if limit.lower() == "tomiyama":
                         eo = self.g * (self.rho_f - self.rho_g) * midas_dict['Dsm2']
@@ -2204,7 +2209,7 @@ class Condition:
 
         return self.area_avg('cd')
 
-    def calc_vr_model(self, method='km1_simp', kw = -0.98, n=1, Lw = 5, kf = 0.089, iterate_cd = True, quiet = True):
+    def calc_vr_model(self, method='km1_simp', kw = -0.98, n=1, Lw = 5, kf = 0.089, iterate_cd = True, quiet = True, recalc_cd = True):
         """Method for calculating relative velocity based on models
         
         Inputs:
@@ -2241,19 +2246,20 @@ the newly calculated :math:`v_{r}` or not
             self.random_point = self.original_mesh[np.random.choice(len(self.original_mesh))]
 
         while True:
-            if iterate_cd:
-                
-                if initialize_vr:
-                    for angle, r_dict in self.phi.items():
-                        for rstar, midas_dict in r_dict.items():
-                            midas_dict.update(
-                                {'vr_model': -10}
-                            )
-                    initialize_vr = False
+            if recalc_cd:
+                if iterate_cd:
+                    
+                    if initialize_vr:
+                        for angle, r_dict in self.phi.items():
+                            for rstar, midas_dict in r_dict.items():
+                                midas_dict.update(
+                                    {'vr_model': -10}
+                                )
+                        initialize_vr = False
 
-                self.calc_cd(vr_cheat=False)
-            else:
-                self.calc_cd(vr_cheat=True)
+                    self.calc_cd(vr_cheat=False)
+                else:
+                    self.calc_cd(vr_cheat=True)
 
             old_vr = self.area_avg('vr_model', recalc=True)
 
@@ -2292,14 +2298,19 @@ the newly calculated :math:`v_{r}` or not
 
                     elif method == 'prelim_plus':
                         ff, fg = self.calc_fric()
+
+                        # if midas_dict['Dsm1'] == 0 and rstar != 1.0:
+                        #     print(self, angle, rstar)
+
                         try:
                             vr = (
                             -kw * midas_dict['alpha'] * midas_dict['vf'] * midas_dict['cd']**(1./3) - kf * midas_dict['vf'] 
-                        + np.sqrt( 8./3 * midas_dict['Dsm1']/midas_dict['cd'] * ( ff/self.Dh * self.jf**2/2 + 
+                            + np.sqrt( 8./3 * midas_dict['Dsm1']/midas_dict['cd'] * ( ff/self.Dh * self.jf**2/2 + 
                                                                                  (1 - midas_dict['alpha'])*(1-self.rho_g/self.rho_f) * self.gz ) )
+                            )
                         except ZeroDivisionError:
                             vr = 0
-                        )
+                        
 
                     elif method == 'proper_integral':
                         warnings.warn("This method is probably no good, messed up the math")
@@ -2339,7 +2350,7 @@ the newly calculated :math:`v_{r}` or not
             
             if iterations > MAX_ITERATIONS:
                 print("Warning, max iterations exceeded in calculating vr_model")
-                print(f"{old_vr - self.area_avg('vr_model', recalc=True)}")
+                print(f"{old_vr}\t{self.area_avg('vr_model', recalc=True)}\t{(old_vr - self.area_avg('vr_model', recalc=True))/old_vr*100}")
                 return
             
         
