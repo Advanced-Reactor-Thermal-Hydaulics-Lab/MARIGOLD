@@ -33,7 +33,7 @@ class Condition:
 
         Optional inputs:
         - fluids, what fluid pair to use as the gas and liquid
-        - g, gravitational acceleration. In case you're on Mars
+        - g, gravitational acceleration. In case you're on Mars. MARIGOLD multiplies by sin(θ)
 
         Implemented Fluids:
         - air-water, uses properties at atmospheric conditions
@@ -139,6 +139,7 @@ class Condition:
             raise NotImplementedError(f"{fluids} not available, try 'air-water'")
         
         self.g = g
+        self.gz = g * np.sin(self.theta)
         return
 
     def __eq__(self, __o: object) -> bool:
@@ -1976,11 +1977,7 @@ class Condition:
         """
         
         if method == 'LM':
-            Re_f = self.rho_f * self.jf * self.Dh / self.mu_f
-            Re_g = self.rho_g * self.jgloc * self.Dh / self.mu_g
-
-            f_f = m / Re_f**n
-            f_g = m / Re_g**n
+            f_f, f_g = self.calc_fric(m = m, n = n)
 
             dpdz_f = f_f * 1/self.Dh * self.rho_f * self.jf**2 / 2
             dpdz_g = f_g * 1/self.Dh * self.rho_g * self.jgloc**2 / 2
@@ -2062,6 +2059,39 @@ class Condition:
                     })
 
         return self.area_avg('W')
+    
+    def calc_fric(self, method = 'Blasius', m = 0.316, n=0.25):
+        """ Calculates friction factor for each phase based on bulk Re
+
+        .. math:: Re_k = \\frac{\\rho_k j_k D}{\\mu_k}
+
+        Method Options:
+         - Blasius
+        .. math:: f_k = \\frac{C}{Re_k^n}
+
+        Returns:
+         - Tuple of f_f, f_g
+        
+        Stores
+         -self.ff
+         -self.fg
+        
+        """
+        
+
+        Re_f = self.rho_f * self.jf * self.Dh / self.mu_f
+        Re_g = self.rho_g * self.jgloc * self.Dh / self.mu_g
+
+        if method.lower() == 'blasius':
+            ff = m / Re_f**n
+            fg = m / Re_g**n
+        else:
+            raise NotImplementedError("Invalid method, try Blasius")
+
+        self.ff = ff
+        self.fg = fg
+        return (ff, fg)
+
     
     def calc_mu_eff(self, method='Ishii', alpha_max = 1.0):
         """Method for effective/mixture viscosity
@@ -2257,9 +2287,18 @@ the newly calculated :math:`v_{r}` or not
                     elif method == 'km1':
                         vr = kw * (np.pi/4)**(1/3) * midas_dict['alpha'] * midas_dict['vf'] * midas_dict['cd']**(1./3) *  (2**(-1./3) - Lw**(1/3))/(0.5 - Lw) + kf * midas_dict['vf']
                     
-                    elif method == 'km1_simp':
+                    elif method == 'km1_simp' or method == 'prelim':
                         vr = -kw * midas_dict['alpha'] * midas_dict['vf'] * midas_dict['cd']**(1./3) - kf * midas_dict['vf']
 
+                    elif method == 'prelim_plus':
+                        ff, fg = self.calc_fric()
+                        
+                        vr = (
+                            -kw * midas_dict['alpha'] * midas_dict['vf'] * midas_dict['cd']**(1./3) - kf * midas_dict['vf'] 
+                        + np.sqrt( 8./3 * midas_dict['Dsm1']/midas_dict['cd'] * ( ff/self.Dh * self.jf**2/2 + 
+                                                                                 (1 - midas_dict['alpha'])*(1-self.rho_g/self.rho_f) * self.gz ) )
+                        )
+                        
                     elif method == 'proper_integral':
                         warnings.warn("This method is probably no good, messed up the math")
                         vr = midas_dict['ug1'] / ( (0.5 - Lw) + kw * midas_dict['cd']**(1./3) *(np.pi/4)**(1/3)* (2**(-1./3) - Lw**(1/3)))
