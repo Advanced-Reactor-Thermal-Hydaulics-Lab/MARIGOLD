@@ -2292,11 +2292,13 @@ the newly calculated :math:`v_{r}` or not
 
                     elif method == 'prelim_plus':
                         ff, fg = self.calc_fric()
-                        
-                        vr = (
+                        try:
+                            vr = (
                             -kw * midas_dict['alpha'] * midas_dict['vf'] * midas_dict['cd']**(1./3) - kf * midas_dict['vf'] 
                         + np.sqrt( 8./3 * midas_dict['Dsm1']/midas_dict['cd'] * ( ff/self.Dh * self.jf**2/2 + 
                                                                                  (1 - midas_dict['alpha'])*(1-self.rho_g/self.rho_f) * self.gz ) )
+                        except ZeroDivisionError:
+                            vr = 0
                         )
 
                     elif method == 'proper_integral':
