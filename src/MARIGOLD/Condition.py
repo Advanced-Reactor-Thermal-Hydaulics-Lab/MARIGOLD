@@ -2184,19 +2184,19 @@ class Condition:
                     Reb = (1 - midas_dict['alpha']) * midas_dict['Dsm1'] * self.rho_f * abs(midas_dict['vr_model']) / self.mu_f
 
                     cd = 24/Reb * (1 + 0.15*Reb**0.687)
-
-                if limit.lower() == "tomiyama":
-                    eo = self.g * (self.rho_f - self.rho_g) * midas_dict['Dsm2']
-                    limit = 8/3 * eo / (eo + 4)
-                    midas_dict.update({'eo': eo})
+                if type(limit) == str:
+                    if limit.lower() == "tomiyama":
+                        eo = self.g * (self.rho_f - self.rho_g) * midas_dict['Dsm2']
+                        limit = 8/3 * eo / (eo + 4)
+                        midas_dict.update({'eo': eo})
+                        
+                    elif limit.lower() == 'ishii-chawla':
+                        eo = self.g * (self.rho_f - self.rho_g) * midas_dict['Dsm2']
+                        limit = min(2/3*np.sqrt(eo), 8/3)
+                        midas_dict.update({'eo': eo})
                     
-                elif limit.lower() == 'ishii-chawla':
-                    eo = self.g * (self.rho_f - self.rho_g) * midas_dict['Dsm2']
-                    limit = min(2/3*np.sqrt(eo), 8/3)
-                    midas_dict.update({'eo': eo})
-                
-                elif type(limit) is not float or type(limit) is not int:
-                    raise NotImplementedError(f"{limit} not a valid type for limiting behavior. Please enter Eo2, Ishii-Chawla, or set a constant limit (e.g. limit = 0.44)")
+                    else:
+                        raise NotImplementedError(f"{limit} not a valid type for limiting behavior. Please enter tomiyama, Ishii-Chawla, or set a constant limit (e.g. limit = 0.44)")
                 
                 cd = max(limit, cd) # Either 0, set by user, or set by above string
 
@@ -2298,7 +2298,7 @@ the newly calculated :math:`v_{r}` or not
                         + np.sqrt( 8./3 * midas_dict['Dsm1']/midas_dict['cd'] * ( ff/self.Dh * self.jf**2/2 + 
                                                                                  (1 - midas_dict['alpha'])*(1-self.rho_g/self.rho_f) * self.gz ) )
                         )
-                        
+
                     elif method == 'proper_integral':
                         warnings.warn("This method is probably no good, messed up the math")
                         vr = midas_dict['ug1'] / ( (0.5 - Lw) + kw * midas_dict['cd']**(1./3) *(np.pi/4)**(1/3)* (2**(-1./3) - Lw**(1/3)))
