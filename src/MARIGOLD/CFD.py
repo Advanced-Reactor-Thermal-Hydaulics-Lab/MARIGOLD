@@ -444,7 +444,7 @@ def write_CCL(mom_source = 'normal_drag_mom_source', ccl_name = 'auto_setup.ccl'
                           inDataFile= '/home/adix/CFD/exp_BCs/in_H_0.csv', 
                           outDataFile = '/home/adix/CFD/exp_BCs/out_H_0.csv', 
                           Db=0.0018, CL = 0.25, CTD = 0.25, theta = 0, mdot = 2.02277,
-                          Kf = 0.083, Kw = 0.98, CD = 0.44, jf = 4, jg = 0.11,
+                          Kf = 0.083, Kw = 0.98, CD = 0.44, jf = 4, jg = 0.11, p_out = 20,
                           num_iter = 10000, resid_target = 1e-6):
     """ Function to write the CCL file that CFX reads
 
@@ -792,7 +792,7 @@ Option = Subsonic\n\
 END\n\
 MASS AND MOMENTUM:\n\
 Option = Opening Pressure and Direction\n\
-Relative Pressure = 0 [Pa]\n\
+Relative Pressure = {p_out} [psi]\n\
 END\n\
 TURBULENCE:\n\
 Option = Medium Intensity and Eddy Viscosity Ratio\n\

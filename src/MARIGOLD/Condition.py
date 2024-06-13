@@ -2147,6 +2147,7 @@ class Condition:
          - "cd" in midas_dict 
          - "Reb" in midas_dict. Calculated by :math:`Re_{b} = \\frac{(1 - \\alpha) \\rho_{f} v_{r} D_{sm,1} }{\\mu_{m}}`. \ 
 :math:`\\mu_{m}` comes from :any:`calc_mu_eff`
+         - "eo", if using "tomiyama" or "ishii" limits
 
         Options for method:
          - Ishii-Zuber, :math:`C_{D} = \\frac{24}{Re_{b}} (1 + 0.1 Re_{b}^{0.75})`
@@ -2305,7 +2306,7 @@ the newly calculated :math:`v_{r}` or not
                         try:
                             vr = (
                             -kw * midas_dict['alpha'] * midas_dict['vf'] * midas_dict['cd']**(1./3) - kf * midas_dict['vf'] 
-                            + np.sqrt( 8./3 * midas_dict['Dsm1']/midas_dict['cd'] * ( ff/self.Dh * self.jf**2/2 + 
+                            + np.sqrt( 8./3 * self.void_area_avg('Dsm1')/midas_dict['cd'] * ( ff/self.Dh * self.jf**2/2 + 
                                                                                  (1 - midas_dict['alpha'])*(1-self.rho_g/self.rho_f) * self.gz ) )
                             )
                         except ZeroDivisionError:
