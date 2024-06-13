@@ -6,7 +6,7 @@ import subprocess
 
 """
 
-def write_CFX_BC(cond:Condition, save_dir = ".", z_loc = 0, only_90 = False):
+def write_CFX_BC(cond:Condition, save_dir = ".", z_loc = 'LoverD', only_90 = False, interp = False, csv_name = False, ngrid = 100):
     """ Write a csv file for CFX based on cond
 
     z_loc can be set by the user, or set to "LoverD" to use the cond L/D information
@@ -16,41 +16,65 @@ def write_CFX_BC(cond:Condition, save_dir = ".", z_loc = 0, only_90 = False):
     only_90 option for writing data only down the 90 degree line
     
     """
+    try:
+        dummy = cond.run_ID
+    except AttributeError:
+        cond.run_ID = cond.database
 
-    if only_90:
-        csv_name = f"{cond.run_ID}_jf{cond.jf:0.1f}_jg{cond.jgref}_{cond.theta}_90deg.csv"
-    else:
-        csv_name = f"{cond.run_ID}_jf{cond.jf:0.1f}_jg{cond.jgref}_{cond.theta}.csv"
+    if not csv_name:
+        if only_90:
+            csv_name = f"{cond.run_ID}_{cond.theta}deg_jf{cond.jf:0.1f}_jg{cond.jgref}_{cond.port}_BC_90deg.csv"
+        else:
+            csv_name = f"{cond.run_ID}_{cond.theta}deg_jf{cond.jf:0.1f}_jg{cond.jgref}_{cond.port}_BC.csv"
 
     path_to_csv = os.path.join(save_dir, csv_name)
 
     if z_loc == 'LoverD':
         z_loc = cond.LoverD
 
+
     with open(path_to_csv, "w") as f:
+        R = cond.Dh/2
 
         f.write("[Name],,,,,,,,,\n")
-        f.write(f"{cond.run_ID}data,,,,,,,,,\n")
+        f.write(f"{cond.port}data,,,,,,,,,\n")
         f.write("[Spatial Fields],,,,,,,,,\n")
-        f.write("radius,z,phi,,,,,,,\n")
-        f.write("[Data],,,,,,,,,\n")
-        f.write("radius [mm],z [m],phi [],Velocity u [m s^-1],Velocity v [m s^-1],Velocity w [m s^-1],Volume Fraction [],Velocity u f [m s^-1],Velocity v f [m s^-1],Velocity w f [m s^-1],\n")
+        
+        
+        if not interp:
+            f.write("radius,z,phi,,,,,,,\n")
+            f.write("[Data],,,,,,,,,\n")
+            f.write("radius [mm],z [m],phi [],Velocity u g[m s^-1],Velocity v g[m s^-1],Velocity w g[m s^-1],Volume Fraction [],Velocity u f [m s^-1],Velocity v f [m s^-1],Velocity w f [m s^-1],\n")
 
-        for angle, r_dict in cond.phi.items():
-                for rstar, midas_output in r_dict.items():
-                    if only_90:
-                        if angle == 90 or angle == 270:
-                            pass
-                        else:
-                            continue
-                    r = rstar * 12.7 # r/R * R [mm]
-                    try:
-                        vf = midas_output['vf']
-                    except:
-                        cond.approx_vf()
-                        vf = midas_output['vf']
+            for angle, r_dict in cond.phi.items():
+                    for rstar, midas_output in r_dict.items():
+                        if only_90:
+                            if angle == 90 or angle == 270:
+                                pass
+                            else:
+                                continue
+                        r = rstar * 12.7 # r/R * R [mm]
 
-                    f.write(f"{r},{z_loc},{angle * np.pi/180},{0},{midas_output['ug1']},{0},{midas_output['alpha']},{0},{vf},{0},\n")
+                        f.write(f"{r},{z_loc},{angle * np.pi/180},{0},{0},{midas_output['ug1']},{midas_output['alpha']},{0},{0},{midas_output['vf']},\n")
+        elif interp == 'xy':
+            f.write("x,y,z,,,,,,,\n")
+            f.write("[Data],,,,,,,,,\n")
+            f.write("x [m],y [m],z [m],Velocity u g [m s^-1],Velocity v g [m s^-1],Velocity w g [m s^-1],Volume Fraction [],Velocity u f [m s^-1],Velocity v f [m s^-1],Velocity w f [m s^-1],\n")
+
+            for x in np.linspace(-R / 2, R, ngrid):
+                for y in np.linspace(-R, R, ngrid):
+                    if np.sqrt(x**2 + y**2) <= R:
+                        f.write(f"{x},{y},{z_loc},{0},{0},{ cond(x, y, 'ug1', interp_method='linear_xy') },{cond(x, y, 'alpha', interp_method='linear_xy')},{0},{0},{cond(x, y, 'vf', interp_method='linear_xy')},\n")
+
+        else:
+            f.write("radius,z,phi,,,,,,,\n")
+            f.write("[Data],,,,,,,,,\n")
+            f.write("radius [mm],z [m],phi [],Velocity u g [m s^-1],Velocity v g [m s^-1],Velocity w g [m s^-1],Volume Fraction [],Velocity u f [m s^-1],Velocity v f [m s^-1],Velocity w f [m s^-1],\n")
+
+            for r in np.linspace(0, R, ngrid):
+                for phi in np.linspace(0, 2*np.pi, ngrid):
+                    f.write(f"{r*1000},{z_loc},{phi},{0},{0},{ cond(phi, r/R, 'ug1', interp_method='linear') },{cond(phi, r/R, 'alpha', interp_method='linear')},{0},{0},{cond(phi, r/R, 'vf', interp_method='linear')},\n")
+
 
     return
 
@@ -121,7 +145,7 @@ def read_CFX_export(csv_name, jf, jgref, theta, port, database, jgloc=None) -> C
 
 def make_ICEM_pipe_mesh(r_divs: int, theta_divs: int, z_divs: int, o_point: float, L: float, 
                         case_name: str, turb_model = 'ke', Ref = 20000, growth_ratio = 1.2, 
-                        fluent_translator_path = "/apps/cent7/ansys22/v221/icemcfd/linux64_amd/icemcfd/output-interfaces/fluent6",
+                        fluent_translator_path = "/apps/external/apps/ansys/2022r2/ansys_inc/v222/icemcfd/linux64_amd/icemcfd/output-interfaces/fluent6",
                         cleanup = True):
     """ Function for making an O-grid pipe mesh using ANSYS ICEM
 
@@ -341,7 +365,8 @@ ic_exit\n', file=fi)
     except subprocess.CalledProcessError as e:
         print(e)
         print("Continuing...")
-    subprocess.check_call('icemcfd -x ./mesh_replay.rpl > auto_cfx_run.log', shell=True)
+    comp_process = subprocess.call('icemcfd -x ./mesh_replay.rpl > auto_cfx_run.log', shell=True)
+    print(comp_process)
     if cleanup:
         subprocess.check_call('rm mesh_replay.rpl', shell=True)
         subprocess.check_call('rm project1.*', shell=True)
@@ -419,7 +444,7 @@ def write_CCL(mom_source = 'normal_drag_mom_source', ccl_name = 'auto_setup.ccl'
                           inDataFile= '/home/adix/CFD/exp_BCs/in_H_0.csv', 
                           outDataFile = '/home/adix/CFD/exp_BCs/out_H_0.csv', 
                           Db=0.0018, CL = 0.25, CTD = 0.25, theta = 0, mdot = 2.02277,
-                          Kf = 0.083, Kw = 0.98, CD = 0.44, jf = 4, jg = 0.11,
+                          Kf = 0.083, Kw = 0.98, CD = 0.44, jf = 4, jg = 0.11, p_out = 20,
                           num_iter = 10000, resid_target = 1e-6):
     """ Function to write the CCL file that CFX reads
 
@@ -463,10 +488,14 @@ def write_CCL(mom_source = 'normal_drag_mom_source', ccl_name = 'auto_setup.ccl'
 
     if CL == 'tomiyama':
         lift_string = f"Option = Tomiyama \n"
+    elif CL == 'legendre':
+        lift_string = f"Option = Legendre \n"
     else:
 
         if CL == 'ryan_DFM':
             CL = calculate_CL_Ryan(jf=jf, jg=jg, theta=theta, Db=Db)
+        elif CL == 'tomi-sharma':
+            CL = 'CL'
 
         lift_string = f"Lift Coefficient = {CL} \nOption = Lift Coefficient \n"
 
@@ -490,17 +519,25 @@ facilitytheta = {theta} \n\
 gravy = -9.81 [m s^-2]*cos(facilitytheta* pi / 180) \n\
 gravz = -9.81 [m s^-2]*sin(facilitytheta* pi / 180) \n\
 liquidWEff = (1 - Kf - Kw * gas.Volume Fraction * CD^(1/3) ) * liquid.w \n\
-phi = if(y>0 [m], pi/2+atan(x/y), 3*pi/2+atan(x/y)) \n\
+phi = atan2(y, x) \n\
 radius = sqrt(x^2 + y^2) \n\
 vrNorm = sqrt( (gas.u - liquid.u)^2+ (gas.v - liquid.v)^2+ (gas.w - liquidWEff)^2 ) \n\
+Eo = gravz * (liquid.density - gas.density) * ( gas.Mean Particle Diameter )^2 / (gas | liquid.Surface Tension Coefficient) \n\
+Eop = gravz * (liquid.density - gas.density) * ( gas.Mean Particle Diameter * (1+0.136*Eo^0.757)^(1/3.) )^2 / (gas | liquid.Surface Tension Coefficient) \n\
+Rep = liquid.density * abs(gas.w - liquidWEff) * gas.Mean Particle Diameter / liquid.viscosity \n\
+f = 0.00105*Eop^3-0.0159*Eop^2-0.0204*Eop + 0.474 \n\
+CLtomiyama = min( 0.288*tanh(0.121*Rep) , f )\n\
+Ref = liquid.density * areaAve(liquid.w)@inlet * 0.0254 [m] / liquid.viscosity\n\
+sharmaFactor = exp( (max(Ref, 5e4) - 5e4) / (-1.22e5) )\n\
+CL = CLtomiyama * sharmaFactor\n\
 END \n\
 FUNCTION: {InletData} \n\
 Argument Units = [mm], [m], [] \n\
 Option = Profile Data \n\
 Reference Coord Frame = Coord 0 \n\
 Spatial Fields = radius, z, phi \n\
-DATA FIELD: Velocity u \n\
-Field Name = Velocity u \n\
+DATA FIELD: Velocity u g\n\
+Field Name = Velocity u g\n\
 Parameter List = U,Velocity r Component,Wall U,Wall Velocity r Component \n\
 Result Units = [m s^-1] \n\
 END \n\
@@ -509,8 +546,8 @@ Field Name = Velocity u f \n\
 Parameter List = U,Velocity r Component,Wall U,Wall Velocity r Component \n\
 Result Units = [m s^-1] \n\
 END \n\
-DATA FIELD: Velocity v \n\
-Field Name = Velocity v \n\
+DATA FIELD: Velocity v g\n\
+Field Name = Velocity v g\n\
 Parameter List = V,Velocity Theta Component,Wall V,Wall Velocity Theta Component \n\
 Result Units = [m s^-1] \n\
 END \n\
@@ -519,8 +556,8 @@ Field Name = Velocity v f \n\
 Parameter List = V,Velocity Theta Component,Wall V,Wall Velocity Theta Component \n\
 Result Units = [m s^-1] \n\
 END \n\
-DATA FIELD: Velocity w \n\
-Field Name = Velocity w \n\
+DATA FIELD: Velocity w g\n\
+Field Name = Velocity w g\n\
 Parameter List = Velocity Axial Component,W,Wall Velocity Axial Component,Wall W \n\
 Result Units = [m s^-1] \n\
 END \n\
@@ -544,8 +581,8 @@ Argument Units = [mm], [m], [] \n\
 Option = Profile Data \n\
 Reference Coord Frame = Coord 0 \n\
 Spatial Fields = radius, z, phi \n\
-DATA FIELD: Velocity u \n\
-Field Name = Velocity u \n\
+DATA FIELD: Velocity u g\n\
+Field Name = Velocity u g\n\
 Parameter List = U,Velocity r Component,Wall U,Wall Velocity r Component \n\
 Result Units = [m s^-1] \n\
 END \n\
@@ -553,8 +590,8 @@ DATA FIELD: Velocity u f \n\
 Field Name = Velocity u f \n\
 Result Units = [m s^-1] \n\
 END \n\
-DATA FIELD: Velocity v \n\
-Field Name = Velocity v \n\
+DATA FIELD: Velocity v g\n\
+Field Name = Velocity v g\n\
 Parameter List = V,Velocity Theta Component,Wall V,Wall Velocity Theta Component \n\
 Result Units = [m s^-1] \n\
 END \n\
@@ -562,8 +599,8 @@ DATA FIELD: Velocity v f \n\
 Field Name = Velocity v f \n\
 Result Units = [m s^-1] \n\
 END \n\
-DATA FIELD: Velocity w \n\
-Field Name = Velocity w \n\
+DATA FIELD: Velocity w g\n\
+Field Name = Velocity w g\n\
 Parameter List = Velocity Axial Component,W,Wall Velocity Axial Component,Wall W \n\
 Result Units = [m s^-1] \n\
 END \n\
@@ -718,7 +755,7 @@ VELOCITY: \n\
 Option = Cartesian Velocity Components \n\
 U = 0 [m s^-1] \n\
 V = 0 [m s^-1] \n\
-W = {InletData}.Velocity v(radius,z,phi) \n\
+W = {InletData}.Velocity w g(radius,z,phi) \n\
 END \n\
 VOLUME FRACTION: \n\
 Option = Value \n\
@@ -755,7 +792,7 @@ Option = Subsonic\n\
 END\n\
 MASS AND MOMENTUM:\n\
 Option = Opening Pressure and Direction\n\
-Relative Pressure = 0 [Pa]\n\
+Relative Pressure = {p_out} [psi]\n\
 END\n\
 TURBULENCE:\n\
 Option = Medium Intensity and Eddy Viscosity Ratio\n\
@@ -1078,16 +1115,11 @@ END\n\
 \n\
 > quit ", file = fi)
     print('$\ncfx5pre -s CFXPre_Commands.pre')
-    try:
-        subprocess.check_call("ml ansys", shell=True)
-    except subprocess.CalledProcessError as e:
-        print(e)
-        print("Continuing...")
-    try:
-        subprocess.check_call('cfx5pre -s CFXPre_Commands.pre -line > auto_cfx_run.log', shell=True)
-    except subprocess.CalledProcessError as e:
-        print(e)
-        print(e.returncode)
+    
+    subprocess.run("ml ansys", shell=True)
+    
+    comp_process = subprocess.check_call('cfx5pre -s CFXPre_Commands.pre -line > auto_cfx_run.log', shell=True)
+    print(comp_process)
     return
 
 def run_CFX_case(case_name, parallel=True, npart = 4, init_fi = None, interactive = False):
@@ -1098,11 +1130,8 @@ def run_CFX_case(case_name, parallel=True, npart = 4, init_fi = None, interactiv
     Can run in parallel, specify the number of cores with npart
     
     """
-    try:
-        subprocess.check_call("ml ansys", shell=True)
-    except subprocess.CalledProcessError as e:
-        print(e)
-        print("Continuing...")
+    comp_process = subprocess.run("ml ansys", shell=True)
+    print(comp_process)
 
     run_string = f"cfx5solve -def {case_name}.def -monitor {case_name}_001.out -double"
     
@@ -1118,7 +1147,9 @@ def run_CFX_case(case_name, parallel=True, npart = 4, init_fi = None, interactiv
     run_string += " > auto_cfx_run.log"
 
     print(f"${run_string}")
-    subprocess.check_call(run_string, shell=True)
+    comp_process = subprocess.run(run_string, shell=True)
+    if comp_process.returncode != 0:
+        print(comp_process)
     return
 
 
@@ -1258,14 +1289,13 @@ END\n\
 >quit     \n\
         \
         ', file=fi)
-    try:
-        subprocess.check_call("ml ansys", shell=True)
-    except subprocess.CalledProcessError as e:
-        print(e)
-        print("Continuing...")
+
+    subprocess.run("ml ansys", shell=True)
+
     print(os.getcwd())
     subprocess.check_call(f'rm -rf ./{case_name}_Results', shell=True)
-    subprocess.check_call(f'cfx5post -play CFXPost_Commands.cse -line > auto_cfx_run.log', shell=True)
+    comp_process = subprocess.run(f'cfx5post -play CFXPost_Commands.cse -line > auto_cfx_run.log', shell=True)
+    print(comp_process)
 
 
 

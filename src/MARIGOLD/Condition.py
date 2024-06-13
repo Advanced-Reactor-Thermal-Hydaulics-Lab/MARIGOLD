@@ -33,7 +33,7 @@ class Condition:
 
         Optional inputs:
         - fluids, what fluid pair to use as the gas and liquid
-        - g, gravitational acceleration. In case you're on Mars
+        - g, gravitational acceleration. In case you're on Mars. MARIGOLD multiplies by sin(θ)
 
         Implemented Fluids:
         - air-water, uses properties at atmospheric conditions
@@ -139,6 +139,7 @@ class Condition:
             raise NotImplementedError(f"{fluids} not available, try 'air-water'")
         
         self.g = g
+        self.gz = g * np.sin(self.theta)
         return
 
     def __eq__(self, __o: object) -> bool:
@@ -155,9 +156,9 @@ class Condition:
         return self.name
 
     def __call__(self, phi_in:np.ndarray, r_in:np.ndarray, param:str, interp_method='None') -> np.ndarray:
-        """Returns the value of param at (phi, r). Phi is in radians
+        """Returns the value of param at (phi, r). Phi is in radians, r nondimensional
          
-        Interp options:
+        Interp method:
          - 'None', will try to fetch raw data at this location
          - 'linear', linear interpolation
          - 'spline', spline interpolation
@@ -203,7 +204,7 @@ class Condition:
             try:
                 return self.linear_interp[param](phi_in, r_in)
             except:
-                self.calc_linear_interp(param)
+                self.fit_linear_interp(param)
                 return self.linear_interp[param](phi_in, r_in)
             
         elif interp_method == 'linear_xy':
@@ -212,7 +213,7 @@ class Condition:
             try:
                 return self.linear_xy_interp[param](x, y)
             except:
-                self.calc_linear_xy_interp(param)
+                self.fit_linear_xy_interp(param)
                 return self.linear_xy_interp[param](x, y)
         
         else:
@@ -1976,11 +1977,7 @@ class Condition:
         """
         
         if method == 'LM':
-            Re_f = self.rho_f * self.jf * self.Dh / self.mu_f
-            Re_g = self.rho_g * self.jgloc * self.Dh / self.mu_g
-
-            f_f = m / Re_f**n
-            f_g = m / Re_g**n
+            f_f, f_g = self.calc_fric(m = m, n = n)
 
             dpdz_f = f_f * 1/self.Dh * self.rho_f * self.jf**2 / 2
             dpdz_g = f_g * 1/self.Dh * self.rho_g * self.jgloc**2 / 2
@@ -2063,6 +2060,39 @@ class Condition:
 
         return self.area_avg('W')
     
+    def calc_fric(self, method = 'Blasius', m = 0.316, n=0.25):
+        """ Calculates friction factor for each phase based on bulk Re
+
+        .. math:: Re_k = \\frac{\\rho_k j_k D}{\\mu_k}
+
+        Method Options:
+         - Blasius
+        .. math:: f_k = \\frac{C}{Re_k^n}
+
+        Returns:
+         - Tuple of f_f, f_g
+        
+        Stores
+         -self.ff
+         -self.fg
+        
+        """
+        
+
+        Re_f = self.rho_f * self.jf * self.Dh / self.mu_f
+        Re_g = self.rho_g * self.jgloc * self.Dh / self.mu_g
+
+        if method.lower() == 'blasius':
+            ff = m / Re_f**n
+            fg = m / Re_g**n
+        else:
+            raise NotImplementedError("Invalid method, try Blasius")
+
+        self.ff = ff
+        self.fg = fg
+        return (ff, fg)
+
+    
     def calc_mu_eff(self, method='Ishii', alpha_max = 1.0):
         """Method for effective/mixture viscosity
         
@@ -2106,7 +2136,7 @@ class Condition:
 
         return self.area_avg('mu_eff')
 
-    def calc_cd(self, method='Ishii-Zuber', vr_cheat = False, limit = 0):
+    def calc_cd(self, method='Ishii-Zuber', vr_cheat = False, limit = 0, const_CD = 0.44):
         """Method for calculating drag coefficient
         
         Inputs:
@@ -2118,10 +2148,12 @@ class Condition:
          - "cd" in midas_dict 
          - "Reb" in midas_dict. Calculated by :math:`Re_{b} = \\frac{(1 - \\alpha) \\rho_{f} v_{r} D_{sm,1} }{\\mu_{m}}`. \ 
 :math:`\\mu_{m}` comes from :any:`calc_mu_eff`
+         - "eo", if using "tomiyama" or "ishii" limits
 
         Options for method:
          - Ishii-Zuber, :math:`C_{D} = \\frac{24}{Re_{b}} (1 + 0.1 Re_{b}^{0.75})`
          - Schiller-Naumann, :math:`C_{D} = \\frac{24}{Re_{b}} (1 + 0.15 Re_{b}^{0.687})`. Here, :math:`Re_{b}` uses :math:`\\mu_{f}`
+         - const
 
         Returns:
          - area average drag coefficient
@@ -2151,23 +2183,27 @@ class Condition:
                     else:
                         cd = 0
 
-                elif method == 'Schiller-Naumann':
+                elif method.lower() == 'schiller-naumann':
                     Reb = (1 - midas_dict['alpha']) * midas_dict['Dsm1'] * self.rho_f * abs(midas_dict['vr_model']) / self.mu_f
 
                     cd = 24/Reb * (1 + 0.15*Reb**0.687)
-
-                if limit.lower() == "tomiyama":
-                    eo = self.g * (self.rho_f - self.rho_g) * midas_dict['Dsm2']
-                    limit = 8/3 * eo / (eo + 4)
-                    midas_dict.update({'eo': eo})
-                    
-                elif limit.lower() == 'ishii-chawla':
-                    eo = self.g * (self.rho_f - self.rho_g) * midas_dict['Dsm2']
-                    limit = min(2/3*np.sqrt(eo), 8/3)
-                    midas_dict.update({'eo': eo})
                 
-                elif type(limit) is not float or type(limit) is not int:
-                    raise NotImplementedError(f"{limit} not a valid type for limiting behavior. Please enter Eo2, Ishii-Chawla, or set a constant limit (e.g. limit = 0.44)")
+                elif method == 'constant' or method == 'const':
+                    cd = const_CD
+
+                if type(limit) == str:
+                    if limit.lower() == "tomiyama":
+                        eo = self.g * (self.rho_f - self.rho_g) * midas_dict['Dsm2']
+                        limit = 8/3 * eo / (eo + 4)
+                        midas_dict.update({'eo': eo})
+                        
+                    elif limit.lower() == 'ishii-chawla':
+                        eo = self.g * (self.rho_f - self.rho_g) * midas_dict['Dsm2']
+                        limit = min(2/3*np.sqrt(eo), 8/3)
+                        midas_dict.update({'eo': eo})
+                    
+                    else:
+                        raise NotImplementedError(f"{limit} not a valid type for limiting behavior. Please enter tomiyama, Ishii-Chawla, or set a constant limit (e.g. limit = 0.44)")
                 
                 cd = max(limit, cd) # Either 0, set by user, or set by above string
 
@@ -2175,7 +2211,7 @@ class Condition:
 
         return self.area_avg('cd')
 
-    def calc_vr_model(self, method='km1_simp', kw = -0.98, n=1, Lw = 5, kf = 0.089, iterate_cd = True, quiet = True):
+    def calc_vr_model(self, method='km1_simp', kw = -0.98, n=1, Lw = 5, kf = 0.089, iterate_cd = True, quiet = True, recalc_cd = True):
         """Method for calculating relative velocity based on models
         
         Inputs:
@@ -2212,19 +2248,20 @@ the newly calculated :math:`v_{r}` or not
             self.random_point = self.original_mesh[np.random.choice(len(self.original_mesh))]
 
         while True:
-            if iterate_cd:
-                
-                if initialize_vr:
-                    for angle, r_dict in self.phi.items():
-                        for rstar, midas_dict in r_dict.items():
-                            midas_dict.update(
-                                {'vr_model': -10}
-                            )
-                    initialize_vr = False
+            if recalc_cd:
+                if iterate_cd:
+                    
+                    if initialize_vr:
+                        for angle, r_dict in self.phi.items():
+                            for rstar, midas_dict in r_dict.items():
+                                midas_dict.update(
+                                    {'vr_model': -10}
+                                )
+                        initialize_vr = False
 
-                self.calc_cd(vr_cheat=False)
-            else:
-                self.calc_cd(vr_cheat=True)
+                    self.calc_cd(vr_cheat=False)
+                else:
+                    self.calc_cd(vr_cheat=True)
 
             old_vr = self.area_avg('vr_model', recalc=True)
 
@@ -2258,8 +2295,24 @@ the newly calculated :math:`v_{r}` or not
                     elif method == 'km1':
                         vr = kw * (np.pi/4)**(1/3) * midas_dict['alpha'] * midas_dict['vf'] * midas_dict['cd']**(1./3) *  (2**(-1./3) - Lw**(1/3))/(0.5 - Lw) + kf * midas_dict['vf']
                     
-                    elif method == 'km1_simp':
+                    elif method == 'km1_simp' or method == 'prelim':
                         vr = -kw * midas_dict['alpha'] * midas_dict['vf'] * midas_dict['cd']**(1./3) - kf * midas_dict['vf']
+
+                    elif method == 'prelim_plus':
+                        ff, fg = self.calc_fric()
+
+                        # if midas_dict['Dsm1'] == 0 and rstar != 1.0:
+                        #     print(self, angle, rstar)
+
+                        try:
+                            vr = (
+                            -kw * midas_dict['alpha'] * midas_dict['vf'] * midas_dict['cd']**(1./3) - kf * midas_dict['vf'] 
+                            + np.sqrt( 8./3 * self.void_area_avg('Dsm1')/midas_dict['cd'] * ( ff/self.Dh * self.jf**2/2 + 
+                                                                                 (1 - midas_dict['alpha'])*(1-self.rho_g/self.rho_f) * self.gz ) )
+                            )
+                        except ZeroDivisionError:
+                            vr = 0
+                        
 
                     elif method == 'proper_integral':
                         warnings.warn("This method is probably no good, messed up the math")
@@ -2299,7 +2352,7 @@ the newly calculated :math:`v_{r}` or not
             
             if iterations > MAX_ITERATIONS:
                 print("Warning, max iterations exceeded in calculating vr_model")
-                print(f"{old_vr - self.area_avg('vr_model', recalc=True)}")
+                print(f"{old_vr}\t{self.area_avg('vr_model', recalc=True)}\t{(old_vr - self.area_avg('vr_model', recalc=True))/old_vr*100}")
                 return
             
         
@@ -2732,7 +2785,7 @@ the newly calculated :math:`v_{r}` or not
         return
 
     def plot_contour(self, param:str, save_dir = '.', show=True, set_max = None, set_min = None, fig_size = 4, label_str = None, suppress_colorbar = False,
-                     rot_angle = 0, ngridr = 50, ngridphi = 50, colormap = 'hot_r', num_levels = 0, level_step = 0.25, title = False, title_str = '', extra_text = '',
+                     rot_angle = 0, ngridr = 50, ngridphi = 50, colormap = 'hot_r', num_levels = 0, level_step = 0.01, title = False, title_str = '', extra_text = '',
                      annotate_h = False, cartesian = False, h_star_kwargs = {'method': 'max_dsm', 'min_void': '0.05'}, plot_measured_points = False) -> None:
         
         """Method to plot contour of a given param
