@@ -155,8 +155,8 @@ def read_CFX_export(csv_name, jf, jgref, theta, port, database, jgloc=None) -> C
     return cond
 
 
-def make_ICEM_pipe_mesh(r_divs: int, theta_divs: int, z_divs: int, o_point: float, L: float, 
-                        case_name: str, turb_model = 'ke', Ref = 20000, growth_ratio = 1.2, 
+def make_ICEM_pipe_mesh(r_divs: int, theta_divs: int, z_divs: int, o_point: float, Lmesh: float, 
+                        case_name: str, turb_model = 'ke', Ref = 20000, growth_ratio = 1.2, L = 0.0254,
                         fluent_translator_path = "/apps/external/apps/ansys/2022r2/ansys_inc/v222/icemcfd/linux64_amd/icemcfd/output-interfaces/fluent6",
                         cleanup = True):
     """ Function for making an O-grid pipe mesh using ANSYS ICEM
@@ -198,7 +198,7 @@ ic_empty_tetin \n\
 ic_point {{}} GEOM pnt.00 0,0,0\n\
 ic_undo_group_end \n\
 ic_undo_group_begin \n\
-ic_point {{}} GEOM pnt.01 0,0,2.54\n\
+ic_point {{}} GEOM pnt.01 0,0,{Lmesh}\n\
 ic_undo_group_end \n\
 ic_set_global geo_cad 0 toptol_userset\n\
 ic_set_global geo_cad 0.001 toler\n\
