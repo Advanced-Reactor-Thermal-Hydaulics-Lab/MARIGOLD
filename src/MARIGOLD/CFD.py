@@ -53,7 +53,7 @@ def write_CFX_BC(cond:Condition, save_dir = ".", z_loc = 'LoverD', only_90 = Fal
                                 pass
                             else:
                                 continue
-                        r = rstar * 12.7 # r/R * R [mm]
+                        r = rstar * 12.7 * np.sin(angle * np.pi/180) # r/R * R [mm]
 
                         f.write(f"{r},{z_loc},{angle * np.pi/180},{0},{0},{midas_output['ug1']},{midas_output['alpha']},{0},{0},{midas_output['vf']},\n")
         elif interp == 'xy':
@@ -79,7 +79,7 @@ def write_CFX_BC(cond:Condition, save_dir = ".", z_loc = 'LoverD', only_90 = Fal
 
             rs = np.linspace(0, R, ngrid)
             if only_90:
-                phis = np.ones(rs.shape) * np.pi/2
+                phis = [np.pi/2, 3*np.pi/2]
             else:
                 phis = np.linspace(0, 2*np.pi, ngrid)
 
