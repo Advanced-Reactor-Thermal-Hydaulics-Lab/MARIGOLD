@@ -597,10 +597,131 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                 theta = float(file.split('_')[0].strip('deg'))
             except:
                 print(f'Warning: Non-standard excel file name {file}. Skipping...')
-                continue
+                pass
             
-            # Yadav's template is a bit chaotic; let's not try to adapt PITA's extract logic to it (DHK)
-            if sheet_type == 'yadav_template':
+            # Temporary fix, for the bettis data (DHK)
+            if sheet_type == 'bettis' and 'Run' in file.split('_')[0]:
+                theta = 90
+                port = file.split('_')[-1]
+            
+                if file.split('_')[0] == 'Run1':
+                    jf = 0.32
+                    jgref = 0.047
+                elif file.split('_')[0] == 'Run2':
+                    jf = 0.95
+                    jgref = 0.047
+                elif file.split('_')[0] == 'Run3':
+                    jf = 1.89
+                    jgref = 0.095
+                elif file.split('_')[0] == 'Run4':
+                    jf = 0.95
+                    jgref = 0.187
+                elif file.split('_')[0] == 'Run5':
+                    jf = 1.89
+                    jgref = 0.193
+                elif file.split('_')[0] == 'Run6':
+                    jf = 0.63
+                    jgref = 0.279
+                elif file.split('_')[0] == 'Run7':
+                    jf = 2.84
+                    jgref = 0.287
+                elif file.split('_')[0] == 'Run8':
+                    jf = 1.89
+                    jgref = 0.385
+                elif file.split('_')[0] == 'Run9':
+                    jf = 4.40
+                    jgref = 0.940
+                else:
+                    continue
+                
+            else:
+                continue
+        
+            if sheet_type == 'bettis':
+                # Bare bones
+                ws = wb['<<Ub>>']
+                jgloc = ws['N18'].value
+
+                newCond = Condition(jgref, jgloc, jf, theta, port, sheet_type.split('_')[0])
+
+                if newCond not in all_conditions:
+                    all_conditions.append(newCond)
+                    cond = newCond
+                else:
+                    cond = all_conditions[ all_conditions.index(newCond) ]
+
+                if port == 'p1':
+                    cond.LoverD = 8.02
+                elif port == 'p2':
+                    cond.LoverD = 34.76
+                elif port == 'p3':
+                    cond.LoverD = 61.49
+                elif port == 'p4':
+                    cond.LoverD = 88.22
+                elif port == 'p5':
+                    cond.LoverD = 114.96
+                elif port == 'p6':
+                    cond.LoverD = 141.70
+
+                # 1 x 20 cm^2 rectangular channel
+                cond.Dh = 4*0.20*0.1/2/(0.20+0.01)
+
+                ws = wb['a']
+                cond.area_avg_void_sheet = ws['N15'].value
+                
+                ws = wb['ai']
+                cond.area_avg_ai_sheet = ws['N15'].value
+
+                ws = wb['Dsm']
+                cond.area_avg_Dsm_sheet = ws['N15'].value
+
+                cond.jgatm = jgref
+
+                # For the future
+
+                # <<Ub>>
+                # A1: x/y (mm)
+                # B2 to L2: y (0-10)
+                # A3 to A15: x (0-100)
+                # B3 to L15: data
+                # M2-O2: headers (Ub*a)x, <Ub*a>, <<Ub>>
+                # M3-N15: formulas (sum across y, divide by 10) (huh?)
+                # O15: <<Ub>> value
+
+                # Ub
+                # A1: x/y (mm)
+                # B2 to L2: y (0-10)
+                # A3 to A15: x (0-100)
+                # B3 to L15: data
+                # M2-O2: headers Ubx, Ubave
+                # M3-N15: formulas (sum across y, divide by 10) (huh?)
+
+                # Dsm
+                # A1: x/y (mm)
+                # B2 to L2: y (0-10)
+                # A3 to A15: x (0-100)
+                # B3 to L15: data
+                # M2-O2: headers Dsmx, Dsm
+                # M3-N15: formulas (sum across y endpoints halved, divide by 10) (huh?)
+
+                # ai
+                # a
+                # x90y
+                # x70y
+                # x50y
+                # x30y
+                # x10y
+                # x3y
+                # AAIXYC
+                # Figures
+
+                # Other sheets that don't appear in all Excel docs:
+                # fb
+                # DriftFlux
+                # aaixycnew
+                # Rawdata
+                
+            elif sheet_type == 'yadav_template':
 
                 potent_ranges = [ [i for i in range(8, 22)], [i for i in range(48, 62)], [i for i in range(87, 101)], [i for i in range(128, 142)], [i for i in range(168, 182)], [i for i in range(209, 223)], [i for i in range(250, 264)], [i for i in range(290, 304)] ]
                 
