@@ -584,11 +584,14 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
             
             #if debug: print(path, file=debugFID)
             
-            try:
-                wb = op.load_workbook(filename=os.path.join(path, file), data_only=True)
-            except:
-                print(f"Error reading wb: {file}\nSkipping...")
-                continue
+            # I'd like to know the actual error, please
+            wb = op.load_workbook(filename=os.path.join(path, file), data_only=True)
+
+            # try:
+            #     wb = op.load_workbook(filename=os.path.join(path, file), data_only=True)
+            # except:
+            #     print(f"Error reading wb: {file}\nSkipping...")
+            #     continue
             
             try:
                 jf = float(file.split('_')[1].strip('jf'))
