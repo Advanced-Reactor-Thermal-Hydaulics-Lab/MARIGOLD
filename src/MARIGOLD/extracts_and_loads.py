@@ -585,9 +585,6 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
             
             #if debug: print(path, file=debugFID)
             
-            # I weep
-            wb = xlrd.open_workbook(filename=os.path.join(path, file))
-
             try:
                 if file.split('.')[-1] == 'xls':
                     wb = xlrd.open_workbook(filename=os.path.join(path, file))
@@ -605,11 +602,11 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
             except:
                 print(f'Warning: Non-standard excel file name {file}. Is this Bettis template?')
                 pass
-
-            print("we're in, boys")
             
             # Temporary fix, for the bettis data (DHK)
             if sheet_type == 'bettis_template' and 'Run' in file.split('_')[0]:
+                print("Yes, it is. Proceeding...")
+
                 theta = 90
                 port = file.split('_')[-1]
             
@@ -641,7 +638,7 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                     jf = 4.40
                     jgref = 0.940
                 else:
-                    print("hmmm")
+                    print("Warning: Run number exceeds highest known run. Skipping...")
                     continue
                 
             else:
@@ -651,6 +648,8 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
             if sheet_type == 'bettis_template':
                 # Bare bones
                 ws = wb['<<Ub>>']
+                print(ws)
+                print(ws['N18'].value)
                 jgloc = ws['N18'].value
 
                 newCond = Condition(jgref, jgloc, jf, theta, port, sheet_type.split('_')[0])
