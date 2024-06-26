@@ -598,6 +598,8 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
             except:
                 print(f'Warning: Non-standard excel file name {file}. Is this Bettis template?')
                 pass
+
+            print("we're in, boys")
             
             # Temporary fix, for the bettis data (DHK)
             if sheet_type == 'bettis_template' and 'Run' in file.split('_')[0]:
@@ -632,6 +634,7 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                     jf = 4.40
                     jgref = 0.940
                 else:
+                    print("hmmm")
                     continue
                 
             else:
