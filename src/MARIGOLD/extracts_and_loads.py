@@ -5,6 +5,7 @@ from .Iskandrani_Condition import Iskandrani_Condition
 from .Yang_Condition import Yang_Condition
 
 import re
+import xlrd
 
 def extractProbeData(dump_file = 'database.dat', in_dir = [], require_terms = None, skip_terms = ['CFD', 'Copy'],
                      extract_Ryan = True, Ryan_path = 'Z:\\TRSL\\PITA\\Data\\LocalData\\spreadsheets\\PITA',
@@ -584,14 +585,14 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
             
             #if debug: print(path, file=debugFID)
             
-            # I'd like to know the actual error, please
-            wb = op.load_workbook(filename=os.path.join(path, file), data_only=True)
-
-            # try:
-            #     wb = op.load_workbook(filename=os.path.join(path, file), data_only=True)
-            # except:
-            #     print(f"Error reading wb: {file}\nSkipping...")
-            #     continue
+            try:
+                if file.split('.')[-1] == 'xls':
+                    wb = xlrd(filename=os.path.join(path, file))
+                else:
+                    wb = op.load_workbook(filename=os.path.join(path, file), data_only=True)                    
+            except:
+                print(f"Error reading wb: {file}\nSkipping...")
+                continue
             
             try:
                 jf = float(file.split('_')[1].strip('jf'))
