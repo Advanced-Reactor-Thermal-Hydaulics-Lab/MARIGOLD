@@ -531,7 +531,7 @@ def extractProbeData(dump_file = 'database.dat', in_dir = [], require_terms = No
         pickle.dump(all_conditions, g)
     return
 
-def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], require_terms = ['jf', 'Run'], 
+def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], require_terms = ['jf'], 
                             skip_terms = ['CFD', 'Copy'], sheet_type = 'adix_template', append_to_json = None,
                             pitot_sheet = False,
                             **kwargs) -> None:
@@ -578,9 +578,9 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                 if debug: print(f"Skipping {file}", file=debugFID)
                 continue
 
-            if all(term not in file for term in require_terms):
-                if debug: print(f"Skipping {file}", file=debugFID)
-                continue
+            # if all(term not in file for term in require_terms):
+            #     if debug: print(f"Skipping {file}", file=debugFID)
+            #     continue
             
             #if debug: print(path, file=debugFID)
             
