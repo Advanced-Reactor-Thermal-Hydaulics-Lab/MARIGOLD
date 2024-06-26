@@ -571,7 +571,7 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
         # print(file)
         if debug: print(file, file=debugFID)
 
-        if file.split('.')[-1] == 'xlsx' or file.split('.')[-1] == 'xlsm':
+        if file.split('.')[-1] == 'xlsx' or file.split('.')[-1] == 'xlsm' or file.split('.')[-1] == 'xls':
 
             # Check if the file has any skipped/required terms
             if any(term in file for term in skip_terms):
