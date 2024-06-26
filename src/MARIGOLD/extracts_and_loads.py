@@ -586,11 +586,11 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
             #if debug: print(path, file=debugFID)
             
             # I weep
-            wb = xlrd(filename=os.path.join(path, file))
+            wb = xlrd.open_workbook(filename=os.path.join(path, file))
 
             try:
                 if file.split('.')[-1] == 'xls':
-                    wb = xlrd(filename=os.path.join(path, file))
+                    wb = xlrd.open_workbook(filename=os.path.join(path, file))
                 else:
                     wb = op.load_workbook(filename=os.path.join(path, file), data_only=True)                    
             except:
