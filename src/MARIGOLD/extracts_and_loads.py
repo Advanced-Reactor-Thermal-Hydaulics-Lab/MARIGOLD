@@ -600,7 +600,7 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                 pass
             
             # Temporary fix, for the bettis data (DHK)
-            if sheet_type == 'bettis' and 'Run' in file.split('_')[0]:
+            if sheet_type == 'bettis_template' and 'Run' in file.split('_')[0]:
                 theta = 90
                 port = file.split('_')[-1]
             
@@ -637,7 +637,7 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
             else:
                 continue
         
-            if sheet_type == 'bettis':
+            if sheet_type == 'bettis_template':
                 # Bare bones
                 ws = wb['<<Ub>>']
                 jgloc = ws['N18'].value
