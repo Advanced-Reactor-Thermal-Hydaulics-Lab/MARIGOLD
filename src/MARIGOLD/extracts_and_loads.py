@@ -596,7 +596,7 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                 port = file.split('_')[3].strip('.xlsx').strip('.xlsm')
                 theta = float(file.split('_')[0].strip('deg'))
             except:
-                print(f'Warning: Non-standard excel file name {file}. Skipping...')
+                print(f'Warning: Non-standard excel file name {file}. Is this Bettis template?')
                 pass
             
             # Temporary fix, for the bettis data (DHK)
@@ -635,6 +635,7 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                     continue
                 
             else:
+                print(f'Nope. Warning: Non-standard excel file name {file}. Skipping...')
                 continue
         
             if sheet_type == 'bettis_template':
