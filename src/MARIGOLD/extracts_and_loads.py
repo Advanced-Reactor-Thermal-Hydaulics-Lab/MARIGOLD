@@ -609,7 +609,7 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
 
                 theta = 90
                 port = file.split('_')[-1]
-                port_idx = int(re.findall(r'\d+',port))
+                port_idx = int(''.join(re.findall(r'\d+',port)))
             
                 if file.split('_')[0] == 'Run1':
                     jf = 0.32
