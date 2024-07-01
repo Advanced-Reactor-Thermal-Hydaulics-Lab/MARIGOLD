@@ -175,6 +175,7 @@ def iate_1d_1g(
         if ai[0] == None:
             try:
                 ai[0]       = cond.area_avg_ai_sheet
+                print(cond.area_avg_ai_sheet)
             except:
                 print(f'Could not find ai for {cond}.')
 
@@ -185,6 +186,7 @@ def iate_1d_1g(
         if alpha[0] == None:
             try:
                 alpha[0]    = cond.area_avg_void_sheet
+                print(cond.area_avg_void_sheet)
             except:
                 print(f'Could not find alpha for {cond}.')
         
@@ -195,6 +197,7 @@ def iate_1d_1g(
         if Db[0] == None:
             try:
                 Db[0]       = cond.area_avg_Dsm_sheet / 1000
+                print(cond.area_avg_Dsm_sheet / 1000)
             except:
                 print(f'Could not find Dsm for {cond}.')
         
@@ -239,8 +242,6 @@ def iate_1d_1g(
         
     elif cond2 != None:
         dpdz = (((cond2.jgatm * p_atm / cond2.jgloc) - p_atm) - p) / (cond2.LoverD - LoverD)
-    
-    print(dpdz)
 
     pz = (p + p_atm) * (1 - (z_mesh - z_mesh[0]) * (dpdz / (p + p_atm)))
     
