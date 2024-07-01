@@ -784,7 +784,7 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                 cond.area_avg_Dsm_sheet = area_avg_Dsm_sheet
                 cond.pz = pz
 
-                cond.jgatm = jgloc * pz / 101300
+                cond.jgatm = jgloc * pz / 101325
 
                 '''
                 <<Ub>>, can be offset by 1 row, depending on which you're looking at
