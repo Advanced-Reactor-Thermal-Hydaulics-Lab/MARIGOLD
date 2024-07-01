@@ -1957,7 +1957,7 @@ class Condition:
         I = integrate.simpson(param_r, angles, even=even_opt) / np.pi # Integrate wrt theta, divide by normalized area
         return I
 
-    def calc_dpdz(self, method = 'LM', m = 0.316, n = 0.25, chisolm = 25, k_m = 0.10, L = 9999):
+    def calc_dpdz(self, method = 'LM', m = 0.316, n = 0.25, chisholm = 25, k_m = 0.10, L = 9999):
         """ Calculates the pressure gradient, dp/dz, according to various methods. Can access later with self.dpdz
 
         Options:
@@ -1970,14 +1970,14 @@ class Condition:
             - mu_g      : Gas phase dynamic viscosity
             - m         : Fed to calc_f()
             - n         : Fed to calc_f()
-            - chisolm   : Chisholm parameter, the C in Lockhart-Martinelli
+            - chisholm   : Chisholm parameter, the C in Lockhart-Martinelli
             - k_m       : Minor loss coefficient
             - L         : Length of restriction, only matters for 'Kim' method
 
         """
 
-        if chisolm == 'Ryan':
-            chisolm = 26 - 4.7*np.cos( self.theta*np.pi/180 )
+        if chisholm == 'Ryan':
+            chisholm = 26 - 4.7*np.cos( self.theta*np.pi/180 )
         
         if method.lower() == 'lm' or method.lower() == 'lockhart' or method.lower() == 'lockhart-martinelli':
             f_f, f_g = self.calc_fric(m = m, n = n)
@@ -1986,7 +1986,7 @@ class Condition:
             dpdz_g = f_g * 1/self.Dh * self.rho_g * self.jgloc**2 / 2
             chi2 = dpdz_f / dpdz_g
 
-            phi_f2 = 1 + chisolm/np.sqrt(chi2) + 1 / chi2
+            phi_f2 = 1 + chisholm/np.sqrt(chi2) + 1 / chi2
             dpdz = phi_f2 * dpdz_f
 
         elif method.lower() == 'kim':
@@ -1999,7 +1999,7 @@ class Condition:
             chi2 = dpdz_f / dpdz_g
             chiM2 = dpdz_f / dpdz_m
 
-            phi_f2 = (1 + 1 / chiM2) + np.sqrt(1 + 1 / chiM2) * chisolm / np.sqrt(chi2) + 1 / chi2
+            phi_f2 = (1 + 1 / chiM2) + np.sqrt(1 + 1 / chiM2) * chisholm / np.sqrt(chi2) + 1 / chi2
             dpdz = phi_f2 * dpdz_f
 
         else:
