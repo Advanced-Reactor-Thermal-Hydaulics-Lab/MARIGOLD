@@ -779,9 +779,9 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
 
                 cond.LoverD = LoverD_mat[port_idx]
 
-                cond.area_avg_void_sheet = alpha
-                cond.area_avg_ai_sheet = ai
-                cond.area_avg_Dsm_sheet = Dsm
+                cond.area_avg_void_sheet = area_avg_void_sheet
+                cond.area_avg_ai_sheet = area_avg_ai_sheet
+                cond.area_avg_Dsm_sheet = area_avg_Dsm_sheet
                 cond.pz = pz
 
                 cond.jgatm = jgloc * pz / 101300
