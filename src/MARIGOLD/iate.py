@@ -220,7 +220,7 @@ def iate_1d_1g(
     if cond2 == None:
         dpdz = cond.calc_dpdz(
             method = dpdz_method, 
-            LM_C = LM_C, 
+            chisholm = LM_C, 
             k_m = k_m, 
             L = (query - LoverD) * Dh
             ) + ((rho_f * grav * delta_h) / (z_mesh[-1] - z_mesh[0]))   # Pressure gradient from gravity
