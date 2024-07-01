@@ -777,7 +777,7 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
 
                 cond.Dh = 4 * 0.20 * 0.1 / 2 / (0.20 + 0.01)    # 1 x 20 cm^2 rectangular channel
 
-                cond.LoverD = LoverD_mat[port_idx]
+                cond.LoverD = LoverD_mat[port_idx-1]
 
                 cond.area_avg_void_sheet = area_avg_void_sheet
                 cond.area_avg_ai_sheet = area_avg_ai_sheet
