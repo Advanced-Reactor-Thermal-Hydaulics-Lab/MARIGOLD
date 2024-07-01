@@ -6,6 +6,7 @@ from .Yang_Condition import Yang_Condition
 
 import re
 import xlrd
+import pandas as pd
 
 def extractProbeData(dump_file = 'database.dat', in_dir = [], require_terms = None, skip_terms = ['CFD', 'Copy'],
                      extract_Ryan = True, Ryan_path = 'Z:\\TRSL\\PITA\\Data\\LocalData\\spreadsheets\\PITA',
@@ -585,6 +586,7 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
             
             #if debug: print(path, file=debugFID)
             
+            
             try:
                 if file.split('.')[-1] == 'xls':
                     wb = xlrd.open_workbook(filename=os.path.join(path, file))
@@ -647,7 +649,7 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
         
             if sheet_type == 'bettis_template':
                 # Bare bones
-                ws = wb['<<Ub>>']
+                ws = wb.sheet_by_name('<<Ub>>')
                 print(ws)
                 print(ws.cell(14,18).value)
                 jgloc = ws['N18'].value
