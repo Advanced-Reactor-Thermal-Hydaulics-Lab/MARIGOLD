@@ -749,12 +749,15 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                 ]
 
                 LoverD_mat = [8.02, 34.76, 61.49, 88.22, 114.96, 141.70]
+                dpdz_mat = [9250.38, 10128.04, 11636.70, 9542.94, 11521.98, 8171.95, 13219.94, 8267.13, 13957.25, 11240.45, 20676.09]
 
                 jgloc                   = jgloc_mat[run_idx-1][port_idx-1]
                 area_avg_void_sheet     = alpha_mat[run_idx-1][port_idx-1]
                 area_avg_ai_sheet       = ai_mat[run_idx-1][port_idx-1]
                 area_avg_Dsm_sheet      = Dsm_mat[run_idx-1][port_idx-1]
                 pz                      = pz_mat[run_idx-1][port_idx-1]
+                dpdz                    = dpdz_mat[run_idx-1]
+                LoverD                  = LoverD_mat[port_idx-1]
 
                 '''
                 ws = wb.sheet_by_name('<<Ub>>')
@@ -777,7 +780,8 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
 
                 cond.Dh = 4 * 0.20 * 0.01 / 2 / (0.20 + 0.01)        # 1 x 20 cm^2 rectangular channel
 
-                cond.LoverD = LoverD_mat[port_idx-1]
+                cond.LoverD = LoverD
+                cond.dpdz = dpdz
 
                 cond.area_avg_void_sheet = area_avg_void_sheet
                 cond.area_avg_ai_sheet = area_avg_ai_sheet
