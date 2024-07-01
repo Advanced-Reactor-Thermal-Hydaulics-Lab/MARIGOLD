@@ -239,6 +239,8 @@ def iate_1d_1g(
         
     elif cond2 != None:
         dpdz = (((cond2.jgatm * p_atm / cond2.jgloc) - p_atm) - p) / (cond2.LoverD - LoverD)
+    
+    print(dpdz)
 
     pz = (p + p_atm) * (1 - (z_mesh - z_mesh[0]) * (dpdz / (p + p_atm)))
     
