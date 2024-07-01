@@ -2,7 +2,7 @@ from .config import *
 
 def iate_1d_1g(
         # Basic inputs
-        cond, query, z_step = 0.01, parcel = None, 
+        cond, query, z_step = 0.01, parcel = None, dpdz = None,
         
         # IATE Coefficients
         C_WE = None, C_RC = None, C_TI = None, alpha_max = 0.75, C = 3, We_cr = 6, acrit_flag = 0, acrit = 0.13, C_inf = 1.20,
@@ -168,23 +168,35 @@ def iate_1d_1g(
         aiexp[0]    = 0
         aivg[0]     = 0
 
-        try:    ai[0]       = cond.area_avg("ai")                       # [1/m]
-        except: ai[0]       = None
+        try:
+            ai[0]           = cond.area_avg("ai")                       # [1/m]
+        except:
+            ai[0]           = None
         if ai[0] == None:
-            try:    ai[0]       = cond.area_avg_ai_sheet
-            except: print(f'Could not find ai for {cond}.')
+            try:
+                ai[0]       = cond.area_avg_ai_sheet
+            except:
+                print(f'Could not find ai for {cond}.')
 
-        try:    alpha[0]    = cond.area_avg("alpha")                    # [-]
-        except: alpha[0]    = None
+        try:
+            alpha[0]        = cond.area_avg("alpha")                    # [-]
+        except:
+            alpha[0]        = None
         if alpha[0] == None:
-            try:    alpha[0]    = cond.area_avg_void_sheet
-            except: print(f'Could not find alpha for {cond}.')
+            try:
+                alpha[0]    = cond.area_avg_void_sheet
+            except:
+                print(f'Could not find alpha for {cond}.')
         
-        try:    Db[0]       = cond.void_area_avg("Dsm1") / 1000         # [m]
-        except: Db[0]       = None
+        try:
+            Db[0]           = cond.void_area_avg("Dsm1") / 1000         # [m]
+        except:
+            Db[0]           = None
         if Db[0] == None:
-            try:    Db[0]       = cond.area_avg_Dsm_sheet / 1000
-            except: print(f'Could not find Dsm for {cond}.')
+            try:
+                Db[0]       = cond.area_avg_Dsm_sheet / 1000
+            except:
+                print(f'Could not find Dsm for {cond}.')
         
         jf          = cond.jf                                   # [m/s]
         jgloc       = cond.jgloc                                # [m/s]
@@ -217,7 +229,7 @@ def iate_1d_1g(
     else:
         delta_h = (z_mesh[-1] - z_mesh[0])                      # Dissipation region is going to be the same as standard VU
 
-    if cond2 == None:
+    if dpdz == None:
         dpdz = cond.calc_dpdz(
             method = dpdz_method, 
             chisholm = LM_C, 
@@ -225,7 +237,7 @@ def iate_1d_1g(
             L = (query - LoverD) * Dh
             ) + ((rho_f * grav * delta_h) / (z_mesh[-1] - z_mesh[0]))   # Pressure gradient from gravity
         
-    else:
+    elif cond2 != None:
         dpdz = (((cond2.jgatm * p_atm / cond2.jgloc) - p_atm) - p) / (cond2.LoverD - LoverD)
 
     pz = (p + p_atm) * (1 - (z_mesh - z_mesh[0]) * (dpdz / (p + p_atm)))
