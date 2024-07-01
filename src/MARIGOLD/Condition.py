@@ -1281,7 +1281,7 @@ class Condition:
         except KeyError as e:
             print(f"KeyError: {e}")
             if debug: print(self.phi, file=debugFID)
-            print(f"Cound not area-average {param} for condition {self.name}")
+            print(f"Could not area-average {param} for condition {self.name}")
             return None
         
         if (param in self.area_avgs.keys()) and (not recalc):
@@ -1359,7 +1359,7 @@ class Condition:
         except KeyError as e:
             print(f"KeyError: {e}")
             if debug: print(self.phi, file=debugFID)
-            print(f"Cound not area-average {param} for condition {self.name}")
+            print(f"Could not area-average {param} for condition {self.name}")
             return
         
         self.mirror()
@@ -1425,7 +1425,7 @@ class Condition:
         except KeyError as e:
             print(f"KeyError: {e}")
             if debug: print(self.phi, file=debugFID)
-            print(f"Cound not area-average {param} for condition {self.name}")
+            print(f"Could not area-average {param} for condition {self.name}")
             return
         
         self.mirror()
@@ -1491,7 +1491,7 @@ class Condition:
 
         if phi_angle not in self.phi.keys():
             if debug: print(self.phi, file=debugFID)
-            print(f"Cound not area-average {param} for condition {self.name}\nData for {phi_angle} not found after mirroring!")
+            print(f"Could not area-average {param} for condition {self.name}\nData for {phi_angle} not found after mirroring!")
             return
 
 
@@ -1500,7 +1500,7 @@ class Condition:
         except KeyError as e:
             print(f"KeyError: {e}")
             if debug: print(self.phi, file=debugFID)
-            print(f"Cound not area-average {param} for condition {self.name}")
+            print(f"Could not area-average {param} for condition {self.name}")
             return
 
         r_for_int = []
@@ -1551,7 +1551,7 @@ class Condition:
 
         if phi_angle not in self.phi.keys():
             if debug: print(self.phi, file=debugFID)
-            print(f"Cound not area-average {param} for condition {self.name}\nData for {phi_angle} not found after mirroring!")
+            print(f"Could not area-average {param} for condition {self.name}\nData for {phi_angle} not found after mirroring!")
             return
 
 
@@ -1560,7 +1560,7 @@ class Condition:
         except KeyError as e:
             print(f"KeyError: {e}")
             if debug: print(self.phi, file=debugFID)
-            print(f"Cound not area-average {param} for condition {self.name}")
+            print(f"Could not area-average {param} for condition {self.name}")
             return
 
         r_for_int = []
@@ -1611,7 +1611,7 @@ class Condition:
         except KeyError as e:
             print(f"KeyError: {e}")
             if debug: print(self.phi, file=debugFID)
-            print(f"Cound not area-average {param} for condition {self.name}")
+            print(f"Could not area-average {param} for condition {self.name}")
             return
         
         # We have to integrate twice, once with resepect to r, again with respect to phi
@@ -1914,7 +1914,7 @@ class Condition:
         except KeyError as e:
             print(f"KeyError: {e}")
             if debug: print(self.phi, file=debugFID)
-            print(f"Cound not area-average {param} for condition {self.name}")
+            print(f"Could not area-average {param} for condition {self.name}")
             return
         
         # We have to integrate twice, once with resepect to r, again with respect to phi
