@@ -586,7 +586,6 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
             
             #if debug: print(path, file=debugFID)
             
-            
             try:
                 if file.split('.')[-1] == 'xls':
                     wb = xlrd.open_workbook(filename=os.path.join(path, file))
@@ -605,40 +604,69 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                 print(f'Warning: Non-standard excel file name {file}. Is this Bettis template?')
                 pass
             
-            # Temporary fix, for the bettis data (DHK)
+            # Temporary fix, for the Bettis data (DHK)
             if sheet_type == 'bettis_template' and 'Run' in file.split('_')[0]:
                 print("Yes, it is. Proceeding...")
 
                 theta = 90
                 port = file.split('_')[-1]
+                port_idx = re.findall(r'\d+',port)
             
                 if file.split('_')[0] == 'Run1':
                     jf = 0.32
                     jgref = 0.047
+                    
+                    run_idx = 1
                 elif file.split('_')[0] == 'Run2':
                     jf = 0.95
                     jgref = 0.047
+
+                    run_idx = 2
                 elif file.split('_')[0] == 'Run3':
                     jf = 1.89
                     jgref = 0.095
+                    
+                    run_idx = 3
                 elif file.split('_')[0] == 'Run4':
                     jf = 0.95
                     jgref = 0.187
+                    
+                    run_idx = 4
                 elif file.split('_')[0] == 'Run5':
                     jf = 1.89
                     jgref = 0.193
-                elif file.split('_')[0] == 'Run6':
+                    
+                    run_idx = 5
+                elif file.split('_')[0] == 'Run6' and file.split('_')[1] == 'short':
                     jf = 0.63
                     jgref = 0.279
-                elif file.split('_')[0] == 'Run7':
+                    
+                    run_idx = 6
+                elif file.split('_')[0] == 'Run7' and file.split('_')[1] == 'short':
                     jf = 2.84
                     jgref = 0.287
+                    
+                    run_idx = 7
+                elif file.split('_')[0] == 'Run6' and file.split('_')[1] == 'long':
+                    jf = 0.63
+                    jgref = 0.279
+                    
+                    run_idx = 8
+                elif file.split('_')[0] == 'Run7' and file.split('_')[1] == 'long':
+                    jf = 2.84
+                    jgref = 0.287
+                    
+                    run_idx = 9
                 elif file.split('_')[0] == 'Run8':
                     jf = 1.89
                     jgref = 0.385
+                    
+                    run_idx = 10
                 elif file.split('_')[0] == 'Run9':
                     jf = 4.40
                     jgref = 0.940
+                    
+                    run_idx = 11
                 else:
                     print("Warning: Run number exceeds highest known run. Skipping...")
                     continue
@@ -648,19 +676,78 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                 continue
         
             if sheet_type == 'bettis_template':
-                # Bare bones
-                ws = wb.sheet_by_name('<<Ub>>')
-                print('proof')
-                print(ws)
+                # I give up. Hardcoding! Whoo!
 
-                # Time for a hail mary
+                jgloc_mat = [
+                    [0.047, 0.040, 0.040, 0.040, 0.000, 0.000], # Run1
+                    [0.047, 0.040, 0.040, 0.040, 0.000, 0.000], # Run2
+                    [0.095, 0.070, 0.070, 0.070, 0.000, 0.000], # Run3
+                    [0.187, 0.140, 0.150, 0.150, 0.000, 0.000], # Run4
+                    [0.193, 0.140, 0.150, 0.150, 0.000, 0.000], # Run5
+                    [0.279, 0.220, 0.000, 0.220, 0.000, 0.000], # Run6_short
+                    [0.287, 0.210, 0.220, 0.220, 0.000, 0.000], # Run7_short
+                    [0.000, 0.219, 0.000, 0.234, 0.000, 0.251], # Run6_long
+                    [0.000, 0.212, 0.000, 0.000, 0.000, 0.264], # Run7_long
+                    [0.000, 0.288, 0.000, 0.314, 0.000, 0.346], # Run8
+                    [0.000, 0.618, 0.000, 0.716, 0.000, 0.850], # Run9
+                ]
+
+                alpha_mat = [
+                    [0.066, 0.089, 0.080, 0.083, 0.000, 0.000], # Run1
+                    [0.039, 0.038, 0.037, 0.034, 0.000, 0.000], # Run2
+                    [0.035, 0.038, 0.031, 0.034, 0.000, 0.000], # Run3
+                    [0.104, 0.110, 0.116, 0.116, 0.000, 0.000], # Run4
+                    [0.064, 0.059, 0.062, 0.059, 0.000, 0.000], # Run5
+                    [0.220, 0.173, 0.000, 0.248, 0.000, 0.000], # Run6_short
+                    [0.031, 0.051, 0.000, 0.058, 0.000, 0.000], # Run7_short
+                    [0.000, 0.207, 0.000, 0.222, 0.000, 0.237], # Run6_long
+                    [0.000, 0.067, 0.000, 0.000, 0.000, 0.075], # Run7_long
+                    [0.000, 0.115, 0.000, 0.103, 0.000, 0.129], # Run8
+                    [0.000, 0.078, 0.000, 0.095, 0.000, 0.125]  # Run9
+                ]
+
+                ai_mat = [
+                    [0.000, 190.33, 3, 4, 5, 6], # Run1
+                    [0.000, 2, 3, 4, 5, 6], # Run2
+                    [0.000, 2, 3, 4, 5, 6], # Run3
+                    [0.000, 2, 3, 4, 5, 6], # Run4
+                    [0.000, 2, 3, 4, 5, 6], # Run5
+                    [0.000, 2, 3, 4, 5, 6], # Run6_short
+                    [0.000, 2, 3, 4, 5, 6], # Run7_short
+                    [0.000, 2, 3, 4, 5, 6], # Run6_long
+                    [0.000, 2, 3, 4, 5, 6], # Run7_long
+                    [0.000, 2, 3, 4, 5, 6], # Run8
+                    [0.000, 2, 3, 4, 5, 6], # Run9
+                ]
+
+                Dsm_mat = [
+                    [0.000, 2, 3, 4, 5, 6], # Run1
+                    [0.000, 2, 3, 4, 5, 6], # Run2
+                    [0.000, 2, 3, 4, 5, 6], # Run3
+                    [0.000, 2, 3, 4, 5, 6], # Run4
+                    [0.000, 2, 3, 4, 5, 6], # Run5
+                    [0.000, 2, 3, 4, 5, 6], # Run6_short
+                    [0.000, 2, 3, 4, 5, 6], # Run7_short
+                    [0.000, 2, 3, 4, 5, 6], # Run6_long
+                    [0.000, 2, 3, 4, 5, 6], # Run7_long
+                    [0.000, 2, 3, 4, 5, 6], # Run8
+                    [0.000, 2, 3, 4, 5, 6], # Run9
+                ]
+
+                LoverD_mat = [8.02, 34.76, 61.49, 88.22, 114.96, 141.70]
+
+                jgloc = jgloc_mat[run_idx,port_idx]
+                
+                '''
+                ws = wb.sheet_by_name('<<Ub>>')
                 try:
-                    jgloc = ws.cell(13,17).value    # N18
+                    jgloc = ws.cell(17,13).value    # N18, N is column!
                 except:
                     print(f"Warning: jgloc could not be found for {file}. Setting jgloc to jgref...")
 
                     jgloc = jgref
                     pass
+                '''
 
                 newCond = Condition(jgref, jgloc, jf, theta, port, sheet_type.split('_')[0])
 
@@ -670,76 +757,50 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                 else:
                     cond = all_conditions[ all_conditions.index(newCond) ]
 
-                if port == 'p1':
-                    cond.LoverD = 8.02
-                elif port == 'p2':
-                    cond.LoverD = 34.76
-                elif port == 'p3':
-                    cond.LoverD = 61.49
-                elif port == 'p4':
-                    cond.LoverD = 88.22
-                elif port == 'p5':
-                    cond.LoverD = 114.96
-                elif port == 'p6':
-                    cond.LoverD = 141.70
-
                 # 1 x 20 cm^2 rectangular channel
-                cond.Dh = 4*0.20*0.1/2/(0.20+0.01)
+                cond.Dh = 4 * 0.20 * 0.1 / 2 / (0.20 + 0.01)
 
-                ws = wb.sheet_by_name('a')
-                cond.area_avg_void_sheet = ws.cell(13,14).value     # N15
-                
-                ws = wb.sheet_by_name('ai')
-                cond.area_avg_ai_sheet = ws.cell(13,14).value       # N15
+                cond.LoverD = LoverD_mat[port_idx]
+                cond.area_avg_void_sheet = alpha_mat[run_idx,port_idx]
+                cond.area_avg_ai_sheet = ai_mat[run_idx,port_idx]
+                cond.area_avg_Dsm_sheet = Dsm_mat[run_idx,port_idx]
 
-                ws = wb.sheet_by_name*('Dsm')
-                cond.area_avg_Dsm_sheet = ws.cell(13,14).value      # N15
+                cond.jgatm = jgref  # No
 
-                cond.jgatm = jgref
+                '''
+                <<Ub>>, can be offset by 1 row, depending on which you're looking at
+                A1: x/y (mm)
+                B2 to L2: y (0-10)
+                A3 to A15: x (0-100)
+                B3 to L15: data
+                M2-O2: headers (Ub*a)x, <Ub*a>, <<Ub>>
+                M3-N15: formulas (sum across y, divide by 10) (huh?)
+                O15: <<Ub>> value
 
-                # For the future
+                Ub
+                A1: x/y (mm)
+                B2 to L2: y (0-10)
+                A3 to A15: x (0-100)
+                B3 to L15: data
+                M2-O2: headers Ubx, Ubave
+                M3-N15: formulas (sum across y, divide by 10) (huh?)
 
-                # <<Ub>>
-                # A1: x/y (mm)
-                # B2 to L2: y (0-10)
-                # A3 to A15: x (0-100)
-                # B3 to L15: data
-                # M2-O2: headers (Ub*a)x, <Ub*a>, <<Ub>>
-                # M3-N15: formulas (sum across y, divide by 10) (huh?)
-                # O15: <<Ub>> value
+                Dsm
+                A1: x/y (mm)
+                B2 to L2: y (0-10)
+                A3 to A15: x (0-100)
+                B3 to L15: data
+                M2-O2: headers Dsmx, Dsm
+                M3-N15: formulas (sum across y endpoints halved, divide by 10) (huh?)
 
-                # Ub
-                # A1: x/y (mm)
-                # B2 to L2: y (0-10)
-                # A3 to A15: x (0-100)
-                # B3 to L15: data
-                # M2-O2: headers Ubx, Ubave
-                # M3-N15: formulas (sum across y, divide by 10) (huh?)
+                ai, a, x90y, x70y, x50y, x30y, x10y, x3y, AAIXYC, Figures
 
-                # Dsm
-                # A1: x/y (mm)
-                # B2 to L2: y (0-10)
-                # A3 to A15: x (0-100)
-                # B3 to L15: data
-                # M2-O2: headers Dsmx, Dsm
-                # M3-N15: formulas (sum across y endpoints halved, divide by 10) (huh?)
-
-                # ai
-                # a
-                # x90y
-                # x70y
-                # x50y
-                # x30y
-                # x10y
-                # x3y
-                # AAIXYC
-                # Figures
-
-                # Other sheets that don't appear in all Excel docs:
-                # fb
-                # DriftFlux
-                # aaixycnew
-                # Rawdata
+                Other sheets that don't appear in all Excel docs:
+                fb
+                DriftFlux
+                aaixycnew
+                Rawdata
+                '''
                 
             elif sheet_type == 'yadav_template':
 
@@ -753,6 +814,7 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                 jglocs = []
 
                 jgloc = jgatm       # Nope. Either need jgloc or P_loc, but I have neither -- how did Yadav get jgloc for his IATE script?
+                
                 '''
                 8 cond x 7 port?
 
@@ -799,11 +861,6 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                 cond.area_avg_void_sheet = ws['J328'].value
                 cond.area_avg_ai_sheet = ws['K328'].value
 
-                # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
-                # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
-                # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
-                # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
-
                 for phi, indices in Q1_ranges:
                     for i in indices:
                         if ws[f'{Q1_check}{i}'].value:
@@ -835,11 +892,6 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                                 #cond.phi[phi_val].update({0.0: zero_data}) # Cuz I'm paranoid
                                 cond.phi[phi].update({roverR: data})
 
-                # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
-                # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
-                # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
-                # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
-            
             # General PITA template structure holds
             else:
                 if sheet_type == 'infer':

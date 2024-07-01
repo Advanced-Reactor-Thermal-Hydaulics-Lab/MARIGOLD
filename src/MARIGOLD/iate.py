@@ -168,9 +168,21 @@ def iate_1d_1g(
         aiexp[0]    = 0
         aivg[0]     = 0
 
-        ai[0]       = cond.area_avg("ai")                       # [1/m]
-        alpha[0]    = cond.area_avg("alpha")                    # [-]
-        Db[0]       = cond.void_area_avg("Dsm1") / 1000         # [m]
+        try:    ai[0]       = cond.area_avg("ai")                       # [1/m]
+        except: pass
+        try:    ai[0]       = cond.area_avg_ai_sheet
+        except: print(f'Could not find ai for {cond}.')
+
+        try:    alpha[0]    = cond.area_avg("alpha")                    # [-]
+        except: pass
+        try:    alpha[0]    = cond.area_avg_void_sheet
+        except: print(f'Could not find alpha for {cond}.')
+        
+        try:    Db[0]       = cond.void_area_avg("Dsm1") / 1000         # [m]
+        except: pass
+        try:    Db[0]       = cond.area_avg_Dsm_sheet
+        except: print(f'Could not find Dsm for {cond}.')
+        
         jf          = cond.jf                                   # [m/s]
         jgloc       = cond.jgloc                                # [m/s]
         jgatm       = cond.jgatm                                # [m/s]
@@ -194,13 +206,13 @@ def iate_1d_1g(
     p = (jgatm * p_atm / jgloc) - p_atm                         # Back-calculate local corrected gauge pressure
 
     if restriction == 'elbow':
-        delta_h = (z_mesh[-1] - z_mesh[0]) * 2 / np.pi              # The height of an elbow is going to be its radius
+        delta_h = (z_mesh[-1] - z_mesh[0]) * 2 / np.pi          # The height of an elbow is going to be its radius
 
     elif restriction == 'ubend':
         delta_h = 0
 
     else:
-        delta_h = (z_mesh[-1] - z_mesh[0])                          # Dissipation region is going to be the same as standard VU
+        delta_h = (z_mesh[-1] - z_mesh[0])                      # Dissipation region is going to be the same as standard VU
 
     if cond2 == None:
         dpdz = cond.calc_dpdz(
