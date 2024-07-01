@@ -139,7 +139,7 @@ class Condition:
             raise NotImplementedError(f"{fluids} not available, try 'air-water'")
         
         self.g = g
-        self.gz = g * np.sin(self.theta)
+        self.gz = g * np.sin(self.theta * np.pi/180)
         return
 
     def __eq__(self, __o: object) -> bool:
@@ -1957,41 +1957,40 @@ class Condition:
         I = integrate.simpson(param_r, angles, even=even_opt) / np.pi # Integrate wrt theta, divide by normalized area
         return I
 
-    def calc_dpdz(self, method = 'LM', m = 0.316, n = 0.25, LM_C = 25, k_m = 0.10, L = 9999):
+    def calc_dpdz(self, method = 'LM', m = 0.316, n = 0.25, chisolm = 25, k_m = 0.10, L = 9999):
         """ Calculates the pressure gradient, dp/dz, according to various methods. Can access later with self.dpdz
 
         Options:
             - method    : Calculation method
-              > 'LM'  : Lockhart Martinelli, assuming turbulent-turbulent, C = LM_C
-              > 'Kim' : Kim-modified Lockhart Martinelli
+              > 'LM'    : Lockhart Martinelli
+              > 'Kim'   : Kim-modified Lockhart Martinelli
             - rho_f     : Liquid phase density
             - rho_g     : Gas phase density
             - mu_f      : Liquid phase dynamic viscosity
             - mu_g      : Gas phase dynamic viscosity
-            - m         : Blasius formulation coefficient (Darcy friction factor)
-            - n         : Blasius formulation coefficient (Darcy friction factor)
-            - LM_C      : Chisholm parameter
+            - m         : Fed to calc_f()
+            - n         : Fed to calc_f()
+            - chisolm   : Chisholm parameter, the C in Lockhart-Martinelli
             - k_m       : Minor loss coefficient
             - L         : Length of restriction, only matters for 'Kim' method
 
         """
+
+        if chisolm == 'Ryan':
+            chisolm = 26 - 4.7*np.cos( self.theta*np.pi/180 )
         
-        if method == 'LM':
+        if method.lower() == 'lm' or method.lower() == 'lockhart' or method.lower() == 'lockhart-martinelli':
             f_f, f_g = self.calc_fric(m = m, n = n)
 
             dpdz_f = f_f * 1/self.Dh * self.rho_f * self.jf**2 / 2
             dpdz_g = f_g * 1/self.Dh * self.rho_g * self.jgloc**2 / 2
             chi2 = dpdz_f / dpdz_g
 
-            phi_f2 = 1 + LM_C/np.sqrt(chi2) + 1 / chi2
+            phi_f2 = 1 + chisolm/np.sqrt(chi2) + 1 / chi2
             dpdz = phi_f2 * dpdz_f
 
-        elif method == 'Kim':
-            Re_f = self.rho_f * self.jf * self.Dh / self.mu_f
-            Re_g = self.rho_g * self.jgloc * self.Dh / self.mu_g
-
-            f_f = m / Re_f**n
-            f_g = m / Re_g**n
+        elif method.lower() == 'kim':
+            f_f, f_g = self.calc_fric(m = m, n = n)
 
             dpdz_f = f_f * 1/self.Dh * self.rho_f * self.jf**2 / 2
             dpdz_g = f_g * 1/self.Dh * self.rho_g * self.jgloc**2 / 2
@@ -2000,7 +1999,7 @@ class Condition:
             chi2 = dpdz_f / dpdz_g
             chiM2 = dpdz_f / dpdz_m
 
-            phi_f2 = (1 + 1 / chiM2) + np.sqrt(1 + 1 / chiM2) * LM_C / np.sqrt(chi2) + 1 / chi2
+            phi_f2 = (1 + 1 / chiM2) + np.sqrt(1 + 1 / chiM2) * chisolm / np.sqrt(chi2) + 1 / chi2
             dpdz = phi_f2 * dpdz_f
 
         else:
@@ -2211,7 +2210,7 @@ class Condition:
 
         return self.area_avg('cd')
 
-    def calc_vr_model(self, method='km1_simp', kw = -0.98, n=1, Lw = 5, kf = 0.089, iterate_cd = True, quiet = True, recalc_cd = True):
+    def calc_vr_model(self, method='km1_simp', kw = -0.98, n=1, Lw = 5, kf = 0.089, iterate_cd = True, quiet = True, recalc_cd = True, custom_f = None):
         """Method for calculating relative velocity based on models
         
         Inputs:
@@ -2238,7 +2237,7 @@ the newly calculated :math:`v_{r}` or not
 
         """
 
-        MAX_ITERATIONS = 10000
+        MAX_ITERATIONS = 1000
         iterations = 0
         initialize_vr = True
 
@@ -2299,7 +2298,10 @@ the newly calculated :math:`v_{r}` or not
                         vr = -kw * midas_dict['alpha'] * midas_dict['vf'] * midas_dict['cd']**(1./3) - kf * midas_dict['vf']
 
                     elif method == 'prelim_plus':
-                        ff, fg = self.calc_fric()
+                        if custom_f is None:
+                            ff, fg = self.calc_fric()
+                        else:
+                            ff = custom_f
 
                         # if midas_dict['Dsm1'] == 0 and rstar != 1.0:
                         #     print(self, angle, rstar)
@@ -2312,6 +2314,7 @@ the newly calculated :math:`v_{r}` or not
                             )
                         except ZeroDivisionError:
                             vr = 0
+                        
                         
 
                     elif method == 'proper_integral':

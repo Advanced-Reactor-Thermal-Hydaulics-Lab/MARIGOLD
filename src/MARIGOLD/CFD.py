@@ -53,7 +53,7 @@ def write_CFX_BC(cond:Condition, save_dir = ".", z_loc = 'LoverD', only_90 = Fal
                                 pass
                             else:
                                 continue
-                        r = rstar * 12.7 # r/R * R [mm]
+                        r = rstar * 12.7 * np.sin(angle * np.pi/180) # r/R * R [mm]
 
                         f.write(f"{r},{z_loc},{angle * np.pi/180},{0},{0},{midas_output['ug1']},{midas_output['alpha']},{0},{0},{midas_output['vf']},\n")
         elif interp == 'xy':
@@ -61,8 +61,14 @@ def write_CFX_BC(cond:Condition, save_dir = ".", z_loc = 'LoverD', only_90 = Fal
             f.write("[Data],,,,,,,,,\n")
             f.write("x [m],y [m],z [m],Velocity u g [m s^-1],Velocity v g [m s^-1],Velocity w g [m s^-1],Volume Fraction [],Velocity u f [m s^-1],Velocity v f [m s^-1],Velocity w f [m s^-1],\n")
 
-            for x in np.linspace(-R / 2, R, ngrid):
-                for y in np.linspace(-R, R, ngrid):
+            ys = np.linspace(-R, R, ngrid)
+            if only_90:
+                xs = np.zeros(ys.shape)
+            else:
+                xs = np.linspace(-R / 2, R, ngrid)
+
+            for x in xs:
+                for y in ys:
                     if np.sqrt(x**2 + y**2) <= R:
                         f.write(f"{x},{y},{z_loc},{0},{0},{ cond(x, y, 'ug1', interp_method='linear_xy') },{cond(x, y, 'alpha', interp_method='linear_xy')},{0},{0},{cond(x, y, 'vf', interp_method='linear_xy')},\n")
 
@@ -71,8 +77,14 @@ def write_CFX_BC(cond:Condition, save_dir = ".", z_loc = 'LoverD', only_90 = Fal
             f.write("[Data],,,,,,,,,\n")
             f.write("radius [mm],z [m],phi [],Velocity u g [m s^-1],Velocity v g [m s^-1],Velocity w g [m s^-1],Volume Fraction [],Velocity u f [m s^-1],Velocity v f [m s^-1],Velocity w f [m s^-1],\n")
 
-            for r in np.linspace(0, R, ngrid):
-                for phi in np.linspace(0, 2*np.pi, ngrid):
+            rs = np.linspace(0, R, ngrid)
+            if only_90:
+                phis = [np.pi/2, 3*np.pi/2]
+            else:
+                phis = np.linspace(0, 2*np.pi, ngrid)
+
+            for r in rs:
+                for phi in phis:
                     f.write(f"{r*1000},{z_loc},{phi},{0},{0},{ cond(phi, r/R, 'ug1', interp_method='linear') },{cond(phi, r/R, 'alpha', interp_method='linear')},{0},{0},{cond(phi, r/R, 'vf', interp_method='linear')},\n")
 
 
@@ -143,8 +155,8 @@ def read_CFX_export(csv_name, jf, jgref, theta, port, database, jgloc=None) -> C
     return cond
 
 
-def make_ICEM_pipe_mesh(r_divs: int, theta_divs: int, z_divs: int, o_point: float, L: float, 
-                        case_name: str, turb_model = 'ke', Ref = 20000, growth_ratio = 1.2, 
+def make_ICEM_pipe_mesh(r_divs: int, theta_divs: int, z_divs: int, o_point: float, Lmesh: float, 
+                        case_name: str, turb_model = 'ke', Ref = 20000, growth_ratio = 1.2, L = 1.2,
                         fluent_translator_path = "/apps/external/apps/ansys/2022r2/ansys_inc/v222/icemcfd/linux64_amd/icemcfd/output-interfaces/fluent6",
                         cleanup = True):
     """ Function for making an O-grid pipe mesh using ANSYS ICEM
@@ -186,7 +198,7 @@ ic_empty_tetin \n\
 ic_point {{}} GEOM pnt.00 0,0,0\n\
 ic_undo_group_end \n\
 ic_undo_group_begin \n\
-ic_point {{}} GEOM pnt.01 0,0,2.54\n\
+ic_point {{}} GEOM pnt.01 0,0,{Lmesh}\n\
 ic_undo_group_end \n\
 ic_set_global geo_cad 0 toptol_userset\n\
 ic_set_global geo_cad 0.001 toler\n\
@@ -470,9 +482,9 @@ def write_CCL(mom_source = 'normal_drag_mom_source', ccl_name = 'auto_setup.ccl'
         trash = infi.readline()
         InletData = infi.readline().split(',')[0] # Name of function in csv
 
-    with open(outDataFile, 'r') as infi:
-        trash = infi.readline()
-        OutletData = infi.readline().split(',')[0] # Name of function in csv
+    with open(outDataFile, 'r') as outfi:
+        trash = outfi.readline()
+        OutletData = outfi.readline().split(',')[0] # Name of function in csv
     CD_CFX = 0
     if mom_source == 'IS':
         mom_source_to_write = ['ISfx', 'ISfy', 'ISfz', 'ISgx', 'ISgy', 'ISgz']
