@@ -652,7 +652,40 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                 ws = wb.sheet_by_name('<<Ub>>')
                 print('proof')
                 print(ws)
-                print(ws.cell_value(rowx=14,colx=18))   # N18 (14,18)
+
+                # Time for a hail mary
+                try:
+                    print(ws.cell_value(rowx=0,colx=0))   # N18 (14,18)
+                except:
+                    print('1 failed')   # Gotta rely on these stupid print statements since there's no way to fuckin open the goddamn variable
+                    pass
+                try:
+                    print(ws.cell(rowx=0,colx=0).value)   # N18 (14,18)
+                except:
+                    print('2 failed')
+                    pass
+                try:
+                    print(ws.cell_value(0,0))   # N18 (14,18)
+                except:
+                    print('3 failed')
+                    pass
+                try:
+                    print(ws.cell(0,0).value)   # N18 (14,18)
+                except:
+                    print('4 failed')
+                    pass
+                try:
+                    print(ws.cell_value(rowx=13,colx=17))   # Zero-indexing bs?
+                except:
+                    print('5 failed')
+                    pass
+                try:
+                    print(ws.cell_value(rowx=14,colx=18))   # N18 (14,18)
+                except:
+                    print('6 failed')
+                    pass
+
+                print('passed the gauntlet')
                 jgloc = ws.cell_value(rowx=14,colx=18)
 
                 newCond = Condition(jgref, jgloc, jf, theta, port, sheet_type.split('_')[0])
