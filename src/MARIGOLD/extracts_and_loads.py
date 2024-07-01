@@ -655,38 +655,12 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
 
                 # Time for a hail mary
                 try:
-                    print(ws.cell_value(rowx=0,colx=0))   # N18 (14,18)
+                    jgloc = ws.cell(13,17).value    # N18
                 except:
-                    print('1 failed')   # Gotta rely on these stupid print statements since there's no way to fuckin open the goddamn variable
-                    pass
-                try:
-                    print(ws.cell(rowx=0,colx=0).value)   # N18 (14,18)
-                except:
-                    print('2 failed')
-                    pass
-                try:
-                    print(ws.cell_value(0,0))   # N18 (14,18)
-                except:
-                    print('3 failed')
-                    pass
-                try:
-                    print(ws.cell(0,0).value)   # N18 (14,18)
-                except:
-                    print('4 failed')
-                    pass
-                try:
-                    print(ws.cell_value(rowx=13,colx=17))   # Zero-indexing bs?
-                except:
-                    print('5 failed')
-                    pass
-                try:
-                    print(ws.cell_value(rowx=14,colx=18))   # N18 (14,18)
-                except:
-                    print('6 failed')
-                    pass
+                    print(f"Warning: jgloc could not be found for {file}. Setting jgloc to jgref...")
 
-                print('passed the gauntlet')
-                jgloc = ws.cell_value(rowx=14,colx=18)
+                    jgloc = jgref
+                    pass
 
                 newCond = Condition(jgref, jgloc, jf, theta, port, sheet_type.split('_')[0])
 
@@ -712,14 +686,14 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                 # 1 x 20 cm^2 rectangular channel
                 cond.Dh = 4*0.20*0.1/2/(0.20+0.01)
 
-                ws = wb['a']
-                cond.area_avg_void_sheet = ws['N15'].value
+                ws = wb.sheet_by_name('a')
+                cond.area_avg_void_sheet = ws.cell(13,14).value     # N15
                 
-                ws = wb['ai']
-                cond.area_avg_ai_sheet = ws['N15'].value
+                ws = wb.sheet_by_name('ai')
+                cond.area_avg_ai_sheet = ws.cell(13,14).value       # N15
 
-                ws = wb['Dsm']
-                cond.area_avg_Dsm_sheet = ws['N15'].value
+                ws = wb.sheet_by_name*('Dsm')
+                cond.area_avg_Dsm_sheet = ws.cell(13,14).value      # N15
 
                 cond.jgatm = jgref
 
