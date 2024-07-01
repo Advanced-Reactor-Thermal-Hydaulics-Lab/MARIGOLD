@@ -168,33 +168,24 @@ def iate_1d_1g(
         aiexp[0]    = 0
         aivg[0]     = 0
 
-        try:
-            ai[0]           = cond.area_avg("ai")                       # [1/m]
-        except:
-            ai[0]           = None
-        if ai[0] == None:
+        ai[0]       = cond.area_avg("ai")                       # [1/m]
+        if ai[0] == None or ai[0] == 0:
             try:
                 ai[0]       = cond.area_avg_ai_sheet
                 print(cond.area_avg_ai_sheet)
             except:
                 print(f'Could not find ai for {cond}.')
 
-        try:
-            alpha[0]        = cond.area_avg("alpha")                    # [-]
-        except:
-            alpha[0]        = None
-        if alpha[0] == None:
+        alpha[0]    = cond.area_avg("alpha")                    # [-]
+        if alpha[0] == None or alpha[0] == 0:
             try:
                 alpha[0]    = cond.area_avg_void_sheet
                 print(cond.area_avg_void_sheet)
             except:
                 print(f'Could not find alpha for {cond}.')
         
-        try:
-            Db[0]           = cond.void_area_avg("Dsm1") / 1000         # [m]
-        except:
-            Db[0]           = None
-        if Db[0] == None:
+        Db[0]       = cond.void_area_avg("Dsm1") / 1000         # [m]
+        if Db[0] == None or Db[0] == 0:
             try:
                 Db[0]       = cond.area_avg_Dsm_sheet / 1000
                 print(cond.area_avg_Dsm_sheet / 1000)
