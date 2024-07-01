@@ -652,8 +652,8 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                 ws = wb.sheet_by_name('<<Ub>>')
                 print('proof')
                 print(ws)
-                print(ws.cell(14,18).value)
-                jgloc = ws['N18'].value
+                print(ws.cell_value(rowx=14,colx=18))   # N18 (14,18)
+                jgloc = ws.cell_value(rowx=14,colx=18)
 
                 newCond = Condition(jgref, jgloc, jf, theta, port, sheet_type.split('_')[0])
 
