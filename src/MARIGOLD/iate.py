@@ -14,7 +14,7 @@ def iate_1d_1g(
         LM_C = 40, k_m = 0.10,
 
         # Temporary arguments
-        restriction = None, cond2 = None
+        restriction = None, cond2 = None, cheat = False
         ):
     """ Calculate the area-averaged interfacial area concentration at query location based on the 1D 1G IATE
     
@@ -168,30 +168,19 @@ def iate_1d_1g(
         aiexp[0]    = 0
         aivg[0]     = 0
 
-        ai[0]       = cond.area_avg("ai")                       # [1/m]
-        if ai[0] == None or ai[0] == 0:
-            try:
-                ai[0]       = cond.area_avg_ai_sheet
-                print(cond.area_avg_ai_sheet)
-            except:
-                print(f'Could not find ai for {cond}.')
+        if cheat == True:
+            ai[0]       = cond.area_avg_ai_sheet
+            alpha[0]    = cond.area_avg_void_sheet
+            Db[0]       = cond.area_avg_Dsm_sheet / 1000
+        else:
+            ai[0]       = cond.area_avg("ai")                       # [1/m]
+            alpha[0]    = cond.area_avg("alpha")                    # [-]
+            Db[0]       = cond.void_area_avg("Dsm1") / 1000         # [m]
+        
+        print('ai:    ', ai[0])
+        print('alpha: ', alpha[0])
+        print('Db:    ', Db[0])
 
-        alpha[0]    = cond.area_avg("alpha")                    # [-]
-        if alpha[0] == None or alpha[0] == 0:
-            try:
-                alpha[0]    = cond.area_avg_void_sheet
-                print(cond.area_avg_void_sheet)
-            except:
-                print(f'Could not find alpha for {cond}.')
-        
-        Db[0]       = cond.void_area_avg("Dsm1") / 1000         # [m]
-        if Db[0] == None or Db[0] == 0:
-            try:
-                Db[0]       = cond.area_avg_Dsm_sheet / 1000
-                print(cond.area_avg_Dsm_sheet / 1000)
-            except:
-                print(f'Could not find Dsm for {cond}.')
-        
         jf          = cond.jf                                   # [m/s]
         jgloc       = cond.jgloc                                # [m/s]
         jgatm       = cond.jgatm                                # [m/s]
