@@ -609,7 +609,7 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
 
                 theta = 90
                 port = file.split('_')[-1]
-                port_idx = re.findall(r'\d+',port)
+                port_idx = int(re.findall(r'\d+',port))
             
                 if file.split('_')[0] == 'Run1':
                     jf = 0.32
@@ -749,11 +749,6 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                 ]
 
                 LoverD_mat = [8.02, 34.76, 61.49, 88.22, 114.96, 141.70]
-
-                print(run_idx)
-                print(type(run_idx))
-                print(port_idx)
-                print(type(port_idx))
 
                 jgloc                   = jgloc_mat[run_idx-1][port_idx-1]
                 area_avg_void_sheet     = alpha_mat[run_idx-1][port_idx-1]
