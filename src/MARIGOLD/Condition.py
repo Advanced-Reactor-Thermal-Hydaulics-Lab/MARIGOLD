@@ -15,7 +15,7 @@ class Condition:
     Can also get the data at a local point from calling the condition, syntax
 
     cond(phi, r, 'param'). Phi is in radians, the arguments can be constants or numpy arrays.
-    Also has an option for interpolation, 'interp_method'
+    Also has an option for interpolation, 'interp_method' 
 
 """
 
@@ -2120,19 +2120,20 @@ class Condition:
 
                 if method.lower() == 'ishii':
                     mu_m = self.mu_f * (1 - midas_dict['alpha'] / alpha_max)**(-2.5*alpha_max * (self.mu_g + 0.4*self.mu_f) / (self.mu_g + self.mu_f)  )
-                    mu_eff = mu_m
 
-                    midas_dict.update({'mu_m': mu_eff})
                 elif method.lower() == 'ishii_AA':
                     mu_m = self.mu_f * (1 - alpha_avg / alpha_max)**(-2.5*alpha_max * (self.mu_g + 0.4*self.mu_f) / (self.mu_g + self.mu_f)  )
-                
+                    
                 elif method.lower() == 'avg_void':
                     mu_m = self.mu_f / (1 - alpha_avg)
 
+                mu_eff = mu_m
+                mu_m = mu_eff
+
                 midas_dict.update({'mu_eff': mu_eff})
+                midas_dict.update({'mu_m': mu_m})
 
         return self.area_avg('mu_eff')
-    
 
     def calc_cd(self, method='Ishii-Zuber', vr_cheat = False, limit = 0, const_CD = 0.44):
         """Method for calculating drag coefficient

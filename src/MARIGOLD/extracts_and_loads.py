@@ -5,6 +5,7 @@ from .Iskandrani_Condition import Iskandrani_Condition
 from .Yang_Condition import Yang_Condition
 
 import re
+import xlrd
 
 def extractProbeData(dump_file = 'database.dat', in_dir = [], require_terms = None, skip_terms = ['CFD', 'Copy'],
                      extract_Ryan = True, Ryan_path = 'Z:\\TRSL\\PITA\\Data\\LocalData\\spreadsheets\\PITA',
@@ -571,21 +572,24 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
         # print(file)
         if debug: print(file, file=debugFID)
 
-        if file.split('.')[-1] == 'xlsx' or file.split('.')[-1] == 'xlsm':
+        if file.split('.')[-1] == 'xlsx' or file.split('.')[-1] == 'xlsm' or file.split('.')[-1] == 'xls':
 
             # Check if the file has any skipped/required terms
             if any(term in file for term in skip_terms):
                 if debug: print(f"Skipping {file}", file=debugFID)
                 continue
 
-            if all(term not in file for term in require_terms):
-                if debug: print(f"Skipping {file}", file=debugFID)
-                continue
+            # if all(term not in file for term in require_terms):
+            #     if debug: print(f"Skipping {file}", file=debugFID)
+            #     continue
             
             #if debug: print(path, file=debugFID)
             
             try:
-                wb = op.load_workbook(filename=os.path.join(path, file), data_only=True)
+                if file.split('.')[-1] == 'xls':
+                    wb = xlrd.open_workbook(filename=os.path.join(path, file))
+                else:
+                    wb = op.load_workbook(filename=os.path.join(path, file), data_only=True)                    
             except:
                 print(f"Error reading wb: {file}\nSkipping...")
                 continue
@@ -596,37 +600,153 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                 port = file.split('_')[3].strip('.xlsx').strip('.xlsm')
                 theta = float(file.split('_')[0].strip('deg'))
             except:
-                print(f'Warning: Non-standard excel file name {file}. Skipping...')
-                continue
+                print(f'Warning: Non-standard excel file name {file}. Is this Bettis template?')
+                pass
             
-            # Yadav's template is a bit chaotic; let's not try to adapt PITA's extract logic to it (DHK)
-            if sheet_type == 'yadav_template':
+            # Temporary fix, for the Bettis data (DHK)
+            if sheet_type == 'bettis_template' and 'Run' in file.split('_')[0]:
+                print("Yes, it is. Proceeding...")
 
-                potent_ranges = [ [i for i in range(8, 22)], [i for i in range(48, 62)], [i for i in range(87, 101)], [i for i in range(128, 142)], [i for i in range(168, 182)], [i for i in range(209, 223)], [i for i in range(250, 264)], [i for i in range(290, 304)] ]
+                theta = 90
+                port = file.split('_')[-1]
+                port_idx = re.findall(r'\d+',port)
+            
+                if file.split('_')[0] == 'Run1':
+                    jf = 0.32
+                    jgref = 0.047
+                    
+                    run_idx = 1
+                elif file.split('_')[0] == 'Run2':
+                    jf = 0.95
+                    jgref = 0.047
+
+                    run_idx = 2
+                elif file.split('_')[0] == 'Run3':
+                    jf = 1.89
+                    jgref = 0.095
+                    
+                    run_idx = 3
+                elif file.split('_')[0] == 'Run4':
+                    jf = 0.95
+                    jgref = 0.187
+                    
+                    run_idx = 4
+                elif file.split('_')[0] == 'Run5':
+                    jf = 1.89
+                    jgref = 0.193
+                    
+                    run_idx = 5
+                elif file.split('_')[0] == 'Run6' and file.split('_')[1] == 'short':
+                    jf = 0.63
+                    jgref = 0.279
+                    
+                    run_idx = 6
+                elif file.split('_')[0] == 'Run7' and file.split('_')[1] == 'short':
+                    jf = 2.84
+                    jgref = 0.287
+                    
+                    run_idx = 7
+                elif file.split('_')[0] == 'Run6' and file.split('_')[1] == 'long':
+                    jf = 0.63
+                    jgref = 0.279
+                    
+                    run_idx = 8
+                elif file.split('_')[0] == 'Run7' and file.split('_')[1] == 'long':
+                    jf = 2.84
+                    jgref = 0.287
+                    
+                    run_idx = 9
+                elif file.split('_')[0] == 'Run8':
+                    jf = 1.89
+                    jgref = 0.385
+                    
+                    run_idx = 10
+                elif file.split('_')[0] == 'Run9':
+                    jf = 4.40
+                    jgref = 0.940
+                    
+                    run_idx = 11
+                else:
+                    print("Warning: Run number exceeds highest known run. Skipping...")
+                    continue
                 
-                # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
-                # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
-                # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
-                # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
+            else:
+                print(f'Nope. Warning: Non-standard excel file name {file}. Skipping...')
+                continue
+        
+            if sheet_type == 'bettis_template':
+                # I give up. Hardcoding! Whoo!
 
-                ws = wb['1']
+                jgloc_mat = [
+                    [0.047, 0.040, 0.040, 0.040, 0.000, 0.000], # Run1
+                    [0.047, 0.040, 0.040, 0.040, 0.000, 0.000], # Run2
+                    [0.095, 0.070, 0.070, 0.070, 0.000, 0.000], # Run3
+                    [0.187, 0.140, 0.150, 0.150, 0.000, 0.000], # Run4
+                    [0.193, 0.140, 0.150, 0.150, 0.000, 0.000], # Run5
+                    [0.279, 0.220, 0.000, 0.220, 0.000, 0.000], # Run6_short
+                    [0.287, 0.210, 0.220, 0.220, 0.000, 0.000], # Run7_short
+                    [0.000, 0.219, 0.000, 0.234, 0.000, 0.251], # Run6_long
+                    [0.000, 0.212, 0.000, 0.000, 0.000, 0.264], # Run7_long
+                    [0.000, 0.288, 0.000, 0.314, 0.000, 0.346], # Run8
+                    [0.000, 0.618, 0.000, 0.716, 0.000, 0.850], # Run9
+                ]
 
-                jglocs = ['O16', 'O17', 'O18', 'O19', 'O20']
+                alpha_mat = [
+                    [0.066, 0.089, 0.080, 0.083, 0.000, 0.000], # Run1
+                    [0.039, 0.038, 0.037, 0.034, 0.000, 0.000], # Run2
+                    [0.035, 0.038, 0.031, 0.034, 0.000, 0.000], # Run3
+                    [0.104, 0.110, 0.116, 0.116, 0.000, 0.000], # Run4
+                    [0.064, 0.059, 0.062, 0.059, 0.000, 0.000], # Run5
+                    [0.220, 0.173, 0.000, 0.248, 0.000, 0.000], # Run6_short
+                    [0.031, 0.051, 0.000, 0.058, 0.000, 0.000], # Run7_short
+                    [0.000, 0.207, 0.000, 0.222, 0.000, 0.237], # Run6_long
+                    [0.000, 0.067, 0.000, 0.000, 0.000, 0.075], # Run7_long
+                    [0.000, 0.115, 0.000, 0.103, 0.000, 0.129], # Run8
+                    [0.000, 0.078, 0.000, 0.095, 0.000, 0.125]  # Run9
+                ]
+
+                ai_mat = [
+                    [0.000, 190.33, 3, 4, 5, 6], # Run1
+                    [0.000, 2, 3, 4, 5, 6], # Run2
+                    [0.000, 2, 3, 4, 5, 6], # Run3
+                    [0.000, 2, 3, 4, 5, 6], # Run4
+                    [0.000, 2, 3, 4, 5, 6], # Run5
+                    [0.000, 2, 3, 4, 5, 6], # Run6_short
+                    [0.000, 2, 3, 4, 5, 6], # Run7_short
+                    [0.000, 2, 3, 4, 5, 6], # Run6_long
+                    [0.000, 2, 3, 4, 5, 6], # Run7_long
+                    [0.000, 2, 3, 4, 5, 6], # Run8
+                    [0.000, 2, 3, 4, 5, 6], # Run9
+                ]
+
+                Dsm_mat = [
+                    [0.000, 2, 3, 4, 5, 6], # Run1
+                    [0.000, 2, 3, 4, 5, 6], # Run2
+                    [0.000, 2, 3, 4, 5, 6], # Run3
+                    [0.000, 2, 3, 4, 5, 6], # Run4
+                    [0.000, 2, 3, 4, 5, 6], # Run5
+                    [0.000, 2, 3, 4, 5, 6], # Run6_short
+                    [0.000, 2, 3, 4, 5, 6], # Run7_short
+                    [0.000, 2, 3, 4, 5, 6], # Run6_long
+                    [0.000, 2, 3, 4, 5, 6], # Run7_long
+                    [0.000, 2, 3, 4, 5, 6], # Run8
+                    [0.000, 2, 3, 4, 5, 6], # Run9
+                ]
+
+                LoverD_mat = [8.02, 34.76, 61.49, 88.22, 114.96, 141.70]
+
+                jgloc = jgloc_mat[run_idx,port_idx]
+                
+                '''
+                ws = wb.sheet_by_name('<<Ub>>')
                 try:
-                    jgloc = ws[jglocs[int(re.findall(r'\d+', port)[0])-1]].value
-                    #jgloc = ws[jglocs[int(port.strip('P'))]].value
-                except Exception as e:
-                    print(e)
-                    print(f"Warning: Could not identify port # for {file}, setting jgloc = jgref")
-                    jgloc = jgref
+                    jgloc = ws.cell(17,13).value    # N18, N is column!
+                except:
+                    print(f"Warning: jgloc could not be found for {file}. Setting jgloc to jgref...")
 
-                # Above jglocs not implemented for Ryan templates (DHK)
-                if jgloc is None and sheet_type == 'ryan_template':
-                    print(f"Sheet type identified as {sheet_type}, referencing cell U23 for jgloc")
-                    jgloc = ws['U23'].value
-                elif jgloc is None:
-                    print(f"Warning: jgloc could not be found, setting jgloc = jgref")
                     jgloc = jgref
+                    pass
+                '''
 
                 newCond = Condition(jgref, jgloc, jf, theta, port, sheet_type.split('_')[0])
 
@@ -636,15 +756,109 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                 else:
                     cond = all_conditions[ all_conditions.index(newCond) ]
 
-                cond.run_ID = ws['B2'].value
+                # 1 x 20 cm^2 rectangular channel
+                cond.Dh = 4 * 0.20 * 0.1 / 2 / (0.20 + 0.01)
 
-                # Local corrected gauge pressure can be back-calculated from jgloc and jgatm (DHK)
-                cond.jgatm = ws['D6'].value
+                cond.LoverD = LoverD_mat[port_idx]
+                cond.area_avg_void_sheet = alpha_mat[run_idx,port_idx]
+                cond.area_avg_ai_sheet = ai_mat[run_idx,port_idx]
+                cond.area_avg_Dsm_sheet = Dsm_mat[run_idx,port_idx]
+
+                cond.jgatm = jgref  # No
+
+                '''
+                <<Ub>>, can be offset by 1 row, depending on which you're looking at
+                A1: x/y (mm)
+                B2 to L2: y (0-10)
+                A3 to A15: x (0-100)
+                B3 to L15: data
+                M2-O2: headers (Ub*a)x, <Ub*a>, <<Ub>>
+                M3-N15: formulas (sum across y, divide by 10) (huh?)
+                O15: <<Ub>> value
+
+                Ub
+                A1: x/y (mm)
+                B2 to L2: y (0-10)
+                A3 to A15: x (0-100)
+                B3 to L15: data
+                M2-O2: headers Ubx, Ubave
+                M3-N15: formulas (sum across y, divide by 10) (huh?)
+
+                Dsm
+                A1: x/y (mm)
+                B2 to L2: y (0-10)
+                A3 to A15: x (0-100)
+                B3 to L15: data
+                M2-O2: headers Dsmx, Dsm
+                M3-N15: formulas (sum across y endpoints halved, divide by 10) (huh?)
+
+                ai, a, x90y, x70y, x50y, x30y, x10y, x3y, AAIXYC, Figures
+
+                Other sheets that don't appear in all Excel docs:
+                fb
+                DriftFlux
+                aaixycnew
+                Rawdata
+                '''
                 
-                ws = wb['2']
+            elif sheet_type == 'yadav_template':
 
-                cond.area_avg_void_sheet = ws['G266'].value
-                cond.area_avg_ai_sheet = ws['J266'].value
+                potent_ranges = [ [i for i in range(8, 22)], [i for i in range(48, 62)], [i for i in range(87, 101)], [i for i in range(128, 142)], [i for i in range(168, 182)], [i for i in range(209, 223)], [i for i in range(250, 264)], [i for i in range(290, 304)] ]
+                
+                ws = wb['1']
+
+                jgatm = ws['C3'].value
+                jgref = jgatm
+
+                jglocs = []
+
+                jgloc = jgatm       # Nope. Either need jgloc or P_loc, but I have neither -- how did Yadav get jgloc for his IATE script?
+                
+                '''
+                8 cond x 7 port?
+
+                % exp_z = [0.38, 1.75, 3.12, 3.59, 4.96, 8.16, 12.58];
+
+                titles=['Run1: j_{g}=0.039 [m/s] & j_{f}=0.018 [m/s]'; 'Run2: j_{g}=0.039 [m/s] & j_{f}=0.682 [m/s]'...
+                    ;'Run3: j_{g}=0.136 [m/s] & j_{f}=0.682 [m/s]';'Run4: j_{g}=0.138 [m/s] & j_{f}=2.336 [m/s]';...
+                    'Run5: j_{g}=0.538 [m/s] & j_{f}=5.100 [m/s]';'Run6: j_{g}=1.234 [m/s] & j_{f}=5.100 [m/s]';...
+                    'Run7: j_{g}=0.039 [m/s] & j_{f}=0.064 [m/s]';'Run8: j_{g}=0.039 [m/s] & j_{f}=0.020 [m/s]'];
+
+                jg_exp = [
+                    0.083	0.090	0.099	0.101	0.102	0.104	0.106
+                    0.136	0.148	0.163	0.166	0.168	0.171	0.175	
+                    0.200	0.217	0.237	0.241	0.244	0.248	0.254	
+                    0.072	0.078	0.085	0.087	0.089	0.091	0.095	
+                    0.118	0.128	0.140	0.143	0.145	0.149	0.156	
+                    0.177	0.191	0.207	0.212	0.216	0.222	0.232
+                    0.094	0.101	0.108	0.110	0.113	0.123	0.139
+                    0.141	0.148	0.159	0.162	0.167	0.182	0.206
+                    ]
+                
+                p_exp = [
+                    65707       51705.5     37799.6     34874.5     33378.4     31206.5     28138.4
+                    68051       54277.2     40722.9     37763.4     36191.4     34100.3     30710.1
+                    72326       58793.3     45604.4     42651.8     40976.4     38958.3     35329.6
+                    94527       79201.8     64227.2     60578.2     57737.5     53657.9     46885.2
+                    97147       81952.8     67116.1     63577.4     60495.5     56277.9     49353.5
+                    100801      85731.1     71121.9     67438.5     64391.0     59910.8     52876.7
+                    148848      132598.1    115749.7	111996.5	106153.9	89964.0     68377.4
+                    153108      136853.6    120051.4	116366.2	110189.3	92801.6     69618.0
+                    ];
+                '''
+
+                newCond = Condition(jgref, jgloc, jf, theta, port, sheet_type.split('_')[0])
+
+                if newCond not in all_conditions:
+                    all_conditions.append(newCond)
+                    cond = newCond
+                else:
+                    cond = all_conditions[ all_conditions.index(newCond) ]
+
+                cond.jgatm = jgatm
+
+                cond.area_avg_void_sheet = ws['J328'].value
+                cond.area_avg_ai_sheet = ws['K328'].value
 
                 for phi, indices in Q1_ranges:
                     for i in indices:
@@ -677,11 +891,6 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                                 #cond.phi[phi_val].update({0.0: zero_data}) # Cuz I'm paranoid
                                 cond.phi[phi].update({roverR: data})
 
-                # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
-                # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
-                # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
-                # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
-            
             # General PITA template structure holds
             else:
                 if sheet_type == 'infer':
@@ -742,7 +951,7 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                     return
                 
                 ws = wb['1']
-
+                
                 jglocs = ['O16', 'O17', 'O18', 'O19', 'O20']
                 try:
                     jgloc = ws[jglocs[int(re.findall(r'\d+', port)[0])-1]].value
@@ -770,13 +979,18 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
 
                 cond.run_ID = ws['B2'].value
 
-                # Local corrected gauge pressure can be back-calculated from jgloc and jgatm (DHK)
+                # Local corrected gauge pressure can also be back-calculated from jgloc and jgatm (DHK)
                 cond.jgatm = ws['D6'].value
-                
-                ws = wb['2']
 
-                cond.area_avg_void_sheet = ws['G266'].value
-                cond.area_avg_ai_sheet = ws['J266'].value
+                ws = wb['2']
+                
+                if sheet_type == 'ryan_template':
+                    cond.area_avg_void_sheet = ws['G266'].value
+                    cond.area_avg_ai_sheet = ws['J266'].value
+                    
+                elif sheet_type == 'adix_template' or sheet_type == 'adix_template4':
+                    cond.area_avg_void_sheet = ws['G246'].value
+                    cond.area_avg_ai_sheet = ws['J246'].value
                 
                 for phi, indices in Q1_ranges:
                     for i in indices:

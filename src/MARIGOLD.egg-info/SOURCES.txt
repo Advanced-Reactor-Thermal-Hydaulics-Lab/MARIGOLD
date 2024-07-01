@@ -9,6 +9,8 @@ src/MARIGOLD/Yang_Condition.py
 src/MARIGOLD/__init__.py
 src/MARIGOLD/config.py
 src/MARIGOLD/extracts_and_loads.py
+src/MARIGOLD/iate.py
+src/MARIGOLD/misc.py
 src/MARIGOLD.egg-info/PKG-INFO
 src/MARIGOLD.egg-info/SOURCES.txt
 src/MARIGOLD.egg-info/dependency_links.txt
