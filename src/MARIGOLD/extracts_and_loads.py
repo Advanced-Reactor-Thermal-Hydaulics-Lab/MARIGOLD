@@ -650,6 +650,7 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
             if sheet_type == 'bettis_template':
                 # Bare bones
                 ws = wb.sheet_by_name('<<Ub>>')
+                print('proof')
                 print(ws)
                 print(ws.cell(14,18).value)
                 jgloc = ws['N18'].value
