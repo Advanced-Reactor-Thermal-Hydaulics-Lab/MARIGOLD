@@ -180,7 +180,7 @@ def iate_1d_1g(
         
         try:    Db[0]       = cond.void_area_avg("Dsm1") / 1000         # [m]
         except: pass
-        try:    Db[0]       = cond.area_avg_Dsm_sheet
+        try:    Db[0]       = cond.area_avg_Dsm_sheet / 1000
         except: print(f'Could not find Dsm for {cond}.')
         
         jf          = cond.jf                                   # [m/s]
