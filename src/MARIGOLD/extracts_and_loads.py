@@ -750,11 +750,11 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
 
                 LoverD_mat = [8.02, 34.76, 61.49, 88.22, 114.96, 141.70]
 
-                jgloc                   = jgloc_mat[run_idx,port_idx]
-                area_avg_void_sheet     = alpha_mat[run_idx,port_idx]
-                area_avg_ai_sheet       = ai_mat[run_idx,port_idx]
-                area_avg_Dsm_sheet      = Dsm_mat[run_idx,port_idx]
-                pz                      = pz_mat[run_idx,port_idx]
+                jgloc                   = jgloc_mat[run_idx-1][port_idx-1]
+                area_avg_void_sheet     = alpha_mat[run_idx-1][port_idx-1]
+                area_avg_ai_sheet       = ai_mat[run_idx-1][port_idx-1]
+                area_avg_Dsm_sheet      = Dsm_mat[run_idx-1][port_idx-1]
+                pz                      = pz_mat[run_idx-1][port_idx-1]
 
                 '''
                 ws = wb.sheet_by_name('<<Ub>>')
