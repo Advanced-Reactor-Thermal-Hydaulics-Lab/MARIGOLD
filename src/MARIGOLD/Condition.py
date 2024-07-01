@@ -1982,8 +1982,8 @@ class Condition:
         if method.lower() == 'lm' or method.lower() == 'lockhart' or method.lower() == 'lockhart-martinelli':
             f_f, f_g = self.calc_fric(m = m, n = n)
 
-            dpdz_f = f_f * 1/self.Dh * self.rhof * self.jf**2 / 2
-            dpdz_g = f_g * 1/self.Dh * self.rhog * self.jgloc**2 / 2
+            dpdz_f = f_f * 1/self.Dh * self.rho_f * self.jf**2 / 2
+            dpdz_g = f_g * 1/self.Dh * self.rho_g * self.jgloc**2 / 2
             chi2 = dpdz_f / dpdz_g
 
             phi_f2 = 1 + chisolm/np.sqrt(chi2) + 1 / chi2
@@ -1992,9 +1992,9 @@ class Condition:
         elif method.lower() == 'kim':
             f_f, f_g = self.calc_fric(m = m, n = n)
 
-            dpdz_f = f_f * 1/self.Dh * self.rhof * self.jf**2 / 2
-            dpdz_g = f_g * 1/self.Dh * self.rhog * self.jgloc**2 / 2
-            dpdz_m = k_m * self.rhof * self.jf**2 / 2 / L
+            dpdz_f = f_f * 1/self.Dh * self.rho_f * self.jf**2 / 2
+            dpdz_g = f_g * 1/self.Dh * self.rho_g * self.jgloc**2 / 2
+            dpdz_m = k_m * self.rho_f * self.jf**2 / 2 / L
 
             chi2 = dpdz_f / dpdz_g
             chiM2 = dpdz_f / dpdz_m
