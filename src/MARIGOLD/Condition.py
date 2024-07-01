@@ -15,7 +15,7 @@ class Condition:
     Can also get the data at a local point from calling the condition, syntax
 
     cond(phi, r, 'param'). Phi is in radians, the arguments can be constants or numpy arrays.
-    Also has an option for interpolation, 'interp_method'
+    Also has an option for interpolation, 'interp_method' 
 
 """
 
