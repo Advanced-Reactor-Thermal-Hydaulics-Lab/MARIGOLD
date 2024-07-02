@@ -38,12 +38,7 @@ class Rect_Condition(Condition):
 
         self.Dh = 4 * (width * depth) / (2*width + 2*depth)
 
-        # Data is stored in this phi array. 3 layers of dictionary
-        # phi [angle] gives a dictionary with the various r/R
-        # phi [angle][r/R] gives a dictionary with the MIDAS output
-        # So phi[angle][r/R]['alpha'] should give you the void fraction at r/R for phi = angle
-        # This structure is initialized with zeros for the MIDAS output at the pipe center and wall
-        #self.phi = deepcopy(dict( zip(angles, deepcopy([ {0.0: dict( zip(tab_keys, [0]*len(tab_keys)) ), 1.0: dict(zip(tab_keys, [0]*len(tab_keys)) ) } ]) * len(angles)) ))
+        # Data is stored in this data array
         self.data = {}
 
         self.mirrored = False
@@ -82,5 +77,65 @@ class Rect_Condition(Condition):
 
     def mirror(self, symQuad = True):
         # TODO
+
+        pass
+
+    def area_avg(self, param: str, even_opt='first', recalc = True) -> float:
+        try:
+            dummy = self.data[0][0][param]
+        except KeyError as e:
+            print(f"KeyError: {e}")
+            if debug: print(self.data, file=debugFID)
+            print(f"Could not area-average {param} for condition {self.name}")
+            return None
+        
+        if (param in self.area_avgs.keys()) and (not recalc):
+            return self.area_avgs[param] # why waste time, if we already calculated this don't do it again
+        
+        # We have to integrate twice, once with resepect to r, again with respect to phi
+        # Start with r
+
+        I = 0
+        param_r = [] # array for parameter integrated wrt r
+        xs = []
+        
+        if not self.mirrored:
+            warnings.warn("Mirroring in area-avg")
+            self.mirror()
+
+
+        for x, y_dict in self.data.items():
+
+            ys_temp = []
+            vars_temp = []
+            xs.append(x) # Convert degrees to radians
+            for y, midas_dict in y_dict.items():
+                ys_temp.append( y )
+                vars_temp.append( midas_dict[param] )
+            
+            
+            vars = [var for _, var in sorted(zip(ys_temp, vars_temp))]
+            ys = sorted(ys_temp)
+
+            if debug: print("Arrays to integrate", x, ys, vars, file=debugFID)
+
+            if len(ys) != len(vars):
+                ValueError( f"rs to integrate over {ys} must be the same length as params {vars}, occured at {x}" )
+                
+            try:
+                param_r.append( integrate.simpson(vars, ys, even=even_opt) ) # Integrate wrt r
+            except Exception as e:
+                print(e)
+                print(ys, vars)
+            if debug: print("calculated integral:", integrate.simpson(vars, ys, even=even_opt), file=debugFID)
+                #I = 2 * np.pi
+        if debug: print("Integrated wrt y", param_r, file=debugFID)
+
+        param_r = [param for _, param in sorted(zip(xs, param_r))]
+        xs = sorted(xs)
+
+        I = integrate.simpson(param_r, xs, even=even_opt) / (self.width * self.depth) # Integrate wrt theta, divide by normalized area
+        self.area_avgs.update({param: I})
+        return I
 
         pass
