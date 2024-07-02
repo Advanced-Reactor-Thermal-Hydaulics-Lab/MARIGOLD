@@ -601,78 +601,77 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                 theta = float(file.split('_')[0].strip('deg'))
             except:
                 print(f'Warning: Non-standard excel file name {file}. Is this Bettis template?')
-                pass
-            
-            # Temporary fix, for the Bettis data (DHK)
-            if sheet_type == 'bettis_template' and 'Run' in file.split('_')[0]:
-                print("Yes, it is. Proceeding...")
-
-                theta = 90
-                port = file.split('_')[-1]
-                port_idx = int(''.join(re.findall(r'\d+',port)))
-            
-                if file.split('_')[0] == 'Run1':
-                    jf = 0.32
-                    jgref = 0.047
-                    
-                    run_idx = 1
-                elif file.split('_')[0] == 'Run2':
-                    jf = 0.95
-                    jgref = 0.047
-
-                    run_idx = 2
-                elif file.split('_')[0] == 'Run3':
-                    jf = 1.89
-                    jgref = 0.095
-                    
-                    run_idx = 3
-                elif file.split('_')[0] == 'Run4':
-                    jf = 0.95
-                    jgref = 0.187
-                    
-                    run_idx = 4
-                elif file.split('_')[0] == 'Run5':
-                    jf = 1.89
-                    jgref = 0.193
-                    
-                    run_idx = 5
-                elif file.split('_')[0] == 'Run6' and file.split('_')[1] == 'short':
-                    jf = 0.63
-                    jgref = 0.279
-                    
-                    run_idx = 6
-                elif file.split('_')[0] == 'Run7' and file.split('_')[1] == 'short':
-                    jf = 2.84
-                    jgref = 0.287
-                    
-                    run_idx = 7
-                elif file.split('_')[0] == 'Run6' and file.split('_')[1] == 'long':
-                    jf = 0.63
-                    jgref = 0.279
-                    
-                    run_idx = 8
-                elif file.split('_')[0] == 'Run7' and file.split('_')[1] == 'long':
-                    jf = 2.84
-                    jgref = 0.287
-                    
-                    run_idx = 9
-                elif file.split('_')[0] == 'Run8':
-                    jf = 1.89
-                    jgref = 0.385
-                    
-                    run_idx = 10
-                elif file.split('_')[0] == 'Run9':
-                    jf = 4.40
-                    jgref = 0.940
-                    
-                    run_idx = 11
-                else:
-                    print("Warning: Run number exceeds highest known run. Skipping...")
-                    continue
                 
-            else:
-                print(f'Nope. Warning: Non-standard excel file name {file}. Skipping...')
-                continue
+                # Temporary fix, for the Bettis data (DHK)
+                if sheet_type == 'bettis_template' and 'Run' in file.split('_')[0]:
+                    print("Yes, it is. Proceeding...")
+
+                    theta = 90
+                    port = file.split('_')[-1]
+                    port_idx = int(''.join(re.findall(r'\d+',port)))
+                
+                    if file.split('_')[0] == 'Run1':
+                        jf = 0.32
+                        jgref = 0.047
+                        
+                        run_idx = 1
+                    elif file.split('_')[0] == 'Run2':
+                        jf = 0.95
+                        jgref = 0.047
+
+                        run_idx = 2
+                    elif file.split('_')[0] == 'Run3':
+                        jf = 1.89
+                        jgref = 0.095
+                        
+                        run_idx = 3
+                    elif file.split('_')[0] == 'Run4':
+                        jf = 0.95
+                        jgref = 0.187
+                        
+                        run_idx = 4
+                    elif file.split('_')[0] == 'Run5':
+                        jf = 1.89
+                        jgref = 0.193
+                        
+                        run_idx = 5
+                    elif file.split('_')[0] == 'Run6' and file.split('_')[1] == 'short':
+                        jf = 0.63
+                        jgref = 0.279
+                        
+                        run_idx = 6
+                    elif file.split('_')[0] == 'Run7' and file.split('_')[1] == 'short':
+                        jf = 2.84
+                        jgref = 0.287
+                        
+                        run_idx = 7
+                    elif file.split('_')[0] == 'Run6' and file.split('_')[1] == 'long':
+                        jf = 0.63
+                        jgref = 0.279
+                        
+                        run_idx = 8
+                    elif file.split('_')[0] == 'Run7' and file.split('_')[1] == 'long':
+                        jf = 2.84
+                        jgref = 0.287
+                        
+                        run_idx = 9
+                    elif file.split('_')[0] == 'Run8':
+                        jf = 1.89
+                        jgref = 0.385
+                        
+                        run_idx = 10
+                    elif file.split('_')[0] == 'Run9':
+                        jf = 4.40
+                        jgref = 0.940
+                        
+                        run_idx = 11
+                    else:
+                        print("Warning: Run number exceeds highest known run. Skipping...")
+                        continue
+                    
+                else:
+                    print(f'Nope. Warning: Non-standard excel file name {file}. Skipping...')
+                    continue
         
             if sheet_type == 'bettis_template':
                 # I give up. Hardcoding! Whoo!
@@ -756,9 +755,9 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                 area_avg_ai_sheet       = ai_mat[run_idx-1][port_idx-1]
                 area_avg_Dsm_sheet      = Dsm_mat[run_idx-1][port_idx-1]
                 pz                      = pz_mat[run_idx-1][port_idx-1]
-                dpdz                    = dpdz_mat[run_idx-1]
                 LoverD                  = LoverD_mat[port_idx-1]
-
+                dpdz                    = dpdz_mat[run_idx-1]
+                
                 '''
                 ws = wb.sheet_by_name('<<Ub>>')
                 try:
@@ -780,13 +779,12 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
 
                 cond.Dh = 4 * 0.20 * 0.01 / 2 / (0.20 + 0.01)        # 1 x 20 cm^2 rectangular channel
 
-                cond.LoverD = LoverD
-                cond.dpdz = dpdz
-
                 cond.area_avg_void_sheet = area_avg_void_sheet
                 cond.area_avg_ai_sheet = area_avg_ai_sheet
                 cond.area_avg_Dsm_sheet = area_avg_Dsm_sheet
                 cond.pz = pz
+                cond.LoverD = LoverD
+                cond.dpdz = dpdz
 
                 cond.jgatm = jgloc * pz / 101325
 
