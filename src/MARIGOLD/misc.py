@@ -40,15 +40,15 @@ def comp_cond(cond1:Condition, cond2:Condition, tag = 'run_ID') -> Condition:
         tag2 = 'CFD'
 
     # Determine which condition has more angles, use that one for rmesh as well
-    if len(cond1.phi.keys()) > len(cond1.phi.keys()):
-        compCond._angles = cond1.phi.keys()
+    if len(cond1.data.keys()) > len(cond1.data.keys()):
+        compCond._angles = cond1.data.keys()
         rmesh_cond = cond1
     else:
-        compCond._angles = cond2.phi.keys()
+        compCond._angles = cond2.data.keys()
         rmesh_cond = cond2
 
     for angle in compCond._angles:
-        compCond.phi.update({angle:{}})
+        compCond.data.update({angle:{}})
 
         for rstar, data_dict in rmesh_cond[angle].items():
             compCond[angle].update({rstar:{}})

@@ -55,7 +55,7 @@ class Condition:
         # This structure is initialized with zeros for the MIDAS output at the pipe center and wall
         self._angles = np.arange(0, 361, 22.5) # HARDCODED 22.5 degree increments
         #self.phi = deepcopy(dict( zip(angles, deepcopy([ {0.0: dict( zip(tab_keys, [0]*len(tab_keys)) ), 1.0: dict(zip(tab_keys, [0]*len(tab_keys)) ) } ]) * len(angles)) ))
-        self.phi = {}
+        self.data = {}
 
         self.mirrored = False
         self.FR = 0 # Flow regime variable. 0 is undefined, 1 is bubbly, etc.
@@ -180,7 +180,7 @@ class Condition:
                 for i, r_val in enumerate(r_in):
                     for j, phi_val in enumerate(phi_in):
                         try:
-                            param_values[i,j] = self.phi[round(float(phi_val) * 180 / np.pi, 2)][r_val][param]
+                            param_values[i,j] = self.data[round(float(phi_val) * 180 / np.pi, 2)][r_val][param]
                         except KeyError as e:
                             if abs(abs(r_val) - 1) < 0.0001:
                                 param_values[i,j] = 0
@@ -189,7 +189,7 @@ class Condition:
                                 raise 
             except:
                 # Probably input a single phi instead of an array
-                param_values = self.phi[round(phi_in * 180 / np.pi, 2)][r_in][param]
+                param_values = self.data[round(phi_in * 180 / np.pi, 2)][r_in][param]
             return param_values
         
         elif interp_method == 'spline':
@@ -236,13 +236,13 @@ class Condition:
             self.mirror()
         
         if print_to_file:
-            for angle, r_dict in self.phi.items():
+            for angle, r_dict in self.data.items():
                 print(angle, file=FID)
                 for r, midas_output in r_dict.items():
                     print(f"\t{r}", file=FID)
                     print("\t\t", midas_output, file=FID)
         else:
-            for angle, r_dict in self.phi.items():
+            for angle, r_dict in self.data.items():
                 print(angle)
                 for r, midas_output in r_dict.items():
                     print(f"\t{r}")
@@ -298,7 +298,7 @@ class Condition:
         angles_with_data = set()
         self.original_mesh = []
 
-        for angle, rdict in self.phi.items():
+        for angle, rdict in self.data.items():
             for rstar, midas_dict in rdict.items():
                 if any(midas_dict.values()):
                     if 'num_spherical' in midas_dict.keys():
@@ -331,8 +331,8 @@ class Condition:
 
             if (comp_angle not in angles_with_data) and (comp_angle <= 360) and (comp_angle not in angles_to_add):
 
-                data = deepcopy(self.phi[angle])
-                rs = list(deepcopy(self.phi[angle]).keys())
+                data = deepcopy(self.data[angle])
+                rs = list(deepcopy(self.data[angle]).keys())
 
                 for r in rs:
                     
@@ -342,24 +342,24 @@ class Condition:
                 
                 for r in rs:
                     if r < 0:
-                        data[-r] = self.phi[angle].pop(r)
+                        data[-r] = self.data[angle].pop(r)
                         data.pop(r)
                     
                     elif r == 0:
                         pass
                 
-                self.phi[angle].update({1.0: deepcopy(zero_data)}) 
+                self.data[angle].update({1.0: deepcopy(zero_data)}) 
 
                 # There should always be data at r/R 0 so we can plot contours
                 try: 
-                    dummy = self.phi[angle][0.0]
+                    dummy = self.data[angle][0.0]
                 except:
-                    self.phi[angle].update({0.0: deepcopy(zero_data)})  # just in case
+                    self.data[angle].update({0.0: deepcopy(zero_data)})  # just in case
 
 
-                self.phi.update({comp_angle: {}})
-                self.phi[comp_angle].update( {1.0: deepcopy(zero_data)} )
-                self.phi[comp_angle].update( data )
+                self.data.update({comp_angle: {}})
+                self.data[comp_angle].update( {1.0: deepcopy(zero_data)} )
+                self.data[comp_angle].update( data )
                 
 
                 angles_to_add.append(comp_angle)
@@ -369,9 +369,9 @@ class Condition:
 
         if (360 not in (angles_with_data)) and (0 in angles_with_data):
             ref_angle = 0
-            data = deepcopy(self.phi[ref_angle])
-            self.phi.update({360: {}})
-            self.phi[360].update( data )
+            data = deepcopy(self.data[ref_angle])
+            self.data.update({360: {}})
+            self.data[360].update( data )
             angles_with_data.append(360)
 
         # Now comes the actual mirroring step. Need data for every angle, incremements of 22.5° (self._angles)
@@ -380,15 +380,15 @@ class Condition:
             # Find the reference angle with the most data
             ref_angle = angles_with_data[0] # initial guess
             for angle in angles_with_data:
-                if len(self.phi[ref_angle].keys()) < len(self.phi[angle].keys()):
+                if len(self.data[ref_angle].keys()) < len(self.data[angle].keys()):
                     ref_angle = angle
             
             for angle in self._angles:
-                data = deepcopy( self.phi[ref_angle] )
+                data = deepcopy( self.data[ref_angle] )
                 
                 data.update({1.0: deepcopy(zero_data)}) 
-                self.phi.update({angle: {}})
-                self.phi[angle].update( data )
+                self.data.update({angle: {}})
+                self.data[angle].update( data )
 
         elif sym90: 
             # symmetric across the 90 degree line
@@ -401,7 +401,7 @@ class Condition:
                         # Quadrant I, should usually have data here, but if we don't, try to copy data from Q2
                         ref_angle = 180 - angle
                         try:
-                            data = deepcopy(self.phi[ref_angle])
+                            data = deepcopy(self.data[ref_angle])
                         except KeyError:
                             if debug: print(f"No data found for {angle} when mirroring {self.name}, defaulting to 0s")
                             data = {0.0: deepcopy(zero_data)}
@@ -409,14 +409,14 @@ class Condition:
                     elif angle > 90 and angle <= 180:
                        # Quadrant II, mirror from Quadrant I
                         ref_angle = 180 - angle
-                        data = deepcopy(self.phi[ref_angle])
+                        data = deepcopy(self.data[ref_angle])
 
                     elif angle > 180 and angle <= 270:
                         # Quadrant III, should be covered by the negative of Quadrant I
                         # But if we're here there's no data here. So make sure it's 0
                         ref_angle = 540 - angle
                         try:
-                            data = deepcopy(self.phi[ref_angle])
+                            data = deepcopy(self.data[ref_angle])
                         except KeyError:
                             if debug: print(f"No data found for {angle} when mirroring {self.name}, defaulting to 0s")
                             data = {0.0: deepcopy(zero_data)}
@@ -424,11 +424,11 @@ class Condition:
                     elif angle > 270 and angle < 360:
                         # Quadrant IV, mirror from Quadrant III
                         ref_angle = 540 - angle
-                        data = deepcopy(self.phi[ref_angle])
+                        data = deepcopy(self.data[ref_angle])
 
                     elif angle == 360:
                         ref_angle = 0
-                        data = deepcopy(self.phi[ref_angle])
+                        data = deepcopy(self.data[ref_angle])
 
                     data.update({1.0: deepcopy(zero_data)}) # paranoia
                     
@@ -439,14 +439,14 @@ class Condition:
                         data.update({0.0: deepcopy(zero_data)}) # just in case
                     
                     if angle > 360: continue # Just in case
-                    self.phi.update({angle: {}})
-                    self.phi[angle].update( data )
+                    self.data.update({angle: {}})
+                    self.data[angle].update( data )
 
             # Check if data exists at zero, and if not, just put some zero data in
                 try: 
-                    dummy = self.phi[angle][0.0]
+                    dummy = self.data[angle][0.0]
                 except:
-                    self.phi[angle].update({0.0: deepcopy(zero_data)}) # just in case
+                    self.data[angle].update({0.0: deepcopy(zero_data)}) # just in case
 
 
         else:
@@ -456,8 +456,8 @@ class Condition:
                     data = {0.0: deepcopy(zero_data)}
                     data.update({1.0: deepcopy(zero_data)})
                     if angle > 360: continue
-                    self.phi.update({angle: {}})
-                    self.phi[angle].update( data )
+                    self.data.update({angle: {}})
+                    self.data[angle].update( data )
 
         if uniform_rmesh:
             #print(all_rs)
@@ -467,32 +467,32 @@ class Condition:
             #print(self.all_rs)
             for angle in self._angles:
                 for r in all_rs:
-                    if r not in self.phi[angle].keys(): # This will break if there's data for 0.85 in some cases but not others
-                        self.phi[angle].update({r: deepcopy(zero_data)})
+                    if r not in self.data[angle].keys(): # This will break if there's data for 0.85 in some cases but not others
+                        self.data[angle].update({r: deepcopy(zero_data)})
             
             # so go through and interpolate the points where we have data on either side
             for angle in self._angles:
                 for i in range(len(self.all_rs) - 2):
                     #print(angle, self.all_rs[i+1])
-                    if (self.phi[angle][self.all_rs[i+2]]['alpha'] != 0) and (self.phi[angle][self.all_rs[i]]['alpha'] != 0) and (self.phi[angle][self.all_rs[i+1]]['alpha'] == 0):
+                    if (self.data[angle][self.all_rs[i+2]]['alpha'] != 0) and (self.data[angle][self.all_rs[i]]['alpha'] != 0) and (self.data[angle][self.all_rs[i+1]]['alpha'] == 0):
                         print(f"Warning: interpolating data for {angle}°, {self.all_rs[i+1]} to maintain uniform r/R mesh")
                         for param in tab_keys:
                             try:
 
                                 x = self.all_rs[i+1]
                                 x1 = self.all_rs[i+2]
-                                y1 = self.phi[angle][x1][param]
+                                y1 = self.data[angle][x1][param]
                                 x2 = self.all_rs[i]
-                                y2 = self.phi[angle][x2][param]
+                                y2 = self.data[angle][x2][param]
 
                                 interp = y1 + (y2-y1)/(x2-x1) * (x - x1)
-                                self.phi[angle][self.all_rs[i+1]][param] = interp
+                                self.data[angle][self.all_rs[i+1]][param] = interp
                             
                             except KeyError:
                                 #print(f"{param} not found for {angle}°, {self.all_rs[i+1]}")
                                 continue
                         
-                        self.phi[angle][self.all_rs[i+1]]['roverR'] = f"interpolated, {angle}, {i+1}"
+                        self.data[angle][self.all_rs[i+1]]['roverR'] = f"interpolated, {angle}, {i+1}"
                     else:
                         pass
                         #print(f"I'm not interpolating for {angle}°, {self.all_rs[i+1]}")
@@ -501,7 +501,7 @@ class Condition:
         self.mirrored = True
 
         # clean up nones
-        for angle, r_dict in self.phi.items():
+        for angle, r_dict in self.data.items():
             for rstar, midas_dict in r_dict.items():
                 for param, value in midas_dict.items():
                     if value is None:
@@ -523,7 +523,7 @@ class Condition:
 
         self.mirror()
 
-        for angle, r_dict in self.phi.items():
+        for angle, r_dict in self.data.items():
             for rstar, midas_dict in r_dict.items():
                 vf_approx = (n+1)*(2*n+1) / (2*n*n) * (self.jf / (1-self.area_avg('alpha'))) * (1 - abs(rstar))**(1/n)
                 try:
@@ -551,7 +551,7 @@ class Condition:
 
         self.mirror()
 
-        for angle, r_dict in self.phi.items():
+        for angle, r_dict in self.data.items():
             for rstar, midas_dict in r_dict.items():
                 vg_approx = (n+1)*(2*n+1) / (2*n*n) * (self.jgloc / (self.area_avg('alpha'))) * (1 - abs(rstar))**(1/n)
                 try:
@@ -573,7 +573,7 @@ class Condition:
 
         self.mirror()
 
-        for angle, r_dict in self.phi.items():
+        for angle, r_dict in self.data.items():
             for rstar, midas_dict in r_dict.items():
                 vf_approx = (n+1)*(2*n+1) / (2*n*n) * (self.jf / (1-self.area_avg('alpha'))) * (1 - abs(rstar))**(1/n)
                 midas_dict.update({'vf': vf_approx})
@@ -602,7 +602,7 @@ class Condition:
 
         self.mirror()
 
-        for angle, r_dict in self.phi.items():
+        for angle, r_dict in self.data.items():
             for rstar, midas_dict in r_dict.items():
                 try:
                     dp = midas_dict['delta_p'] * 6894.757
@@ -643,7 +643,7 @@ class Condition:
 
         self.mirror()
 
-        for angle, r_dict in self.phi.items():
+        for angle, r_dict in self.data.items():
             for rstar, midas_dict in r_dict.items():
                 try:
                     vf_naive = midas_dict['vf_naive']
@@ -686,7 +686,7 @@ class Condition:
 
         self.mirror()
 
-        for angle, r_dict in self.phi.items():
+        for angle, r_dict in self.data.items():
             for rstar, midas_dict in r_dict.items():
                 try:
                     vf = midas_dict['vf']
@@ -734,7 +734,7 @@ class Condition:
 
         self.mirror()
 
-        for angle, r_dict in self.phi.items():
+        for angle, r_dict in self.data.items():
             for rstar, midas_dict in r_dict.items():
                 try:
                     dummy = midas_dict['vf']
@@ -785,7 +785,7 @@ class Condition:
         phis.sort()
         maxj = len(phis)
 
-        for phi_angle, r_dict in self.phi.items():
+        for phi_angle, r_dict in self.data.items():
             rs = list(r_dict.keys())
 
             rs.sort()
@@ -812,13 +812,13 @@ class Condition:
                 # print(phis[j], hi_phi, lo_phi)
                 
                 try:
-                    hi = self.phi[hi_phi][rs[i]][param]
+                    hi = self.data[hi_phi][rs[i]][param]
                 except KeyError as e:
                     if debug: print(f"Key error found when indexing {e} for hi. Likely a case of the data being zero for the adjacent point, setting to 0...", file=debugFID)
                     hi = 0
 
                 try:
-                    lo = self.phi[lo_phi][rs[i]][param]
+                    lo = self.data[lo_phi][rs[i]][param]
                 except KeyError as e:
                     if debug: print(f"Key error found when indexing {e} for lo. Likely a case of the data being zero for the adjacent point, setting to 0...", file=debugFID)
                     lo = 0
@@ -846,13 +846,13 @@ class Condition:
                         # r_dict[0.0].update( {grad_param_name+'_x': grad_r_param * np.cos(phi_angle) } )
                         # Copy to all other angles
                         for temp_angle in self._angles:
-                            self.phi[temp_angle][0.0].update({grad_param_name+'_x': grad_r_param * np.cos(phi_angle*180/np.pi) } )
+                            self.data[temp_angle][0.0].update({grad_param_name+'_x': grad_r_param * np.cos(phi_angle*180/np.pi) } )
                     
                     elif phi_angle == 90:
                         # r_dict[0.0].update( {grad_param_name+'_y': grad_r_param * np.sin(phi_angle) } )
                         # Copy to all other angles
                         for temp_angle in self._angles:
-                            self.phi[temp_angle][0.0].update({grad_param_name+'_y': grad_r_param * np.sin(phi_angle*180/np.pi) } )
+                            self.data[temp_angle][0.0].update({grad_param_name+'_y': grad_r_param * np.sin(phi_angle*180/np.pi) } )
 
 
                     if phi_angle <= 180:
@@ -869,21 +869,21 @@ class Condition:
                         r_dict[0.0].update( {grad_param_name+'_r': 0.5 * grad_r_param} )
 
                     
-                    if grad_param_name+'_r' in self.phi[comp_angle][0.0].keys():
-                        value = deepcopy(self.phi[comp_angle][0.0][grad_param_name+'_r']) + 0.5 * grad_r_param
-                        self.phi[comp_angle][0.0].update( {grad_param_name+'_r': value} )
+                    if grad_param_name+'_r' in self.data[comp_angle][0.0].keys():
+                        value = deepcopy(self.data[comp_angle][0.0][grad_param_name+'_r']) + 0.5 * grad_r_param
+                        self.data[comp_angle][0.0].update( {grad_param_name+'_r': value} )
                     else:
-                        self.phi[comp_angle][0.0].update( {grad_param_name+'_r': 0.5 * grad_r_param} )
+                        self.data[comp_angle][0.0].update( {grad_param_name+'_r': 0.5 * grad_r_param} )
                         
                     
                     r_dict[0.0].update( {grad_param_name+'_phi': 0 } )     
-                    self.phi[comp_angle][0.0].update({grad_param_name+'_phi': 0 })
+                    self.data[comp_angle][0.0].update({grad_param_name+'_phi': 0 })
 
                     r_dict[0.0].update( {grad_param_name+'_phinor': 0 } )     
-                    self.phi[comp_angle][0.0].update({grad_param_name+'_phinor': 0 })
+                    self.data[comp_angle][0.0].update({grad_param_name+'_phinor': 0 })
 
                     r_dict[0.0].update( {grad_param_name+'_total': deepcopy(r_dict[0.0][grad_param_name+'_r'])} )
-                    self.phi[comp_angle][0.0].update({grad_param_name+'_total': deepcopy(r_dict[0.0][grad_param_name+'_r']) })
+                    self.data[comp_angle][0.0].update({grad_param_name+'_total': deepcopy(r_dict[0.0][grad_param_name+'_r']) })
                     
 
         return self.area_avg(grad_param_name+'_total')
@@ -911,7 +911,7 @@ class Condition:
         phi_unique = set()
         r_unique = set()
 
-        for angle, r_dict in self.phi.items():
+        for angle, r_dict in self.data.items():
             phi_unique.add(angle)
             for rstar, midas_dict in r_dict.items(): # TODO check for the 0.85 issue
                 r_unique.add(rstar)
@@ -924,7 +924,7 @@ class Condition:
         for angle in phi_unique:
             for rstar in r_unique:
                 #print(angle, rstar, self.phi[angle][rstar][param])
-                vals.append(self.phi[angle][rstar][param])
+                vals.append(self.data[angle][rstar][param])
 
         #print(r_unique, phi_unique)
 
@@ -957,7 +957,7 @@ class Condition:
         phis = []
         vals = []
 
-        for angle, r_dict in self.phi.items():
+        for angle, r_dict in self.data.items():
             for rstar, midas_dict in r_dict.items():
                 rs.append(rstar)
                 phis.append(angle *np.pi/180)
@@ -992,7 +992,7 @@ class Condition:
         ys = []
         vals = []
 
-        for angle, r_dict in self.phi.items():
+        for angle, r_dict in self.data.items():
             for rstar, midas_dict in r_dict.items():
                 xs.append(rstar * np.cos(angle * np.pi / 180))
                 ys.append(rstar * np.sin(angle * np.pi / 180))
@@ -1021,7 +1021,7 @@ class Condition:
         if (param in self.maxs.keys()) and (not recalc):
             return self.maxs[param] # why waste time 
         max = 0
-        for angle, r_dict in self.phi.items():
+        for angle, r_dict in self.data.items():
             for rstar, midas_dict in r_dict.items():
                 if midas_dict[param] > max:
                     max = midas_dict[param]
@@ -1040,7 +1040,7 @@ class Condition:
                           
         """
         max = 0
-        for angle, r_dict in self.phi.items():
+        for angle, r_dict in self.data.items():
             for rstar, midas_dict in r_dict.items():
                 if midas_dict[param] > max:
                     max = midas_dict[param]
@@ -1064,7 +1064,7 @@ class Condition:
         if (param in self.mins.keys()) and (not recalc):
             return self.mins[param] # why waste time 
         min = 10**7
-        for angle, r_dict in self.phi.items():
+        for angle, r_dict in self.data.items():
             for rstar, midas_dict in r_dict.items():
                 
                 if nonzero and midas_dict[param] == 0:
@@ -1087,7 +1087,7 @@ class Condition:
                           
         """
         min = 10**7
-        for angle, r_dict in self.phi.items():
+        for angle, r_dict in self.data.items():
             for rstar, midas_dict in r_dict.items():
                 if midas_dict[param] < min:
                     min = midas_dict[param]
@@ -1107,7 +1107,7 @@ class Condition:
                           
         """
         max = 0
-        for rstar, midas_dict in self.phi[angle].items():
+        for rstar, midas_dict in self.data[angle].items():
             if midas_dict[param] > max:
                 max = midas_dict[param]
                 location = rstar
@@ -1126,7 +1126,7 @@ class Condition:
                           
         """
         max = 0
-        for rstar, midas_dict in self.phi[angle].items():
+        for rstar, midas_dict in self.data[angle].items():
             if midas_dict[param] > max:
                 max = midas_dict[param]
                 location = rstar
@@ -1173,7 +1173,7 @@ class Condition:
         
         elif method == 'max_mag_grad_y':
             self.calc_grad('alpha')
-            for rstar, midas_dict in self.phi[90].items():
+            for rstar, midas_dict in self.data[90].items():
                 if midas_dict['alpha'] < void_criteria:
                     pass
                     #TODO finish this
@@ -1185,13 +1185,13 @@ class Condition:
             roverRend = -1
             max_loc = self.max_line_loc('alpha', 90)
             max_void = self.max_line('alpha', 90)
-            for rstar, midas_dict in self.phi[90].items():
+            for rstar, midas_dict in self.data[90].items():
                 if midas_dict['alpha'] < void_criteria:
                     if rstar > roverRend and rstar < max_loc:
                         roverRend = rstar
             
             if roverRend == -1: # Didn't find it on the positive side
-                for rstar, midas_dict in self.phi[270].items():
+                for rstar, midas_dict in self.data[270].items():
                     if midas_dict['alpha'] < void_criteria:
                         if -rstar > roverRend:
                             roverRend = -rstar
@@ -1205,13 +1205,13 @@ class Condition:
             roverRend = -1
             max_loc = self.max_line_loc('alpha', 90)
             max_void = self.max_line('alpha', 90)
-            for rstar, midas_dict in self.phi[90].items():
+            for rstar, midas_dict in self.data[90].items():
                 if midas_dict['alpha'] < max_void * void_criteria:
                     if rstar > roverRend and rstar < max_loc:
                         roverRend = rstar
             
             if roverRend == -1:
-                for rstar, midas_dict in self.phi[180].items():
+                for rstar, midas_dict in self.data[180].items():
                     if midas_dict['alpha'] < max_void * void_criteria:
                         if -rstar > roverRend:
                             roverRend = -rstar
@@ -1247,7 +1247,7 @@ class Condition:
         """
         count = 0
         avg_param = 0
-        for angle, r_dict in self.phi.items():
+        for angle, r_dict in self.data.items():
             for rstar, midas_dict in r_dict.items():
                 
                 if include_zero:
@@ -1277,10 +1277,10 @@ class Condition:
         
         # Check that the parameter that the user requested exists
         try:
-            dummy = self.phi[90][1.0][param]
+            dummy = self.data[90][1.0][param]
         except KeyError as e:
             print(f"KeyError: {e}")
-            if debug: print(self.phi, file=debugFID)
+            if debug: print(self.data, file=debugFID)
             print(f"Could not area-average {param} for condition {self.name}")
             return None
         
@@ -1299,7 +1299,7 @@ class Condition:
             self.mirror()
 
 
-        for angle, r_dict in self.phi.items():
+        for angle, r_dict in self.data.items():
 
             rs_temp = []
             vars_temp = []
@@ -1355,10 +1355,10 @@ class Condition:
 
         # Check that the parameter that the user requested exists
         try:
-            dummy = self.phi[90][1.0][param]
+            dummy = self.data[90][1.0][param]
         except KeyError as e:
             print(f"KeyError: {e}")
-            if debug: print(self.phi, file=debugFID)
+            if debug: print(self.data, file=debugFID)
             print(f"Could not area-average {param} for condition {self.name}")
             return
         
@@ -1367,7 +1367,7 @@ class Condition:
         rs = []
         phis = []
         vals = []
-        for angle, r_dict in self.phi.items():
+        for angle, r_dict in self.data.items():
             for r_star, midas_dict in r_dict.items():
                 rs.append(r_star)
                 phis.append(angle * np.pi/180) # Convert degrees to radians
@@ -1421,10 +1421,10 @@ class Condition:
 
         # Check that the parameter that the user requested exists
         try:
-            dummy = self.phi[90][1.0][param]
+            dummy = self.data[90][1.0][param]
         except KeyError as e:
             print(f"KeyError: {e}")
-            if debug: print(self.phi, file=debugFID)
+            if debug: print(self.data, file=debugFID)
             print(f"Could not area-average {param} for condition {self.name}")
             return
         
@@ -1434,7 +1434,7 @@ class Condition:
         phis = []
         vals = []
         denom = []
-        for angle, r_dict in self.phi.items():
+        for angle, r_dict in self.data.items():
             for r_star, midas_dict in r_dict.items():
                 rs.append(r_star)
                 phis.append(angle * np.pi/180) # Convert degrees to radians
@@ -1489,24 +1489,24 @@ class Condition:
         # Check that the parameter that the user requested exists
         self.mirror()
 
-        if phi_angle not in self.phi.keys():
-            if debug: print(self.phi, file=debugFID)
+        if phi_angle not in self.data.keys():
+            if debug: print(self.data, file=debugFID)
             print(f"Could not area-average {param} for condition {self.name}\nData for {phi_angle} not found after mirroring!")
             return
 
 
         try:
-            dummy = self.phi[90][1.0][param]
+            dummy = self.data[90][1.0][param]
         except KeyError as e:
             print(f"KeyError: {e}")
-            if debug: print(self.phi, file=debugFID)
+            if debug: print(self.data, file=debugFID)
             print(f"Could not area-average {param} for condition {self.name}")
             return
 
         r_for_int = []
         var_for_int = []
 
-        for rstar, midas_dict in self.phi[phi_angle].items():
+        for rstar, midas_dict in self.data[phi_angle].items():
             if rstar not in r_for_int:
                 r_for_int.append(rstar)
                 var_for_int.append(midas_dict[param])
@@ -1517,7 +1517,7 @@ class Condition:
         else:
             comp_angle = phi_angle - 180
         
-        for rstar, midas_dict in self.phi[comp_angle].items():
+        for rstar, midas_dict in self.data[comp_angle].items():
             if rstar not in r_for_int:
                 r_for_int.append(-rstar)
                 var_for_int.append(midas_dict[param])
@@ -1549,24 +1549,24 @@ class Condition:
         # Check that the parameter that the user requested exists
         self.mirror()
 
-        if phi_angle not in self.phi.keys():
-            if debug: print(self.phi, file=debugFID)
+        if phi_angle not in self.data.keys():
+            if debug: print(self.data, file=debugFID)
             print(f"Could not area-average {param} for condition {self.name}\nData for {phi_angle} not found after mirroring!")
             return
 
 
         try:
-            dummy = self.phi[90][1.0][param]
+            dummy = self.data[90][1.0][param]
         except KeyError as e:
             print(f"KeyError: {e}")
-            if debug: print(self.phi, file=debugFID)
+            if debug: print(self.data, file=debugFID)
             print(f"Could not area-average {param} for condition {self.name}")
             return
 
         r_for_int = []
         var_for_int = []
 
-        for rstar, midas_dict in self.phi[phi_angle].items():
+        for rstar, midas_dict in self.data[phi_angle].items():
             if rstar not in r_for_int:
                 r_for_int.append(rstar)
                 var_for_int.append((midas_dict[param] - self.area_avg(param))**2)
@@ -1577,7 +1577,7 @@ class Condition:
         else:
             comp_angle = phi_angle - 180
         
-        for rstar, midas_dict in self.phi[comp_angle].items():
+        for rstar, midas_dict in self.data[comp_angle].items():
             if rstar not in r_for_int:
                 r_for_int.append(-rstar)
                 var_for_int.append((midas_dict[param] - self.area_avg(param))**2)
@@ -1607,10 +1607,10 @@ class Condition:
 
         # Check that the parameter that the user requested exists
         try:
-            dummy = self.phi[90][1.0][param]
+            dummy = self.data[90][1.0][param]
         except KeyError as e:
             print(f"KeyError: {e}")
-            if debug: print(self.phi, file=debugFID)
+            if debug: print(self.data, file=debugFID)
             print(f"Could not area-average {param} for condition {self.name}")
             return
         
@@ -1624,7 +1624,7 @@ class Condition:
         self.mirror()
 
 
-        for angle, r_dict in self.phi.items():
+        for angle, r_dict in self.data.items():
 
             rs_temp = []
             vars_temp = []
@@ -1768,7 +1768,7 @@ class Condition:
         
         self.mirror()
 
-        for angle, r_dict in self.phi.items():
+        for angle, r_dict in self.data.items():
             rs_temp = []
             vars_temp = []
             angles.append(angle * np.pi/180) # Convert degrees to radians
@@ -1820,7 +1820,7 @@ class Condition:
 
         alpha_avg = self.area_avg('alpha')
 
-        for angle, r_dict in self.phi.items():
+        for angle, r_dict in self.data.items():
             rs_temp = []
             vars_temp = []
             angles.append(angle * np.pi/180) # Convert degrees to radians
@@ -1873,7 +1873,7 @@ class Condition:
 
         alpha_avg = self.area_avg('alpha')
 
-        for angle, r_dict in self.phi.items():
+        for angle, r_dict in self.data.items():
             rs_temp = []
             vars_temp = []
             angles.append(angle * np.pi/180) # Convert degrees to radians
@@ -1910,10 +1910,10 @@ class Condition:
         
         # Check that the parameter that the user requested exists
         try:
-            dummy = self.phi[90][1.0][param]
+            dummy = self.data[90][1.0][param]
         except KeyError as e:
             print(f"KeyError: {e}")
-            if debug: print(self.phi, file=debugFID)
+            if debug: print(self.data, file=debugFID)
             print(f"Could not area-average {param} for condition {self.name}")
             return
         
@@ -1926,7 +1926,7 @@ class Condition:
         
         self.mirror()
 
-        for angle, r_dict in self.phi.items():
+        for angle, r_dict in self.data.items():
 
             rs_temp = []
             vars_temp = []
@@ -2038,7 +2038,7 @@ class Condition:
         
         """
 
-        for angle, r_dict in self.phi.items():
+        for angle, r_dict in self.data.items():
             for rstar, midas_dict in r_dict.items():
                 try:
                     vfp = midas_dict['vf']
@@ -2115,7 +2115,7 @@ class Condition:
         self.mirror()
         alpha_avg = self.area_avg('alpha')
                 
-        for angle, r_dict in self.phi.items():
+        for angle, r_dict in self.data.items():
             for rstar, midas_dict in r_dict.items():
 
                 if method.lower() == 'ishii':
@@ -2161,7 +2161,7 @@ class Condition:
 
         self.calc_mu_eff()
 
-        for angle, r_dict in self.phi.items():
+        for angle, r_dict in self.data.items():
             for rstar, midas_dict in r_dict.items():
 
                 if vr_cheat:
@@ -2251,7 +2251,7 @@ the newly calculated :math:`v_{r}` or not
                 if iterate_cd:
                     
                     if initialize_vr:
-                        for angle, r_dict in self.phi.items():
+                        for angle, r_dict in self.data.items():
                             for rstar, midas_dict in r_dict.items():
                                 midas_dict.update(
                                     {'vr_model': -10}
@@ -2266,7 +2266,7 @@ the newly calculated :math:`v_{r}` or not
 
             vr_name = "vr_" + method
 
-            for angle, r_dict in self.phi.items():
+            for angle, r_dict in self.data.items():
                 for rstar, midas_dict in r_dict.items():
                     
                     if method == 'wake_1':
@@ -2369,7 +2369,7 @@ the newly calculated :math:`v_{r}` or not
 
         """
 
-        for angle, r_dict in self.phi.items():
+        for angle, r_dict in self.data.items():
             for rstar, midas_dict in r_dict.items():
 
                 if 'vr_model' not in midas_dict.keys():
@@ -2413,7 +2413,7 @@ the newly calculated :math:`v_{r}` or not
         param_sq_error_name = "eps_sq_" + param1 + "_" + param2
         param_rel_sq_error_name = "eps_rel_sq_" + param1 + "_" + param2
 
-        for angle, r_dict in self.phi.items():
+        for angle, r_dict in self.data.items():
             for rstar, midas_dict in r_dict.items():
                 midas_dict[param_error_name] = midas_dict[param1] - midas_dict[param2]
                 midas_dict[param_sq_error_name] = (midas_dict[param1] - midas_dict[param2])**2
@@ -2455,7 +2455,7 @@ the newly calculated :math:`v_{r}` or not
 
         self.mirror()
 
-        for angle, r_dict in self.phi.items():
+        for angle, r_dict in self.data.items():
             for rstar, midas_dict in r_dict.items():
                 
                 try:
@@ -2500,7 +2500,7 @@ the newly calculated :math:`v_{r}` or not
         f_TP         = 0.316*(mu_m_avg/mu_f/Rem)**0.25                # Two-phase frictional factor, Talley (2012) and Ted (2015)
         eps          =  f_TP*v_m**3 /2/Dh                                # epsilon for calculating u_t
             
-        for angle, r_dict in self.phi.items():
+        for angle, r_dict in self.data.items():
             for rstar, midas_dict in r_dict.items():
                 
                 if midas_dict['alpha'] <= alpha_cr:  # Check if local void fraction is less than or equal to alpha_cr
@@ -2593,7 +2593,7 @@ the newly calculated :math:`v_{r}` or not
 
         if x_axis == 'r':
             for angle in const_to_plot:
-                r_dict = self.phi[angle]
+                r_dict = self.data[angle]
                 rs = []
                 vals = []
                 for r, midas_output in r_dict.items():
@@ -2611,7 +2611,7 @@ the newly calculated :math:`v_{r}` or not
                     if angle > 180:
                         print("Error: Cannot find complement to angle > 180. Skipping")
                     else:
-                        r_dict = self.phi[angle+180]
+                        r_dict = self.data[angle+180]
                         for r, midas_output in r_dict.items():
                             rs.append(-r)
                             try:
@@ -2636,7 +2636,7 @@ the newly calculated :math:`v_{r}` or not
             for rtarget in const_to_plot:
                 phis = []
                 vals = []
-                for angle, r_dict in self.phi.items():
+                for angle, r_dict in self.data.items():
                     for rstar, midas_output in r_dict.items():
                         if abs(rstar - rtarget) < 0.001:
                             phis.append(angle)
@@ -2819,7 +2819,7 @@ the newly calculated :math:`v_{r}` or not
         phis = []
         vals = []
 
-        for phi_angle, r_dict in self.phi.items():
+        for phi_angle, r_dict in self.data.items():
             for r, midas_output in r_dict.items():
                 if r >= 0:
                     rs.append(r)
@@ -2994,7 +2994,7 @@ the newly calculated :math:`v_{r}` or not
         phis = []
         vals = []
 
-        for phi_angle, r_dict in self.phi.items():
+        for phi_angle, r_dict in self.data.items():
             for r, midas_output in r_dict.items():
                 if r >= 0:
                     rs.append(r)

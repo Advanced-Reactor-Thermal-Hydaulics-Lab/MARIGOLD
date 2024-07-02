@@ -97,17 +97,17 @@ def extractProbeData(dump_file = 'database.dat', in_dir = [], require_terms = No
                                     print(tab_keys, midas_output, file=debugFID)
 
                             try:
-                                cond.phi[phi].update({roverR: data})
+                                cond.data[phi].update({roverR: data})
                             except KeyError as e:
                                 if first_phi:
                                     pass
                                 else:
                                     if debug: print("Not my first phi, for some reaseon", e, file=debugFID)
-                                cond.phi.update( {phi:{}} )
+                                cond.data.update( {phi:{}} )
                                 first_phi = False
-                                cond.phi[phi].update({1.0: zero_data})
+                                cond.data[phi].update({1.0: zero_data})
                                 #cond.phi[phi_val].update({0.0: zero_data}) # Cuz I'm paranoid
-                                cond.phi[phi].update({roverR: data})
+                                cond.data[phi].update({roverR: data})
 
 
                 for phi, indices in Q2_ranges:
@@ -134,12 +134,12 @@ def extractProbeData(dump_file = 'database.dat', in_dir = [], require_terms = No
                                     print(tab_keys, midas_output, file=debugFID)
 
                             try:
-                                cond.phi[phi].update({roverR: data})
+                                cond.data[phi].update({roverR: data})
                             except KeyError:
-                                cond.phi.update( {phi:{}} )
-                                cond.phi[phi].update({1.0: zero_data})
+                                cond.data.update( {phi:{}} )
+                                cond.data[phi].update({1.0: zero_data})
                                 #cond.phi[phi_val].update({0.0: zero_data}) # Cuz I'm paranoid
-                                cond.phi[phi].update({roverR: data})
+                                cond.data[phi].update({roverR: data})
 
     
     ### 38.1 mm data (Talley) ###
@@ -255,12 +255,12 @@ def extractProbeData(dump_file = 'database.dat', in_dir = [], require_terms = No
 
                         phi = phis[phi_counter]
                         try:
-                            cond.phi[phi].update({roverR: data})
+                            cond.data[phi].update({roverR: data})
                         except KeyError:
-                            cond.phi.update( {phi:{}} )
-                            cond.phi[phi].update({1.0: zero_data})
+                            cond.data.update( {phi:{}} )
+                            cond.data[phi].update({1.0: zero_data})
                             #cond.phi[phi_val].update({0.0: zero_data}) # Cuz I'm paranoid
-                            cond.phi[phi].update({roverR: data})
+                            cond.data[phi].update({roverR: data})
 
                 #print('total rows read:', i)
 
@@ -347,12 +347,12 @@ def extractProbeData(dump_file = 'database.dat', in_dir = [], require_terms = No
                                     print(tab_keys, midas_output, file=debugFID)
 
                             try:
-                                cond.phi[phi].update({roverR: data})
+                                cond.data[phi].update({roverR: data})
                             except KeyError:
-                                cond.phi.update( {phi:{}} )
-                                cond.phi[phi].update({1.0: zero_data})
+                                cond.data.update( {phi:{}} )
+                                cond.data[phi].update({1.0: zero_data})
                                 #cond.phi[phi_val].update({0.0: zero_data}) # Cuz I'm paranoid
-                                cond.phi[phi].update({roverR: data})
+                                cond.data[phi].update({roverR: data})
 
 
                 for phi, indices in Q2_ranges:
@@ -379,12 +379,12 @@ def extractProbeData(dump_file = 'database.dat', in_dir = [], require_terms = No
                                     print(tab_keys, midas_output, file=debugFID)
 
                             try:
-                                cond.phi[phi].update({roverR: data})
+                                cond.data[phi].update({roverR: data})
                             except KeyError:
-                                cond.phi.update( {phi:{}} )
-                                cond.phi[phi].update({1.0: zero_data})
+                                cond.data.update( {phi:{}} )
+                                cond.data[phi].update({1.0: zero_data})
                                 #cond.phi[phi_val].update({0.0: zero_data}) # Cuz I'm paranoid
-                                cond.phi[phi].update({roverR: data})
+                                cond.data[phi].update({roverR: data})
                 
     
     ### Yadav Data ###
@@ -478,12 +478,12 @@ def extractProbeData(dump_file = 'database.dat', in_dir = [], require_terms = No
                                     print(tab_keys, midas_output, file=debugFID)
 
                             try:
-                                cond.phi[phi].update({roverR: data})
+                                cond.data[phi].update({roverR: data})
                             except KeyError:
-                                cond.phi.update( {phi:{}} )
-                                cond.phi[phi].update({1.0: zero_data})
+                                cond.data.update( {phi:{}} )
+                                cond.data[phi].update({1.0: zero_data})
                                 #cond.phi[phi_val].update({0.0: zero_data}) # Cuz I'm paranoid
-                                cond.phi[phi].update({roverR: data})
+                                cond.data[phi].update({roverR: data})
 
 
             for phi, indices in Q2_ranges:
@@ -516,12 +516,12 @@ def extractProbeData(dump_file = 'database.dat', in_dir = [], require_terms = No
                                 print(tab_keys, midas_output, file=debugFID)
 
                         try:
-                            cond.phi[phi].update({roverR: data})
+                            cond.data[phi].update({roverR: data})
                         except KeyError:
-                            cond.phi.update( {phi:{}} )
-                            cond.phi[phi].update({1.0: zero_data})
+                            cond.data.update( {phi:{}} )
+                            cond.data[phi].update({1.0: zero_data})
                             #cond.phi[phi_val].update({0.0: zero_data}) # Cuz I'm paranoid
-                            cond.phi[phi].update({roverR: data}) 
+                            cond.data[phi].update({roverR: data}) 
 
     
     if debug and False:
@@ -908,12 +908,12 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                                     print(tab_keys, midas_output, file=debugFID)
                             
                             try:
-                                cond.phi[phi].update({roverR: data})
+                                cond.data[phi].update({roverR: data})
                             except KeyError:
-                                cond.phi.update( {phi:{}} )
-                                cond.phi[phi].update({1.0: deepcopy(zero_data)})
+                                cond.data.update( {phi:{}} )
+                                cond.data[phi].update({1.0: deepcopy(zero_data)})
                                 #cond.phi[phi_val].update({0.0: zero_data}) # Cuz I'm paranoid
-                                cond.phi[phi].update({roverR: data})
+                                cond.data[phi].update({roverR: data})
 
             # General PITA template structure holds
             else:
@@ -1040,12 +1040,12 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                                     print(tab_keys, midas_output, file=debugFID)
                             
                             try:
-                                cond.phi[phi].update({roverR: data})
+                                cond.data[phi].update({roverR: data})
                             except KeyError:
-                                cond.phi.update( {phi:{}} )
-                                cond.phi[phi].update({1.0: deepcopy(zero_data)})
+                                cond.data.update( {phi:{}} )
+                                cond.data[phi].update({1.0: deepcopy(zero_data)})
                                 #cond.phi[phi_val].update({0.0: zero_data}) # Cuz I'm paranoid
-                                cond.phi[phi].update({roverR: data})
+                                cond.data[phi].update({roverR: data})
 
                 
                 if pitot_sheet: # Pitot data for Q1
@@ -1073,10 +1073,10 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                                         print(pitot_keys2, pitot_output, file=debugFID)
 
                                 try:
-                                    cond.phi[phi][roverR].update(pitot_data)
+                                    cond.data[phi][roverR].update(pitot_data)
                                 except KeyError:
-                                    cond.phi[phi].update({roverR: deepcopy(zero_data)})
-                                    cond.phi[phi][roverR].update(pitot_data)
+                                    cond.data[phi].update({roverR: deepcopy(zero_data)})
+                                    cond.data[phi][roverR].update(pitot_data)
 
                 for phi, indices in Q2_ranges:
                     for i in indices:
@@ -1102,12 +1102,12 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                                     print(tab_keys, midas_output, file=debugFID)
 
                             try:
-                                cond.phi[phi].update({roverR: data})
+                                cond.data[phi].update({roverR: data})
                             except KeyError:
-                                cond.phi.update( {phi:{}} )
-                                cond.phi[phi].update({1.0: zero_data})
+                                cond.data.update( {phi:{}} )
+                                cond.data[phi].update({1.0: zero_data})
                                 #cond.phi[phi_val].update({0.0: zero_data}) # Cuz I'm paranoid
-                                cond.phi[phi].update({roverR: data}) 
+                                cond.data[phi].update({roverR: data}) 
 
                 if pitot_sheet: # Pitot data for Q2
                     for phi, indices in Q2_ranges:
@@ -1134,10 +1134,10 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                                         print(pitot_keys2, pitot_output, file=debugFID)
 
                                 try:
-                                    cond.phi[phi][roverR].update(pitot_data)
+                                    cond.data[phi][roverR].update(pitot_data)
                                 except KeyError:
-                                    cond.phi[phi].update({roverR: deepcopy(zero_data)})
-                                    cond.phi[phi][roverR].update(pitot_data)
+                                    cond.data[phi].update({roverR: deepcopy(zero_data)})
+                                    cond.data[phi][roverR].update(pitot_data)
 
     if debug and False:
         for cond in all_conditions:
@@ -1195,12 +1195,12 @@ def dump_data_from_tabs(dump_file = 'PITA_Database.dat', skip_dir = "") -> None:
                             roverR = -roverR
                         #print(roverR)
                         try:
-                            cond.phi[phi_val].update({roverR: data})
+                            cond.data[phi_val].update({roverR: data})
                         except KeyError:
-                            cond.phi.update( {phi_val:{}} )
-                            cond.phi[phi_val].update({1.0: zero_data})
+                            cond.data.update( {phi_val:{}} )
+                            cond.data[phi_val].update({1.0: zero_data})
                             #cond.phi[phi_val].update({0.0: zero_data}) # Cuz I'm paranoid
-                            cond.phi[phi_val].update({roverR: data})                    
+                            cond.data[phi_val].update({roverR: data})                    
                         
 
                     except Exception as e:
@@ -1319,12 +1319,12 @@ def extractPitotData(dump_file = 'Pitot_Database.dat', in_dir = [], require_term
                                 print(pitot_keys, midas_output, file=debugFID)
 
                         try:
-                            cond.phi[phi].update({roverR: data})
+                            cond.data[phi].update({roverR: data})
                         except KeyError:
-                            cond.phi.update( {phi:{}} )
-                            cond.phi[phi].update({1.0: zero_data})
+                            cond.data.update( {phi:{}} )
+                            cond.data[phi].update({1.0: zero_data})
                             #cond.phi[phi_val].update({0.0: zero_data}) # Cuz I'm paranoid
-                            cond.phi[phi].update({roverR: data})
+                            cond.data[phi].update({roverR: data})
 
 
     with open(dump_file, 'wb') as g:
