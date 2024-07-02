@@ -172,14 +172,14 @@ def iate_1d_1g(
             ai[0]       = cond.area_avg_ai_sheet
             alpha[0]    = cond.area_avg_void_sheet
             Db[0]       = cond.area_avg_Dsm_sheet / 1000
+
+            print("\tUsing sheet area-averaged values...")
         else:
             ai[0]       = cond.area_avg("ai")                       # [1/m]
             alpha[0]    = cond.area_avg("alpha")                    # [-]
             Db[0]       = cond.void_area_avg("Dsm1") / 1000         # [m]
-        
-        print('ai:    ', ai[0])
-        print('alpha: ', alpha[0])
-        print('Db:    ', Db[0])
+
+            print("\tUsing MG area-averaged values...")
 
         jf          = cond.jf                                   # [m/s]
         jgloc       = cond.jgloc                                # [m/s]
