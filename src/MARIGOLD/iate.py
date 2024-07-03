@@ -170,7 +170,9 @@ def iate_1d_1g(
         if cheat == True:
             ai[0]       = cond.area_avg_ai_sheet
             alpha[0]    = cond.area_avg_void_sheet
-            Db[0]       = cond.area_avg_Dsm_sheet / 1000
+            # Db[0]       = cond.area_avg_Dsm_sheet / 1000
+
+            Db[0]       = 6 * alpha[0] / ai[0]
 
             print("\tUsing sheet area-averaged values...")
         else:
@@ -228,7 +230,7 @@ def iate_1d_1g(
     pz = (p + p_atm) * (1 - (z_mesh - z_mesh[0]) * (dpdz / (p + p_atm)))
     
 	# Local gas density along the test section
-    rho_gz = rho_g * pz / p_atm                                 # Talley
+    rho_gz = rho_g * pz / (p + p_atm)                           # Talley
     # rho_gz = pz / R_spec / T                                  # Worosz, Ideal Gas Law
     
     ############################################################################################################################
@@ -386,8 +388,7 @@ def iate_1d_1g(
             vgj = (2**0.5) * (sigma * abs(grav) * (rho_f - rho_gz[i]) / (rho_f**2))**0.25 * (1 - alpha[i])**(1.75)
             
             C0 = C_inf - (C_inf - 1) * np.sqrt(rho_gz[i]/rho_f)     # Round tube drift flux distribution parameter
-            # alpha[i+1] = (jgloc) / (C0 * j + vgj)
-
+            
             alpha[i+1] = (jgloc) / (C0 * j + vgj)
 
         elif void_method == 'continuity':   # Continuity
@@ -407,7 +408,7 @@ def iate_1d_1g(
             f_f, f_g = cond.calc_fric(m = m, n = n)
             dpdz_f = f_f * 1/Dh * rho_f * jf**2 / 2
 
-            alpha[i+1] = 1 - (dpdz / dpdz_f)**(-1/m)
+            alpha[i+1] = 1 - (-dpdz / dpdz_f)**(-1/(2*akapower))
 
         # Estimate Sauter mean diameter for the next step calculation
         Db[i+1] = 6 * alpha[i+1] / ai[i+1]
