@@ -167,6 +167,10 @@ def iate_1d_1g(
         aiexp[0]    = 0
         aivg[0]     = 0
 
+        jf          = cond.jf                                   # [m/s]
+        jgloc       = cond.jgloc                                # [m/s]
+        jgatm       = cond.jgatm                                # [m/s]
+
         if cheat == True:
             ai[0]       = cond.area_avg_ai_sheet
             alpha[0]    = cond.area_avg_void_sheet
@@ -181,10 +185,6 @@ def iate_1d_1g(
             Db[0]       = cond.void_area_avg("Dsm1") / 1000         # [m]
 
             print("\tUsing MG area-averaged values...")
-
-        jf          = cond.jf                                   # [m/s]
-        jgloc       = cond.jgloc                                # [m/s]
-        jgatm       = cond.jgatm                                # [m/s]
 
     else:
         aiwe[0]     = io["aiwe"][-1]
@@ -202,7 +202,7 @@ def iate_1d_1g(
 
     ########################################################################################################################
     # Pressure drop [Pa/m]
-    p = (jgatm * p_atm / jgloc) - p_atm                         # Back-calculate local corrected gauge pressure
+    p = jgatm * p_atm / jgloc                                   # Back-calculate local corrected absolute pressure
 
     if restriction == 'elbow':
         delta_h = (z_mesh[-1] - z_mesh[0]) * 2 / np.pi          # The height of an elbow is going to be its radius
@@ -225,12 +225,12 @@ def iate_1d_1g(
             ) + ((rho_f * grav * delta_h) / (z_mesh[-1] - z_mesh[0]))   # Pressure gradient from gravity
         
     else:
-        dpdz = (((cond2.jgatm * p_atm / cond2.jgloc) - p_atm) - p) / (cond2.LoverD - LoverD)
+        dpdz = ((cond2.jgatm * p_atm / cond2.jgloc) - p) / (cond2.LoverD - LoverD)
 
-    pz = (p + p_atm) * (1 - (z_mesh - z_mesh[0]) * (dpdz / (p + p_atm)))
+    pz = p * (1 - (z_mesh - z_mesh[0]) * (dpdz / p))
     
 	# Local gas density along the test section
-    rho_gz = rho_g * pz / (p + p_atm)                           # Talley
+    rho_gz = rho_g * pz / p                                     # Talley
     # rho_gz = pz / R_spec / T                                  # Worosz, Ideal Gas Law
     
     ############################################################################################################################
@@ -391,10 +391,8 @@ def iate_1d_1g(
             
             alpha[i+1] = (jgloc) / (C0 * j + vgj)
 
-            print("\n\t\tC0: ",C0)
-            print("\t\tvgj: ",vgj)
-            print("\t\tj: ",j)
-            print("\t\talpha: ",alpha[i+1])
+            # with open("H:\TRSL-H\IATE\DF.txt", mode = 'a+') as FID:
+            #     print(f"\n\njf = {jf} [m/s], jg = {cond.jgref} [m/s]\n\tL/D: {z/Dh}\n\tC0: {C0}\n\tvgj: {vgj}\n\tj: {j}\n\talpha: {alpha[i+1]}",file=FID)
 
         elif void_method == 'continuity':   # Continuity
 

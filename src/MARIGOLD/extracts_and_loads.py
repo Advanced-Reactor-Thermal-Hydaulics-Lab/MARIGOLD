@@ -754,7 +754,7 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                 area_avg_void_sheet     = alpha_mat[run_idx-1][port_idx-1]
                 area_avg_ai_sheet       = ai_mat[run_idx-1][port_idx-1]
                 area_avg_Dsm_sheet      = Dsm_mat[run_idx-1][port_idx-1]
-                pz                      = pz_mat[run_idx-1][port_idx-1]
+                pz                      = pz_mat[run_idx-1][port_idx-1] + 101325
                 LoverD                  = LoverD_mat[port_idx-1]
                 dpdz                    = dpdz_mat[run_idx-1]
                 
