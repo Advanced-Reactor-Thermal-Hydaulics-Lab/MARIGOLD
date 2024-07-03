@@ -391,6 +391,11 @@ def iate_1d_1g(
             
             alpha[i+1] = (jgloc) / (C0 * j + vgj)
 
+            print("\n\t\tC0: ",C0)
+            print("\t\tvgj: ",vgj)
+            print("\t\tj: ",j)
+            print("\t\talpha: ",alpha[i+1])
+
         elif void_method == 'continuity':   # Continuity
 
             # alpha[i+1] = alpha[i] - alpha[i] / pz[i] * -dpdz * z_step
