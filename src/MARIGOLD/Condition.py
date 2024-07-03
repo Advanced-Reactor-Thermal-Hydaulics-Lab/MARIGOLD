@@ -1957,7 +1957,7 @@ class Condition:
         I = integrate.simpson(param_r, angles, even=even_opt) / np.pi # Integrate wrt theta, divide by normalized area
         return I
 
-    def calc_dpdz(self, method = 'LM', m = 0.316, n = 0.25, chisholm = 25, k_m = 0.10, L = 9999):
+    def calc_dpdz(self, method = 'LM', m = 0.316, n = 0.25, chisholm = 25, k_m = 0.10, L = None, alpha = None, akapower = 0.875):
         """ Calculates the pressure gradient, dp/dz, according to various methods. Can access later with self.dpdz
 
         Options:
@@ -1968,9 +1968,9 @@ class Condition:
             - rho_g     : Gas phase density
             - mu_f      : Liquid phase dynamic viscosity
             - mu_g      : Gas phase dynamic viscosity
-            - m         : Fed to calc_f()
-            - n         : Fed to calc_f()
-            - chisholm   : Chisholm parameter, the C in Lockhart-Martinelli
+            - m         : Fed to calc_fric()
+            - n         : Fed to calc_fric()
+            - chisholm  : Chisholm parameter, the C in Lockhart-Martinelli
             - k_m       : Minor loss coefficient
             - L         : Length of restriction, only matters for 'Kim' method
 
@@ -2000,6 +2000,14 @@ class Condition:
             chiM2 = dpdz_f / dpdz_m
 
             phi_f2 = (1 + 1 / chiM2) + np.sqrt(1 + 1 / chiM2) * chisholm / np.sqrt(chi2) + 1 / chi2
+            dpdz = phi_f2 * dpdz_f
+
+        elif method.lower() == 'akagawa':
+            f_f, f_g = self.calc_fric(m = m, n = n)
+
+            dpdz_f = f_f * 1/self.Dh * self.rho_f * self.jf**2 / 2
+            phi_f2 = ((1 - alpha)**(-akapower))**2
+
             dpdz = phi_f2 * dpdz_f
 
         else:
@@ -2077,7 +2085,6 @@ class Condition:
         
         """
         
-
         Re_f = self.rho_f * self.jf * self.Dh / self.mu_f
         Re_g = self.rho_g * self.jgloc * self.Dh / self.mu_g
 

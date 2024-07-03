@@ -2,7 +2,7 @@ from .config import *
 
 def iate_1d_1g(
         # Basic inputs
-        cond, query, z_step = 0.01, parcel = None,
+        cond, query, z_step = 0.01, io = None,
         
         # IATE Coefficients
         C_WE = None, C_RC = None, C_TI = None, alpha_max = 0.75, C = 3, We_cr = 6, acrit_flag = 0, acrit = 0.13, C_inf = 1.20,
@@ -11,7 +11,7 @@ def iate_1d_1g(
         dpdz_method = 'LM', cd_method = 'doe', void_method = 'driftflux',
 
         # Pressure drop calculation arguments
-        LM_C = 40, k_m = 0.10,
+        LM_C = 40, k_m = 0.10, m = 0.316, n = 0.25, akapower = 0.875,
 
         # Temporary arguments
         restriction = None, cond2 = None, cheat = False
@@ -22,7 +22,7 @@ def iate_1d_1g(
      - cond:            Condition object, part of MARIGOLD framework
      - query:           L/D endpoint
      - z_step:          Axial mesh cell size [-]
-     - parcel:          Output package of iate_1d_1g(), can be used as input for subsequent runs
+     - io:              Output package of iate_1d_1g(), can be used as input for subsequent runs
      - C_WE:            Wake entrainment coefficient
      - C_RC:            Random collision coefficient
      - C_TI:            Turbulent impact coefficient
@@ -48,7 +48,6 @@ def iate_1d_1g(
      - vgz calculation in elbow and dissipation length regions still need to be implemented
      - Need a way to compute void fraction across restrictions, void fraction prediction falters
      - Modify MG for Yadav data extraction
-     - Revise parcel and cond2 variable names
      - Revise vgj calculation
     """
 
@@ -65,10 +64,10 @@ def iate_1d_1g(
     R_spec          = 287.058                                   # Specific gas constant for dry air [J/kg-K]
     T               = 293.15                                    # Ambient absolute temperature [K], for calculating air density as a function of pressure along channel
     
-    if parcel == None:
+    if io == None:
         LoverD      = cond.LoverD                               # Condition L/D
     else:
-        LoverD      = parcel["z_mesh"][-1] / Dh
+        LoverD      = io["z_mesh"][-1] / Dh
     
     # Mesh generation
     if query < LoverD+z_step:
@@ -161,7 +160,7 @@ def iate_1d_1g(
     aiexp           = np.empty(len(z_mesh))
     aivg            = np.empty(len(z_mesh))
 
-    if parcel == None:
+    if io == None:
         aiwe[0]     = 0
         airc[0]     = 0
         aiti[0]     = 0
@@ -171,7 +170,9 @@ def iate_1d_1g(
         if cheat == True:
             ai[0]       = cond.area_avg_ai_sheet
             alpha[0]    = cond.area_avg_void_sheet
-            Db[0]       = cond.area_avg_Dsm_sheet / 1000
+            # Db[0]       = cond.area_avg_Dsm_sheet / 1000
+
+            Db[0]       = 6 * alpha[0] / ai[0]
 
             print("\tUsing sheet area-averaged values...")
         else:
@@ -186,18 +187,18 @@ def iate_1d_1g(
         jgatm       = cond.jgatm                                # [m/s]
 
     else:
-        aiwe[0]     = parcel["aiwe"][-1]
-        airc[0]     = parcel["airc"][-1]
-        aiti[0]     = parcel["aiti"][-1]
-        aiexp[0]    = parcel["aiexp"][-1]
-        aivg[0]     = parcel["aivg"][-1]
+        aiwe[0]     = io["aiwe"][-1]
+        airc[0]     = io["airc"][-1]
+        aiti[0]     = io["aiti"][-1]
+        aiexp[0]    = io["aiexp"][-1]
+        aivg[0]     = io["aivg"][-1]
 
-        ai[0]       = parcel["ai"][-1]
-        alpha[0]    = parcel["alpha"][-1]
-        Db[0]       = parcel["Db"][-1]
-        jf          = parcel["jf"]
-        jgloc       = parcel["jgloc"]
-        jgatm       = parcel["jgatm"]
+        ai[0]       = io["ai"][-1]
+        alpha[0]    = io["alpha"][-1]
+        Db[0]       = io["Db"][-1]
+        jf          = io["jf"]
+        jgloc       = io["jgloc"]
+        jgatm       = io["jgatm"]
 
     ########################################################################################################################
     # Pressure drop [Pa/m]
@@ -229,7 +230,7 @@ def iate_1d_1g(
     pz = (p + p_atm) * (1 - (z_mesh - z_mesh[0]) * (dpdz / (p + p_atm)))
     
 	# Local gas density along the test section
-    rho_gz = rho_g * pz / p_atm                                 # Talley
+    rho_gz = rho_g * pz / (p + p_atm)                           # Talley
     # rho_gz = pz / R_spec / T                                  # Worosz, Ideal Gas Law
     
     ############################################################################################################################
@@ -387,9 +388,13 @@ def iate_1d_1g(
             vgj = (2**0.5) * (sigma * abs(grav) * (rho_f - rho_gz[i]) / (rho_f**2))**0.25 * (1 - alpha[i])**(1.75)
             
             C0 = C_inf - (C_inf - 1) * np.sqrt(rho_gz[i]/rho_f)     # Round tube drift flux distribution parameter
-            # alpha[i+1] = (jgloc) / (C0 * j + vgj)
-
+            
             alpha[i+1] = (jgloc) / (C0 * j + vgj)
+
+            print("\n\t\tC0: ",C0)
+            print("\t\tvgj: ",vgj)
+            print("\t\tj: ",j)
+            print("\t\talpha: ",alpha[i+1])
 
         elif void_method == 'continuity':   # Continuity
 
@@ -404,10 +409,16 @@ def iate_1d_1g(
             else:
                 alpha[i+1] = alpha[i] - (alpha[i] / (rho_gz[i] * vgz[i])) * ((rho_gz[i] * vgz[i]) - (rho_gz[i-1] * vgz[i-1]))
 
+        elif void_method == 'pressure':     # Akagawa (1957), Kong (2018)
+            f_f, f_g = cond.calc_fric(m = m, n = n)
+            dpdz_f = f_f * 1/Dh * rho_f * jf**2 / 2
+
+            alpha[i+1] = 1 - (-dpdz / dpdz_f)**(-1/(2*akapower))
+
         # Estimate Sauter mean diameter for the next step calculation
         Db[i+1] = 6 * alpha[i+1] / ai[i+1]
         
-    parcel = {
+    io = {
         "ai"            : ai,
         "alpha"         : alpha,
         "Db"            : Db,
@@ -424,4 +435,4 @@ def iate_1d_1g(
         "pz"            : pz
     }
 
-    return parcel
+    return io

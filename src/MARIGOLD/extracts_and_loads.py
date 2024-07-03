@@ -705,17 +705,17 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                 ]
 
                 ai_mat = [
-                    [None  , 190.33, None  , 173.36, None  , None  ],   # Run1
-                    [None  , 82.28 , None  , 71.13 , None  , None  ],   # Run2
-                    [None  , 87.72 , None  , 78.59 , None  , None  ],   # Run3
-                    [None  , 210.56, None  , 211.69, None  , None  ],   # Run4
-                    [None  , 125.06, None  , 120.97, None  , None  ],   # Run5
+                    [None  , 190.33, 175.51, 173.26, None  , None  ],   # Run1
+                    [None  , 78.90 , 77.30 , 71.10 , None  , None  ],   # Run2
+                    [None  , 87.80 , 76.70 , 78.60 , None  , None  ],   # Run3
+                    [None  , 210.56, 223.89, 211.69, None  , None  ],   # Run4
+                    [None  , 125.06, 135.80, 120.97, None  , None  ],   # Run5
                     [None  , 432.78, None  , 372.21, None  , None  ],   # Run6_short
                     [None  , 151.23, None  , 157.03, None  , None  ],   # Run7_short
                     [None  , 470.61, None  , 369.69, None  , 418.74],   # Run6_long
                     [None  , 199.34, None  , None  , None  , 222.64],   # Run7_long
-                    [None  , 268.64, None  , 192.28, None  , 259.25],   # Run8
-                    [None  , 188.53, None  , 258.8 , None  , 345.16],   # Run9
+                    [None  , 209.62, None  , 192.28, None  , 270.00],   # Run8
+                    [None  , 188.53, None  , 258.80, None  , 345.16],   # Run9
                 ]
 
                 Dsm_mat = [
