@@ -1,5 +1,5 @@
 from .config import *
-from.Condition import Condition
+from .Condition import Condition
 import warnings
 
 class Rect_Condition(Condition):
