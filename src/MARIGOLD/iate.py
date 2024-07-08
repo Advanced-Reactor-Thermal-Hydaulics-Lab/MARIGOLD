@@ -172,6 +172,8 @@ def iate_1d_1g(
         jgatm       = cond.jgatm                                # [m/s]
 
         if cheat == True:
+            jgloc = cond.jgref      # Testing for Bettis data
+
             ai[0]       = cond.area_avg_ai_sheet
             alpha[0]    = cond.area_avg_void_sheet
             # Db[0]       = cond.area_avg_Dsm_sheet / 1000
@@ -202,8 +204,6 @@ def iate_1d_1g(
 
     ########################################################################################################################
     # Pressure drop [Pa/m]
-    p = jgatm * p_atm / jgloc                                   # Back-calculate local corrected absolute pressure
-
     if restriction == 'elbow':
         delta_h = (z_mesh[-1] - z_mesh[0]) * 2 / np.pi          # The height of an elbow is going to be its radius
 
@@ -214,9 +214,11 @@ def iate_1d_1g(
         delta_h = (z_mesh[-1] - z_mesh[0])                      # Dissipation region is going to be the same as standard VU
 
     if cheat == True:
+        p = cond.pz
         dpdz = cond.dpdz
 
     elif cond2 == None:
+        p = jgatm * p_atm / jgloc                               # Back-calculate local corrected absolute pressure
         dpdz = cond.calc_dpdz(
             method = dpdz_method, 
             chisholm = LM_C, 
@@ -225,6 +227,7 @@ def iate_1d_1g(
             ) + ((rho_f * grav * delta_h) / (z_mesh[-1] - z_mesh[0]))   # Pressure gradient from gravity
         
     else:
+        p = jgatm * p_atm / jgloc                               # Back-calculate local corrected absolute pressure
         dpdz = ((cond2.jgatm * p_atm / cond2.jgloc) - p) / (cond2.LoverD - LoverD)
 
     pz = p * (1 - (z_mesh - z_mesh[0]) * (dpdz / p))
@@ -272,6 +275,12 @@ def iate_1d_1g(
             CDwe = 24 * (1 + 0.1 * ReD**0.75) / ReD
             ur = (4 * abs(grav) * Db[i] / 3 / CDwe)**0.5            # Interestingly, Yadav keeps 9.8 instead of changing grav for angle
 
+        elif cd_method == 'bettis':
+            for loop_idx in range(25):
+                ReD = rho_f * ur * Db[i] * (1 - alpha[i]) / mu_f
+                CDwe = 24 * (1 + 0.1 * ReD**0.75) / ReD
+                ur = (9.8 * Db[i] / 3 / CDwe)**0.5
+
         ########################################################################################################################
         # Estimate Energy Dissipation Rate and Turbulent Velocity (See Talley, 2012, 4.2.2.3)
         #   > One-group models written using turbulent fluctuation velocity, while models implemented in TRACE are written using
@@ -289,6 +298,9 @@ def iate_1d_1g(
         e = fTW * (vm**3) / 2 / Dh                              # Energy dissipation rate (Wu et al., 1998; Kim, 1999)
         ut = 1.4 * e**(1/3) * Db[i]**(1/3)                      # Turbulent velocity (Batchelor, 1951; Rotta, 1972)
         
+        with open("H:\TRSL-H\IATE\TEST.txt", mode = 'a+') as FID:
+            print(f"\n\njf = {jf} [m/s], jg = {cond.jgref} [m/s]\n\tL/D: {z/Dh}\n\tur: {ur}\n\tut: {ut}\n\ta: {alpha[i]}",file=FID)
+
         ########################################################################################################################
         # Estimate sources & sinks in the Interfacial Area Transport Eqn. (Part 1)
 
@@ -349,7 +361,8 @@ def iate_1d_1g(
             # Backwards difference for remaining nodes
             SEXP[i] = -2 / 3 / rho_gz[i] * ai[i] * vgz[i] * (rho_gz[i] - rho_gz[i-1]) / z_step
 
-        # SEXP[i] = -2 / 3 / pz[i] * ai[i] * vgz[i] * (-dpdz)   # Original DOE_MATLAB_IAC
+        if cheat == True:
+            SEXP[i] = -2 / 3 / pz[i] * ai[i] * vgz[i] * (-dpdz)   # Original DOE_MATLAB_IAC
         
         # Source/sink due to Bubble Acceleration (advection in Yadav's script)
         if i <= 2:
@@ -362,6 +375,9 @@ def iate_1d_1g(
             dvgdz = dvg / z_step
 
         SVG[i] = ai[i] * dvgdz
+
+        if cheat == True:
+            SVG[i] = 0                                          # Suppress VG for Bettis data
 
         # Critical void fraction to shut off turbulence-based mechanisms
         if acrit_flag == 1 and alpha[i] > acrit:
@@ -387,9 +403,10 @@ def iate_1d_1g(
             # Applicable for void fractions less than 20%; for void fractions greater than 30%, use Kataoka and Ishii 1987 for drift-velocity
             vgj = (2**0.5) * (sigma * abs(grav) * (rho_f - rho_gz[i]) / (rho_f**2))**0.25 * (1 - alpha[i])**(1.75)
             
-            C0 = C_inf - (C_inf - 1) * np.sqrt(rho_gz[i]/rho_f)     # Round tube drift flux distribution parameter
-            
-            alpha[i+1] = (jgloc) / (C0 * j + vgj)
+            # C0 = C_inf - (C_inf - 1) * np.sqrt(rho_gz[i]/rho_f)     # Round tube drift flux distribution parameter
+            C0 = 1.12   # Temporary, for Bettis check
+
+            alpha[i+1] = jgloc / (C0 * j + vgj)
 
             # with open("H:\TRSL-H\IATE\DF.txt", mode = 'a+') as FID:
             #     print(f"\n\njf = {jf} [m/s], jg = {cond.jgref} [m/s]\n\tL/D: {z/Dh}\n\tC0: {C0}\n\tvgj: {vgj}\n\tj: {j}\n\talpha: {alpha[i+1]}",file=FID)
