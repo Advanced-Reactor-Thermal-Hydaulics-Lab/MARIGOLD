@@ -8,13 +8,13 @@ def iate_1d_1g(
         C_WE = None, C_RC = None, C_TI = None, alpha_max = 0.75, C = 3, We_cr = 6, acrit_flag = 0, acrit = 0.13, C_inf = 1.20,
 
         # Method arguments
-        dpdz_method = 'LM', cd_method = 'doe', void_method = 'driftflux',
+        iate_method = None, dpdz_method = 'LM', cd_method = 'doe', void_method = 'driftflux',
 
         # Pressure drop calculation arguments
         LM_C = 40, k_m = 0.10, m = 0.316, n = 0.25, akapower = 0.875,
 
         # Temporary arguments
-        restriction = None, cond2 = None, cheat = False
+        restriction = None, cond2 = None, cheat = False, debug = False
         ):
     """ Calculate the area-averaged interfacial area concentration at query location based on the 1D 1G IATE
     
@@ -63,12 +63,21 @@ def iate_1d_1g(
     R_spec          = 287.058                                   # Specific gas constant for dry air [J/kg-K]
     T               = 293.15                                    # Ambient absolute temperature [K], for calculating air density as a function of pressure along channel
 
-    # For Bettis, override some constants
-    rho_f = 998
-    rho_g = 1.226
-    mu_f = 0.001
-    sigma = 0.07278
-    p_atm = 101330
+    if iate_method == 'kim':
+        rho_f = 998
+        rho_g = 1.226
+        mu_f = 0.001
+        sigma = 0.07278
+        p_atm = 101330
+        grav = 9.8
+
+        cd_method = 'fixed_iter'
+    elif iate_method == 'yadav':
+        pass
+    elif iate_method == 'talley':
+        pass
+    elif iate_method == 'worosz':
+        pass
     
     if io == None:
         LoverD      = cond.LoverD                               # Condition L/D
@@ -178,21 +187,17 @@ def iate_1d_1g(
         jgatm       = cond.jgatm                                # [m/s]
 
         if cheat == True:
-            jgloc = cond.jgref      # Testing for Bettis data
+            # jgloc = cond.jgref      # Testing for Bettis data
 
             ai[0]       = cond.area_avg_ai_sheet
             alpha[0]    = cond.area_avg_void_sheet
             # Db[0]       = cond.area_avg_Dsm_sheet / 1000
 
             Db[0]       = 6 * alpha[0] / ai[0]
-
-            print("\tUsing sheet area-averaged values...")
         else:
             ai[0]       = cond.area_avg("ai")                       # [1/m]
             alpha[0]    = cond.area_avg("alpha")                    # [-]
             Db[0]       = cond.void_area_avg("Dsm1") / 1000         # [m]
-
-            print("\tUsing MG area-averaged values...")
 
     else:
         aiwe[0]     = io["aiwe"][-1]
@@ -210,6 +215,8 @@ def iate_1d_1g(
 
     ########################################################################################################################
     # Pressure drop [Pa/m]
+
+    # Calculate height change for gravitational loss
     if restriction == 'elbow':
         delta_h = (z_mesh[-1] - z_mesh[0]) * 2 / np.pi          # The height of an elbow is going to be its radius
 
@@ -219,12 +226,14 @@ def iate_1d_1g(
     else:
         delta_h = (z_mesh[-1] - z_mesh[0])                      # Dissipation region is going to be the same as standard VU
 
+    # Calculate initial pressure and pressure gradient
+    p = jgatm * p_atm / jgloc                                   # Back-calculate local corrected absolute pressure
+    
     if cheat == True:
-        p = cond.pz
+        p = cond.pz                                             # Override
         dpdz = cond.dpdz
 
     elif cond2 == None:
-        p = jgatm * p_atm / jgloc                               # Back-calculate local corrected absolute pressure
         dpdz = cond.calc_dpdz(
             method = dpdz_method, 
             chisholm = LM_C, 
@@ -233,14 +242,15 @@ def iate_1d_1g(
             ) + ((rho_f * grav * delta_h) / (z_mesh[-1] - z_mesh[0]))   # Pressure gradient from gravity
         
     else:
-        p = jgatm * p_atm / jgloc                               # Back-calculate local corrected absolute pressure
         dpdz = ((cond2.jgatm * p_atm / cond2.jgloc) - p) / (cond2.LoverD - LoverD)
 
     pz = p * (1 - (z_mesh - z_mesh[0]) * (dpdz / p))
     
 	# Local gas density along the test section
-    rho_gz = rho_g * pz / p                                     # Talley
-    # rho_gz = pz / R_spec / T                                  # Worosz, Ideal Gas Law
+    if iate_method == 'worosz':
+        rho_gz = pz / R_spec / T                                # Worosz, Ideal Gas Law
+    else:
+        rho_gz = rho_g * pz / p                                 # Talley
     
     ############################################################################################################################
     #                                                                                                                          #
@@ -261,7 +271,7 @@ def iate_1d_1g(
         # Estimate bubble relative velocity <ur> (See Talley, 2012, 4.2.2.6)
         ur = 0.2                                                # Set to constant value of 0.23 m/s by Schilling (2007)
 
-        if cd_method == 'iter':
+        if cd_method == 'err_iter':
             err = 0.1
             while abs(err) > 0.000001:
                 ReD = rho_f * ur * Db[i] * (1 - alpha[i]) / mu_f    # Bubble Reynolds number
@@ -281,11 +291,11 @@ def iate_1d_1g(
             CDwe = 24 * (1 + 0.1 * ReD**0.75) / ReD
             ur = (4 * abs(grav) * Db[i] / 3 / CDwe)**0.5            # Interestingly, Yadav keeps 9.8 instead of changing grav for angle
 
-        elif cd_method == 'bettis':
+        elif cd_method == 'fixed_iter':
             for loop_idx in range(25):
                 ReD = rho_f * ur * Db[i] * (1 - alpha[i]) / mu_f
                 CDwe = 24 * (1 + 0.1 * ReD**0.75) / ReD
-                ur = (9.8 * Db[i] / 3 / CDwe)**0.5
+                ur = (grav * Db[i] / 3 / CDwe)**0.5
             
             ReD = rho_f * ur * Db[i] * (1 - alpha[i]) / mu_f
             CDwe = 24 * (1 + 0.1 * ReD**0.75) / ReD
@@ -307,8 +317,9 @@ def iate_1d_1g(
         e = fTW * (vm**3) / 2 / Dh                              # Energy dissipation rate (Wu et al., 1998; Kim, 1999)
         ut = 1.4 * e**(1/3) * Db[i]**(1/3)                      # Turbulent velocity (Batchelor, 1951; Rotta, 1972)
         
-        with open("H:\TRSL-H\IATE\TEST.txt", mode = 'a+') as FID:
-            print(f"\n\njf = {jf} [m/s], jg = {cond.jgref} [m/s]\n\tL/D: {z/Dh}\n\tur: {ur}\n\tut: {ut}\n\ta: {alpha[i]}",file=FID)
+        if debug:
+            with open("H:\TRSL-H\IATE\TEST.txt", mode = 'a+') as FID:
+                print(f"\n\njf = {jf} [m/s], jg = {cond.jgref} [m/s]\n\tL/D: {z/Dh}\n\tur: {ur}\n\tut: {ut}\n\ta: {alpha[i]}",file=FID)
 
         ########################################################################################################################
         # Estimate sources & sinks in the Interfacial Area Transport Eqn. (Part 1)
@@ -363,16 +374,16 @@ def iate_1d_1g(
         # Estimate sources & sinks in the Interfacial Area Transport Eqn. (Part 2)
 
         # Source due to Bubble Expansion
-        if i <= 2:      # Previously 3, but in MATLAB (1 indexing vs. 0 indexing)
-            # Forward difference for first node
-            SEXP[i] = -2 / 3 / rho_gz[i] * ai[i] * vgz[i] * (rho_gz[i+1] - rho_gz[i]) / z_step
+        if iate_method == 'kim' or iate_method == 'doe':
+            SEXP[i] = -2 / 3 / pz[i] * ai[i] * vgz[i] * (-dpdz)     # Original DOE_MATLAB_IAC
         else:
-            # Backwards difference for remaining nodes
-            SEXP[i] = -2 / 3 / rho_gz[i] * ai[i] * vgz[i] * (rho_gz[i] - rho_gz[i-1]) / z_step
+            if i <= 2:      # Previously 3, but in MATLAB (1 indexing vs. 0 indexing)
+                # Forward difference for first node
+                SEXP[i] = -2 / 3 / rho_gz[i] * ai[i] * vgz[i] * (rho_gz[i+1] - rho_gz[i]) / z_step
+            else:
+                # Backwards difference for remaining nodes
+                SEXP[i] = -2 / 3 / rho_gz[i] * ai[i] * vgz[i] * (rho_gz[i] - rho_gz[i-1]) / z_step
 
-        if cheat == True:
-            SEXP[i] = -2 / 3 / pz[i] * ai[i] * vgz[i] * (-dpdz)   # Original DOE_MATLAB_IAC
-        
         # Source/sink due to Bubble Acceleration (advection in Yadav's script)
         if i <= 2:
             dvg = 0
@@ -412,13 +423,16 @@ def iate_1d_1g(
             # Applicable for void fractions less than 20%; for void fractions greater than 30%, use Kataoka and Ishii 1987 for drift-velocity
             vgj = (2**0.5) * (sigma * abs(grav) * (rho_f - rho_gz[i]) / (rho_f**2))**0.25 * (1 - alpha[i])**(1.75)
             
-            # C0 = C_inf - (C_inf - 1) * np.sqrt(rho_gz[i]/rho_f)     # Round tube drift flux distribution parameter
-            C0 = 1.12   # Temporary, for Bettis check
-
+            if iate_method == 'kim':
+                C0 = 1.12                                               # Temporary, for Bettis check
+            else:
+                C0 = C_inf - (C_inf - 1) * np.sqrt(rho_gz[i]/rho_f)     # Round tube drift flux distribution parameter
+            
             alpha[i+1] = jgloc / (C0 * j + vgj)
 
-            # with open("H:\TRSL-H\IATE\DF.txt", mode = 'a+') as FID:
-            #     print(f"\n\njf = {jf} [m/s], jg = {cond.jgref} [m/s]\n\tL/D: {z/Dh}\n\tC0: {C0}\n\tvgj: {vgj}\n\tj: {j}\n\talpha: {alpha[i+1]}",file=FID)
+            if debug:
+                with open("H:\TRSL-H\IATE\DF.txt", mode = 'a+') as FID:
+                    print(f"\n\njf = {jf} [m/s], jg = {cond.jgref} [m/s]\n\tL/D: {z/Dh}\n\tC0: {C0}\n\tvgj: {vgj}\n\tj: {j}\n\talpha: {alpha[i+1]}",file=FID)
 
         elif void_method == 'continuity':   # Continuity
 
