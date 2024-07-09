@@ -322,7 +322,10 @@ def iate_1d_1g(
         
         if debug:
             with open("H:\TRSL-H\IATE\TEST.txt", mode = 'a+') as FID:
-                print(f"\n\njf = {jf} [m/s], jg = {cond.jgref} [m/s]\n\tL/D: {z/Dh}\n\tur: {ur}\n\tut: {ut}\n\ta: {alpha[i]}",file=FID)
+                print(f"\n\n{i+1}.\tjf = {jf} [m/s], jg = {cond.jgref} [m/s]\n\tL/D: {z/Dh}\n\tur: {ur}\n\tut: {ut}\n\ta: {alpha[i]}",file=FID)
+
+            with open("H:\TRSL-H\IATE\VZ.txt", mode = 'a+') as FID:
+                print(f"\n\n{i+1}.\tjf = {jf} [m/s], jg = {cond.jgref} [m/s]\n\tL/D: {z/Dh}\n\tvfz: {vfz}\n\tvgz: {vgz[i]}\n\tjg: {jgloc}",file=FID)
 
         ########################################################################################################################
         # Estimate sources & sinks in the Interfacial Area Transport Eqn. (Part 1)
@@ -356,7 +359,13 @@ def iate_1d_1g(
             '''
 
         else:
-            SWE[i] = C_WE * CDwe**(1/3) * ur * ai[i]**2 / 3 / np.pi
+            if iate_method == 'kim':
+                # In the Bettis version
+                # SWE[i] = C_WE * CDwe * ur * ai[i]**2 / 3 / np.pi
+
+                SWE[i] = C_WE * CDwe**(1/3) * ur * ai[i]**2 / 3 / np.pi
+            else:
+                SWE[i] = C_WE * CDwe**(1/3) * ur * ai[i]**2 / 3 / np.pi
         
         # Sink due to Random Collisions	
         RC1 = ut * ai[i]**2 / alpha_max**(1/3) / (alpha_max**(1/3) - alpha[i]**(1/3))
@@ -416,6 +425,10 @@ def iate_1d_1g(
         aiwe[i+1]       = aiwe[i] + z_step * SWE[i] / vgz[i]
         aivg[i+1]       = aivg[i] + z_step * SVG[i] / vgz[i]
 
+        if debug:
+            with open("H:\TRSL-H\IATE\AI.txt", mode = 'a+') as FID:
+                print(f"\n\n{i+1}.\tjf = {jf} [m/s], jg = {cond.jgref} [m/s]\n\tL/D: {z/Dh}\n\tTI: {aiti[i]}\n\tRC: {airc[i]}\n\tEXP: {aiexp[i]}\n\tWE: {aiwe[i]}",file=FID)
+
         # Estimate Void Fraction for the next step calculation
 
         if void_method == 'driftflux':      # Drift Flux Model
@@ -431,11 +444,11 @@ def iate_1d_1g(
             else:
                 C0 = C_inf - (C_inf - 1) * np.sqrt(rho_gz[i]/rho_f)     # Round tube drift flux distribution parameter
             
+            alpha[i+1] = jgloc / (C0 * j + vgj)
+
             if debug:
                 with open("H:\TRSL-H\IATE\DF.txt", mode = 'a+') as FID:
-                    print(f"\n\njf = {jf} [m/s], jg = {cond.jgref} [m/s]\n\tL/D: {z/Dh}\n\tC0: {C0}\n\tvgj: {vgj}\n\tj: {j}\n\talpha: {alpha[i+1]}",file=FID)
-                    
-            alpha[i+1] = jgloc / (C0 * j + vgj)
+                    print(f"\n\n{i+1}.\tjf = {jf} [m/s], jg = {cond.jgref} [m/s]\n\tL/D: {z/Dh}\n\tC0: {C0}\n\tvgj: {vgj}\n\tj: {j}\n\talpha: {alpha[i]}",file=FID)
 
         elif void_method == 'continuity':   # Continuity
 
