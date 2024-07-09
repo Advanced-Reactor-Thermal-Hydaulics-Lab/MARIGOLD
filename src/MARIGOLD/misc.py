@@ -1,5 +1,7 @@
 from .Condition import Condition
 from .config import *
+from subprocess import run
+from shutil import copy2
 
 def comp_cond(cond1:Condition, cond2:Condition, tag = 'run_ID') -> Condition:
     """ Collate data from cond1 and cond2 into a single condition
@@ -128,7 +130,7 @@ def process_dir(target_dir:str, probe_number:str, r01:float, r02:float, r03:floa
     
     """
     os.chdir(target_dir)
-    current_time = datetime.datetime.now()
+    current_time = datetime.now()
     timestamp = f"{current_time.month}-{current_time.day}-{current_time.year}_{current_time.hour}-{current_time.minute}"
 
     reprocessed_dir = os.path.join(target_dir, 'auto_reprocessed_data_'+ timestamp)
@@ -137,15 +139,20 @@ def process_dir(target_dir:str, probe_number:str, r01:float, r02:float, r03:floa
 
     copy2(os.path.join(target_dir, "MIDASv1.14d.exe"), reprocessed_dir)
 
+    os.chdir(reprocessed_dir)
+
     for file in os.listdir(target_dir):
-        print(file)
+        # print(file)
         if file.split('.')[-1] == 'dat':
+            copy2(os.path.join(target_dir, file), reprocessed_dir)
 
             roverR = 0.1 * int(file[1])
-            write_inp(roverR, file.split('.')[0], probe_number = 'QM4-3', r01=r01, r02=r02, r03=r03, r12=r12, r13=r13, r23=r23, directory=reprocessed_dir, signalOutput=signal_output, detailedOutput=detailed_output)
+            write_inp(roverR, file.split('.')[0], probe_number = probe_number, r01=r01, r02=r02, r03=r03, r12=r12, r13=r13, r23=r23, directory=reprocessed_dir, signalOutput=signal_output, detailedOutput=detailed_output)
 
             comp_process = run(os.path.join(reprocessed_dir, 'MIDASv1.14d.exe'), cwd = reprocessed_dir, shell=True)
 
             if comp_process.returncode != 0:
                 print(comp_process)
+
+            # os.remove(os.path.join(reprocessed_dir, file))
             
