@@ -127,6 +127,12 @@ def process_dir(target_dir:str, probe_number:str, r01:float, r02:float, r03:floa
 
     Inputs:
      - target_dir, directory to process
+     - Probe number, for identification
+     - Probe measurements (r01, r02, etc.). In mm. Same as in .inp file
+     - signal_output, makes the _MedianSig, _NormSig, etc. files
+
+    Outputs:
+     - Returns name of directory the reprocessed files are in
     
     """
     os.chdir(target_dir)
@@ -153,6 +159,10 @@ def process_dir(target_dir:str, probe_number:str, r01:float, r02:float, r03:floa
 
             if comp_process.returncode != 0:
                 print(comp_process)
+            try:
+                os.remove(os.path.join(reprocessed_dir, file))
+            except OSError as e:
+                print("Failed to remove .dat file, ", e)
 
-            # os.remove(os.path.join(reprocessed_dir, file))
+    return reprocessed_dir
             

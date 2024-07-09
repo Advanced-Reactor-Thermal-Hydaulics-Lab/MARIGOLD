@@ -50,10 +50,11 @@ def write_CFX_BC(cond:Condition, save_dir = ".", z_loc = 'LoverD', only_90 = Fal
                     for rstar, midas_output in r_dict.items():
                         if only_90:
                             if angle == 90 or angle == 270:
-                                pass
+                                r = rstar * 12.7 * np.sin(angle * np.pi/180) # r/R * R [mm]
                             else:
                                 continue
-                        r = rstar * 12.7 * np.sin(angle * np.pi/180) # r/R * R [mm]
+                        else:
+                            r = rstar * 12.7 # r/R * R [mm]
 
                         f.write(f"{r},{z_loc},{angle * np.pi/180},{0},{0},{midas_output['ug1']},{midas_output['alpha']},{0},{0},{midas_output['vf']},\n")
         elif interp == 'xy':
