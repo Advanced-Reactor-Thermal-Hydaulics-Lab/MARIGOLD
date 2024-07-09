@@ -10,8 +10,6 @@ import matplotlib.pyplot as plt
 import matplotlib.tri as tri
 import matplotlib as mpl
 import openpyxl as op
-from subprocess import run
-from shutil import copy2
 
 debug = False
 debugFID = None
