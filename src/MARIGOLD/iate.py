@@ -304,15 +304,18 @@ def iate_1d_1g(
         # Estimate Energy Dissipation Rate and Turbulent Velocity (See Talley, 2012, 4.2.2.3)
         #   > One-group models written using turbulent fluctuation velocity, while models implemented in TRACE are written using
         #     dissipation rate
-
+    
         mu_m = mu_f / (1 - alpha[i])                            # Mixture viscosity, given by Ishii and Chawla (Eq. 4-10 in Kim, 1999)
         rho_m = (1 - alpha[i]) * rho_f + alpha[i] * rho_gz[i]   # Mixture density
 
         vm = (rho_f * (1 - alpha[i]) * vfz + rho_gz[i] * alpha[i] * vgz[i]) \
             / rho_m                                             # Mixture velocity
         
-        # Rem = rho_f * vm * Dh / mu_m                          # Mixture Reynolds number
-        Rem = rho_m * vm * Dh / mu_m                            # Yadav
+        if iate_method == 'kim':
+            Rem = rho_f * vm * Dh / mu_m                        # Mixture Reynolds number
+        else:
+            Rem = rho_m * vm * Dh / mu_m                        # Yadav
+
         fTW = 0.316 * (mu_m / mu_f)**0.25 / Rem**0.25           # Two-phase friction factor
         e = fTW * (vm**3) / 2 / Dh                              # Energy dissipation rate (Wu et al., 1998; Kim, 1999)
         ut = 1.4 * e**(1/3) * Db[i]**(1/3)                      # Turbulent velocity (Batchelor, 1951; Rotta, 1972)
@@ -428,11 +431,11 @@ def iate_1d_1g(
             else:
                 C0 = C_inf - (C_inf - 1) * np.sqrt(rho_gz[i]/rho_f)     # Round tube drift flux distribution parameter
             
-            alpha[i+1] = jgloc / (C0 * j + vgj)
-
             if debug:
                 with open("H:\TRSL-H\IATE\DF.txt", mode = 'a+') as FID:
                     print(f"\n\njf = {jf} [m/s], jg = {cond.jgref} [m/s]\n\tL/D: {z/Dh}\n\tC0: {C0}\n\tvgj: {vgj}\n\tj: {j}\n\talpha: {alpha[i+1]}",file=FID)
+                    
+            alpha[i+1] = jgloc / (C0 * j + vgj)
 
         elif void_method == 'continuity':   # Continuity
 
