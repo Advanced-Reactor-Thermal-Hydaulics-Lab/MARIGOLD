@@ -54,7 +54,6 @@ def iate_1d_1g(
     # MARIGOLD retrieval and setup
     theta           = cond.theta                                # Pipe inclination angle
     Dh              = cond.Dh                                   # Hydraulic diameter
-
     rho_f           = cond.rho_f                                # Liquid phase density [kg/m**3]
     rho_g           = cond.rho_g                                # Gas phase density [kg/m**3]
     mu_f            = cond.mu_f                                 # Viscosity of water [Pa-s]
@@ -63,6 +62,13 @@ def iate_1d_1g(
     grav            = 9.81*np.sin((theta)*np.pi/180)            # Gravity constant (added by Drew to account for pipe inclination)
     R_spec          = 287.058                                   # Specific gas constant for dry air [J/kg-K]
     T               = 293.15                                    # Ambient absolute temperature [K], for calculating air density as a function of pressure along channel
+
+    # For Bettis, override some constants
+    rho_f = 998
+    rho_g = 1.226
+    mu_f = 0.001
+    sigma = 0.07278
+    p_atm = 101330
     
     if io == None:
         LoverD      = cond.LoverD                               # Condition L/D
@@ -253,7 +259,7 @@ def iate_1d_1g(
 
         ########################################################################################################################
         # Estimate bubble relative velocity <ur> (See Talley, 2012, 4.2.2.6)
-        ur = 0.2                                                    # Set to constant value of 0.23 m/s by Schilling (2007)
+        ur = 0.2                                                # Set to constant value of 0.23 m/s by Schilling (2007)
 
         if cd_method == 'iter':
             err = 0.1
@@ -280,6 +286,9 @@ def iate_1d_1g(
                 ReD = rho_f * ur * Db[i] * (1 - alpha[i]) / mu_f
                 CDwe = 24 * (1 + 0.1 * ReD**0.75) / ReD
                 ur = (9.8 * Db[i] / 3 / CDwe)**0.5
+            
+            ReD = rho_f * ur * Db[i] * (1 - alpha[i]) / mu_f
+            CDwe = 24 * (1 + 0.1 * ReD**0.75) / ReD
 
         ########################################################################################################################
         # Estimate Energy Dissipation Rate and Turbulent Velocity (See Talley, 2012, 4.2.2.3)
