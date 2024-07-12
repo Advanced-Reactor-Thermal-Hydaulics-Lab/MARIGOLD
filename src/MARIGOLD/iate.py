@@ -295,7 +295,7 @@ def iate_1d_1g(
             for loop_idx in range(25):
                 ReD = rho_f * ur * Db[i] * (1 - alpha[i]) / mu_f
                 CDwe = 24 * (1 + 0.1 * ReD**0.75) / ReD
-                ur = (grav * Db[i] / 3 / CDwe)**0.5
+                ur = (4 * grav * Db[i] / 3 / CDwe)**0.5
             
             ReD = rho_f * ur * Db[i] * (1 - alpha[i]) / mu_f
             CDwe = 24 * (1 + 0.1 * ReD**0.75) / ReD
@@ -359,13 +359,7 @@ def iate_1d_1g(
             '''
 
         else:
-            if iate_method == 'kim':
-                # In the Bettis version
-                # SWE[i] = C_WE * CDwe * ur * ai[i]**2 / 3 / np.pi
-
-                SWE[i] = C_WE * CDwe**(1/3) * ur * ai[i]**2 / 3 / np.pi
-            else:
-                SWE[i] = C_WE * CDwe**(1/3) * ur * ai[i]**2 / 3 / np.pi
+            SWE[i] = C_WE * CDwe**(1/3) * ur * ai[i]**2 / 3 / np.pi
         
         # Sink due to Random Collisions	
         RC1 = ut * ai[i]**2 / alpha_max**(1/3) / (alpha_max**(1/3) - alpha[i]**(1/3))
@@ -463,11 +457,33 @@ def iate_1d_1g(
             else:
                 alpha[i+1] = alpha[i] - (alpha[i] / (rho_gz[i] * vgz[i])) * ((rho_gz[i] * vgz[i]) - (rho_gz[i-1] * vgz[i-1]))
 
-        elif void_method == 'pressure':     # Akagawa (1957), Kong (2018)
+        elif void_method == 'pressure_akagawa':     # Akagawa (1957), Kong (2018)
             f_f, f_g = cond.calc_fric(m = m, n = n)
             dpdz_f = f_f * 1/Dh * rho_f * jf**2 / 2
 
             alpha[i+1] = 1 - (-dpdz / dpdz_f)**(-1/(2*akapower))
+
+        elif void_method == 'pressure_kim':
+            # dpdz = (1 - (pz[i] / p)) * (p / z_mesh[i])
+            # dpdz = phi_f2 * dpdz_f
+            #
+            # rho_x = rho_gz[i] / rho_f
+            # mu_x = mu_g / mu_f
+            # L_x =             # Restriction length scale, = L/D_restriction
+            # alpha_x = alpha[i] / (1 - alpha[i])
+            # Re_f = 
+            
+            # phi_f2 = 1 + C * (rho_x**3 * mu_x * alpha_x**7)**(1/8) * (1 + (3.165 * k / L_x) * Re_f**0.25)**(1/2) + (rho_x**3 * mu_x * alpha_x**7)**(1/4) + (3.165 * k / L_x) * Re_f**0.25
+
+            # phi_f2 = 1 + C * (rho_x**3 * mu_x * alpha_x**7)**(1/8) + (rho_x**3 * mu_x * alpha_x**7)**(1/4)        # LM
+
+            # A = (rho_x**3 * mu_x * alpha_x**7)**(1/8)
+            # phi_f2 = 1 + C*A + A**2       # Quadratic
+
+            # A = (-C + (C^2 - 4 * (1 - phi_f2))**0.5) / 2
+            # A = (-C - (C^2 - 4 * (1 - phi_f2))**0.5) / 2
+            
+            pass
 
         # Estimate Sauter mean diameter for the next step calculation
         Db[i+1] = 6 * alpha[i+1] / ai[i+1]
