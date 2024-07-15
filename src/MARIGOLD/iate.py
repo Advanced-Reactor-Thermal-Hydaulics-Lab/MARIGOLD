@@ -56,7 +56,8 @@ def iate_1d_1g(
     Dh              = cond.Dh                                   # Hydraulic diameter
     rho_f           = cond.rho_f                                # Liquid phase density [kg/m**3]
     rho_g           = cond.rho_g                                # Gas phase density [kg/m**3]
-    mu_f            = cond.mu_f                                 # Viscosity of water [Pa-s]
+    mu_f            = cond.mu_f                                 # Dynamic viscosity of water [Pa-s]
+    mu_g            = cond.mu_g                                 # Dynamic viscosity of air [Pa-s]
     sigma           = cond.sigma                                # Surface tension of air/water [N/m]
     p_atm           = 101325                                    # Ambient pressure [Pa]
     grav            = 9.81*np.sin((theta)*np.pi/180)            # Gravity constant (added by Drew to account for pipe inclination)
@@ -464,25 +465,55 @@ def iate_1d_1g(
             alpha[i+1] = 1 - (-dpdz / dpdz_f)**(-1/(2*akapower))
 
         elif void_method == 'pressure_kim':
-            # dpdz = (1 - (pz[i] / p)) * (p / z_mesh[i])
-            # dpdz = phi_f2 * dpdz_f
-            #
-            # rho_x = rho_gz[i] / rho_f
-            # mu_x = mu_g / mu_f
-            # L_x =             # Restriction length scale, = L/D_restriction
-            # alpha_x = alpha[i] / (1 - alpha[i])
-            # Re_f = 
+            f_f, f_g = cond.calc_fric(m = m, n = n)
+            dpdz_f = f_f * 1/Dh * rho_f * jf**2 / 2
+
+            dpdz = (1 - (pz[i] / p)) * (p / z_mesh[i])
+            dpdz = phi_f2 * dpdz_f
             
-            # phi_f2 = 1 + C * (rho_x**3 * mu_x * alpha_x**7)**(1/8) * (1 + (3.165 * k / L_x) * Re_f**0.25)**(1/2) + (rho_x**3 * mu_x * alpha_x**7)**(1/4) + (3.165 * k / L_x) * Re_f**0.25
+            rho_x = rho_gz[i] / rho_f
+            mu_x = mu_g / mu_f
+            L_x = (query - LoverD) * Dh            # Restriction length scale, = L/D_restriction
+            alpha_x = alpha[i] / (1 - alpha[i])
 
-            # phi_f2 = 1 + C * (rho_x**3 * mu_x * alpha_x**7)**(1/8) + (rho_x**3 * mu_x * alpha_x**7)**(1/4)        # LM
-
-            # A = (rho_x**3 * mu_x * alpha_x**7)**(1/8)
-            # phi_f2 = 1 + C*A + A**2       # Quadratic
-
-            # A = (-C + (C^2 - 4 * (1 - phi_f2))**0.5) / 2
-            # A = (-C - (C^2 - 4 * (1 - phi_f2))**0.5) / 2
+            Re_f = rho_f * jf * Dh / mu_f
             
+            phi_f2 = 1 + LM_C * (rho_x**3 * mu_x * alpha_x**7)**(1/8) * (1 + (3.165 * k_m / L_x) * Re_f**0.25)**(1/2) + (rho_x**3 * mu_x * alpha_x**7)**(1/4) + (3.165 * k_m / L_x) * Re_f**0.25
+
+            pass
+
+        elif void_method == 'pressure_LM':
+            f_f, f_g = cond.calc_fric(m = m, n = n)
+            dpdz_f = f_f * 1/Dh * rho_f * jf**2 / 2
+
+            phi_f2 = (dpdz - ((rho_f * grav * delta_h) / (z_mesh[-1] - z_mesh[0]))) / dpdz_f
+
+            print(phi_f2)
+
+            rho_x = rho_gz[i] / rho_f
+            mu_x = mu_g / mu_f
+
+            # phi_f2 = 1 + LM_C * (rho_x**3 * mu_x * alpha_x**7)**(1/8) + (rho_x**3 * mu_x * alpha_x**7)**(1/4)        # LM
+
+            # A = (rho_x**3 * mu_x * alpha_x**7)**(1/4)
+            # phi_f2 = 1 + LM_C*A + A**2       # Quadratic
+
+            X_inv = np.array([((-LM_C + (LM_C**2 - 4 * (1 - phi_f2))**0.5) / 2) , ((-LM_C - (LM_C**2 - 4 * (1 - phi_f2))**0.5) / 2)])
+
+            print(X_inv)
+
+            alpha_x = (X_inv**8 / rho_x**3 / mu_x)**(1/7)
+
+            print(alpha_x)
+            print(alpha_x / (alpha_x + 1))
+
+            print(1 + LM_C * (rho_x**3 * mu_x * alpha_x**7)**(1/8) + (rho_x**3 * mu_x * alpha_x**7)**(1/4))     # It seems, there is not an error in computing alpha, but perhaps one in dpdz or dpdz_f?
+            # phi_f2 matches up, but the alpha yielded is 0.9 for a bubbly flow condition
+            # maybe dpdz_f is not accounting for something taken into consideration for dpdz?
+            # yep, it was gravity
+
+            alpha[i+1] = alpha_x / (alpha_x + 1)
+
             pass
 
         # Estimate Sauter mean diameter for the next step calculation
