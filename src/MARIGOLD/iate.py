@@ -56,7 +56,8 @@ def iate_1d_1g(
     Dh              = cond.Dh                                   # Hydraulic diameter
     rho_f           = cond.rho_f                                # Liquid phase density [kg/m**3]
     rho_g           = cond.rho_g                                # Gas phase density [kg/m**3]
-    mu_f            = cond.mu_f                                 # Viscosity of water [Pa-s]
+    mu_f            = cond.mu_f                                 # Dynamic viscosity of water [Pa-s]
+    mu_g            = cond.mu_g                                 # Dynamic viscosity of air [Pa-s]
     sigma           = cond.sigma                                # Surface tension of air/water [N/m]
     p_atm           = 101325                                    # Ambient pressure [Pa]
     grav            = 9.81*np.sin((theta)*np.pi/180)            # Gravity constant (added by Drew to account for pipe inclination)
@@ -295,7 +296,7 @@ def iate_1d_1g(
             for loop_idx in range(25):
                 ReD = rho_f * ur * Db[i] * (1 - alpha[i]) / mu_f
                 CDwe = 24 * (1 + 0.1 * ReD**0.75) / ReD
-                ur = (grav * Db[i] / 3 / CDwe)**0.5
+                ur = (4 * grav * Db[i] / 3 / CDwe)**0.5
             
             ReD = rho_f * ur * Db[i] * (1 - alpha[i]) / mu_f
             CDwe = 24 * (1 + 0.1 * ReD**0.75) / ReD
@@ -322,7 +323,10 @@ def iate_1d_1g(
         
         if debug:
             with open("H:\TRSL-H\IATE\TEST.txt", mode = 'a+') as FID:
-                print(f"\n\njf = {jf} [m/s], jg = {cond.jgref} [m/s]\n\tL/D: {z/Dh}\n\tur: {ur}\n\tut: {ut}\n\ta: {alpha[i]}",file=FID)
+                print(f"\n\n{i+1}.\tjf = {jf} [m/s], jg = {cond.jgref} [m/s]\n\tL/D: {z/Dh}\n\tur: {ur}\n\tut: {ut}\n\ta: {alpha[i]}",file=FID)
+
+            with open("H:\TRSL-H\IATE\VZ.txt", mode = 'a+') as FID:
+                print(f"\n\n{i+1}.\tjf = {jf} [m/s], jg = {cond.jgref} [m/s]\n\tL/D: {z/Dh}\n\tvfz: {vfz}\n\tvgz: {vgz[i]}\n\tjg: {jgloc}",file=FID)
 
         ########################################################################################################################
         # Estimate sources & sinks in the Interfacial Area Transport Eqn. (Part 1)
@@ -416,6 +420,10 @@ def iate_1d_1g(
         aiwe[i+1]       = aiwe[i] + z_step * SWE[i] / vgz[i]
         aivg[i+1]       = aivg[i] + z_step * SVG[i] / vgz[i]
 
+        if debug:
+            with open("H:\TRSL-H\IATE\AI.txt", mode = 'a+') as FID:
+                print(f"\n\n{i+1}.\tjf = {jf} [m/s], jg = {cond.jgref} [m/s]\n\tL/D: {z/Dh}\n\tTI: {aiti[i]}\n\tRC: {airc[i]}\n\tEXP: {aiexp[i]}\n\tWE: {aiwe[i]}",file=FID)
+
         # Estimate Void Fraction for the next step calculation
 
         if void_method == 'driftflux':      # Drift Flux Model
@@ -431,11 +439,11 @@ def iate_1d_1g(
             else:
                 C0 = C_inf - (C_inf - 1) * np.sqrt(rho_gz[i]/rho_f)     # Round tube drift flux distribution parameter
             
+            alpha[i+1] = jgloc / (C0 * j + vgj)
+
             if debug:
                 with open("H:\TRSL-H\IATE\DF.txt", mode = 'a+') as FID:
-                    print(f"\n\njf = {jf} [m/s], jg = {cond.jgref} [m/s]\n\tL/D: {z/Dh}\n\tC0: {C0}\n\tvgj: {vgj}\n\tj: {j}\n\talpha: {alpha[i+1]}",file=FID)
-                    
-            alpha[i+1] = jgloc / (C0 * j + vgj)
+                    print(f"\n\n{i+1}.\tjf = {jf} [m/s], jg = {cond.jgref} [m/s]\n\tL/D: {z/Dh}\n\tC0: {C0}\n\tvgj: {vgj}\n\tj: {j}\n\talpha: {alpha[i]}",file=FID)
 
         elif void_method == 'continuity':   # Continuity
 
@@ -450,11 +458,63 @@ def iate_1d_1g(
             else:
                 alpha[i+1] = alpha[i] - (alpha[i] / (rho_gz[i] * vgz[i])) * ((rho_gz[i] * vgz[i]) - (rho_gz[i-1] * vgz[i-1]))
 
-        elif void_method == 'pressure':     # Akagawa (1957), Kong (2018)
+        elif void_method == 'pressure_akagawa':     # Akagawa (1957), Kong (2018)
             f_f, f_g = cond.calc_fric(m = m, n = n)
             dpdz_f = f_f * 1/Dh * rho_f * jf**2 / 2
 
             alpha[i+1] = 1 - (-dpdz / dpdz_f)**(-1/(2*akapower))
+
+        elif void_method == 'pressure_kim':
+            f_f, f_g = cond.calc_fric(m = m, n = n)
+            dpdz_f = f_f * 1/Dh * rho_f * jf**2 / 2
+
+            dpdz = (1 - (pz[i] / p)) * (p / z_mesh[i])
+            dpdz = phi_f2 * dpdz_f
+            
+            rho_x = rho_gz[i] / rho_f
+            mu_x = mu_g / mu_f
+            L_x = (query - LoverD) * Dh            # Restriction length scale, = L/D_restriction
+            alpha_x = alpha[i] / (1 - alpha[i])
+
+            Re_f = rho_f * jf * Dh / mu_f
+            
+            phi_f2 = 1 + LM_C * (rho_x**3 * mu_x * alpha_x**7)**(1/8) * (1 + (3.165 * k_m / L_x) * Re_f**0.25)**(1/2) + (rho_x**3 * mu_x * alpha_x**7)**(1/4) + (3.165 * k_m / L_x) * Re_f**0.25
+
+            pass
+
+        elif void_method == 'pressure_LM':
+            f_f, f_g = cond.calc_fric(m = m, n = n)
+            dpdz_f = f_f * 1/Dh * rho_f * jf**2 / 2
+
+            phi_f2 = (dpdz - ((rho_f * grav * delta_h) / (z_mesh[-1] - z_mesh[0]))) / dpdz_f
+
+            print(phi_f2)
+
+            rho_x = rho_gz[i] / rho_f
+            mu_x = mu_g / mu_f
+
+            # phi_f2 = 1 + LM_C * (rho_x**3 * mu_x * alpha_x**7)**(1/8) + (rho_x**3 * mu_x * alpha_x**7)**(1/4)        # LM
+
+            # A = (rho_x**3 * mu_x * alpha_x**7)**(1/4)
+            # phi_f2 = 1 + LM_C*A + A**2       # Quadratic
+
+            X_inv = np.array([((-LM_C + (LM_C**2 - 4 * (1 - phi_f2))**0.5) / 2) , ((-LM_C - (LM_C**2 - 4 * (1 - phi_f2))**0.5) / 2)])
+
+            print(X_inv)
+
+            alpha_x = (X_inv**8 / rho_x**3 / mu_x)**(1/7)
+
+            print(alpha_x)
+            print(alpha_x / (alpha_x + 1))
+
+            print(1 + LM_C * (rho_x**3 * mu_x * alpha_x**7)**(1/8) + (rho_x**3 * mu_x * alpha_x**7)**(1/4))     # It seems, there is not an error in computing alpha, but perhaps one in dpdz or dpdz_f?
+            # phi_f2 matches up, but the alpha yielded is 0.9 for a bubbly flow condition
+            # maybe dpdz_f is not accounting for something taken into consideration for dpdz?
+            # yep, it was gravity
+
+            alpha[i+1] = alpha_x / (alpha_x + 1)
+
+            pass
 
         # Estimate Sauter mean diameter for the next step calculation
         Db[i+1] = 6 * alpha[i+1] / ai[i+1]

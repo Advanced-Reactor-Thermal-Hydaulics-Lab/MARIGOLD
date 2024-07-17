@@ -682,6 +682,8 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
             if sheet_type == 'bettis_template':
                 # I give up. Hardcoding! Whoo!
 
+                '''
+                # Sourced from Kim_Research_BubbleDoc\Bettis\OneGroupEvaluation\AllConditions
                 jgloc_mat = [
                     [0.047 , 0.040 , 0.040 , 0.040 , None  , None  ],   # Run1
                     [0.047 , 0.040 , 0.040 , 0.040 , None  , None  ],   # Run2
@@ -755,12 +757,89 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
 
                 LoverD_mat = [8.02, 34.76, 61.49, 88.22, 114.96, 141.70]
                 dpdz_mat = [9250.38, 10128.04, 11636.70, 9542.94, 11521.98, 8171.95, 13219.94, 8267.13, 13957.25, 11240.45, 20676.09]
+                '''
+
+                # Sourced from \Kim_ThesisFolder\Thesis_Original\OneGroupEvaluation\AllConditions
+                jgloc_mat = [
+                    [0.047 , 0.040 , 0.040 , 0.040 , None  , None  ],   # Run1
+                    [0.047 , 0.040 , 0.040 , 0.040 , None  , None  ],   # Run2
+                    [0.095 , 0.070 , 0.070 , 0.070 , None  , None  ],   # Run3
+                    [0.187 , 0.140 , 0.150 , 0.150 , None  , None  ],   # Run4
+                    [0.193 , 0.140 , 0.150 , 0.150 , None  , None  ],   # Run5
+                    [0.279 , 0.220 , None  , 0.220 , None  , None  ],   # Run6_short
+                    [0.287 , 0.210 , 0.220 , 0.220 , None  , None  ],   # Run7_short
+                    [None  , 0.28  , None  , 0.234 , None  , 0.251 ],   # Run6_long
+                    [None  , 0.3   , None  , None  , None  , 0.264 ],   # Run7_long
+                    [None  , 0.385 , None  , 0.314 , None  , 0.346 ],   # Run8
+                    [None  , 0.94  , None  , 0.716 , None  , 0.850 ],   # Run9
+                ]
+
+                alpha_mat = [
+                    [0.066 , 0.0839, 0.080 , 0.083 , None  , None  ],   # Run1
+                    [0.039 , 0.038 , 0.037 , 0.034 , None  , None  ],   # Run2
+                    [0.035 , 0.038 , 0.031 , 0.034 , None  , None  ],   # Run3
+                    [0.104 , 0.1097, 0.116 , 0.116 , None  , None  ],   # Run4
+                    [0.064 , 0.0592, 0.062 , 0.059 , None  , None  ],   # Run5
+                    [0.220 , 0.1727, None  , 0.248 , None  , None  ],   # Run6_short
+                    [0.031 , 0.051 , None  , 0.058 , None  , None  ],   # Run7_short
+                    [None  , 0.2068, None  , 0.222 , None  , 0.237 ],   # Run6_long
+                    [None  , 0.0674, None  , None  , None  , 0.075 ],   # Run7_long
+                    [None  , 0.1149, None  , 0.103 , None  , 0.124 ],   # Run8
+                    [None  , 0.0782, None  , 0.095 , None  , 0.125 ]    # Run9
+                ]
+
+                ai_mat = [
+                    [None  , 190.33, 175.51, 173.26, None  , None  ],   # Run1
+                    [None  , 82.28 , 77.30 , 71.10 , None  , None  ],   # Run2
+                    [None  , 87.70 , 76.70 , 78.60 , None  , None  ],   # Run3
+                    [None  , 210.56, 223.89, 211.69, None  , None  ],   # Run4
+                    [None  , 125.06, 135.80, 120.97, None  , None  ],   # Run5
+                    [None  , 432.78, None  , 372.21, None  , None  ],   # Run6_short
+                    [None  , 151.23, None  , 157.03, None  , None  ],   # Run7_short
+                    [None  , 470.61, None  , 369.69, None  , 418.74],   # Run6_long
+                    [None  , 199.34, None  , None  , None  , 222.64],   # Run7_long
+                    [None  , 209.62, None  , 192.28, None  , 270.00],   # Run8
+                    [None  , 188.53, None  , 258.80, None  , 345.16],   # Run9
+                ]
+
+                Dsm_mat = [
+                    [None  , 2.56  , None  , 2.61  , None  , None  ],   # Run1
+                    [None  , 2.87  , None  , 2.71  , None  , None  ],   # Run2
+                    [None  , 2.55  , None  , 2.59  , None  , None  ],   # Run3
+                    [None  , 3.06  , None  , 3.06  , None  , None  ],   # Run4
+                    [None  , 2.92  , None  , 2.92  , None  , None  ],   # Run5
+                    [None  , 2.33  , None  , 3.81  , None  , None  ],   # Run6_short
+                    [None  , 2.03  , None  , 2.21  , None  , None  ],   # Run7_short
+                    [None  , 2.61  , None  , 3.54  , None  , 3.28  ],   # Run6_long
+                    [None  , 1.98  , None  , None  , None  , 2.01  ],   # Run7_long, last one at 140.1 L/D
+                    [None  , 2.67  , None  , 3.26  , None  , 2.78  ],   # Run8
+                    [None  , 2.43  , None  , 2.19  , None  , 2.18  ],   # Run9
+                ]
+
+                # Sourced from thesis Table A.E.(a), and MATLAB initcond.m
+                pz_mat = [
+                    [None  , 30603.60 , 27710.01 , 24816.42 , None  , None    ],  # Run1
+                    [None  , 32735.69 , 29567.55 , 26399.42 , None  , None    ],  # Run2
+                    [None  , 35073.44 , 31433.39 , 27793.33 , None  , None    ],  # Run3
+                    [None  , 31486.61 , 28501.50 , 25516.40 , None  , None    ],  # Run4
+                    [None  , 38464.37 , 34860.21 , 31256.04 , None  , None    ],  # Run5
+                    [None  , 29584.83 , 27028.58 , 24472.33 , None  , None    ],  # Run6_short
+                    [None  , 36275.59 , 32140.29 , 28004.99 , None  , None    ],  # Run7_short
+                    [None  , 28213.762, None     , 19814.36 , None  , 11415   ],  # Run6_long
+                    [None  , 40150.62 , None     , 25970.05 , None  , 11789.5 ],  # Run7_long
+                    [None  , 34289.443, None     , 22869.15 , None  , 11448.8 ],  # Run8
+                    [None  , 52254.526, None     , 31247.62 , None  , 10240.7 ],  # Run9
+                ]
+
+                LoverD_mat = [8.02, 34.76, 61.49, 88.22, 114.96, 141.70]
+                dpdz_mat = [9250.38, 10128.04, 11636.70, 9542.94, 11521.98, 8171.95, 13219.94, 8267.13, 13957.25, 11240.45, 20676.09]
+
 
                 jgloc                   = jgloc_mat[run_idx-1][port_idx-1]
                 area_avg_void_sheet     = alpha_mat[run_idx-1][port_idx-1]
                 area_avg_ai_sheet       = ai_mat[run_idx-1][port_idx-1]
                 area_avg_Dsm_sheet      = Dsm_mat[run_idx-1][port_idx-1]
-                pz                      = pz_mat[run_idx-1][port_idx-1] + 101325
+                pz                      = pz_mat[run_idx-1][port_idx-1] + 101330
                 LoverD                  = LoverD_mat[port_idx-1]
                 dpdz                    = dpdz_mat[run_idx-1]
                 
@@ -792,7 +871,7 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                 cond.LoverD = LoverD
                 cond.dpdz = dpdz
 
-                cond.jgatm = jgloc * pz / 101325
+                cond.jgatm = jgloc * pz / 101330
 
                 '''
                 <<Ub>>, can be offset by 1 row, depending on which you're looking at
