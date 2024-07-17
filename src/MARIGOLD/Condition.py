@@ -1673,19 +1673,8 @@ class Condition:
         
         """
 
-        if interp_type == 'spline':
-            if param not in self.spline_interp.keys():
-                self.fit_spline(param)
-
-            def integrand(phi, r):
-                return self.spline_interp[param](phi * 180/np.pi, r) * r
-        
-        elif interp_type == 'linear':
-            if param not in self.linear_interp.keys():
-                self.fit_linear_interp(param)
-
-            def integrand(phi, r):
-                return self.linear_interp[param](phi, r) * r
+        def integrand(phi, r): # phi will be in radians from dblquad
+            return self(phi, r, param, interp_method=interp_type) * r
         
         I = integrate.dblquad(integrand, 0, 1, 0, np.pi * 2)[0] / np.pi
         return I
