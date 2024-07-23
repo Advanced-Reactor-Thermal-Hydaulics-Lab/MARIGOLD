@@ -519,8 +519,8 @@ def iate_1d_1g(
             chiM_inv = (3.165 * k_m / L_x * Re_f**0.25)**0.5
 
             quad_A = 1
-            quad_B = LM_C * (1 + (1 / chiM_inv**2))**0.5
-            quad_C = 1 + (1 / chiM_inv**2) - phi_f2
+            quad_B = LM_C * (1 + (chiM_inv**2))**0.5
+            quad_C = 1 + (chiM_inv**2) - phi_f2
 
             chi_inv = ((-quad_B + (quad_B**2 - 4 * quad_A * quad_C)**0.5) / (2 * quad_A))     # Quadratic formula to solve for 1/X
             alpha_x = (chi_inv**8 / rho_x**3 / mu_x)**(1/7)                                   # Solve for alpha/(1-alpha)
