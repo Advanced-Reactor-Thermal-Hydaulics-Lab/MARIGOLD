@@ -501,7 +501,7 @@ def iate_1d_1g(
             
             rho_x = rho_gz[i] / rho_f
             mu_x = mu_g / mu_f
-            L_x = (query - LoverD) * Dh             # Restriction length scale, = L/D_restriction
+            L_x = query - LoverD             # Restriction length scale, = L/D_restriction
             Re_f = rho_f * jf * Dh / mu_f
 
             # alpha_x = alpha[i] / (1 - alpha[i])
