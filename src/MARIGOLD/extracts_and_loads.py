@@ -1134,7 +1134,7 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                 if pitot_sheet: # Pitot data for Q1
                     for phi, indices in Q1_ranges:
                         for i in indices:
-                            if ws[f'{Q1_pitot_check}{i}'].value:
+                            if ws[f'{Q1_pitot_check}{i}'].value and ws[f'{Q1_check}{i}'].value:
 
                                 try:
                                     roverR = float(ws[f'{Q1_pitot_start}{i}'].value)
