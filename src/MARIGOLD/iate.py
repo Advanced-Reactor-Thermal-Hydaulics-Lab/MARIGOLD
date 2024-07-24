@@ -99,6 +99,7 @@ def iate_1d_1g(
         grav = 9.8
 
         cd_method = 'fixed_iter'
+        cheat = True
     elif iate_method == 'yadav':
         pass
     elif iate_method == 'talley':
