@@ -2376,16 +2376,22 @@ the newly calculated :math:`v_{r}` or not
 
         return
     
-    def calc_aa_values_model(self, method='km1_naive', kw=-0.98, kf=-0.083, Lw = 5, Cavf=1):
+    def calc_aa_vr_model(self, method='km1_naive', kw=-0.98, kf=-0.083, Lw = 5, Cavf=1, Ctau=1):
 
         if method == 'km1_naive':
             vr = kw * (np.pi/4)**(1/3) * self.area_avg('alpha') * self.jf / (1 - self.area_avg('alpha')) * self.area_avg('cd')**(1./3) *  (2**(-1./3) - Lw**(1/3))/(0.5 - Lw) + kf * self.jf / (1 - self.area_avg('alpha'))
         
-        elif method == 'km1_naive2':
+        elif method == 'km1_naive2' or method == 'prelim':
             vr = kw * self.area_avg('alpha') * self.jf / (1 - self.area_avg('alpha')) * self.area_avg('cd')**(1./3)  + kf * self.jf / (1 - self.area_avg('alpha'))
+
+        elif method == 'IS':
+            self.calc_cd()
+            self.calc_fric()
+            vr = np.sign(1 - Ctau) * self.jf * np.sqrt(2/3 * self.void_area_avg('Dsm1') / self.Dh * abs(1-Ctau)/self.cd * self.ff)
 
         self.vwvgj = (1-self.area_avg('alpha'))*vr
         self.aa_vr = vr
+        return vr
     
     def calc_errors(self, param1:str, param2:str):
         """ Calculates the errors, ε, between two parameters (param1 - param2) in midas_dict
@@ -2423,7 +2429,7 @@ the newly calculated :math:`v_{r}` or not
                     midas_dict[param_rel_sq_error_name] = 0
                     midas_dict[param_abs_rel_error_name] = 0
 
-        return
+        return self.area_avg(param_error_name)
 
     def calc_avg_lat_sep(self):
         """Calculates average lateral separation distance between bubbles
