@@ -51,6 +51,32 @@ def iate_1d_1g(
      - Revise vgj calculation
     """
 
+    # Could make a dictionary with all of the options outside of the fxn and then with kwarg
+    # Inside of the function with whatever kwargs you passed update the dictionary
+
+    '''
+    option_dict = {
+        "dpdz": 'LM',
+        "CD": 0.2
+    }
+
+    def test(**kwargs):
+
+        for option, value in kwargs.items():
+            if option in option_dict.keys():
+                option_dict.update({option:value})
+            else:
+                print(f"Warning: unknown option {option}")
+
+        # Test
+        print(option_dict)
+
+
+    if __name__ == '__main__':
+
+        test(CD = 0.4, m = 4)
+    '''
+
     # MARIGOLD retrieval and setup
     theta           = cond.theta                                # Pipe inclination angle
     Dh              = cond.Dh                                   # Hydraulic diameter
@@ -468,17 +494,36 @@ def iate_1d_1g(
             f_f, f_g = cond.calc_fric(m = m, n = n)
             dpdz_f = f_f * 1/Dh * rho_f * jf**2 / 2
 
-            dpdz = (1 - (pz[i] / p)) * (p / z_mesh[i])
-            dpdz = phi_f2 * dpdz_f
+            phi_f2 = (dpdz - ((rho_f * grav * delta_h) / (z_mesh[-1] - z_mesh[0]))) / dpdz_f
+
+            # dpdz = (1 - (pz[i] / p)) * (p / z_mesh[i])
+            # dpdz = phi_f2 * dpdz_f
             
             rho_x = rho_gz[i] / rho_f
             mu_x = mu_g / mu_f
-            L_x = (query - LoverD) * Dh            # Restriction length scale, = L/D_restriction
-            alpha_x = alpha[i] / (1 - alpha[i])
-
+            L_x = query - LoverD             # Restriction length scale, = L/D_restriction
             Re_f = rho_f * jf * Dh / mu_f
-            
-            phi_f2 = 1 + LM_C * (rho_x**3 * mu_x * alpha_x**7)**(1/8) * (1 + (3.165 * k_m / L_x) * Re_f**0.25)**(1/2) + (rho_x**3 * mu_x * alpha_x**7)**(1/4) + (3.165 * k_m / L_x) * Re_f**0.25
+
+            # alpha_x = alpha[i] / (1 - alpha[i])
+            # phi_f2 = 1 + LM_C * (rho_x**3 * mu_x * alpha_x**7)**(1/8) * (1 + (3.165 * k_m / L_x) * Re_f**0.25)**(1/2) + (rho_x**3 * mu_x * alpha_x**7)**(1/4) + (3.165 * k_m / L_x) * Re_f**0.25
+
+            '''
+            dpdz_f = f_f * 1/self.Dh * self.rho_f * self.jf**2 / 2
+            dpdz_g = f_g * 1/self.Dh * self.rho_g * self.jgloc**2 / 2
+            dpdz_m = k_m * self.rho_f * self.jf**2 / 2 / L
+
+            chi2 = dpdz_f / dpdz_g
+            chiM2 = dpdz_f / dpdz_m
+            '''
+
+            chiM_inv = (3.165 * k_m / L_x * Re_f**0.25)**0.5
+
+            quad_A = 1
+            quad_B = LM_C * (1 + (chiM_inv**2))**0.5
+            quad_C = 1 + (chiM_inv**2) - phi_f2
+
+            chi_inv = ((-quad_B + (quad_B**2 - 4 * quad_A * quad_C)**0.5) / (2 * quad_A))     # Quadratic formula to solve for 1/X
+            alpha_x = (chi_inv**8 / rho_x**3 / mu_x)**(1/7)                                   # Solve for alpha/(1-alpha)
 
             pass
 
@@ -488,29 +533,20 @@ def iate_1d_1g(
 
             phi_f2 = (dpdz - ((rho_f * grav * delta_h) / (z_mesh[-1] - z_mesh[0]))) / dpdz_f
 
-            print(phi_f2)
-
             rho_x = rho_gz[i] / rho_f
             mu_x = mu_g / mu_f
 
-            # phi_f2 = 1 + LM_C * (rho_x**3 * mu_x * alpha_x**7)**(1/8) + (rho_x**3 * mu_x * alpha_x**7)**(1/4)        # LM
+            # phi_f2 = 1 + LM_C * (rho_x**3 * mu_x * alpha_x**7)**(1/8) + (rho_x**3 * mu_x * alpha_x**7)**(1/4)        # LM, if you substitute expression for 1/X
 
-            # A = (rho_x**3 * mu_x * alpha_x**7)**(1/4)
-            # phi_f2 = 1 + LM_C*A + A**2       # Quadratic
+            # chi_inv = (rho_x**3 * mu_x * alpha_x**7)**(1/8)     # 1/X**2 is to the 1/4 power
+            # chi_inv = np.array([((-LM_C + (LM_C**2 - 4 * (1 - phi_f2))**0.5) / 2) , ((-LM_C - (LM_C**2 - 4 * (1 - phi_f2))**0.5) / 2)])
 
-            X_inv = np.array([((-LM_C + (LM_C**2 - 4 * (1 - phi_f2))**0.5) / 2) , ((-LM_C - (LM_C**2 - 4 * (1 - phi_f2))**0.5) / 2)])
+            quad_A = 1
+            quad_B = LM_C
+            quad_C = 1 - phi_f2
 
-            print(X_inv)
-
-            alpha_x = (X_inv**8 / rho_x**3 / mu_x)**(1/7)
-
-            print(alpha_x)
-            print(alpha_x / (alpha_x + 1))
-
-            print(1 + LM_C * (rho_x**3 * mu_x * alpha_x**7)**(1/8) + (rho_x**3 * mu_x * alpha_x**7)**(1/4))     # It seems, there is not an error in computing alpha, but perhaps one in dpdz or dpdz_f?
-            # phi_f2 matches up, but the alpha yielded is 0.9 for a bubbly flow condition
-            # maybe dpdz_f is not accounting for something taken into consideration for dpdz?
-            # yep, it was gravity
+            chi_inv = ((-quad_B + (quad_B**2 - 4 * quad_A * quad_C)**0.5) / (2 * quad_A))     # Quadratic formula to solve for 1/X
+            alpha_x = (chi_inv**8 / rho_x**3 / mu_x)**(1/7)                                   # Solve for alpha/(1-alpha)
 
             alpha[i+1] = alpha_x / (alpha_x + 1)
 
