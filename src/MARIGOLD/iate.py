@@ -323,7 +323,11 @@ def iate_1d_1g(
             for loop_idx in range(25):
                 ReD = rho_f * ur * Db[i] * (1 - alpha[i]) / mu_f
                 CDwe = 24 * (1 + 0.1 * ReD**0.75) / ReD
-                ur = (4 * grav * Db[i] / 3 / CDwe)**0.5
+
+                if iate_method == 'kim':
+                    ur = (grav * Db[i] / 3 / CDwe)**0.5
+                else:
+                    ur = (4 * grav * Db[i] / 3 / CDwe)**0.5
             
             ReD = rho_f * ur * Db[i] * (1 - alpha[i]) / mu_f
             CDwe = 24 * (1 + 0.1 * ReD**0.75) / ReD
