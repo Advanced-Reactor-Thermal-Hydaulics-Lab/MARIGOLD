@@ -2387,7 +2387,12 @@ the newly calculated :math:`v_{r}` or not
         elif method == 'IS':
             self.calc_cd()
             self.calc_fric()
-            vr = np.sign(1 - Ctau) * self.jf * np.sqrt(2/3 * self.void_area_avg('Dsm1') / self.Dh * abs(1-Ctau)/self.cd * self.ff)
+            rb = self.void_area_avg('Dsm1') / 2 *1000 # Convert to m
+            CD = self.void_area_avg('cd')
+            alpha = self.area_avg('alpha')
+            tau_fw = self.ff/4 * self.rho_f * self.jf**2/2
+
+            vr = np.sign(1 - Ctau) * (8*rb/3 * 1/(CD * self.rho_f) * ( (1-alpha)*self.gz * (self.rho_f - self.rho_g) + (1-Ctau)*4*tau_fw/self.Dh ))
 
         self.vwvgj = (1-self.area_avg('alpha'))*vr
         self.aa_vr = vr
