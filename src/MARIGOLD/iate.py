@@ -530,7 +530,7 @@ def iate_1d_1g(
             chi_inv = ((-quad_B + (quad_B**2 - 4 * quad_A * quad_C)**0.5) / (2 * quad_A))     # Quadratic formula to solve for 1/X
             alpha_x = (chi_inv**8 / rho_x**3 / mu_x)**(1/7)                                   # Solve for alpha/(1-alpha)
 
-            pass
+            alpha[i+1] = alpha_x / (alpha_x + 1)
 
         elif void_method == 'pressure_LM':
             f_f, f_g = cond.calc_fric(m = m, n = n)
@@ -554,8 +554,6 @@ def iate_1d_1g(
             alpha_x = (chi_inv**8 / rho_x**3 / mu_x)**(1/7)                                   # Solve for alpha/(1-alpha)
 
             alpha[i+1] = alpha_x / (alpha_x + 1)
-
-            pass
 
         # Estimate Sauter mean diameter for the next step calculation
         Db[i+1] = 6 * alpha[i+1] / ai[i+1]
