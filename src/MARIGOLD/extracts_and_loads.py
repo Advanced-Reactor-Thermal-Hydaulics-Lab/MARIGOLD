@@ -912,6 +912,10 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
 
                 potent_ranges = [ [i for i in range(8, 22)], [i for i in range(48, 62)], [i for i in range(87, 101)], [i for i in range(128, 142)], [i for i in range(168, 182)], [i for i in range(209, 223)], [i for i in range(250, 264)], [i for i in range(290, 304)] ]
                 
+                # ID is going to be at A1, A41, A80, A121, A161, A202, A243, A283
+                # jgatm C3
+                # jf C4
+
                 ws = wb['1']
 
                 jgatm = ws['C3'].value
@@ -997,6 +1001,10 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                                 cond.data[phi].update({1.0: deepcopy(zero_data)})
                                 #cond.phi[phi_val].update({0.0: zero_data}) # Cuz I'm paranoid
                                 cond.data[phi].update({roverR: data})
+
+
+
+
 
             # General PITA template structure holds
             else:
