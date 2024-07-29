@@ -2071,6 +2071,7 @@ class Condition:
         Stores
          -self.ff
          -self.fg
+         -self.tau_fw
         
         """
         
@@ -2085,6 +2086,8 @@ class Condition:
 
         self.ff = ff
         self.fg = fg
+        tau_fw = self.ff/4 * self.rho_f * self.jf**2/2
+        self.tau_fw = tau_fw
         return (ff, fg)
 
     
@@ -2376,7 +2379,40 @@ the newly calculated :math:`v_{r}` or not
 
         return
     
-    def calc_aa_vr_model(self, method='km1_naive', kw=-0.98, kf=-0.083, Lw = 5, Cavf=1, Ctau=1):
+    def calc_IS_term(self, method = 'power', n=2, mu = 1.5):
+        self.calc_cd()
+        self.calc_fric()
+        self.calc_grad('alpha')
+        
+        for angle, r_dict in self.data.items():
+            for r_star, midas_dict in r_dict.items():
+                    
+                    if r_star == 0:
+                        midas_dict.update(
+                            {'IS': 0 , 'ISxgrad': 0}
+                         )
+                        continue
+
+                    if method == 'power':
+                        midas_dict.update(
+                            {'ISxgrad': float(self.tau_fw * r_star**n * ( midas_dict['grad_alpha_r'] )) , 'IS': float(self.tau_fw * r_star**n)}
+                         )
+        
+                    elif method == 'power_both':
+                        midas_dict.update(
+                            {'ISxgrad': float(self.tau_fw * r_star**n * (midas_dict['grad_alpha_r'] + 1 / r_star * midas_dict['grad_alpha_phi'])) , 'IS': float(self.tau_fw * r_star**n)}
+                        )
+                        
+                    elif method == 'lognorm':
+                        taui = self.tau_fw * np.exp( -(np.log(1-r_star) + mu)**2 )
+                        midas_dict.update(
+                            {'ISxgrad': float(taui * (midas_dict['grad_alpha_r'] )) , 'IS': float(taui)}
+                        )
+
+
+        return 1 / self.area_avg('alpha') * self.area_avg('ISxgrad')
+    
+    def calc_aa_vr_model(self, method='km1_naive', IS_method = 'power', kw=-0.98, kf=-0.083, Lw = 5, Cavf=1, Ctau=1, n=2):
 
         if method == 'km1_naive':
             vr = kw * (np.pi/4)**(1/3) * self.area_avg('alpha') * self.jf / (1 - self.area_avg('alpha')) * self.area_avg('cd')**(1./3) *  (2**(-1./3) - Lw**(1/3))/(0.5 - Lw) + kf * self.jf / (1 - self.area_avg('alpha'))
@@ -2384,15 +2420,26 @@ the newly calculated :math:`v_{r}` or not
         elif method == 'km1_naive2' or method == 'prelim':
             vr = kw * self.area_avg('alpha') * self.jf / (1 - self.area_avg('alpha')) * self.area_avg('cd')**(1./3)  + kf * self.jf / (1 - self.area_avg('alpha'))
 
-        elif method == 'IS':
+        elif method == 'IS_Ctau':
             self.calc_cd()
             self.calc_fric()
-            rb = self.void_area_avg('Dsm1') / 2 *1000 # Convert to m
+            rb = self.void_area_avg('Dsm1') / 2 /1000 # Convert to m
             CD = self.void_area_avg('cd')
             alpha = self.area_avg('alpha')
-            tau_fw = self.ff/4 * self.rho_f * self.jf**2/2
 
-            vr = np.sign(1 - Ctau) * (8*rb/3 * 1/(CD * self.rho_f) * ( (1-alpha)*self.gz * (self.rho_f - self.rho_g) + (1-Ctau)*4*tau_fw/self.Dh ))
+            discrim = (1-alpha)*self.gz * (self.rho_f - self.rho_g) + (1-Ctau)*4*self.tau_fw/self.Dh
+            vr = np.sign(discrim) * np.sqrt(8*rb/3 * 1/(CD * self.rho_f) * abs( discrim ))
+
+        elif method == 'IS':
+            IS_term = self.calc_IS_term(method = IS_method, n = n)
+
+            rb = self.void_area_avg('Dsm1') / 2 /1000 # Convert to m
+            CD = self.void_area_avg('cd')
+            alpha = self.area_avg('alpha')
+
+            discrim = 4*self.tau_fw/self.Dh + (1-alpha)*self.gz * (self.rho_f - self.rho_g) - IS_term
+            vr = np.sign(discrim) * np.sqrt(8*rb/3 * 1/(CD * self.rho_f) * abs( discrim ))
+            
 
         self.vwvgj = (1-self.area_avg('alpha'))*vr
         self.aa_vr = vr
