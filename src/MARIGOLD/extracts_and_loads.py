@@ -50,7 +50,7 @@ def extractProbeData(dump_file = 'database.dat', in_dir = [], require_terms = No
                 
                 try:
                     jf = float(file.split('_')[1].strip('jf'))
-                    jgP3 = float(file.split('_')[2].strip('jg'))
+                    jgref = float(file.split('_')[2].strip('jg'))
                     port = file.split('_')[3].strip('.xlsx')
                     theta = float(file.split('_')[0].strip('deg'))
                 except:
@@ -60,7 +60,7 @@ def extractProbeData(dump_file = 'database.dat', in_dir = [], require_terms = No
                 ws = wb['1']
                 jgloc = ws['U23'].value
 
-                newCond = Condition(jgP3, jgloc, jf, theta, port, 'Ryan')
+                newCond = Condition(jgref, jgloc, jf, theta, port, 'Ryan')
 
                 if newCond not in all_conditions:
                     all_conditions.append(newCond)
@@ -172,7 +172,7 @@ def extractProbeData(dump_file = 'database.dat', in_dir = [], require_terms = No
                 
                 try:
                     jf = float(file.split('_')[1].strip('jf'))
-                    jgP3 = float(file.split('_')[2].strip('jg'))
+                    jgref = float(file.split('_')[2].strip('jg'))
                     port = file.split('_')[3].strip('.xlsx')
                     theta = float(file.split('_')[0].strip('deg'))
                 except:
@@ -190,7 +190,7 @@ def extractProbeData(dump_file = 'database.dat', in_dir = [], require_terms = No
                     old = True
                 
 
-                newCond = Condition(jgP3, jgloc, jf, theta, port, 'Talley')
+                newCond = Condition(jgref, jgloc, jf, theta, port, 'Talley')
 
                 if newCond not in all_conditions:
                     all_conditions.append(newCond)
@@ -296,7 +296,7 @@ def extractProbeData(dump_file = 'database.dat', in_dir = [], require_terms = No
                 
                 try:
                     jf = float(file.split('_')[1].strip('jf'))
-                    jgP3 = float(file.split('_')[2].strip('jg'))
+                    jgref = float(file.split('_')[2].strip('jg'))
                     port = file.split('_')[3].strip('.xlsx')
                     theta = float(file.split('_')[0].strip('deg'))
                 except:
@@ -312,7 +312,7 @@ def extractProbeData(dump_file = 'database.dat', in_dir = [], require_terms = No
                     jgloc = ws['C2'].value
                 
 
-                newCond = Condition(jgP3, jgloc, jf, theta, port, 'Kong')
+                newCond = Condition(jgref, jgloc, jf, theta, port, 'Kong')
 
                 if newCond not in all_conditions:
                     all_conditions.append(newCond)
@@ -418,7 +418,7 @@ def extractProbeData(dump_file = 'database.dat', in_dir = [], require_terms = No
                 
                 try:
                     jf = float(file.split('_')[1].strip('jf'))
-                    jgP3 = float(file.split('_')[2].strip('jg'))
+                    jgref = float(file.split('_')[2].strip('jg'))
                     port = file.split('_')[3].strip('.xlsx')
                     theta = float(file.split('_')[0].strip('deg'))
                 except:
@@ -429,9 +429,9 @@ def extractProbeData(dump_file = 'database.dat', in_dir = [], require_terms = No
 
                 # jglocs = ['O16', 'O17', 'O18', 'O19', 'O20']
                 # jgloc = ws[jglocs[int(port.strip('P'))-1]].value
-                jgloc = jgP3
+                jgloc = jgref
                 
-                newCond = Condition(jgP3, jgloc, jf, theta, port, 'Yadav')
+                newCond = Condition(jgref, jgloc, jf, theta, port, 'Yadav')
 
                 if newCond not in all_conditions:
                     all_conditions.append(newCond)
@@ -1002,10 +1002,93 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                                 #cond.phi[phi_val].update({0.0: zero_data}) # Cuz I'm paranoid
                                 cond.data[phi].update({roverR: data})
 
+            elif sheet_type == 'talley_template':
+                #print(Q1_ranges, Q2_ranges)
+                phis = [90, 67.5, 45, 22.5, 0]
 
+                try:
+                    ws = wb['2']
+                    jgloc = ws['C2'].value
+                    old = False
+                except:
+                    #print(f"Warning: Old format file {file}")
+                    ws = wb['Sheet1']
+                    jgloc = ws['C3'].value
+                    old = True
+                
+                newCond = Condition(jgref, jgloc, jf, theta, port, 'Talley')
 
+                if newCond not in all_conditions:
+                    all_conditions.append(newCond)
+                    cond = newCond
+                else:
+                    cond = all_conditions[ all_conditions.index(newCond) ]
+                
+                i = 0
+                
+                phi_counter = 0
+                next = False
+                while phi_counter < 5:
+                    i += 1
 
+                    if ws[f'E{i}'].value == 'Spherical' or  ws[f'C{i}'].value == 'Spherical':
+                        if debug: print(f'found header in row {i}', file=debugFID)
+                        next = True
+                        continue
 
+                    if next:
+                        try:
+                            # Hopefully in the part of the sheet with data
+                            roverR = float(ws[f'A{i}'].value)
+                        except:
+                            # Done reading data
+                            phi_counter += 1
+                            next = False
+                            continue
+
+                        midas_output = []
+                        data = deepcopy(zero_data)
+
+                        if old and ws[f'F{i}'].value:
+                            # use old tab keys
+                            for cell in ws[f'A{i}':f'AA{i}'][0]:
+                                midas_output.append(cell.value)
+                            
+                            if len(old_tab_keys) == len( midas_output ):
+                                data = dict( zip( old_tab_keys, midas_output ))
+                            else:
+                                if debug: print("Warning, old tab_keys not the same length as midas_output")
+                                data = dict( zip( old_tab_keys, midas_output ))
+                                if debug:
+                                    print("old tab_keys not the same length as midas_output", file=debugFID)
+                                    print(tab_keys, midas_output, file=debugFID)
+                        elif ws[f'K{i}'].value:
+                            # use new tab keys
+                            roverR = float(ws[f'A{i}'].value)
+                            midas_output = []
+                            for cell in ws[f'A{i}':f'BD{i}'][0]:
+                                midas_output.append(cell.value)
+                            
+                            if len(tab_keys) == len( midas_output ):
+                                data = dict( zip( tab_keys, midas_output ))
+                            else:
+                                if debug: print("Warning, tab_keys not the same length as midas_output")
+                                data = dict( zip( tab_keys, midas_output ))
+                                if debug:
+                                    print("tab_keys not the same length as midas_output", file=debugFID)
+                                    print(tab_keys, midas_output, file=debugFID)
+
+                        phi = phis[phi_counter]
+                        try:
+                            cond.data[phi].update({roverR: data})
+                        except KeyError:
+                            cond.data.update( {phi:{}} )
+                            cond.data[phi].update({1.0: zero_data})
+                            #cond.phi[phi_val].update({0.0: zero_data}) # Cuz I'm paranoid
+                            cond.data[phi].update({roverR: data})
+
+                #print('total rows read:', i)
+                        
             # General PITA template structure holds
             else:
                 if sheet_type == 'infer':
@@ -1364,7 +1447,7 @@ def extractPitotData(dump_file = 'Pitot_Database.dat', in_dir = [], require_term
             
             try:
                 jf = float(file.split('_')[1].strip('jf'))
-                jgP3 = float(file.split('_')[2].strip('jg'))
+                jgref = float(file.split('_')[2].strip('jg'))
                 port = file.split('_')[3].strip('.xlsx')
                 theta = float(file.split('_')[0].strip('deg'))
             except:
@@ -1374,7 +1457,7 @@ def extractPitotData(dump_file = 'Pitot_Database.dat', in_dir = [], require_term
             ws = wb['1']
             jgloc = ws['U23'].value
 
-            newCond = Condition(jgP3, jgloc, jf, theta, port, 'Pitot')
+            newCond = Condition(jgref, jgloc, jf, theta, port, 'Pitot')
 
             if newCond not in all_conditions:
                 all_conditions.append(newCond)
