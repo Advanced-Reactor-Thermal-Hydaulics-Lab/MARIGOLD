@@ -103,7 +103,24 @@ def iate_1d_1g(
     elif iate_method == 'yadav':
         pass
     elif iate_method == 'talley':
-        pass
+        if theta == 0:
+            # Horizontal
+            Dh = 0.0254
+            rho_f = 998
+            rho_g = 3.0     #???
+            # rho_g = 1.23  # Commented out
+            mu_f = 0.001
+            sigma = 0.07278
+
+            # Coefficients_Horz
+            C_WE = 0.002
+            C_RC = 0.003
+            C_TI = 0.014
+            We_cr = 5.0
+            C = 3
+            amax = 0.75
+
+            pass
     elif iate_method == 'worosz':
         pass
     
