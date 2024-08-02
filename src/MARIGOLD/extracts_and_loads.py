@@ -1009,6 +1009,7 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                 try:
                     ws = wb['2']
                     jgloc = ws['C2'].value
+                    jgatm = ws['C2'].value
                     old = False
                 except:
                     #print(f"Warning: Old format file {file}")
@@ -1023,6 +1024,8 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                     cond = newCond
                 else:
                     cond = all_conditions[ all_conditions.index(newCond) ]
+
+                cond.jgatm = jgatm
                 
                 i = 0
                 

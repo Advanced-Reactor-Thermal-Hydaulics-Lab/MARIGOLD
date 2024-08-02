@@ -120,6 +120,8 @@ def iate_1d_1g(
             C = 3
             amax = 0.75
 
+            cd_method = 'doe'
+
             pass
     elif iate_method == 'worosz':
         pass
@@ -429,7 +431,7 @@ def iate_1d_1g(
         # Estimate sources & sinks in the Interfacial Area Transport Eqn. (Part 2)
 
         # Source due to Bubble Expansion
-        if iate_method == 'kim' or iate_method == 'doe':
+        if iate_method == 'kim' or iate_method == 'doe' or iate_method == 'talley':
             SEXP[i] = -2 / 3 / pz[i] * ai[i] * vgz[i] * (-dpdz)     # Original DOE_MATLAB_IAC
         else:
             if i <= 2:      # Previously 3, but in MATLAB (1 indexing vs. 0 indexing)
@@ -561,7 +563,7 @@ def iate_1d_1g(
             # phi_f2 = 1 + LM_C * (rho_x**3 * mu_x * alpha_x**7)**(1/8) + (rho_x**3 * mu_x * alpha_x**7)**(1/4)        # LM, if you substitute expression for 1/X
 
             # chi_inv = (rho_x**3 * mu_x * alpha_x**7)**(1/8)     # 1/X**2 is to the 1/4 power
-            # chi_inv = np.array([((-LM_C + (LM_C**2 - 4 * (1 - phi_f2))**0.5) / 2) , ((-LM_C - (LM_C**2 - 4 * (1 - phi_f2))**0.5) / 2)])
+            # chi_inv = np.array([((-LM_C + (LM_C**2 - 4 * (1 - phi_f2))**0.5) / 2) , ((2-LM_C - (LM_C**2 - 4 * (1 - phi_f2))**0.5) / 2)])
 
             quad_A = 1
             quad_B = LM_C
