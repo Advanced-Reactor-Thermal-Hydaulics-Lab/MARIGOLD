@@ -523,7 +523,6 @@ def extractProbeData(dump_file = 'database.dat', in_dir = [], require_terms = No
                             #cond.phi[phi_val].update({0.0: zero_data}) # Cuz I'm paranoid
                             cond.data[phi].update({roverR: data}) 
 
-    
     if debug and False:
         for cond in all_conditions:
             cond.pretty_print()
@@ -531,6 +530,7 @@ def extractProbeData(dump_file = 'database.dat', in_dir = [], require_terms = No
     with open(dump_file, 'wb') as g:
         pickle.dump(all_conditions, g)
     return
+
 
 def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], require_terms = ['jf'], 
                             skip_terms = ['CFD', 'Copy'], sheet_type = 'adix_template', append_to_json = None,
@@ -583,7 +583,7 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
             #     if debug: print(f"Skipping {file}", file=debugFID)
             #     continue
             
-            #if debug: print(path, file=debugFID)
+            # if debug: print(path, file=debugFID)
             
             try:
                 if file.split('.')[-1] == 'xls':
@@ -602,7 +602,6 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
             except:
                 print(f'Warning: Non-standard excel file name {file}. Is this Bettis template?')
                 
-                # Temporary fix, for the Bettis data (DHK)
                 if sheet_type == 'bettis_template' and 'Run' in file.split('_')[0]:
                     print("Yes, it is. Proceeding...")
 
@@ -676,11 +675,15 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                         continue
                     
                 else:
-                    print(f'Nope. Warning: Non-standard excel file name {file}. Skipping...')
+                    print(f'Nope. Skipping...')
                     continue
-        
+            
+            ############################################################################################################################
+            #                                                                                                                          #
+            #                                                       BETTIS DATA                                                        #
+            #                                                                                                                          #
+            ############################################################################################################################
             if sheet_type == 'bettis_template':
-                # I give up. Hardcoding! Whoo!
 
                 '''
                 # Sourced from Kim_Research_BubbleDoc\Bettis\OneGroupEvaluation\AllConditions
@@ -843,17 +846,6 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                 LoverD                  = LoverD_mat[port_idx-1]
                 dpdz                    = dpdz_mat[run_idx-1]
                 
-                '''
-                ws = wb.sheet_by_name('<<Ub>>')
-                try:
-                    jgloc = ws.cell(17,13).value    # N18, N is column!
-                except:
-                    print(f"Warning: jgloc could not be found for {file}. Setting jgloc to jgref...")
-
-                    jgloc = jgref
-                    pass
-                '''
-
                 newCond = Condition(jgref, jgloc, jf, theta, port, sheet_type.split('_')[0])
 
                 if newCond not in all_conditions:
@@ -871,43 +863,182 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                 cond.LoverD = LoverD
                 cond.dpdz = dpdz
 
-                cond.jgatm = jgloc * pz / 101330
+                cond.jgatm = jgloc * pz / 101330        # It's important that P_atm is 101330 if you want to match with old results
+            
+            ############################################################################################################################
+            #                                                                                                                          #
+            #                                                       TALLEY DATA                                                        #
+            #                                                                                                                          #
+            ############################################################################################################################
+            elif sheet_type == 'talley_template':
+                #print(Q1_ranges, Q2_ranges)
+                phis = [90, 67.5, 45, 22.5, 0]
 
+                try:
+                    ws = wb['2']
+                    jgloc = ws['C2'].value
+                    jgatm = ws['C2'].value
+                    old = False
+                except:
+                    #print(f"Warning: Old format file {file}")
+                    ws = wb['Sheet1']
+                    jgloc = ws['C3'].value
+                    old = True
+                
+                newCond = Condition(jgref, jgloc, jf, theta, port, 'Talley')
+
+                if newCond not in all_conditions:
+                    all_conditions.append(newCond)
+                    cond = newCond
+                else:
+                    cond = all_conditions[ all_conditions.index(newCond) ]
+
+                cond.jgatm = jgatm
+
+                # Covariance hard-coding (WIP)
+                # 38.1 mm spreadsheets don't match up?
+                if jf == 4.00:
+                    if jgref == 0.09:
+                        pass    # Doesn't exist?
+                    elif jgref == 0.16:
+                        pass    # 0.15 exists
+
+                elif jf == 5.00:
+                    if jgref == 0.08:
+                        pass    # Doesn't exist
+                    elif jgref == 0.13:
+                        pass    # 0.15 exists
+                    elif jgref == 0.26:
+                        pass    # 0.25 exists
+
+                elif jf == 6.00:
+                    if jgref == 0.07:
+                        pass    # Doesn't exist?
+                    elif jgref == 0.11:
+                        pass    # 0.15 exists
+                    elif jgref == 0.22:
+                        pass    # 0.25 exists
+                    elif jgref == 0.43:
+                        pass    # Doesn't exist? Nearest is 0.50
+                
                 '''
-                <<Ub>>, can be offset by 1 row, depending on which you're looking at
-                A1: x/y (mm)
-                B2 to L2: y (0-10)
-                A3 to A15: x (0-100)
-                B3 to L15: data
-                M2-O2: headers (Ub*a)x, <Ub*a>, <<Ub>>
-                M3-N15: formulas (sum across y, divide by 10) (huh?)
-                O15: <<Ub>> value
+                CovTI = [
+                    0.267	0.187	0.187
+                    0.112	0.062	0.053
+                    1.000	1.000	1.000
+                    0.558	0.603	0.603
+                    0.188	0.335	0.168
+                    1.209	1.000	1.000
+                    0.902	1.000	1.000
+                    0.422	1.000	0.860
+                    0.272	0.395	0.228
+                ];
+            
+                CovRC = [
+                    0.843	0.625	0.459
+                    0.596	0.070	0.053
+                    3.496	2.693	2.759
+                    1.135	2.594	1.169
+                    0.328	0.460	0.144
+                    2.917	1.517	1.525
+                    3.290	1.547	1.553
+                    0.741	1.605	1.239
+                    0.249	0.339	0.143
+                ];
 
-                Ub
-                A1: x/y (mm)
-                B2 to L2: y (0-10)
-                A3 to A15: x (0-100)
-                B3 to L15: data
-                M2-O2: headers Ubx, Ubave
-                M3-N15: formulas (sum across y, divide by 10) (huh?)
-
-                Dsm
-                A1: x/y (mm)
-                B2 to L2: y (0-10)
-                A3 to A15: x (0-100)
-                B3 to L15: data
-                M2-O2: headers Dsmx, Dsm
-                M3-N15: formulas (sum across y endpoints halved, divide by 10) (huh?)
-
-                ai, a, x90y, x70y, x50y, x30y, x10y, x3y, AAIXYC, Figures
-
-                Other sheets that don't appear in all Excel docs:
-                fb
-                DriftFlux
-                aaixycnew
-                Rawdata
+                exp_jf = [
+                    3.98
+                    3.98
+                    4.98
+                    4.98
+                    4.98
+                    5.98
+                    5.98
+                    5.98
+                    5.98
+                    ];
+                
+                exp_jg = [
+                    0.0934	
+                    0.1558	
+                    0.0838	
+                    0.1329	
+                    0.2585	
+                    0.0672	
+                    0.1129	
+                    0.2238	
+                    0.4307	
+                    ];
                 '''
                 
+                i = 0
+                
+                phi_counter = 0
+                next = False
+                while phi_counter < 5:
+                    i += 1
+
+                    if ws[f'E{i}'].value == 'Spherical' or  ws[f'C{i}'].value == 'Spherical':
+                        if debug: print(f'found header in row {i}', file=debugFID)
+                        next = True
+                        continue
+
+                    if next:
+                        try:
+                            # Hopefully in the part of the sheet with data
+                            roverR = float(ws[f'A{i}'].value)
+                        except:
+                            # Done reading data
+                            phi_counter += 1
+                            next = False
+                            continue
+
+                        midas_output = []
+                        data = deepcopy(zero_data)
+
+                        if old and ws[f'F{i}'].value:
+                            # use old tab keys
+                            for cell in ws[f'A{i}':f'AA{i}'][0]:
+                                midas_output.append(cell.value)
+                            
+                            if len(old_tab_keys) == len( midas_output ):
+                                data = dict( zip( old_tab_keys, midas_output ))
+                            else:
+                                if debug: print("Warning, old tab_keys not the same length as midas_output")
+                                data = dict( zip( old_tab_keys, midas_output ))
+                                if debug:
+                                    print("old tab_keys not the same length as midas_output", file=debugFID)
+                                    print(tab_keys, midas_output, file=debugFID)
+                        elif ws[f'K{i}'].value:
+                            # use new tab keys
+                            roverR = float(ws[f'A{i}'].value)
+                            midas_output = []
+                            for cell in ws[f'A{i}':f'BD{i}'][0]:
+                                midas_output.append(cell.value)
+                            
+                            if len(tab_keys) == len( midas_output ):
+                                data = dict( zip( tab_keys, midas_output ))
+                            else:
+                                if debug: print("Warning, tab_keys not the same length as midas_output")
+                                data = dict( zip( tab_keys, midas_output ))
+                                if debug:
+                                    print("tab_keys not the same length as midas_output", file=debugFID)
+                                    print(tab_keys, midas_output, file=debugFID)
+
+                        phi = phis[phi_counter]
+                        try:
+                            cond.data[phi].update({roverR: data})
+                        except KeyError:
+                            cond.data.update( {phi:{}} )
+                            cond.data[phi].update({1.0: zero_data})
+                            #cond.phi[phi_val].update({0.0: zero_data}) # Cuz I'm paranoid
+                            cond.data[phi].update({roverR: data})
+
+            ############################################################################################################################
+            #                                                                                                                          #
+            #                                                       YADAV DATA                                                         #
+            #                                                                                                                          #
+            ############################################################################################################################
             elif sheet_type == 'yadav_template':
 
                 potent_ranges = [ [i for i in range(8, 22)], [i for i in range(48, 62)], [i for i in range(87, 101)], [i for i in range(128, 142)], [i for i in range(168, 182)], [i for i in range(209, 223)], [i for i in range(250, 264)], [i for i in range(290, 304)] ]
@@ -1002,96 +1133,11 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                                 #cond.phi[phi_val].update({0.0: zero_data}) # Cuz I'm paranoid
                                 cond.data[phi].update({roverR: data})
 
-            elif sheet_type == 'talley_template':
-                #print(Q1_ranges, Q2_ranges)
-                phis = [90, 67.5, 45, 22.5, 0]
-
-                try:
-                    ws = wb['2']
-                    jgloc = ws['C2'].value
-                    jgatm = ws['C2'].value
-                    old = False
-                except:
-                    #print(f"Warning: Old format file {file}")
-                    ws = wb['Sheet1']
-                    jgloc = ws['C3'].value
-                    old = True
-                
-                newCond = Condition(jgref, jgloc, jf, theta, port, 'Talley')
-
-                if newCond not in all_conditions:
-                    all_conditions.append(newCond)
-                    cond = newCond
-                else:
-                    cond = all_conditions[ all_conditions.index(newCond) ]
-
-                cond.jgatm = jgatm
-                
-                i = 0
-                
-                phi_counter = 0
-                next = False
-                while phi_counter < 5:
-                    i += 1
-
-                    if ws[f'E{i}'].value == 'Spherical' or  ws[f'C{i}'].value == 'Spherical':
-                        if debug: print(f'found header in row {i}', file=debugFID)
-                        next = True
-                        continue
-
-                    if next:
-                        try:
-                            # Hopefully in the part of the sheet with data
-                            roverR = float(ws[f'A{i}'].value)
-                        except:
-                            # Done reading data
-                            phi_counter += 1
-                            next = False
-                            continue
-
-                        midas_output = []
-                        data = deepcopy(zero_data)
-
-                        if old and ws[f'F{i}'].value:
-                            # use old tab keys
-                            for cell in ws[f'A{i}':f'AA{i}'][0]:
-                                midas_output.append(cell.value)
-                            
-                            if len(old_tab_keys) == len( midas_output ):
-                                data = dict( zip( old_tab_keys, midas_output ))
-                            else:
-                                if debug: print("Warning, old tab_keys not the same length as midas_output")
-                                data = dict( zip( old_tab_keys, midas_output ))
-                                if debug:
-                                    print("old tab_keys not the same length as midas_output", file=debugFID)
-                                    print(tab_keys, midas_output, file=debugFID)
-                        elif ws[f'K{i}'].value:
-                            # use new tab keys
-                            roverR = float(ws[f'A{i}'].value)
-                            midas_output = []
-                            for cell in ws[f'A{i}':f'BD{i}'][0]:
-                                midas_output.append(cell.value)
-                            
-                            if len(tab_keys) == len( midas_output ):
-                                data = dict( zip( tab_keys, midas_output ))
-                            else:
-                                if debug: print("Warning, tab_keys not the same length as midas_output")
-                                data = dict( zip( tab_keys, midas_output ))
-                                if debug:
-                                    print("tab_keys not the same length as midas_output", file=debugFID)
-                                    print(tab_keys, midas_output, file=debugFID)
-
-                        phi = phis[phi_counter]
-                        try:
-                            cond.data[phi].update({roverR: data})
-                        except KeyError:
-                            cond.data.update( {phi:{}} )
-                            cond.data[phi].update({1.0: zero_data})
-                            #cond.phi[phi_val].update({0.0: zero_data}) # Cuz I'm paranoid
-                            cond.data[phi].update({roverR: data})
-
-                #print('total rows read:', i)
-                        
+            ############################################################################################################################
+            #                                                                                                                          #
+            #                                                        PITA DATA                                                         #
+            #                                                                                                                          #
+            ############################################################################################################################
             # General PITA template structure holds
             else:
                 if sheet_type == 'infer':

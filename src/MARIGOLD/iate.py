@@ -41,7 +41,6 @@ def iate_1d_1g(
      - cond2:           Second condition object, for possible interpolation
 
     Notes:
-     - Isn't this script nice and clean? Follow good coding practices, kids. - David
      - Notice some grav terms are made absolute; needs downward flow fixes
      - IATE coefficients set as optional inputs, with default values set depending on geometry
      - COV terms being implemented in Condition.py, not incorporated into this function yet
@@ -90,6 +89,7 @@ def iate_1d_1g(
     R_spec          = 287.058                                   # Specific gas constant for dry air [J/kg-K]
     T               = 293.15                                    # Ambient absolute temperature [K], for calculating air density as a function of pressure along channel
 
+    C0 = None
     if iate_method == 'kim':
         rho_f = 998
         rho_g = 1.226
@@ -109,18 +109,9 @@ def iate_1d_1g(
             # Horizontal
             Dh = 0.0254
             rho_f = 998
-            rho_g = 3.0     #???
-            # rho_g = 1.23  # Commented out
+            rho_g = 1.23
             mu_f = 0.001
             sigma = 0.07278
-
-            # Coefficients_Horz
-            C_WE = 0.002
-            C_RC = 0.003
-            C_TI = 0.014
-            We_cr = 5.0
-            C = 3
-            amax = 0.75
 
             cd_method = 'doe'
 
@@ -164,8 +155,39 @@ def iate_1d_1g(
         if C_TI == None:
             C_TI    = 0.014
         
-        COV_RC      = 1
-        COV_TI      = 1
+        We_cr = 5
+        
+        # COV_RC      = 1
+        # COV_TI      = 1
+
+        # Row is run, column is port?
+        # I think this should be implemented in extracts and loads, as a cheat option
+        # In here, maybe have an interpolation framework for the COV between ports?
+        '''
+        CovTI = [
+            0.267	0.187	0.187
+            0.112	0.062	0.053
+            1.000	1.000	1.000
+            0.558	0.603	0.603
+            0.188	0.335	0.168
+            1.209	1.000	1.000
+            0.902	1.000	1.000
+            0.422	1.000	0.860
+            0.272	0.395	0.228
+        ];
+    
+        CovRC = [
+            0.843	0.625	0.459
+            0.596	0.070	0.053
+            3.496	2.693	2.759
+            1.135	2.594	1.169
+            0.328	0.460	0.144
+            2.917	1.517	1.525
+            3.290	1.547	1.553
+            0.741	1.605	1.239
+            0.249	0.339	0.143
+        ];
+        '''
 
     elif restriction == 'elbow':                # Elbow (Yadav, 2013)
         if C_WE == None:
