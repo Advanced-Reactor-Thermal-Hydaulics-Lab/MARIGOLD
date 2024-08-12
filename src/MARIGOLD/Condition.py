@@ -2003,6 +2003,7 @@ class Condition:
             raise NotImplementedError(f'{method} is not a valid option for calc_dpdz. Try "LM" ')
         
         self.dpdz = dpdz
+        self.tau_w = dpdz * self.Dh / 4
 
         return dpdz
 
@@ -2209,7 +2210,7 @@ class Condition:
 
         return self.area_avg('cd')
 
-    def calc_vr_model(self, method='km1_simp', kw = -0.98, n=1, Lw = 5, kf = 0.089, iterate_cd = True, quiet = True, recalc_cd = True, custom_f = None):
+    def calc_vr_model(self, method='km1_simp', kw = -0.98, n=1, Lw = 5, kf = 0.089, iterate_cd = True, quiet = True, recalc_cd = True, custom_f = None, CC = 1):
         """Method for calculating relative velocity based on models
         
         Inputs:
@@ -2330,6 +2331,17 @@ the newly calculated :math:`v_{r}` or not
                     elif method.lower() == 'ishii-chawla' or method.lower() == 'ishii' or method.lower() == 'ishii chawla':
                         vr = np.sqrt(2) * (self.sigma * self.g * (self.rho_f - self.rho_g) / (self.rho_f**2))**0.25
                     
+                    elif method.lower() == 'chahed':
+                        self.calc_dpdz()
+                        self.calc_grad('alpha')
+                        self.calc_grad('vf')
+                        if abs(midas_dict['alpha']) < 1e-6 or abs(midas_dict['cd']) < 1e-6:
+                            discrim = 0
+                        else:
+                            # print(self.Dh, self.rho_f, midas_dict['cd'], midas_dict['alpha'])
+                            discrim = 4/3 * midas_dict['Dsm1'] / midas_dict['cd'] * ( 4/self.Dh * self.tau_w  / self.rho_f + self.gz*(1-midas_dict['alpha']) - CC/midas_dict['alpha'] * midas_dict['grad_alpha_r'] * midas_dict['grad_vf_r'])
+
+                        vr = float(np.sign(discrim) * np.sqrt(discrim))
                     else:
                         print(f"{method} not implemented")
                         return -1
@@ -2595,9 +2607,9 @@ the newly calculated :math:`v_{r}` or not
 
         return
 
-    def plot_profiles(self, param, save_dir = '.', show=True, x_axis='r', 
+    def plot_profiles(self, param, save_dir = '.', show=True, x_axis='vals', 
                       const_to_plot = [90, 67.5, 45, 22.5, 0], include_complement = True, 
-                      rotate=False, fig_size=4, title=True, label_str = '', legend_loc = 'best', xlabel_loc = 'center',
+                      rotate=False, fig_size=(4,4), title=True, label_str = '', legend_loc = 'best', xlabel_loc = 'center',
                       set_min = None, set_max = None, show_spines = True, force_RH_y_axis = False, xlabel_loc_coords = None) -> None:
         """ Plot profiles of param over x_axis, for const_to_plot, i.e. α over r/R for φ = [90, 67.5 ... 0]. 
         
@@ -2620,13 +2632,13 @@ the newly calculated :math:`v_{r}` or not
             import matplotlib as mpl
             from matplotlib.transforms import Affine2D
             import mpl_toolkits.axisartist.floating_axes as floating_axes
-            fig = plt.figure(figsize=(fig_size, fig_size))
+            fig = plt.figure(figsize=fig_size)
             if x_axis == 'r':
                 plot_extents = self.min(param), self.max(param)*1.1, -1, 1
-                transform = Affine2D().scale(fig_size / (self.max(param)*1.1 - self.min(param)), fig_size / (1 - -1)).rotate_deg(self.theta)
+                transform = Affine2D().scale(fig_size[0] / (self.max(param)*1.1 - self.min(param)), fig_size[1] / (1 - -1)).rotate_deg(self.theta)
             else:
                 plot_extents = self.min(param), self.max(param)*1.1, 0, 360
-                transform = Affine2D().scale(fig_size / (self.max(param)*1.1 - self.min(param)), fig_size / (360-0)).rotate_deg(self.theta)
+                transform = Affine2D().scale(fig_size[0] / (self.max(param)*1.1 - self.min(param)), fig_size[1] / (360-0)).rotate_deg(self.theta)
             
             
             helper = floating_axes.GridHelperCurveLinear(transform, plot_extents)
@@ -2634,7 +2646,7 @@ the newly calculated :math:`v_{r}` or not
             ax = fake_ax.get_aux_axes(transform)
 
         else:
-            fig, ax = plt.subplots(figsize=(fig_size, fig_size), dpi=300, layout='compressed')
+            fig, ax = plt.subplots(figsize=fig_size, dpi=300, layout='compressed')
             fake_ax = ax
 
         # Only show ticks on the left and bottom spines
@@ -2653,7 +2665,7 @@ the newly calculated :math:`v_{r}` or not
         if set_max == None:
             set_max = self.max(param) *1.1
 
-        if x_axis == 'r':
+        if x_axis == 'vals' or x_axis == 'r':
             for angle in const_to_plot:
                 r_dict = self.data[angle]
                 rs = []
@@ -2687,10 +2699,17 @@ the newly calculated :math:`v_{r}` or not
 
                 vals = [var for _, var in sorted(zip(rs, vals))]
                 rs = sorted(rs)
-                    
-                ax.plot(vals, rs, label=f'{angle}°', color=next(cs), marker=next(ms), linestyle = '--')
-            ax.set_ylim(-1, 1)
-            ax.set_xlim(set_min, set_max)
+                if x_axis == 'vals':
+                    ax.plot(vals, rs, label=f'{angle}°', color=next(cs), marker=next(ms), linestyle = '--')
+                if x_axis == 'r':
+                    ax.plot(rs, vals, label=f'{angle}°', color=next(cs), marker=next(ms), linestyle = '--')
+            
+            if x_axis == 'vals':
+                ax.set_ylim(-1, 1)
+                ax.set_xlim(set_min, set_max)
+            elif x_axis == 'r':
+                ax.set_xlim(-1, 1)
+                ax.set_ylim(set_min, set_max)
             
         
         elif x_axis == 'phi':
@@ -2739,11 +2758,16 @@ the newly calculated :math:`v_{r}` or not
             else:
                 label_str = param
         
-        if x_axis == 'r':
+        if x_axis == 'vals':
             fake_ax.set_xlabel(label_str, loc = xlabel_loc)
             fake_ax.set_ylabel(r'$r/R$ [-]')
             fake_ax.set_yticks(np.arange(-1, 1.01, 0.2))
             #fake_ax.set_xticks(np.linspace(self.min(param), self.max(param), 7))
+
+        elif x_axis == 'r':
+            fake_ax.set_ylabel(label_str, loc = xlabel_loc)
+            fake_ax.set_xlabel(r'$r/R$ [-]')
+            fake_ax.set_xticks(np.arange(-1, 1.01, 0.2))
 
         elif x_axis == 'phi':
             if not rotate:

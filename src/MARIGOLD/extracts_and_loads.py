@@ -534,7 +534,7 @@ def extractProbeData(dump_file = 'database.dat', in_dir = [], require_terms = No
 
 def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], require_terms = ['jf'], 
                             skip_terms = ['CFD', 'Copy'], sheet_type = 'adix_template', append_to_json = None,
-                            pitot_sheet = False,
+                            pitot_sheet = False, print_sheets = False,
                             **kwargs) -> None:
     
     """Function for getting all local data from spreadsheets in a directory, path
@@ -570,7 +570,7 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
     for file in os.listdir(path):
     
         # print(file)
-        if debug: print(file, file=debugFID)
+        if print_sheets: print(file)
 
         if file.split('.')[-1] == 'xlsx' or file.split('.')[-1] == 'xlsm' or file.split('.')[-1] == 'xls':
 
