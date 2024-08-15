@@ -1,6 +1,7 @@
 from .config import *
 from scipy import interpolate
 import warnings
+import re
 
 class Condition:
     """ Class to handle the local probe data
@@ -2610,7 +2611,7 @@ the newly calculated :math:`v_{r}` or not
     def plot_profiles(self, param, save_dir = '.', show=True, x_axis='vals', 
                       const_to_plot = [90, 67.5, 45, 22.5, 0], include_complement = True, 
                       rotate=False, fig_size=(4,4), title=True, label_str = '', legend_loc = 'best', xlabel_loc = 'center',
-                      set_min = None, set_max = None, show_spines = True, force_RH_y_axis = False, xlabel_loc_coords = None) -> None:
+                      set_min = None, set_max = None, show_spines = True, force_RH_y_axis = False, xlabel_loc_coords = None, cs=None) -> None:
         """ Plot profiles of param over x_axis, for const_to_plot, i.e. α over r/R for φ = [90, 67.5 ... 0]. 
         
         Include_complement will continue with the negative side if x_axis = 'r' 
@@ -2657,7 +2658,12 @@ the newly calculated :math:`v_{r}` or not
         ax.tick_params(direction='in',which='both')
 
         ms = marker_cycle()
-        cs = color_cycle()
+        if cs is None:
+            cs = color_cycle()
+        elif cs == 'infer':
+            cs = color_cycle(set_color = param)
+        else:
+            print("I hope cs is a generator that returns valid colors")
 
         if set_min == None:
             set_min = self.min(param)
@@ -3874,23 +3880,47 @@ the newly calculated :math:`v_{r}` or not
         return self.FR
 
 
-def color_cycle():
+def color_cycle(set_color = None):
     """Custom generator for colors
-    """
+    set_color can be 
+     * None, for a basic cycle of blue, red, green, etc.
+     * A single hexcolor code ('#000000' for black, etc)
+     * 'alpha', 'ai', 'ug1', 'Dsm1' or 'vr', which have default built in colors
+     * Otherwise, it assumes set_color is a list of colors to yield
 
-    var_list = ['#0000FF',
-                '#FF0000',
-                '#00FF00',
-                '#00FFFF',
-                '#7F00FF',
-                '#7FFF7F',
-                '#007F7F',
-                '#7F007F',
-                '#7F7F7F',
-                '#000000']
+    """
+    if set_color == None:
+        color_list = ['#0000FF',
+                      '#FF0000',
+                      '#00FF00',
+                      '#00FFFF',
+                      '#7F00FF',
+                      '#7FFF7F',
+                      '#007F7F',
+                      '#7F007F',
+                      '#7F7F7F',
+                      '#000000']
+    elif re.search(r'^#(?:[0-9a-fA-F]{3}){1,2}$', set_color):
+        color_list = [set_color]
+    elif set_color == 'alpha':
+        color_list = ['#000000']
+    elif set_color == 'ai':
+        color_list = ['#7F00FF']
+    elif set_color == 'ug1':
+        color_list = ['#FF0000']
+    elif set_color == 'Dsm1':
+        color_list = ['#00FFFF']
+    elif set_color == 'vf':
+        color_list = ['#0000FF']
+    elif set_color == 'vr':
+        color_list = ['#800080']
+    else:
+        color_list = set_color
+        
+
     i = 0
     while True:
-        yield var_list[ i % len(var_list)]
+        yield color_list[ i % len(color_list)]
         i += 1
 
 def marker_cycle():
