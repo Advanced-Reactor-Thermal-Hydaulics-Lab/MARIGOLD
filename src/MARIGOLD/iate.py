@@ -5,13 +5,16 @@ def iate_1d_1g(
         cond, query, z_step = 0.01, io = None,
         
         # IATE Coefficients
-        C_WE = None, C_RC = None, C_TI = None, alpha_max = 0.75, C = 3, We_cr = 6, acrit_flag = 0, acrit = 0.13, C_inf = 1.20,
+        C_WE = None, C_RC = None, C_TI = None, alpha_max = 0.75, C = 3, We_cr = 6, acrit_flag = 0, acrit = 0.13,
 
         # Method arguments
-        iate_method = None, dpdz_method = 'LM', cd_method = 'doe', void_method = 'driftflux',
+        preset = None, cd_method = 'doe',
 
-        # Pressure drop calculation arguments
-        LM_C = 40, k_m = 0.10, m = 0.316, n = 0.25, akapower = 0.875,
+        # Pressure drop calculation
+        dpdz_method = 'LM', LM_C = 40, k_m = 0.10, m = 0.316, n = 0.25,
+
+        # Void fraction calculation
+        void_method = 'driftflux', C_inf = 1.20,
 
         # Temporary arguments
         restriction = None, cond2 = None, cheat = False, debug = False
@@ -90,7 +93,7 @@ def iate_1d_1g(
     T               = 293.15                                    # Ambient absolute temperature [K], for calculating air density as a function of pressure along channel
 
     C0 = None
-    if iate_method == 'kim':
+    if preset == 'kim':
         rho_f = 998
         rho_g = 1.226
         mu_f = 0.001
@@ -102,9 +105,9 @@ def iate_1d_1g(
         cheat = True
 
         C0 = 1.12
-    elif iate_method == 'yadav':
+    elif preset == 'yadav':
         pass
-    elif iate_method == 'talley':
+    elif preset == 'talley':
         if theta == 0:
             # Horizontal
             Dh = 0.0254
@@ -116,7 +119,7 @@ def iate_1d_1g(
             cd_method = 'doe'
 
             pass
-    elif iate_method == 'worosz':
+    elif preset == 'worosz':
         pass
     
     if io == None:
@@ -157,8 +160,8 @@ def iate_1d_1g(
         
         We_cr = 5
         
-        # COV_RC      = 1
-        # COV_TI      = 1
+        COV_RC      = 1
+        COV_TI      = 1
 
         # Row is run, column is port?
         # I think this should be implemented in extracts and loads, as a cheat option
@@ -318,7 +321,7 @@ def iate_1d_1g(
     pz = p * (1 - (z_mesh - z_mesh[0]) * (dpdz / p))
     
 	# Local gas density along the test section
-    if iate_method == 'worosz':
+    if preset == 'worosz':
         rho_gz = pz / R_spec / T                                # Worosz, Ideal Gas Law
     else:
         rho_gz = rho_g * pz / p                                 # Talley
@@ -367,7 +370,7 @@ def iate_1d_1g(
                 ReD = rho_f * ur * Db[i] * (1 - alpha[i]) / mu_f
                 CDwe = 24 * (1 + 0.1 * ReD**0.75) / ReD
 
-                if iate_method == 'kim':
+                if preset == 'kim':
                     ur = (grav * Db[i] / 3 / CDwe)**0.5
                 else:
                     ur = (4 * grav * Db[i] / 3 / CDwe)**0.5
@@ -386,7 +389,7 @@ def iate_1d_1g(
         vm = (rho_f * (1 - alpha[i]) * vfz + rho_gz[i] * alpha[i] * vgz[i]) \
             / rho_m                                             # Mixture velocity
         
-        if iate_method == 'kim':
+        if preset == 'kim':
             Rem = rho_f * vm * Dh / mu_m                        # Mixture Reynolds number
         else:
             Rem = rho_m * vm * Dh / mu_m                        # Yadav
@@ -455,7 +458,7 @@ def iate_1d_1g(
         # Estimate sources & sinks in the Interfacial Area Transport Eqn. (Part 2)
 
         # Source due to Bubble Expansion
-        if iate_method == 'kim' or iate_method == 'doe' or iate_method == 'talley':
+        if preset == 'kim' or preset == 'doe' or preset == 'talley':
             SEXP[i] = -2 / 3 / pz[i] * ai[i] * vgz[i] * (-dpdz)     # Original DOE_MATLAB_IAC
         else:
             if i <= 2:      # Previously 3, but in MATLAB (1 indexing vs. 0 indexing)
@@ -498,8 +501,8 @@ def iate_1d_1g(
             with open("H:\TRSL-H\IATE\AI.txt", mode = 'a+') as FID:
                 print(f"\n\n{i+1}.\tjf = {jf} [m/s], jg = {cond.jgref} [m/s]\n\tL/D: {z/Dh}\n\tTI: {aiti[i]}\n\tRC: {airc[i]}\n\tEXP: {aiexp[i]}\n\tWE: {aiwe[i]}",file=FID)
 
+        ########################################################################################################################
         # Estimate Void Fraction for the next step calculation
-
         if void_method == 'driftflux':      # Drift Flux Model
 
             j = jgloc + jf
@@ -529,38 +532,17 @@ def iate_1d_1g(
 
             else:
                 alpha[i+1] = alpha[i] - (alpha[i] / (rho_gz[i] * vgz[i])) * ((rho_gz[i] * vgz[i]) - (rho_gz[i-1] * vgz[i-1]))
-
-        elif void_method == 'pressure_akagawa':     # Akagawa (1957), Kong (2018)
-            f_f, f_g = cond.calc_fric(m = m, n = n)
-            dpdz_f = f_f * 1/Dh * rho_f * jf**2 / 2
-
-            alpha[i+1] = 1 - (-dpdz / dpdz_f)**(-1/(2*akapower))
-
+                
         elif void_method == 'pressure_kim':
             f_f, f_g = cond.calc_fric(m = m, n = n)
             dpdz_f = f_f * 1/Dh * rho_f * jf**2 / 2
 
             phi_f2 = (dpdz - ((rho_f * grav * delta_h) / (z_mesh[-1] - z_mesh[0]))) / dpdz_f
 
-            # dpdz = (1 - (pz[i] / p)) * (p / z_mesh[i])
-            # dpdz = phi_f2 * dpdz_f
-            
             rho_x = rho_gz[i] / rho_f
             mu_x = mu_g / mu_f
             L_x = query - LoverD             # Restriction length scale, = L/D_restriction
             Re_f = rho_f * jf * Dh / mu_f
-
-            # alpha_x = alpha[i] / (1 - alpha[i])
-            # phi_f2 = 1 + LM_C * (rho_x**3 * mu_x * alpha_x**7)**(1/8) * (1 + (3.165 * k_m / L_x) * Re_f**0.25)**(1/2) + (rho_x**3 * mu_x * alpha_x**7)**(1/4) + (3.165 * k_m / L_x) * Re_f**0.25
-
-            '''
-            dpdz_f = f_f * 1/self.Dh * self.rho_f * self.jf**2 / 2
-            dpdz_g = f_g * 1/self.Dh * self.rho_g * self.jgloc**2 / 2
-            dpdz_m = k_m * self.rho_f * self.jf**2 / 2 / L
-
-            chi2 = dpdz_f / dpdz_g
-            chiM2 = dpdz_f / dpdz_m
-            '''
 
             chiM_inv = (3.165 * k_m / L_x * Re_f**0.25)**0.5
 
@@ -581,11 +563,6 @@ def iate_1d_1g(
 
             rho_x = rho_gz[i] / rho_f
             mu_x = mu_g / mu_f
-
-            # phi_f2 = 1 + LM_C * (rho_x**3 * mu_x * alpha_x**7)**(1/8) + (rho_x**3 * mu_x * alpha_x**7)**(1/4)        # LM, if you substitute expression for 1/X
-
-            # chi_inv = (rho_x**3 * mu_x * alpha_x**7)**(1/8)     # 1/X**2 is to the 1/4 power
-            # chi_inv = np.array([((-LM_C + (LM_C**2 - 4 * (1 - phi_f2))**0.5) / 2) , ((2-LM_C - (LM_C**2 - 4 * (1 - phi_f2))**0.5) / 2)])
 
             quad_A = 1
             quad_B = LM_C
