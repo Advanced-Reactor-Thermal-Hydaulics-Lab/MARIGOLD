@@ -2623,7 +2623,7 @@ the newly calculated :math:`v_{r}` or not
         if method.lower() == 'talley':
             self.roverRend = -1.472e-5 * self.Ref + 2.571
 
-            def reconstruct_profile(alpha_max):
+            def find_alpha_max(alpha_max):
                 for angle, r_dict in self.data.items():
                     for rstar, midas_dict in r_dict.items():
 
@@ -2645,11 +2645,11 @@ the newly calculated :math:`v_{r}` or not
 
                 return abs( self.area_avg('alpha') - self.area_avg('alpha_reconstructed') )
             
-            result = minimize(reconstruct_profile, x0 = 0.5)
+            result = minimize(find_alpha_max, x0 = 0.5)
 
             if result.success:
                 self.alpha_max_reconstructed = result.x
-                reconstruct_profile(self.alpha_max_reconstructed)
+                find_alpha_max(self.alpha_max_reconstructed)
             else:
                 warnings.warn("Minimization did not return a successful result")
                 print(f"⟨α⟩_data: {self.area_avg('alpha')}\n⟨α⟩_reconstructed: {self.area_avg('alpha_reconstructed')}")
@@ -2658,7 +2658,7 @@ the newly calculated :math:`v_{r}` or not
         elif method.lower() == 'not_talley' or method.lower() == 'double_linear':
             self.roverRend = -1.472e-5 * self.Ref + 2.571
 
-            def reconstruct_profile(alpha_max):
+            def find_alpha_max(alpha_max):
                 for angle, r_dict in self.data.items():
                     for rstar, midas_dict in r_dict.items():
 
@@ -2679,11 +2679,11 @@ the newly calculated :math:`v_{r}` or not
 
                 return abs( self.area_avg('alpha') - self.area_avg('alpha_reconstructed') )
             
-            result = minimize(reconstruct_profile, x0 = 0.5)
+            result = minimize(find_alpha_max, x0 = 0.5)
 
             if result.success:
                 self.alpha_max_reconstructed = result.x
-                reconstruct_profile(self.alpha_max_reconstructed)
+                find_alpha_max(self.alpha_max_reconstructed)
             else:
                 warnings.warn("Minimization did not return a successful result")
                 print(f"⟨α⟩_data: {self.area_avg('alpha')}\n⟨α⟩_reconstructed: {self.area_avg('alpha_reconstructed')}")
@@ -2692,9 +2692,39 @@ the newly calculated :math:`v_{r}` or not
             # TODO
             pass
         elif method.lower() == 'adix':
-            # TODO
-            # Both implementing but also coming up with a better method
-            pass
+            
+            def complicated_alpha(params):
+                s, n, sigma = params
+                for angle, r_dict in self.data.items():
+                    for rstar, midas_dict in r_dict.items():
+
+                        x = rstar * np.cos(angle * np.pi / 180)
+                        y = rstar * np.sin(angle * np.pi / 180)
+                        h = 1 - y
+                        
+                        if (np.sqrt(1-y**2) - abs(x)) < 0:
+                            if debug: print((np.sqrt(1-y**2) - abs(x)), x, y)
+                        alpha = float(s * abs(np.sqrt(1-y**2) - abs(x))**(n) * np.sqrt(h) /sigma**2 * np.exp(-h**2 / (2*sigma**2)) )
+                        midas_dict['alpha_reconstructed'] = alpha
+
+                self.calc_errors('alpha', 'alpha_reconstructed')
+
+                return (abs( self.area_avg('alpha') - self.area_avg('alpha_reconstructed') )/self.area_avg('alpha') + abs(self.max('alpha') - self.max('alpha_reconstructed')) / self.max('alpha')) * 100
+                return self.area_avg('eps_abs_rel_alpha_alpha_reconstructed')
+
+                
+            # result = minimize(complicated_alpha, x0 = [0.2, 2, 0.3], method='Nelder-Mead', bounds=( (0.01, 1), (1, 100), (0.01, 10) ), options = {'maxiter': 100000, 'disp': True}, tol = 1e-9)
+            result = minimize(complicated_alpha, x0 = [0.2, 1/7, 0.3], method='powell', options = {'maxiter': 100000, 'disp': True})
+
+            if result.success:
+                self.reconstruct_s = result.x[0]
+                self.reconstruct_n = result.x[1]
+                self.reconstruct_sigma = result.x[2]
+                complicated_alpha(result.x)
+            else:
+                warnings.warn("Minimization did not return a successful result")
+                complicated_alpha(result.x)
+                print(f"⟨α⟩_data: {self.area_avg('alpha')}\n⟨α⟩_reconstructed: {self.area_avg('alpha_reconstructed')}\n{result.x}")
 
 
         return self.area_avg("alpha_reconstructed")
