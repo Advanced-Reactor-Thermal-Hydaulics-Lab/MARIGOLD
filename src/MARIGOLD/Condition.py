@@ -1,5 +1,6 @@
 from .config import *
 from scipy import interpolate
+from scipy.optimize import minimize
 import warnings
 import re
 
@@ -128,13 +129,16 @@ class Condition:
         self.mins = {}
         self._grads_calced = []
 
-        if fluids == 'air-water':
+        if fluids == 'air-water' or fluids == 'water-air':
             self.rho_f = 998       # kg/m^3
             self.rho_g = 1.204     # kg/m^3
             self.mu_f = 0.001002   # Pa s
             self.mu_g = 0.01803e-3 # Pa s
 
             self.sigma = 0.0728    # N/m
+
+            self.Ref = self.rho_f * self.jf * self.Dh / self.mu_f
+            self.Reg = self.rho_g * self.jgloc * self.Dh / self.mu_g
         
         else:
             raise NotImplementedError(f"{fluids} not available, try 'air-water'")
@@ -1222,12 +1226,7 @@ class Condition:
             return h_star
         
         elif method == 'Ryan_Ref':
-            try:
-                dummy = self.Ref
-            except:
-                print(f'Condition {self.name} has no Ref value, calculating assuming water')
-                self.Ref = 998 * self.jf * self.Dh / 0.001
-            
+                        
             self.roverRend = 1.3 - 1.57e-5 * self.Ref
             h_star = 1 - self.roverRend
             return h_star
@@ -1309,7 +1308,7 @@ class Condition:
                 if rstar >= 0: # This should be unnecessary now with the new mirror, but it's not hurting anyone by being here
                     try:
                         rs_temp.append( rstar ) # This is proably equivalent to rs = list(r_dict.keys() ), but I'm paranoid about ordering
-                        vars_temp.append( midas_dict[param] * rstar)
+                        vars_temp.append( float( midas_dict[param] * rstar)) # Floatify to avoid np inhomogeneous array issues
                     except:
                         if debug: print('Problem with:', angle, r_dict, param)
                     #if debug: print(angle, midas_dict, file=debugFID)
@@ -2607,6 +2606,98 @@ the newly calculated :math:`v_{r}` or not
     
 
         return
+    
+    def reconstruct_void(self, method='talley'):
+        """ Reconstruct the void profile based on various methods
+
+        Saves:
+         * 'alpha_reconstructed' in midas_dict
+         * self.roverRend
+        
+        Methods:
+         * talley
+         * double_linear (not_talley). Something I accidently invented while trying to implement Talley's method
+        
+        """
+
+        if method.lower() == 'talley':
+            self.roverRend = -1.472e-5 * self.Ref + 2.571
+
+            def reconstruct_profile(alpha_max):
+                for angle, r_dict in self.data.items():
+                    for rstar, midas_dict in r_dict.items():
+
+                        x = rstar * np.cos(angle * np.pi / 180)
+                        y = rstar * np.sin(angle * np.pi / 180)
+
+                        # First calculate centerline void fraction (first linear interpolation)
+                        if y > 0.9:
+                            alpha_CL = alpha_max / 0.1 * (1 - y)
+                        else:
+                            alpha_CL = max(alpha_max / (0.9 - self.roverRend) * (y - self.roverRend), 0) # make sure it's not < 0. This covers for y < roverRend
+                        alpha_CL = float(alpha_CL)
+                        # Then calculate
+                        if rstar >= 0.9:
+                            xtrans = 0.9 * np.cos(angle * np.pi / 180)
+                            midas_dict['alpha_reconstructed'] = alpha_CL / (1 - xtrans) * (1-x)
+                        else:
+                            midas_dict['alpha_reconstructed'] = alpha_CL
+
+                return abs( self.area_avg('alpha') - self.area_avg('alpha_reconstructed') )
+            
+            result = minimize(reconstruct_profile, x0 = 0.5)
+
+            if result.success:
+                self.alpha_max_reconstructed = result.x
+                reconstruct_profile(self.alpha_max_reconstructed)
+            else:
+                warnings.warn("Minimization did not return a successful result")
+                print(f"⟨α⟩_data: {self.area_avg('alpha')}\n⟨α⟩_reconstructed: {self.area_avg('alpha_reconstructed')}")
+
+
+        elif method.lower() == 'not_talley' or method.lower() == 'double_linear':
+            self.roverRend = -1.472e-5 * self.Ref + 2.571
+
+            def reconstruct_profile(alpha_max):
+                for angle, r_dict in self.data.items():
+                    for rstar, midas_dict in r_dict.items():
+
+                        x = rstar * np.cos(angle * np.pi / 180)
+                        y = rstar * np.sin(angle * np.pi / 180)
+
+                        # First calculate centerline void fraction (first linear interpolation)
+                        if y > 0.9:
+                            alpha_CL = alpha_max / 0.1 * (1 - y)
+                        else:
+                            alpha_CL = max(alpha_max / (0.9 - self.roverRend) * (y - self.roverRend), 0) # make sure it's not < 0. This covers for y < roverRend
+
+                        # 
+                        if np.sqrt(1 - y**2) == 0:
+                            midas_dict['alpha_reconstructed'] = 0
+                        else:
+                            midas_dict['alpha_reconstructed'] = float(alpha_CL / np.sqrt(1 - y**2) * (np.sqrt(1 - y**2) - np.abs(x) ))
+
+                return abs( self.area_avg('alpha') - self.area_avg('alpha_reconstructed') )
+            
+            result = minimize(reconstruct_profile, x0 = 0.5)
+
+            if result.success:
+                self.alpha_max_reconstructed = result.x
+                reconstruct_profile(self.alpha_max_reconstructed)
+            else:
+                warnings.warn("Minimization did not return a successful result")
+                print(f"⟨α⟩_data: {self.area_avg('alpha')}\n⟨α⟩_reconstructed: {self.area_avg('alpha_reconstructed')}")
+            
+        elif method.lower() == 'ryan':
+            # TODO
+            pass
+        elif method.lower() == 'adix':
+            # TODO
+            # Both implementing but also coming up with a better method
+            pass
+
+
+        return self.area_avg("alpha_reconstructed")
 
     def plot_profiles(self, param, save_dir = '.', show=True, x_axis='vals', 
                       const_to_plot = [90, 67.5, 45, 22.5, 0], include_complement = True, 
