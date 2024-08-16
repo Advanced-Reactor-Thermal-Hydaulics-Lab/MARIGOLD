@@ -2549,11 +2549,11 @@ the newly calculated :math:`v_{r}` or not
          - Stored in self.COV_RC
         
         """
-     ############################################################################################################################
-    #                                                                                                                          #
-    #                                                       CONSTANTS                                                          #
-    #                                                                                                                          #
-    ############################################################################################################################
+        ############################################################################################################################
+        #                                                                                                                          #
+        #                                                       CONSTANTS                                                          #
+        #                                                                                                                          #
+        ############################################################################################################################
   
         rho_f        = self.rho_f                                         # Liquid phase density [kg/m**3]
         rho_g        = self.rho_g                                     # Gas phase density [kg/m**3]
@@ -2564,7 +2564,7 @@ the newly calculated :math:`v_{r}` or not
 
         alpha_avg    = self.area_avg('alpha')
         ai_avg       = self.area_avg('ai')
-        Dsm1_avg     = self.void_area_avg ('Dsm1')   # try void weighted
+        Dsm1_avg     = self.void_area_avg ('Dsm1')   # Try void weighted
         mu_m_avg     = self.void_area_avg ('mu_m') 
 
         rho_m        = (1 - alpha_avg) * rho_f + alpha_avg * rho_g     # Mixture density

@@ -874,103 +874,72 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                 #print(Q1_ranges, Q2_ranges)
                 phis = [90, 67.5, 45, 22.5, 0]
 
-                try:
-                    ws = wb['2']
-                    jgloc = ws['C2'].value
-                    jgatm = ws['C2'].value
-                    old = False
-                except:
-                    #print(f"Warning: Old format file {file}")
-                    ws = wb['Sheet1']
-                    jgloc = ws['C3'].value
-                    old = True
+                ws = wb['Sheet1']
+                jgatm = ws['C3'].value
+                old = True
+
+                jgloc = jgref
                 
-                newCond = Condition(jgref, jgloc, jf, theta, port, 'Talley')
+                newCond = Condition(jgatm, jgloc, jf, theta, port, 'Talley')
 
                 if newCond not in all_conditions:
                     all_conditions.append(newCond)
                     cond = newCond
                 else:
                     cond = all_conditions[ all_conditions.index(newCond) ]
-
-                cond.jgatm = jgatm
-
-                # Covariance hard-coding (WIP)
-                # 38.1 mm spreadsheets don't match up?
-                if jf == 4.00:
-                    if jgref == 0.09:
-                        pass    # Doesn't exist?
-                    elif jgref == 0.16:
-                        pass    # 0.15 exists
-
-                elif jf == 5.00:
-                    if jgref == 0.08:
-                        pass    # Doesn't exist
-                    elif jgref == 0.13:
-                        pass    # 0.15 exists
-                    elif jgref == 0.26:
-                        pass    # 0.25 exists
-
-                elif jf == 6.00:
-                    if jgref == 0.07:
-                        pass    # Doesn't exist?
-                    elif jgref == 0.11:
-                        pass    # 0.15 exists
-                    elif jgref == 0.22:
-                        pass    # 0.25 exists
-                    elif jgref == 0.43:
-                        pass    # Doesn't exist? Nearest is 0.50
                 
-                '''
+                cond.jgatm = jgatm
+                cond.jgloc = jgloc
+                
+                # Covariance hard-coding (WIP)
+                if jf == 3.98:
+                    if jgatm == 0.15:
+                        run_idx = 1
+                    elif jgatm == 0.25:
+                        run_idx = 2
+
+                elif jf == 4.98:
+                    if jgatm == 0.15:
+                        run_idx = 3
+                    elif jgatm == 0.25:
+                        run_idx = 4
+                    elif jgatm == 0.50:
+                        run_idx = 5
+
+                elif jf == 5.98:
+                    if jgatm == 0.15:
+                        run_idx = 6
+                    elif jgatm == 0.25:
+                        run_idx = 7
+                    elif jgatm == 0.50:
+                        run_idx = 8
+                    elif jgatm == 1.00:
+                        run_idx = 9
+                
                 CovTI = [
-                    0.267	0.187	0.187
-                    0.112	0.062	0.053
-                    1.000	1.000	1.000
-                    0.558	0.603	0.603
-                    0.188	0.335	0.168
-                    1.209	1.000	1.000
-                    0.902	1.000	1.000
-                    0.422	1.000	0.860
-                    0.272	0.395	0.228
-                ];
+                    [0.267, 0.187, 0.187],
+                    [0.112, 0.062, 0.053],
+                    [1.000, 1.000, 1.000],
+                    [0.558, 0.603, 0.603],
+                    [0.188, 0.335, 0.168],
+                    [1.209, 1.000, 1.000],
+                    [0.902, 1.000, 1.000],
+                    [0.422, 1.000, 0.860],
+                    [0.272, 0.395, 0.228],
+                ]
             
                 CovRC = [
-                    0.843	0.625	0.459
-                    0.596	0.070	0.053
-                    3.496	2.693	2.759
-                    1.135	2.594	1.169
-                    0.328	0.460	0.144
-                    2.917	1.517	1.525
-                    3.290	1.547	1.553
-                    0.741	1.605	1.239
-                    0.249	0.339	0.143
-                ];
+                    [0.843, 0.625, 0.459],
+                    [0.596, 0.070, 0.053],
+                    [3.496, 2.693, 2.759],
+                    [1.135, 2.594, 1.169],
+                    [0.328, 0.460, 0.144],
+                    [2.917, 1.517, 1.525],
+                    [3.290, 1.547, 1.553],
+                    [0.741, 1.605, 1.239],
+                    [0.249, 0.339, 0.143],
+                ]
 
-                exp_jf = [
-                    3.98
-                    3.98
-                    4.98
-                    4.98
-                    4.98
-                    5.98
-                    5.98
-                    5.98
-                    5.98
-                    ];
-                
-                exp_jg = [
-                    0.0934	
-                    0.1558	
-                    0.0838	
-                    0.1329	
-                    0.2585	
-                    0.0672	
-                    0.1129	
-                    0.2238	
-                    0.4307	
-                    ];
-                '''
-                
                 i = 0
                 
                 phi_counter = 0
