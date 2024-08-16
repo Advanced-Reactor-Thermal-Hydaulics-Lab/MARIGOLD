@@ -1,6 +1,8 @@
 from .config import *
 from scipy import interpolate
+from scipy.optimize import minimize
 import warnings
+import re
 
 class Condition:
     """ Class to handle the local probe data
@@ -127,13 +129,16 @@ class Condition:
         self.mins = {}
         self._grads_calced = []
 
-        if fluids == 'air-water':
+        if fluids == 'air-water' or fluids == 'water-air':
             self.rho_f = 998       # kg/m^3
             self.rho_g = 1.204     # kg/m^3
             self.mu_f = 0.001002   # Pa s
             self.mu_g = 0.01803e-3 # Pa s
 
             self.sigma = 0.0728    # N/m
+
+            self.Ref = self.rho_f * self.jf * self.Dh / self.mu_f
+            self.Reg = self.rho_g * self.jgloc * self.Dh / self.mu_g
         
         else:
             raise NotImplementedError(f"{fluids} not available, try 'air-water'")
@@ -1221,12 +1226,7 @@ class Condition:
             return h_star
         
         elif method == 'Ryan_Ref':
-            try:
-                dummy = self.Ref
-            except:
-                print(f'Condition {self.name} has no Ref value, calculating assuming water')
-                self.Ref = 998 * self.jf * self.Dh / 0.001
-            
+                        
             self.roverRend = 1.3 - 1.57e-5 * self.Ref
             h_star = 1 - self.roverRend
             return h_star
@@ -1308,7 +1308,7 @@ class Condition:
                 if rstar >= 0: # This should be unnecessary now with the new mirror, but it's not hurting anyone by being here
                     try:
                         rs_temp.append( rstar ) # This is proably equivalent to rs = list(r_dict.keys() ), but I'm paranoid about ordering
-                        vars_temp.append( midas_dict[param] * rstar)
+                        vars_temp.append( float( midas_dict[param] * rstar)) # Floatify to avoid np inhomogeneous array issues
                     except:
                         if debug: print('Problem with:', angle, r_dict, param)
                     #if debug: print(angle, midas_dict, file=debugFID)
@@ -2606,11 +2606,103 @@ the newly calculated :math:`v_{r}` or not
     
 
         return
+    
+    def reconstruct_void(self, method='talley'):
+        """ Reconstruct the void profile based on various methods
+
+        Saves:
+         * 'alpha_reconstructed' in midas_dict
+         * self.roverRend
+        
+        Methods:
+         * talley
+         * double_linear (not_talley). Something I accidently invented while trying to implement Talley's method
+        
+        """
+
+        if method.lower() == 'talley':
+            self.roverRend = -1.472e-5 * self.Ref + 2.571
+
+            def reconstruct_profile(alpha_max):
+                for angle, r_dict in self.data.items():
+                    for rstar, midas_dict in r_dict.items():
+
+                        x = rstar * np.cos(angle * np.pi / 180)
+                        y = rstar * np.sin(angle * np.pi / 180)
+
+                        # First calculate centerline void fraction (first linear interpolation)
+                        if y > 0.9:
+                            alpha_CL = alpha_max / 0.1 * (1 - y)
+                        else:
+                            alpha_CL = max(alpha_max / (0.9 - self.roverRend) * (y - self.roverRend), 0) # make sure it's not < 0. This covers for y < roverRend
+                        alpha_CL = float(alpha_CL)
+                        # Then calculate
+                        if rstar >= 0.9:
+                            xtrans = 0.9 * np.cos(angle * np.pi / 180)
+                            midas_dict['alpha_reconstructed'] = alpha_CL / (1 - xtrans) * (1-x)
+                        else:
+                            midas_dict['alpha_reconstructed'] = alpha_CL
+
+                return abs( self.area_avg('alpha') - self.area_avg('alpha_reconstructed') )
+            
+            result = minimize(reconstruct_profile, x0 = 0.5)
+
+            if result.success:
+                self.alpha_max_reconstructed = result.x
+                reconstruct_profile(self.alpha_max_reconstructed)
+            else:
+                warnings.warn("Minimization did not return a successful result")
+                print(f"⟨α⟩_data: {self.area_avg('alpha')}\n⟨α⟩_reconstructed: {self.area_avg('alpha_reconstructed')}")
+
+
+        elif method.lower() == 'not_talley' or method.lower() == 'double_linear':
+            self.roverRend = -1.472e-5 * self.Ref + 2.571
+
+            def reconstruct_profile(alpha_max):
+                for angle, r_dict in self.data.items():
+                    for rstar, midas_dict in r_dict.items():
+
+                        x = rstar * np.cos(angle * np.pi / 180)
+                        y = rstar * np.sin(angle * np.pi / 180)
+
+                        # First calculate centerline void fraction (first linear interpolation)
+                        if y > 0.9:
+                            alpha_CL = alpha_max / 0.1 * (1 - y)
+                        else:
+                            alpha_CL = max(alpha_max / (0.9 - self.roverRend) * (y - self.roverRend), 0) # make sure it's not < 0. This covers for y < roverRend
+
+                        # 
+                        if np.sqrt(1 - y**2) == 0:
+                            midas_dict['alpha_reconstructed'] = 0
+                        else:
+                            midas_dict['alpha_reconstructed'] = float(alpha_CL / np.sqrt(1 - y**2) * (np.sqrt(1 - y**2) - np.abs(x) ))
+
+                return abs( self.area_avg('alpha') - self.area_avg('alpha_reconstructed') )
+            
+            result = minimize(reconstruct_profile, x0 = 0.5)
+
+            if result.success:
+                self.alpha_max_reconstructed = result.x
+                reconstruct_profile(self.alpha_max_reconstructed)
+            else:
+                warnings.warn("Minimization did not return a successful result")
+                print(f"⟨α⟩_data: {self.area_avg('alpha')}\n⟨α⟩_reconstructed: {self.area_avg('alpha_reconstructed')}")
+            
+        elif method.lower() == 'ryan':
+            # TODO
+            pass
+        elif method.lower() == 'adix':
+            # TODO
+            # Both implementing but also coming up with a better method
+            pass
+
+
+        return self.area_avg("alpha_reconstructed")
 
     def plot_profiles(self, param, save_dir = '.', show=True, x_axis='vals', 
                       const_to_plot = [90, 67.5, 45, 22.5, 0], include_complement = True, 
                       rotate=False, fig_size=(4,4), title=True, label_str = '', legend_loc = 'best', xlabel_loc = 'center',
-                      set_min = None, set_max = None, show_spines = True, force_RH_y_axis = False, xlabel_loc_coords = None) -> None:
+                      set_min = None, set_max = None, show_spines = True, force_RH_y_axis = False, xlabel_loc_coords = None, cs=None) -> None:
         """ Plot profiles of param over x_axis, for const_to_plot, i.e. α over r/R for φ = [90, 67.5 ... 0]. 
         
         Include_complement will continue with the negative side if x_axis = 'r' 
@@ -2657,7 +2749,12 @@ the newly calculated :math:`v_{r}` or not
         ax.tick_params(direction='in',which='both')
 
         ms = marker_cycle()
-        cs = color_cycle()
+        if cs is None:
+            cs = color_cycle()
+        elif cs == 'infer':
+            cs = color_cycle(set_color = param)
+        else:
+            print("I hope cs is a generator that returns valid colors")
 
         if set_min == None:
             set_min = self.min(param)
@@ -3874,23 +3971,47 @@ the newly calculated :math:`v_{r}` or not
         return self.FR
 
 
-def color_cycle():
+def color_cycle(set_color = None):
     """Custom generator for colors
-    """
+    set_color can be 
+     * None, for a basic cycle of blue, red, green, etc.
+     * A single hexcolor code ('#000000' for black, etc)
+     * 'alpha', 'ai', 'ug1', 'Dsm1' or 'vr', which have default built in colors
+     * Otherwise, it assumes set_color is a list of colors to yield
 
-    var_list = ['#0000FF',
-                '#FF0000',
-                '#00FF00',
-                '#00FFFF',
-                '#7F00FF',
-                '#7FFF7F',
-                '#007F7F',
-                '#7F007F',
-                '#7F7F7F',
-                '#000000']
+    """
+    if set_color == None:
+        color_list = ['#0000FF',
+                      '#FF0000',
+                      '#00FF00',
+                      '#00FFFF',
+                      '#7F00FF',
+                      '#7FFF7F',
+                      '#007F7F',
+                      '#7F007F',
+                      '#7F7F7F',
+                      '#000000']
+    elif re.search(r'^#(?:[0-9a-fA-F]{3}){1,2}$', set_color):
+        color_list = [set_color]
+    elif set_color == 'alpha':
+        color_list = ['#000000']
+    elif set_color == 'ai':
+        color_list = ['#7F00FF']
+    elif set_color == 'ug1':
+        color_list = ['#FF0000']
+    elif set_color == 'Dsm1':
+        color_list = ['#00FFFF']
+    elif set_color == 'vf':
+        color_list = ['#0000FF']
+    elif set_color == 'vr':
+        color_list = ['#800080']
+    else:
+        color_list = set_color
+        
+
     i = 0
     while True:
-        yield var_list[ i % len(var_list)]
+        yield color_list[ i % len(color_list)]
         i += 1
 
 def marker_cycle():
