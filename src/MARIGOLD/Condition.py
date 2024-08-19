@@ -2618,7 +2618,7 @@ the newly calculated :math:`v_{r}` or not
                 else:
                     u_t = 0                                                 # TI and RC are driven by the turbulent fluctuation velocity (u_t)
 
-                COV_loc = u_t * (midas_dict['ai'])**2 / alpha_max**(1/3) * (alpha_max**(1/3) - (midas_dict['alpha'])**(1/3))
+                COV_loc = u_t * (midas_dict['ai'])**2 / (alpha_max**(1/3) * (alpha_max**(1/3) - (midas_dict['alpha'])**(1/3)))
                 
                 midas_dict.update({'u_t': u_t})
                 midas_dict.update({'COV_loc': COV_loc})
