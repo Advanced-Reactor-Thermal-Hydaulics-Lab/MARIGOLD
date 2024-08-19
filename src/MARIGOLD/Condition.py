@@ -2829,6 +2829,21 @@ the newly calculated :math:`v_{r}` or not
                       fig_size=(4,4), title=True, label_str = '', legend_loc = 'best', xlabel_loc = 'center',
                       set_min = None, set_max = None, show_spines = True, xlabel_loc_coords = None, cs=None) -> None:
         """ Simplified plot_profiles with no rotation option
+
+        Inputs:
+         * param, any parameter in midas_dict, e.g. 'alpha', 'ai', etc.
+        
+        Options:
+         * save_dir, directory in which to save the .png file. Will not save the file unless show = False
+         * show, display the figure (in an iPython notebook or have it pop up)
+         * x_axis, the variable to put on the x-axis. Usually for vertical flow this is 'rs', for horizontal 'vals'. Also can be 'phis'
+         * const_to_plot, a list of angles (if x-axis is 'vals' or 'rs') or rs (if x-axis is 'phis')
+         * include_complement, includes the complementary angle of the const_to_plot (i.e. 270 with 90)
+         * fig_size, a tuple of the figure size, in inches
+         * title, puts a title above the figure
+         * label_str, a string that will replace the default title
+         * legend_loc, passed to ax.legend
+         
         
         """
 
