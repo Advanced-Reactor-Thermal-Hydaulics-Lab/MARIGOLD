@@ -1011,6 +1011,23 @@ class Condition:
 
         return
     
+    def sum(self, param: str) -> float:
+        """ Adds all values of param
+        
+        Inputs:
+         - param, string of local parameter to sum
+
+        Returns:
+         - sum of the value of parameter at every point
+                          
+        """
+        total = 0
+        for angle, r_dict in self.data.items():
+            for rstar, midas_dict in r_dict.items():
+                total += midas_dict[param]
+
+        return total
+    
     def max(self, param: str, recalc=False) -> float:
         """ Return maximum value of param in the Condition
         
@@ -1053,7 +1070,7 @@ class Condition:
 
         return (location)
     
-    def min(self, param: str, recalc = False, nonzero=False)-> float:
+    def min(self, param: str, recalc = True, nonzero=False)-> float:
         """ Return minimum value of param in the Condition
         
         Inputs:
@@ -1072,7 +1089,7 @@ class Condition:
         for angle, r_dict in self.data.items():
             for rstar, midas_dict in r_dict.items():
                 
-                if nonzero and midas_dict[param] == 0:
+                if nonzero and midas_dict[param] < 1e-7:
                     continue
                 
                 if midas_dict[param] < min:
@@ -2696,7 +2713,7 @@ the newly calculated :math:`v_{r}` or not
         if method.lower() == 'talley':
             self.roverRend = -1.472e-5 * self.Ref + 2.571
 
-            def reconstruct_profile(alpha_max):
+            def find_alpha_max(alpha_max):
                 for angle, r_dict in self.data.items():
                     for rstar, midas_dict in r_dict.items():
 
@@ -2718,11 +2735,11 @@ the newly calculated :math:`v_{r}` or not
 
                 return abs( self.area_avg('alpha') - self.area_avg('alpha_reconstructed') )
             
-            result = minimize(reconstruct_profile, x0 = 0.5)
+            result = minimize(find_alpha_max, x0 = 0.5)
 
             if result.success:
                 self.alpha_max_reconstructed = result.x
-                reconstruct_profile(self.alpha_max_reconstructed)
+                find_alpha_max(self.alpha_max_reconstructed)
             else:
                 warnings.warn("Minimization did not return a successful result")
                 print(f"⟨α⟩_data: {self.area_avg('alpha')}\n⟨α⟩_reconstructed: {self.area_avg('alpha_reconstructed')}")
@@ -2731,7 +2748,7 @@ the newly calculated :math:`v_{r}` or not
         elif method.lower() == 'not_talley' or method.lower() == 'double_linear':
             self.roverRend = -1.472e-5 * self.Ref + 2.571
 
-            def reconstruct_profile(alpha_max):
+            def find_alpha_max(alpha_max):
                 for angle, r_dict in self.data.items():
                     for rstar, midas_dict in r_dict.items():
 
@@ -2752,11 +2769,11 @@ the newly calculated :math:`v_{r}` or not
 
                 return abs( self.area_avg('alpha') - self.area_avg('alpha_reconstructed') )
             
-            result = minimize(reconstruct_profile, x0 = 0.5)
+            result = minimize(find_alpha_max, x0 = 0.5)
 
             if result.success:
                 self.alpha_max_reconstructed = result.x
-                reconstruct_profile(self.alpha_max_reconstructed)
+                find_alpha_max(self.alpha_max_reconstructed)
             else:
                 warnings.warn("Minimization did not return a successful result")
                 print(f"⟨α⟩_data: {self.area_avg('alpha')}\n⟨α⟩_reconstructed: {self.area_avg('alpha_reconstructed')}")
@@ -2765,12 +2782,237 @@ the newly calculated :math:`v_{r}` or not
             # TODO
             pass
         elif method.lower() == 'adix':
-            # TODO
-            # Both implementing but also coming up with a better method
-            pass
+            
+            def complicated_alpha(params):
+                s, n, sigma = params
+                for angle, r_dict in self.data.items():
+                    for rstar, midas_dict in r_dict.items():
+
+                        x = rstar * np.cos(angle * np.pi / 180)
+                        y = rstar * np.sin(angle * np.pi / 180)
+                        h = 1 - y
+                        
+                        if (np.sqrt(1-y**2) - abs(x)) < 0:
+                            if debug: print((np.sqrt(1-y**2) - abs(x)), x, y)
+                        # alpha = float(s * abs(np.sqrt(1-y**2) - abs(x))**(n) * np.sqrt(h) /sigma**2 * np.exp(-h**2 / (2*sigma**2)) )
+                        alpha = float(abs(np.sqrt(1-y**2) - abs(x))**(n) *  s * 1 / sigma * (h/sigma)**(0.5) * np.exp(-(h/sigma)**0.5))
+                        if alpha < 1e-3:
+                            alpha = 0
+                        elif alpha > 1:
+                            alpha = 1
+                        midas_dict['alpha_reconstructed'] = alpha
+
+                self.calc_errors('alpha', 'alpha_reconstructed')
+
+                # return (abs( self.area_avg('alpha') - self.area_avg('alpha_reconstructed') )/self.area_avg('alpha') + abs(self.max('alpha') - self.max('alpha_reconstructed')) / self.max('alpha')) * 100
+                return self.sum('eps_sq_alpha_alpha_reconstructed')
+
+                
+            # result = minimize(complicated_alpha, x0 = [0.2, 2, 0.3], method='Nelder-Mead', bounds=( (0.01, 1), (1, 100), (0.01, 10) ), options = {'maxiter': 100000, 'disp': True}, tol = 1e-9)
+            result = minimize(complicated_alpha, x0 = [0.041, 0.1417, 0.0155], method='Nelder-Mead', bounds=( (0.0001, 1), (0.001, 10), (0.0001, 0.1) ), options = {'maxiter': 100000})
+
+            if result.success:
+                self.reconstruct_s = result.x[0]
+                self.reconstruct_n = result.x[1]
+                self.reconstruct_sigma = result.x[2]
+                complicated_alpha(result.x)
+            else:
+                warnings.warn("Minimization did not return a successful result")
+                complicated_alpha(result.x)
+                print(f"⟨α⟩_data: {self.area_avg('alpha')}\n⟨α⟩_reconstructed: {self.area_avg('alpha_reconstructed')}\n{result.x}")
 
 
         return self.area_avg("alpha_reconstructed")
+    
+    def plot_profiles2(self, param, save_dir = '.', show=True, x_axis='vals', 
+                      const_to_plot = [90, 67.5, 45, 22.5, 0], include_complement = True, 
+                      fig_size=(4,4), title=True, label_str = '', legend_loc = 'best', xlabel_loc = 'center',
+                      set_min = None, set_max = None, show_spines = True, xlabel_loc_coords = None, cs=None) -> None:
+        """ Simplified plot_profiles with no rotation option
+        
+        """
+
+
+        plt.rcParams.update({'font.size': 12})
+        plt.rcParams["font.family"] = "Times New Roman"
+        plt.rcParams["mathtext.fontset"] = "cm"
+
+        fig, ax = plt.subplots(figsize=fig_size, dpi=300, layout='compressed')
+
+        # Only show ticks on the left and bottom spines
+        ax.yaxis.set_ticks_position('left')
+        ax.xaxis.set_ticks_position('bottom')
+
+        # Tick marks facing in
+        ax.tick_params(direction='in',which='both')
+
+        ms = marker_cycle()
+        if cs is None:
+            cs = color_cycle()
+        elif cs == 'infer':
+            cs = color_cycle(set_color = param)
+        else:
+            print("I hope cs is a generator that returns valid colors")
+
+        if set_min == None:
+            set_min = self.min(param)
+        
+        if set_max == None:
+            set_max = self.max(param) *1.1
+
+        if x_axis == 'vals' or x_axis == 'r':
+            for angle in const_to_plot:
+                r_dict = self.data[angle]
+                rs = []
+                vals = []
+                for r, midas_output in r_dict.items():
+                    rs.append(r)
+                    try:
+                        vals.append(midas_output[param])
+                    except:
+                        if abs(r - 1) < 0.0001:
+                            vals.append(0.0)
+                        else:
+                            vals.append(0.0)
+                            print(f"Could not find {param} for φ = {angle}, r = {r}. Substituting 0")
+
+                if include_complement:
+                    if angle > 180:
+                        print("Error: Cannot find complement to angle > 180. Skipping")
+                    else:
+                        r_dict = self.data[angle+180]
+                        for r, midas_output in r_dict.items():
+                            rs.append(-r)
+                            try:
+                                vals.append(midas_output[param])
+                            except:
+                                if abs(r - 1) < 0.0001:
+                                    vals.append(0.0)
+                                else:
+                                    vals.append(0.0)
+                                    print(f"Could not find {param} for φ = {angle}, r = {r}. Substituting 0")
+
+                vals = [var for _, var in sorted(zip(rs, vals))]
+                rs = sorted(rs)
+                if x_axis == 'vals':
+                    ax.plot(vals, rs, label=f'{angle}°', color=next(cs), marker=next(ms), linestyle = '--')
+                elif x_axis == 'r':
+                    ax.plot(rs, vals, label=f'{angle}°', color=next(cs), marker=next(ms), linestyle = '--')
+            
+            if x_axis == 'vals':
+                ax.set_ylim(-1, 1)
+                ax.set_xlim(set_min, set_max)
+            elif x_axis == 'r':
+                ax.set_xlim(-1, 1)
+                ax.set_ylim(set_min, set_max)
+            
+        
+        elif x_axis == 'phi':
+            ax.plot([], [], label=r'$r/R$', color='white', linestyle = None)
+            for rtarget in const_to_plot:
+                phis = []
+                vals = []
+                for angle, r_dict in self.data.items():
+                    for rstar, midas_output in r_dict.items():
+                        if abs(rstar - rtarget) < 0.001:
+                            phis.append(angle)
+                            try:
+                                vals.append(midas_output[param])
+                            except:
+                                if abs(rstar - 1) < 0.0001:
+                                    vals.append(0.0)
+                                else:
+                                    vals.append(0.0)
+                                    print(f"Could not find {param} for φ = {angle}, r = {rstar}. Substituting 0")
+
+                vals = [var for _, var in sorted(zip(phis, vals))]
+                phis = sorted(phis)
+                
+                ax.plot(phis, vals, label=f'{rtarget:0.1f}', color=next(cs), marker=next(ms), linestyle = '--')
+            
+            ax.set_xlim(0, 360)
+            ax.set_ylim(set_min, set_max)
+                
+        else:
+            print(f"invalid axis for plot_profiles: {x_axis}. Current supported options are 'rs', 'vals' and 'phi'")
+            return
+        
+        if label_str == '':
+            if param == 'alpha':
+                label_str = r'$\alpha\ [-]$'
+            elif param == 'ai':
+                label_str = r'$a_{i}\ [1/m]$'
+            elif param == 'ug1':
+                label_str = r'$v_{g}\ [m/s]$'
+            elif param == 'ug1':
+                label_str = r'$D_{sm1}\ [mm]$'
+            else:
+                label_str = param
+        
+        if x_axis == 'vals':
+            ax.set_xlabel(label_str, loc = xlabel_loc)
+            ax.set_ylabel(r'$r/R$ [-]')
+            ax.set_yticks(np.arange(-1, 1.01, 0.2))
+            
+            ax.spines['bottom'].set_position(('data', 0))
+            
+            if set_min == 0 or set_max == 0:
+                ax.spines['left'].set_position(('data', set_min))
+                ax.spines['right'].set_position(('data', 0))
+                ax.yaxis.tick_right()
+                ax.yaxis.set_label_position("right")
+
+            if not show_spines:
+                ax.spines['top'].set_visible(False)
+                ax.spines['right'].set_visible(False)
+            else:
+                ax2 = ax.twiny()
+                ax2.get_xaxis().set_visible(False)
+
+
+        elif x_axis == 'r':
+            ax.set_ylabel(label_str, loc = xlabel_loc)
+            ax.set_xlabel(r'$r/R$ [-]')
+            ax.set_xticks(np.arange(-1, 1.01, 0.2))
+
+            ax.spines['bottom'].set_position(('data', max(0, set_min)))
+            
+            ax.spines['left'].set_position(('data', 0))
+            
+            if not show_spines:
+                ax.spines['top'].set_visible(False)
+                ax.spines['right'].set_visible(False)
+            else:
+                ax2 = ax.twiny()
+                ax2.get_xaxis().set_visible(False)
+            
+            
+        elif x_axis == 'phi':
+            
+            ax.set_ylabel(label_str, loc = xlabel_loc)
+            ax.set_xlabel(r'$\varphi$ [-]')
+
+            ax.set_xticks([0, 90, 180, 270, 360])
+               
+        if title:
+            ax.set_title(self.name)
+        
+
+        ax.legend(loc=legend_loc, edgecolor='white')
+
+        if xlabel_loc_coords:
+            ax.xaxis.set_label_coords(*xlabel_loc_coords)
+
+        
+        ax.set_aspect('auto', adjustable='datalim', share=True)
+        #fake_ax.set_box_aspect(1)
+        
+        if show:
+            plt.show()
+        else:
+            plt.savefig(os.path.join(save_dir, f'{param}_profile_vs_{x_axis}_{self.name}.png'))
+            plt.close()
+        return
 
     def plot_profiles(self, param, save_dir = '.', show=True, x_axis='vals', 
                       const_to_plot = [90, 67.5, 45, 22.5, 0], include_complement = True, 
@@ -2790,6 +3032,8 @@ the newly calculated :math:`v_{r}` or not
         plt.rcParams["mathtext.fontset"] = "cm"
 
         log_x = False # This breaks, so I removed it from the arguments to the function
+
+        
 
         if rotate:
 
@@ -2880,6 +3124,8 @@ the newly calculated :math:`v_{r}` or not
             elif x_axis == 'r':
                 ax.set_xlim(-1, 1)
                 ax.set_ylim(set_min, set_max)
+                fake_ax.set_xlim(-1, 1)
+                fake_ax.set_ylim(set_min, set_max)
             
         
         elif x_axis == 'phi':
@@ -4069,7 +4315,7 @@ def color_cycle(set_color = None):
     elif set_color == 'alpha':
         color_list = ['#000000']
     elif set_color == 'ai':
-        color_list = ['#7F00FF']
+        color_list = ['#00FF00']
     elif set_color == 'ug1':
         color_list = ['#FF0000']
     elif set_color == 'Dsm1':
@@ -4077,7 +4323,7 @@ def color_cycle(set_color = None):
     elif set_color == 'vf':
         color_list = ['#0000FF']
     elif set_color == 'vr':
-        color_list = ['#800080']
+        color_list = ['#FF00FF']
     else:
         color_list = set_color
         
