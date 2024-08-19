@@ -2544,68 +2544,141 @@ the newly calculated :math:`v_{r}` or not
         return self.area_avg('lambda')
     
 
-    def calc_COV_RC(self, alpha_max = 0.75, alpha_cr = 1.00):
-        """Calculates the experimental Random Collision Covariance based on Talley (2012) method (with modification factor m_RC eliminated), Quan, 05/15
+    def calc_COV_RC(self, alpha_max = 0.75, alpha_cr = 1.00, reconstruct_flag = False):
+        """Calculates the experimental Random Collision Covariance based on Talley (2012) method (without modification factor m_RC)
          - Stored in self.COV_RC
+
+         Inputs:
+         - alpha_max, maximum void fraction based on hexagonal-closed-packed (HCP) bubble distribution
+         - alpha_cr, critical alpha to activate Random Collision, Talley (2012), Kong (2018) 
+        
+         Authors:
+         - Quan (05/15/2024)
+         - Kang (08/19/2024)
+        """
+
+        # Notes DHK 16 AUG
+        '''
+        Add a "use data" flag to toggle between using void reconstruct and local data to calculate covariance
+        Reconstructed profile should be saved in midas_dict
+
+        Verify mu_m_avg
+        '''
+
+        rho_f           = self.rho_f                                        # Liquid phase density [kg/m**3]
+        rho_g           = self.rho_g                                        # Gas phase density [kg/m**3]
+        Dh              = self.Dh                                           # Hydraulic diameter
+        mu_f            = self.mu_f                                         # Dynamic viscosity of water [Pa-s]
+
+        alpha_avg       = self.area_avg('alpha')
+        ai_avg          = self.area_avg('ai')
+        Dsm1_avg        = self.void_area_avg ('Dsm1')                       # Try void-weighted?
+        mu_m_avg        = self.void_area_avg ('mu_m')
+
+        rho_m           = (1 - alpha_avg) * rho_f + alpha_avg * rho_g       # Mixture density
+        v_m             = (rho_f * self.jf + rho_g * self.jgloc) / rho_m    # Mixture velocity
+        Rem             = rho_m * v_m * Dh / mu_m_avg                       # Mixture Reynolds number, ***CAREFUL*** I have seen some versions of the IATE script that use rho_f instead as an approximation
+        #f_TP           = 0.316 * (1 / (1 - alpha_avg) / Rem)**0.25         # Two-phase friction factor, Kong (2018)
+        f_TP            = 0.316 * (mu_m_avg / mu_f / Rem)**0.25             # Two-phase friction factor, Talley (2012) and Worosz (2015), also used in iate_1d_1g
+        eps             =  f_TP * v_m**3 / 2 / Dh                           # Energy dissipation rate (Wu et al., 1998; Kim, 1999), also used in iate_1d_1g
+        
+        if reconstruct_flag == True:
+            pass
+
+        else:
+            alpha_profile = midas_dict['alpha']
+            # Hmmm, this doesn't work with the looping structure below?
+
+        for angle, r_dict in self.data.items():
+            for rstar, midas_dict in r_dict.items():
+                
+                if midas_dict['alpha'] <= alpha_cr:                         # Check if local void fraction is less than or equal to alpha_cr
+                    # Turbulent velocity (Batchelor, 1951; Rotta, 1972), also used in iate_1d_1g
+                    u_t = 1.4 * eps**(1/3) * (midas_dict['Dsm1'] / 1000)**(1/3)
+
+                    # print(angle, rstar, Dh, v_m, Rem, f_TP, eps, midas_dict['Dsm1'])
+
+                else:
+                    u_t = 0                                                 # TI and RC are driven by the turbulent fluctuation velocity (u_t)
+
+                COV_loc = u_t * (midas_dict['ai'])**2 / alpha_max**(1/3) * (alpha_max**(1/3) - (midas_dict['alpha'])**(1/3))
+                
+                midas_dict.update({'u_t': u_t})
+                midas_dict.update({'COV_loc': COV_loc})
+                
+        u_t_avg = self.area_avg('u_t')
+
+        if u_t_avg > 0:
+            COV_avg = u_t_avg * ai_avg**2 / alpha_max**(1/3) * (alpha_max**(1/3) - alpha_avg**(1/3))
+            COV_RC = self.area_avg('COV_loc') / COV_avg
+
+        else:
+            COV_avg = 0
+            COV_RC = 0
+
+        self.COV_RC = COV_RC
+
+        return COV_RC
+
+
+    def calc_COV_TI(self, alpha_max = 0.75, alpha_cr = 1.00, reconstruct_flag = False):
+        """Calculates the experimental Turbulent Impact Covariance based on Talley (2012) method (with modification factor m_RC eliminated), Quan, 05/15
+         - Stored in self.COV_RC
+
+         Inputs:
+         - alpha_max, maximum void fraction based on hexagonal-closed-packed (HCP) bubble distribution
+         - alpha_cr, critical alpha to activate Random Collision, Talley (2012), Kong (2018) 
         
         """
-        ############################################################################################################################
-        #                                                                                                                          #
-        #                                                       CONSTANTS                                                          #
-        #                                                                                                                          #
-        ############################################################################################################################
-  
-        rho_f        = self.rho_f                                         # Liquid phase density [kg/m**3]
-        rho_g        = self.rho_g                                     # Gas phase density [kg/m**3]
-        # alpha_max = 0.75, Maximum void fraction based on hexagonal-closed-packed (HCP) bubble distribution
-        # alpha_cr = 0.11, Critical alpha to activate Random Collision, Talley (2012), Kong (2018) 
-        Dh           = self.Dh                                         # Hydraulic diameter
-        mu_f         = self.mu_f
 
-        alpha_avg    = self.area_avg('alpha')
-        ai_avg       = self.area_avg('ai')
-        Dsm1_avg     = self.void_area_avg ('Dsm1')   # Try void weighted
-        mu_m_avg     = self.void_area_avg ('mu_m') 
+        rho_f           = self.rho_f                                        # Liquid phase density [kg/m**3]
+        rho_g           = self.rho_g                                        # Gas phase density [kg/m**3]
+        Dh              = self.Dh                                           # Hydraulic diameter
+        mu_f            = self.mu_f                                         # Dynamic viscosity of water [Pa-s]
 
-        rho_m        = (1 - alpha_avg) * rho_f + alpha_avg * rho_g     # Mixture density
-        v_m          =(rho_f*self.jf+rho_g*self.jgloc)/rho_m           # Mixture velocity                     
-        Rem          = rho_m * v_m * Dh / mu_m_avg                     # Ran Kong
-        #f_TP         = 0.316*(1/(1-alpha_avg)/Rem)**0.25                # Two-phase frictional factor, Kong (2018)
-        f_TP         = 0.316*(mu_m_avg/mu_f/Rem)**0.25                # Two-phase frictional factor, Talley (2012) and Ted (2015)
-        eps          =  f_TP*v_m**3 /2/Dh                                # epsilon for calculating u_t
+        alpha_avg       = self.area_avg('alpha')
+        ai_avg          = self.area_avg('ai')
+        Dsm1_avg        = self.void_area_avg ('Dsm1')                       # Try void-weighted?
+        mu_m_avg        = self.void_area_avg ('mu_m')
+
+        rho_m           = (1 - alpha_avg) * rho_f + alpha_avg * rho_g       # Mixture density
+        v_m             = (rho_f * self.jf + rho_g * self.jgloc) / rho_m    # Mixture velocity
+        Rem             = rho_m * v_m * Dh / mu_m_avg                       # Mixture Reynolds number, ***CAREFUL*** I have seen some versions of the IATE script that use rho_f instead as an approximation
+        #f_TP           = 0.316 * (1 / (1 - alpha_avg) / Rem)**0.25         # Two-phase friction factor, Kong (2018)
+        f_TP            = 0.316 * (mu_m_avg / mu_f / Rem)**0.25             # Two-phase friction factor, Talley (2012) and Worosz (2015), also used in iate_1d_1g
+        eps             =  f_TP * v_m**3 / 2 / Dh                           # Energy dissipation rate (Wu et al., 1998; Kim, 1999), also used in iate_1d_1g
             
         for angle, r_dict in self.data.items():
             for rstar, midas_dict in r_dict.items():
                 
-                if midas_dict['alpha'] <= alpha_cr:  # Check if local void fraction is less than or equal to alpha_cr
-                    u_t = 1.4 * eps**(1./3) * (midas_dict['Dsm1']/1000.)**(1./3) 
-                    # print(angle, rstar, Dh, v_m, Rem, f_TP, eps, midas_dict['Dsm1']) # for check
-                else:
-                    u_t = 0  # The turbulence-impact and random- collision are driven by the turbulent fluctuation velocity (u_t).
+                if midas_dict['alpha'] <= alpha_cr:                         # Check if local void fraction is less than or equal to alpha_cr
+                    # Turbulent velocity (Batchelor, 1951; Rotta, 1972), also used in iate_1d_1g
+                    u_t = 1.4 * eps**(1/3) * (midas_dict['Dsm1'] / 1000)**(1/3)
 
-                COV_loc = u_t * (midas_dict['ai'])**2 / alpha_max**(1/3)*(alpha_max**(1/3)-(midas_dict['alpha'])**(1/3))     
+                    # print(angle, rstar, Dh, v_m, Rem, f_TP, eps, midas_dict['Dsm1'])
+
+                else:
+                    u_t = 0                                                 # TI and RC are driven by the turbulent fluctuation velocity (u_t)
+
+                COV_loc = u_t * (midas_dict['ai'])**2 / alpha_max**(1/3) * (alpha_max**(1/3) - (midas_dict['alpha'])**(1/3))
                 
                 midas_dict.update({'u_t': u_t})
-        
                 midas_dict.update({'COV_loc': COV_loc})
                 
-        u_t_avg=self.area_avg ('u_t')
+        u_t_avg = self.area_avg('u_t')
+
         if u_t_avg > 0:
-            COV_avg = u_t_avg * ai_avg**2 / alpha_max**(1/3)*(alpha_max**(1/3)-alpha_avg**(1/3))
-            I = self.area_avg('COV_loc') / COV_avg
+            COV_avg = u_t_avg * ai_avg**2 / alpha_max**(1/3) * (alpha_max**(1/3) - alpha_avg**(1/3))
+            COV_RC = self.area_avg('COV_loc') / COV_avg
+
         else:
             COV_avg = 0
-            I = 0
+            COV_RC = 0
 
-        self.COV_RC = I
-        return I
-
-    
-
-    def calc_COV_TI(self):
-    
+        self.COV_RC = COV_RC
 
         return
+    
     
     def reconstruct_void(self, method='talley'):
         """ Reconstruct the void profile based on various methods

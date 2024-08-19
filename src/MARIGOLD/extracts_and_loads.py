@@ -891,6 +891,7 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                 cond.jgatm = jgatm
                 cond.jgloc = jgloc
                 
+                '''
                 # Covariance hard-coding (WIP)
                 if jf == 3.98:
                     if jgatm == 0.15:
@@ -939,6 +940,7 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                     [0.741, 1.605, 1.239],
                     [0.249, 0.339, 0.143],
                 ]
+                '''
 
                 i = 0
                 
