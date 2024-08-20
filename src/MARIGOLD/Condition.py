@@ -2843,6 +2843,8 @@ the newly calculated :math:`v_{r}` or not
          * title, puts a title above the figure
          * label_str, a string that will replace the default title
          * legend_loc, passed to ax.legend
+         * xlable_loc, passed to ax.xaxis.set_label_coords
+         * xlable_loc_coords, passed to ax.xaxis.set_label_coords
          
         
         """
@@ -2864,16 +2866,29 @@ the newly calculated :math:`v_{r}` or not
         ms = marker_cycle()
         if cs is None:
             cs = color_cycle()
-        elif cs == 'infer':
+        elif cs == 'infer' and type(param) == str:
             cs = color_cycle(set_color = param)
         else:
             print("I hope cs is a generator that returns valid colors")
 
-        if set_min == None:
+        if set_min == None and type(param) == str:
             set_min = self.min(param)
+        else:
+            mins = []
+            for specific_param in param:
+                mins.append(self.min(specific_param))
+
+            set_min = min(mins)
         
-        if set_max == None:
+        if set_max == None and type(param) == str:
             set_max = self.max(param) *1.1
+
+        else:
+            maxs = []
+            for specific_param in param:
+                maxs.append(self.max(specific_param))
+
+            set_max = max(maxs) *1.1
 
         if x_axis == 'vals' or x_axis == 'r':
             for angle in const_to_plot:
@@ -2882,14 +2897,27 @@ the newly calculated :math:`v_{r}` or not
                 vals = []
                 for r, midas_output in r_dict.items():
                     rs.append(r)
-                    try:
-                        vals.append(midas_output[param])
-                    except:
-                        if abs(r - 1) < 0.0001:
-                            vals.append(0.0)
-                        else:
-                            vals.append(0.0)
-                            print(f"Could not find {param} for φ = {angle}, r = {r}. Substituting 0")
+
+                    if type(param) == str:
+                        try:
+                            vals.append(midas_output[param])
+                        except:
+                            if abs(r - 1) < 0.0001:
+                                vals.append(0.0)
+                            else:
+                                vals.append(0.0)
+                                print(f"Could not find {param} for φ = {angle}, r = {r}. Substituting 0")
+                    elif type(param) == list:
+                        for i, specific_param in enumerate(param):
+                            vals.append([])
+                            try:
+                                vals[i].append(midas_output[specific_param])
+                            except:
+                                if abs(r - 1) < 0.0001:
+                                    vals[i].append(0.0)
+                                else:
+                                    vals[i].append(0.0)
+                                    print(f"Could not find {specific_param} for φ = {angle}, r = {r}. Substituting 0")
 
                 if include_complement:
                     if angle > 180:
@@ -2898,21 +2926,50 @@ the newly calculated :math:`v_{r}` or not
                         r_dict = self.data[angle+180]
                         for r, midas_output in r_dict.items():
                             rs.append(-r)
-                            try:
-                                vals.append(midas_output[param])
-                            except:
-                                if abs(r - 1) < 0.0001:
-                                    vals.append(0.0)
-                                else:
-                                    vals.append(0.0)
-                                    print(f"Could not find {param} for φ = {angle}, r = {r}. Substituting 0")
+                            if type(param) == str:
+                                try:
+                                    vals.append(midas_output[param])
+                                except:
+                                    if abs(r - 1) < 0.0001:
+                                        vals.append(0.0)
+                                    else:
+                                        vals.append(0.0)
+                                        print(f"Could not find {param} for φ = {angle}, r = {r}. Substituting 0")
+                            elif type(param) == list:
+                                for i, specific_param in enumerate(param):
+                                    vals.append([])
+                                    try:
+                                        vals[i].append(midas_output[specific_param])
+                                    except:
+                                        if abs(r - 1) < 0.0001:
+                                            vals[i].append(0.0)
+                                        else:
+                                            vals[i].append(0.0)
+                                            print(f"Could not find {specific_param} for φ = {angle}, r = {r}. Substituting 0")
+                if type(param) == str:
+                    vals = [var for _, var in sorted(zip(rs, vals))]
+                    rs = sorted(rs)
+                    
+                    if x_axis == 'vals':
+                        ax.plot(vals, rs, label=f'{angle}°', color=next(cs), marker=next(ms), linestyle = '--')
+                    elif x_axis == 'r':
+                        ax.plot(rs, vals, label=f'{angle}°', color=next(cs), marker=next(ms), linestyle = '--')
+                
+                elif type(param) == list:
+                    temp = []
+                    for vals_list in vals:
+                        temp_list = [var for _, var in sorted(zip(rs, vals_list))]
+                        temp.append(temp_list)
+                    rs = sorted(rs)
 
-                vals = [var for _, var in sorted(zip(rs, vals))]
-                rs = sorted(rs)
-                if x_axis == 'vals':
-                    ax.plot(vals, rs, label=f'{angle}°', color=next(cs), marker=next(ms), linestyle = '--')
-                elif x_axis == 'r':
-                    ax.plot(rs, vals, label=f'{angle}°', color=next(cs), marker=next(ms), linestyle = '--')
+                    for specific_param, val_list in zip(param, temp):
+                        # print(val_list)
+                        cs = color_cycle(set_color = specific_param)
+                        if x_axis == 'vals':
+                            ax.plot(val_list, rs, color=next(cs), marker=next(ms), linestyle = '--', label = specific_param)
+                        elif x_axis == 'r':
+                            ax.plot(rs, val_list, color=next(cs), marker=next(ms), linestyle = '--', label = specific_param)
+                    
             
             if x_axis == 'vals':
                 ax.set_ylim(-1, 1)
@@ -2952,7 +3009,7 @@ the newly calculated :math:`v_{r}` or not
             print(f"invalid axis for plot_profiles: {x_axis}. Current supported options are 'rs', 'vals' and 'phi'")
             return
         
-        if label_str == '':
+        if label_str == '' and type(param) == str:
             if param == 'alpha':
                 label_str = r'$\alpha\ [-]$'
             elif param == 'ai':
@@ -3025,7 +3082,10 @@ the newly calculated :math:`v_{r}` or not
         if show:
             plt.show()
         else:
-            plt.savefig(os.path.join(save_dir, f'{param}_profile_vs_{x_axis}_{self.name}.png'))
+            if type(param) == str:
+                plt.savefig(os.path.join(save_dir, f'{param}_profile_vs_{x_axis}_{self.name}.png'))
+            else:
+                plt.savefig(os.path.join(save_dir, f'{param[0]}_profile_vs_{x_axis}_{self.name}.png'))
             plt.close()
         return
 
@@ -4333,6 +4393,8 @@ def color_cycle(set_color = None):
         color_list = ['#00FF00']
     elif set_color == 'ug1':
         color_list = ['#FF0000']
+    elif set_color == 'ug2':
+        color_list = ['#ff8080']
     elif set_color == 'Dsm1':
         color_list = ['#00FFFF']
     elif set_color == 'vf':
@@ -4340,7 +4402,7 @@ def color_cycle(set_color = None):
     elif set_color == 'vr':
         color_list = ['#FF00FF']
     else:
-        color_list = set_color
+        color_list = ['#000000']
         
 
     i = 0
