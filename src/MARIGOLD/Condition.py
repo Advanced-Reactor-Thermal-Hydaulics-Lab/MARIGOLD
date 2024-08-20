@@ -720,6 +720,55 @@ class Condition:
                     
 
         return self.area_avg('vr')
+    
+    def calc_vr2(self, warn_approx = True) -> None:
+        """Method for calculating relative velocity based on ug2. 
+        
+        Inputs:
+         - warn_approx, flag for warning if :math`v_r` is not found and function is approximating
+
+        Note that if vg2 = 0, then this method says vr2 = 0. This will happen when no data is present,
+        such as in the bottom of the pipe in horizontal, when this is not necessarily true
+
+        Stores:
+         - 'vr2' in midas_dict
+
+        Returns:
+         - Area-average vr2
+
+        """
+
+        self.mirror()
+
+        for angle, r_dict in self.data.items():
+            for rstar, midas_dict in r_dict.items():
+                try:
+                    vf = midas_dict['vf']
+                except:
+                    if warn_approx:
+                        print("Warning: Approximating vf in calculating vr, since no data found")
+                        warn_approx = False
+                    self.approx_vf()
+                    vf = midas_dict['vf']
+                vg = midas_dict['ug2']
+
+                if vg == 0: # should be the same as α = 0, could maybe switch this to that
+                    vr = 0 # this is an assumption, similar to void weighting
+                    
+                else:
+                    vr = vg - vf
+
+                try:
+                    if abs( midas_dict['vr2'] - vr ) < 0.00001:
+                        pass
+                    else:
+                        print(f"Warning: vr2 already present for {rstar}, {angle}°, but doesn't match subtraction. Will update and overwrite")
+                        midas_dict.update({'vr2': vr})
+                except:
+                    midas_dict.update({'vr2': vr})
+                    
+
+        return self.area_avg('vr2')
 
     def calc_vgj(self, warn_approx = True) -> None:
         """Method for calculating Vgj
