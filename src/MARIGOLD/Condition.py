@@ -720,6 +720,55 @@ class Condition:
                     
 
         return self.area_avg('vr')
+    
+    def calc_vr2(self, warn_approx = True) -> None:
+        """Method for calculating relative velocity based on ug2. 
+        
+        Inputs:
+         - warn_approx, flag for warning if :math`v_r` is not found and function is approximating
+
+        Note that if vg2 = 0, then this method says vr2 = 0. This will happen when no data is present,
+        such as in the bottom of the pipe in horizontal, when this is not necessarily true
+
+        Stores:
+         - 'vr2' in midas_dict
+
+        Returns:
+         - Area-average vr2
+
+        """
+
+        self.mirror()
+
+        for angle, r_dict in self.data.items():
+            for rstar, midas_dict in r_dict.items():
+                try:
+                    vf = midas_dict['vf']
+                except:
+                    if warn_approx:
+                        print("Warning: Approximating vf in calculating vr, since no data found")
+                        warn_approx = False
+                    self.approx_vf()
+                    vf = midas_dict['vf']
+                vg = midas_dict['ug2']
+
+                if vg == 0: # should be the same as α = 0, could maybe switch this to that
+                    vr = 0 # this is an assumption, similar to void weighting
+                    
+                else:
+                    vr = vg - vf
+
+                try:
+                    if abs( midas_dict['vr2'] - vr ) < 0.00001:
+                        pass
+                    else:
+                        print(f"Warning: vr2 already present for {rstar}, {angle}°, but doesn't match subtraction. Will update and overwrite")
+                        midas_dict.update({'vr2': vr})
+                except:
+                    midas_dict.update({'vr2': vr})
+                    
+
+        return self.area_avg('vr2')
 
     def calc_vgj(self, warn_approx = True) -> None:
         """Method for calculating Vgj
@@ -2849,8 +2898,25 @@ the newly calculated :math:`v_{r}` or not
     def plot_profiles2(self, param, save_dir = '.', show=True, x_axis='vals', 
                       const_to_plot = [90, 67.5, 45, 22.5, 0], include_complement = True, 
                       fig_size=(4,4), title=True, label_str = '', legend_loc = 'best', xlabel_loc = 'center',
-                      set_min = None, set_max = None, show_spines = True, xlabel_loc_coords = None, cs=None) -> None:
+                      set_min = None, set_max = None, show_spines = True, xlabel_loc_coords = None, ylabel_loc_coords = None, cs=None) -> None:
         """ Simplified plot_profiles with no rotation option
+
+        Inputs:
+         * param, any parameter string in midas_dict, e.g. 'alpha', 'ai', etc., or a list of parameter strings ['alpha_G1', 'alpha_G2']
+        
+        Options:
+         * save_dir, directory in which to save the .png file. Will not save the file unless show = False
+         * show, display the figure (in an iPython notebook or have it pop up)
+         * x_axis, the variable to put on the x-axis. Usually for vertical flow this is 'rs', for horizontal 'vals'. Also can be 'phis'
+         * const_to_plot, a list of angles (if x-axis is 'vals' or 'rs') or rs (if x-axis is 'phis')
+         * include_complement, includes the complementary angle of the const_to_plot (i.e. 270 with 90)
+         * fig_size, a tuple of the figure size, in inches
+         * title, puts a title above the figure
+         * label_str, a string that will replace the default title
+         * legend_loc, passed to ax.legend
+         * xlable_loc, passed to ax.xaxis.set_label_coords
+         * xlable_loc_coords, passed to ax.xaxis.set_label_coords
+         
         
         """
 
@@ -2871,16 +2937,27 @@ the newly calculated :math:`v_{r}` or not
         ms = marker_cycle()
         if cs is None:
             cs = color_cycle()
-        elif cs == 'infer':
+        elif cs == 'infer' and type(param) == str:
             cs = color_cycle(set_color = param)
-        else:
-            print("I hope cs is a generator that returns valid colors")
 
-        if set_min == None:
+        if set_min == None and type(param) == str:
             set_min = self.min(param)
+        elif set_min == None and type(param) == list:
+            mins = []
+            for specific_param in param:
+                mins.append(self.min(specific_param))
+
+            set_min = min(mins)
         
-        if set_max == None:
+        if set_max == None and type(param) == str:
             set_max = self.max(param) *1.1
+
+        elif set_min == None and type(param) == list:
+            maxs = []
+            for specific_param in param:
+                maxs.append(self.max(specific_param))
+
+            set_max = max(maxs) *1.1
 
         if x_axis == 'vals' or x_axis == 'r':
             for angle in const_to_plot:
@@ -2889,14 +2966,27 @@ the newly calculated :math:`v_{r}` or not
                 vals = []
                 for r, midas_output in r_dict.items():
                     rs.append(r)
-                    try:
-                        vals.append(midas_output[param])
-                    except:
-                        if abs(r - 1) < 0.0001:
-                            vals.append(0.0)
-                        else:
-                            vals.append(0.0)
-                            print(f"Could not find {param} for φ = {angle}, r = {r}. Substituting 0")
+
+                    if type(param) == str:
+                        try:
+                            vals.append(midas_output[param])
+                        except:
+                            if abs(r - 1) < 0.0001:
+                                vals.append(0.0)
+                            else:
+                                vals.append(0.0)
+                                print(f"Could not find {param} for φ = {angle}, r = {r}. Substituting 0")
+                    elif type(param) == list:
+                        for i, specific_param in enumerate(param):
+                            vals.append([])
+                            try:
+                                vals[i].append(midas_output[specific_param])
+                            except:
+                                if abs(r - 1) < 0.0001:
+                                    vals[i].append(0.0)
+                                else:
+                                    vals[i].append(0.0)
+                                    print(f"Could not find {specific_param} for φ = {angle}, r = {r}. Substituting 0")
 
                 if include_complement:
                     if angle > 180:
@@ -2905,21 +2995,80 @@ the newly calculated :math:`v_{r}` or not
                         r_dict = self.data[angle+180]
                         for r, midas_output in r_dict.items():
                             rs.append(-r)
-                            try:
-                                vals.append(midas_output[param])
-                            except:
-                                if abs(r - 1) < 0.0001:
-                                    vals.append(0.0)
-                                else:
-                                    vals.append(0.0)
-                                    print(f"Could not find {param} for φ = {angle}, r = {r}. Substituting 0")
+                            if type(param) == str:
+                                try:
+                                    vals.append(midas_output[param])
+                                except:
+                                    if abs(r - 1) < 0.0001:
+                                        vals.append(0.0)
+                                    else:
+                                        vals.append(0.0)
+                                        print(f"Could not find {param} for φ = {angle}, r = {r}. Substituting 0")
+                            elif type(param) == list:
+                                for i, specific_param in enumerate(param):
+                                    vals.append([])
+                                    try:
+                                        vals[i].append(midas_output[specific_param])
+                                    except:
+                                        if abs(r - 1) < 0.0001:
+                                            vals[i].append(0.0)
+                                        else:
+                                            vals[i].append(0.0)
+                                            print(f"Could not find {specific_param} for φ = {angle}, r = {r}. Substituting 0")
+                if type(param) == str:
+                    vals = [var for _, var in sorted(zip(rs, vals))]
+                    rs = sorted(rs)
+                    
+                    if x_axis == 'vals':
+                        ax.plot(vals, rs, label=f'{angle}°', color=next(cs), marker=next(ms), linestyle = '--')
+                    elif x_axis == 'r':
+                        ax.plot(rs, vals, label=f'{angle}°', color=next(cs), marker=next(ms), linestyle = '--')
+                
+                elif type(param) == list:
+                    temp = []
+                    for vals_list in vals:
+                        temp_list = [var for _, var in sorted(zip(rs, vals_list))]
+                        temp.append(temp_list)
+                    rs = sorted(rs)
 
-                vals = [var for _, var in sorted(zip(rs, vals))]
-                rs = sorted(rs)
-                if x_axis == 'vals':
-                    ax.plot(vals, rs, label=f'{angle}°', color=next(cs), marker=next(ms), linestyle = '--')
-                elif x_axis == 'r':
-                    ax.plot(rs, vals, label=f'{angle}°', color=next(cs), marker=next(ms), linestyle = '--')
+                    for specific_param, val_list in zip(param, temp):
+                        # print(val_list)
+                        cs = color_cycle(set_color = specific_param)
+
+                        if specific_param == 'alpha':
+                            legend_str = r'$\alpha$'
+                        elif specific_param == 'alpha_G1':
+                            legend_str = r'$\alpha_{G1}$'
+                        elif specific_param == 'alpha_G2':
+                            legend_str = r'$\alpha_{G2}$'
+                        elif specific_param == 'ai':
+                            legend_str = r'$a_{i}$'
+                        elif specific_param == 'ai_G1':
+                            legend_str = r'$a_{i, G1}$'
+                        elif specific_param == 'ai_G2':
+                            legend_str = r'$a_{i, G2}$'
+                        elif specific_param == 'ug1':
+                            legend_str = r'$v_{g,G1}$'
+                        elif specific_param == 'ug2':
+                            legend_str = r'$v_{g,G2}$'
+                        elif specific_param == 'vf':
+                            legend_str = r'$v_{f}$'
+                        elif specific_param == 'vr':
+                            legend_str = r'$v_{r,G1}$'
+                        elif specific_param == 'vr':
+                            legend_str = r'$v_{r,G2}$'
+                        elif specific_param == 'Dsm1':
+                            legend_str = r'$D_{sm1}$'
+                        elif specific_param == 'Dsm2':
+                            legend_str = r'$D_{sm2}$'
+                        else:
+                            legend_str = param
+
+                        if x_axis == 'vals':
+                            ax.plot(val_list, rs, color=next(cs), marker=next(ms), linestyle = '--', label = legend_str)
+                        elif x_axis == 'r':
+                            ax.plot(rs, val_list, color=next(cs), marker=next(ms), linestyle = '--', label = legend_str)
+                    
             
             if x_axis == 'vals':
                 ax.set_ylim(-1, 1)
@@ -2959,14 +3108,18 @@ the newly calculated :math:`v_{r}` or not
             print(f"invalid axis for plot_profiles: {x_axis}. Current supported options are 'rs', 'vals' and 'phi'")
             return
         
-        if label_str == '':
+        if label_str == '' and type(param) == str:
             if param == 'alpha':
                 label_str = r'$\alpha\ [-]$'
             elif param == 'ai':
                 label_str = r'$a_{i}\ [1/m]$'
-            elif param == 'ug1':
+            elif param == 'ug1' or param == 'ug2':
                 label_str = r'$v_{g}\ [m/s]$'
-            elif param == 'ug1':
+            elif param == 'vf':
+                label_str = r'$v_{f}\ [m/s]$'
+            elif param == 'vr' or param == 'vr2':
+                label_str = r'$v_{r}\ [m/s]$'
+            elif param == 'Dsm1':
                 label_str = r'$D_{sm1}\ [mm]$'
             else:
                 label_str = param
@@ -3025,6 +3178,9 @@ the newly calculated :math:`v_{r}` or not
         if xlabel_loc_coords:
             ax.xaxis.set_label_coords(*xlabel_loc_coords)
 
+        if ylabel_loc_coords:
+            ax.yaxis.set_label_coords(*ylabel_loc_coords)
+
         
         ax.set_aspect('auto', adjustable='datalim', share=True)
         #fake_ax.set_box_aspect(1)
@@ -3032,7 +3188,10 @@ the newly calculated :math:`v_{r}` or not
         if show:
             plt.show()
         else:
-            plt.savefig(os.path.join(save_dir, f'{param}_profile_vs_{x_axis}_{self.name}.png'))
+            if type(param) == str:
+                plt.savefig(os.path.join(save_dir, f'{param}_profile_vs_{x_axis}_{self.name}.png'))
+            else:
+                plt.savefig(os.path.join(save_dir, f'{"_".join(param)}_profile_vs_{x_axis}_{self.name}.png'))
             plt.close()
         return
 
@@ -4336,18 +4495,32 @@ def color_cycle(set_color = None):
         color_list = [set_color]
     elif set_color == 'alpha':
         color_list = ['#000000']
+    elif set_color == 'alpha_G1':
+        color_list = ['#A0A0A0']
+    elif set_color == 'alpha_G2':
+        color_list = ['#606060']
     elif set_color == 'ai':
         color_list = ['#00FF00']
+    elif set_color == 'ai_G2':
+        color_list = ['#66FF66']
+    elif set_color == 'ai_G1':
+        color_list = ['#006600']
     elif set_color == 'ug1':
         color_list = ['#FF0000']
+    elif set_color == 'ug2':
+        color_list = ['#ff8080']
     elif set_color == 'Dsm1':
         color_list = ['#00FFFF']
-    elif set_color == 'vf':
+    elif set_color == 'Dsm2':
+        color_list = ['#6666FF']
+    elif set_color == 'vf' or set_color == 'vf_approx':
         color_list = ['#0000FF']
     elif set_color == 'vr':
         color_list = ['#FF00FF']
+    elif set_color == 'vr2':
+        color_list = ['#FF80FF']
     else:
-        color_list = set_color
+        color_list = ['#000000']
         
 
     i = 0
