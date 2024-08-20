@@ -893,6 +893,10 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
 
                 cond.calc_COV_RC()
                 cond.calc_COV_TI()
+
+                print("cond.calc_COV_RC(): ", cond.calc_COV_RC())
+                print("cond.COV_RC: ", cond.COV_RC)
+                
                 
                 '''
                 # Covariance hard-coding (WIP)
