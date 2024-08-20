@@ -2561,7 +2561,7 @@ the newly calculated :math:`v_{r}` or not
         return self.area_avg('lambda')
     
 
-    def calc_COV_RC(self, alpha_max = 0.75, alpha_cr = 1.00, reconstruct_flag = False):
+    def calc_COV_RC(self, alpha_max = 0.75, alpha_cr = 0.11, reconstruct_flag = False):
         """Calculates the experimental Random Collision Covariance based on Talley (2012) method (without modification factor m_RC)
          - Stored in self.COV_RC
 
@@ -2599,17 +2599,16 @@ the newly calculated :math:`v_{r}` or not
         f_TP            = 0.316 * (mu_m_avg / mu_f / Rem)**0.25             # Two-phase friction factor, Talley (2012) and Worosz (2015), also used in iate_1d_1g
         eps             =  f_TP * v_m**3 / 2 / Dh                           # Energy dissipation rate (Wu et al., 1998; Kim, 1999), also used in iate_1d_1g
         
-        if reconstruct_flag == True:
-            pass
-
-        else:
-            alpha_profile = midas_dict['alpha']
-            # Hmmm, this doesn't work with the looping structure below?
-
         for angle, r_dict in self.data.items():
             for rstar, midas_dict in r_dict.items():
                 
-                if midas_dict['alpha'] <= alpha_cr:                         # Check if local void fraction is less than or equal to alpha_cr
+                if reconstruct_flag == True:
+                    alpha_profile = midas_dict['alpha_reconstructed']
+
+                else:
+                    alpha_profile = midas_dict['alpha']
+                
+                if alpha_profile <= alpha_cr:                         # Check if local void fraction is less than or equal to alpha_cr
                     # Turbulent velocity (Batchelor, 1951; Rotta, 1972), also used in iate_1d_1g
                     u_t = 1.4 * eps**(1/3) * (midas_dict['Dsm1'] / 1000)**(1/3)
 
@@ -2618,7 +2617,7 @@ the newly calculated :math:`v_{r}` or not
                 else:
                     u_t = 0                                                 # TI and RC are driven by the turbulent fluctuation velocity (u_t)
 
-                COV_loc = u_t * (midas_dict['ai'])**2 / (alpha_max**(1/3) * (alpha_max**(1/3) - (midas_dict['alpha'])**(1/3)))
+                COV_loc = u_t * (midas_dict['ai'])**2 / (alpha_max**(1/3) * (alpha_max**(1/3) - (alpha_profile)**(1/3)))
                 
                 midas_dict.update({'u_t': u_t})
                 midas_dict.update({'COV_loc': COV_loc})
@@ -2626,7 +2625,7 @@ the newly calculated :math:`v_{r}` or not
         u_t_avg = self.area_avg('u_t')
 
         if u_t_avg > 0:
-            COV_avg = u_t_avg * ai_avg**2 / alpha_max**(1/3) * (alpha_max**(1/3) - alpha_avg**(1/3))
+            COV_avg = u_t_avg * ai_avg**2 / (alpha_max**(1/3) * (alpha_max**(1/3) - alpha_avg**(1/3)))
             COV_RC = self.area_avg('COV_loc') / COV_avg
 
         else:
@@ -2638,7 +2637,7 @@ the newly calculated :math:`v_{r}` or not
         return COV_RC
 
 
-    def calc_COV_TI(self, alpha_max = 0.75, alpha_cr = 1.00, reconstruct_flag = False):
+    def calc_COV_TI(self, alpha_max = 0.75, alpha_cr = 1.00, We_cr = 6, reconstruct_flag = False):
         """Calculates the experimental Turbulent Impact Covariance based on Talley (2012) method (with modification factor m_RC eliminated), Quan, 05/15
          - Stored in self.COV_RC
 
@@ -2677,15 +2676,19 @@ the newly calculated :math:`v_{r}` or not
                 else:
                     u_t = 0                                                 # TI and RC are driven by the turbulent fluctuation velocity (u_t)
 
-                COV_loc = u_t * (midas_dict['ai'])**2 / alpha_max**(1/3) * (alpha_max**(1/3) - (midas_dict['alpha'])**(1/3))
+                We = rho_f * u_t**2 * midas_dict['Dsm1'] / self.sigma       # Weber number criterion
+
+                COV_loc = (u_t * (midas_dict['ai'])**2 / midas_dict['alpha']) * np.sqrt(1 - (We_cr / We)) * np.exp(-We_cr / We)
                 
                 midas_dict.update({'u_t': u_t})
                 midas_dict.update({'COV_loc': COV_loc})
+                midas_dict.update({'We': We})
                 
         u_t_avg = self.area_avg('u_t')
+        We_avg = self.area_avg('We')
 
         if u_t_avg > 0:
-            COV_avg = u_t_avg * ai_avg**2 / alpha_max**(1/3) * (alpha_max**(1/3) - alpha_avg**(1/3))
+            COV_avg = (u_t_avg * ai_avg**2 / alpha_avg) * np.sqrt(1 - (We_cr / We_avg)) * np.exp(-We_cr / We_avg)
             COV_RC = self.area_avg('COV_loc') / COV_avg
 
         else:
