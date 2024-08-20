@@ -160,8 +160,11 @@ def iate_1d_1g(
         
         We_cr = 5
         
-        COV_RC      = cond.COV_RC
-        COV_TI      = cond.COV_TI
+        COV_RC      = cond.calc_COV_RC(reconstruct_flag=True)
+        COV_TI      = cond.calc_COV_TI(reconstruct_flag=True)
+
+        print('COV_RC: ',COV_RC)
+        print('COV_TI: ',COV_TI)
 
         # Row is run, column is port?
         # I think this should be implemented in extracts and loads, as a cheat option
@@ -396,11 +399,11 @@ def iate_1d_1g(
 
         fTW = 0.316 * (mu_m / mu_f)**0.25 / Rem**0.25           # Two-phase friction factor
         e = fTW * (vm**3) / 2 / Dh                              # Energy dissipation rate (Wu et al., 1998; Kim, 1999)
-        ut = 1.4 * e**(1/3) * Db[i]**(1/3)                      # Turbulent velocity (Batchelor, 1951; Rotta, 1972)
+        u_t = 1.4 * e**(1/3) * Db[i]**(1/3)                     # Turbulent velocity (Batchelor, 1951; Rotta, 1972)
         
         if debug:
             with open("H:\TRSL-H\IATE\TEST.txt", mode = 'a+') as FID:
-                print(f"\n\n{i+1}.\tjf = {jf} [m/s], jg = {cond.jgref} [m/s]\n\tL/D: {z/Dh}\n\tur: {ur}\n\tut: {ut}\n\ta: {alpha[i]}",file=FID)
+                print(f"\n\n{i+1}.\tjf = {jf} [m/s], jg = {cond.jgref} [m/s]\n\tL/D: {z/Dh}\n\tur: {ur}\n\tut: {u_t}\n\ta: {alpha[i]}",file=FID)
 
             with open("H:\TRSL-H\IATE\VZ.txt", mode = 'a+') as FID:
                 print(f"\n\n{i+1}.\tjf = {jf} [m/s], jg = {cond.jgref} [m/s]\n\tL/D: {z/Dh}\n\tvfz: {vfz}\n\tvgz: {vgz[i]}\n\tjg: {jgloc}",file=FID)
@@ -440,13 +443,13 @@ def iate_1d_1g(
             SWE[i] = C_WE * CDwe**(1/3) * ur * ai[i]**2 / 3 / np.pi
         
         # Sink due to Random Collisions	
-        RC1 = ut * ai[i]**2 / alpha_max**(1/3) / (alpha_max**(1/3) - alpha[i]**(1/3))
+        RC1 = u_t * ai[i]**2 / alpha_max**(1/3) / (alpha_max**(1/3) - alpha[i]**(1/3))
         RC2 = 1 - np.exp(-C * alpha_max**(1/3) * alpha[i]**(1/3) / (alpha_max**(1/3) - alpha[i]**(1/3)))
         SRC[i] = COV_RC * C_RC * RC1 * RC2 / 3 / np.pi
         
         # Source due to Turbulent Impact
-        TI1 = ut * ai[i]**2 / alpha[i]
-        We = rho_f * ut**2 * Db[i] / sigma                      # Weber number criterion
+        TI1 = u_t * ai[i]**2 / alpha[i]
+        We = rho_f * u_t**2 * Db[i] / sigma                     # Weber number criterion
 
         if We > We_cr:
             TI2 = (1 - We_cr / We)**0.5 * np.exp(-We_cr / We)
