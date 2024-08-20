@@ -2883,20 +2883,20 @@ the newly calculated :math:`v_{r}` or not
         """ Simplified plot_profiles with no rotation option
 
         Inputs:
-         * param, any parameter string in midas_dict, e.g. 'alpha', 'ai', etc., or a list of parameter strings ['alpha_G1', 'alpha_G2']
+         - param, any parameter string in midas_dict, e.g. 'alpha', 'ai', etc., or a list of parameter strings ['alpha_G1', 'alpha_G2']
         
         Options:
-         * save_dir, directory in which to save the .png file. Will not save the file unless show = False
-         * show, display the figure (in an iPython notebook or have it pop up)
-         * x_axis, the variable to put on the x-axis. Usually for vertical flow this is 'rs', for horizontal 'vals'. Also can be 'phis'
-         * const_to_plot, a list of angles (if x-axis is 'vals' or 'rs') or rs (if x-axis is 'phis')
-         * include_complement, includes the complementary angle of the const_to_plot (i.e. 270 with 90)
-         * fig_size, a tuple of the figure size, in inches
-         * title, puts a title above the figure
-         * label_str, a string that will replace the default title
-         * legend_loc, passed to ax.legend
-         * xlable_loc, passed to ax.xaxis.set_label_coords
-         * xlable_loc_coords, passed to ax.xaxis.set_label_coords
+         - save_dir, directory in which to save the .png file. Will not save the file unless show = False
+         - show, display the figure (in an iPython notebook or have it pop up)
+         - x_axis, the variable to put on the x-axis. Usually for vertical flow this is 'rs', for horizontal 'vals'. Also can be 'phis'
+         - const_to_plot, a list of angles (if x-axis is 'vals' or 'rs') or rs (if x-axis is 'phis')
+         - include_complement, includes the complementary angle of the const_to_plot (i.e. 270 with 90)
+         - fig_size, a tuple of the figure size, in inches
+         - title, puts a title above the figure
+         - label_str, a string that will replace the default title
+         - legend_loc, passed to ax.legend
+         - xlable_loc, passed to ax.xaxis.set_label_coords
+         - xlable_loc_coords, passed to ax.xaxis.set_label_coords
          
         
         """
@@ -3029,15 +3029,17 @@ the newly calculated :math:`v_{r}` or not
                         elif specific_param == 'ai_G2':
                             legend_str = r'$a_{i, G2}$'
                         elif specific_param == 'ug1':
-                            legend_str = r'$v_{g,G1}$'
+                            legend_str = r'$v_{g, G1}$'
                         elif specific_param == 'ug2':
-                            legend_str = r'$v_{g,G2}$'
+                            legend_str = r'$v_{g, G2}$'
                         elif specific_param == 'vf':
                             legend_str = r'$v_{f}$'
+                        elif specific_param == 'vf_approx':
+                            legend_str = r'$v_{f, approx}$'
                         elif specific_param == 'vr':
-                            legend_str = r'$v_{r,G1}$'
-                        elif specific_param == 'vr':
-                            legend_str = r'$v_{r,G2}$'
+                            legend_str = r'$v_{r, G1}$'
+                        elif specific_param == 'vr2':
+                            legend_str = r'$v_{r, G2}$'
                         elif specific_param == 'Dsm1':
                             legend_str = r'$D_{sm1}$'
                         elif specific_param == 'Dsm2':
