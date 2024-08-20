@@ -2879,11 +2879,11 @@ the newly calculated :math:`v_{r}` or not
     def plot_profiles2(self, param, save_dir = '.', show=True, x_axis='vals', 
                       const_to_plot = [90, 67.5, 45, 22.5, 0], include_complement = True, 
                       fig_size=(4,4), title=True, label_str = '', legend_loc = 'best', xlabel_loc = 'center',
-                      set_min = None, set_max = None, show_spines = True, xlabel_loc_coords = None, cs=None) -> None:
+                      set_min = None, set_max = None, show_spines = True, xlabel_loc_coords = None, ylabel_loc_coords = None, cs=None) -> None:
         """ Simplified plot_profiles with no rotation option
 
         Inputs:
-         * param, any parameter in midas_dict, e.g. 'alpha', 'ai', etc.
+         * param, any parameter string in midas_dict, e.g. 'alpha', 'ai', etc., or a list of parameter strings ['alpha_G1', 'alpha_G2']
         
         Options:
          * save_dir, directory in which to save the .png file. Will not save the file unless show = False
@@ -2920,8 +2920,6 @@ the newly calculated :math:`v_{r}` or not
             cs = color_cycle()
         elif cs == 'infer' and type(param) == str:
             cs = color_cycle(set_color = param)
-        else:
-            print("I hope cs is a generator that returns valid colors")
 
         if set_min == None and type(param) == str:
             set_min = self.min(param)
@@ -3127,6 +3125,9 @@ the newly calculated :math:`v_{r}` or not
         if xlabel_loc_coords:
             ax.xaxis.set_label_coords(*xlabel_loc_coords)
 
+        if ylabel_loc_coords:
+            ax.yaxis.set_label_coords(*ylabel_loc_coords)
+
         
         ax.set_aspect('auto', adjustable='datalim', share=True)
         #fake_ax.set_box_aspect(1)
@@ -3137,7 +3138,7 @@ the newly calculated :math:`v_{r}` or not
             if type(param) == str:
                 plt.savefig(os.path.join(save_dir, f'{param}_profile_vs_{x_axis}_{self.name}.png'))
             else:
-                plt.savefig(os.path.join(save_dir, f'{param[0]}_profile_vs_{x_axis}_{self.name}.png'))
+                plt.savefig(os.path.join(save_dir, f'{"_".join(param)}_profile_vs_{x_axis}_{self.name}.png'))
             plt.close()
         return
 
@@ -4441,18 +4442,30 @@ def color_cycle(set_color = None):
         color_list = [set_color]
     elif set_color == 'alpha':
         color_list = ['#000000']
+    elif set_color == 'alpha_G1':
+        color_list = ['#A0A0A0']
+    elif set_color == 'alpha_G2':
+        color_list = ['#606060']
     elif set_color == 'ai':
         color_list = ['#00FF00']
+    elif set_color == 'ai_G2':
+        color_list = ['#33FF33']
+    elif set_color == 'ai_G1':
+        color_list = ['#006600']
     elif set_color == 'ug1':
         color_list = ['#FF0000']
     elif set_color == 'ug2':
         color_list = ['#ff8080']
     elif set_color == 'Dsm1':
         color_list = ['#00FFFF']
+    elif set_color == 'Dsm2':
+        color_list = ['#6666FF']
     elif set_color == 'vf':
         color_list = ['#0000FF']
     elif set_color == 'vr':
         color_list = ['#FF00FF']
+    elif set_color == 'vr2':
+        color_list = ['#FF80FF']
     else:
         color_list = ['#000000']
         
