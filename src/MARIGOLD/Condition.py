@@ -2923,7 +2923,7 @@ the newly calculated :math:`v_{r}` or not
 
         if set_min == None and type(param) == str:
             set_min = self.min(param)
-        else:
+        elif set_min == None and type(param) == list:
             mins = []
             for specific_param in param:
                 mins.append(self.min(specific_param))
@@ -2933,7 +2933,7 @@ the newly calculated :math:`v_{r}` or not
         if set_max == None and type(param) == str:
             set_max = self.max(param) *1.1
 
-        else:
+        elif set_min == None and type(param) == list:
             maxs = []
             for specific_param in param:
                 maxs.append(self.max(specific_param))
@@ -3015,10 +3015,40 @@ the newly calculated :math:`v_{r}` or not
                     for specific_param, val_list in zip(param, temp):
                         # print(val_list)
                         cs = color_cycle(set_color = specific_param)
+
+                        if specific_param == 'alpha':
+                            legend_str = r'$\alpha$'
+                        elif specific_param == 'alpha_G1':
+                            legend_str = r'$\alpha_{G1}$'
+                        elif specific_param == 'alpha_G2':
+                            legend_str = r'$\alpha_{G2}$'
+                        elif specific_param == 'ai':
+                            legend_str = r'$a_{i}$'
+                        elif specific_param == 'ai_G1':
+                            legend_str = r'$a_{i, G1}$'
+                        elif specific_param == 'ai_G2':
+                            legend_str = r'$a_{i, G2}$'
+                        elif specific_param == 'ug1':
+                            legend_str = r'$v_{g,G1}$'
+                        elif specific_param == 'ug2':
+                            legend_str = r'$v_{g,G2}$'
+                        elif specific_param == 'vf':
+                            legend_str = r'$v_{f}$'
+                        elif specific_param == 'vr':
+                            legend_str = r'$v_{r,G1}$'
+                        elif specific_param == 'vr':
+                            legend_str = r'$v_{r,G2}$'
+                        elif specific_param == 'Dsm1':
+                            legend_str = r'$D_{sm1}$'
+                        elif specific_param == 'Dsm2':
+                            legend_str = r'$D_{sm2}$'
+                        else:
+                            legend_str = param
+
                         if x_axis == 'vals':
-                            ax.plot(val_list, rs, color=next(cs), marker=next(ms), linestyle = '--', label = specific_param)
+                            ax.plot(val_list, rs, color=next(cs), marker=next(ms), linestyle = '--', label = legend_str)
                         elif x_axis == 'r':
-                            ax.plot(rs, val_list, color=next(cs), marker=next(ms), linestyle = '--', label = specific_param)
+                            ax.plot(rs, val_list, color=next(cs), marker=next(ms), linestyle = '--', label = legend_str)
                     
             
             if x_axis == 'vals':
@@ -3064,9 +3094,13 @@ the newly calculated :math:`v_{r}` or not
                 label_str = r'$\alpha\ [-]$'
             elif param == 'ai':
                 label_str = r'$a_{i}\ [1/m]$'
-            elif param == 'ug1':
+            elif param == 'ug1' or param == 'ug2':
                 label_str = r'$v_{g}\ [m/s]$'
-            elif param == 'ug1':
+            elif param == 'vf':
+                label_str = r'$v_{f}\ [m/s]$'
+            elif param == 'vr' or param == 'vr2':
+                label_str = r'$v_{r}\ [m/s]$'
+            elif param == 'Dsm1':
                 label_str = r'$D_{sm1}\ [mm]$'
             else:
                 label_str = param
@@ -4449,7 +4483,7 @@ def color_cycle(set_color = None):
     elif set_color == 'ai':
         color_list = ['#00FF00']
     elif set_color == 'ai_G2':
-        color_list = ['#33FF33']
+        color_list = ['#66FF66']
     elif set_color == 'ai_G1':
         color_list = ['#006600']
     elif set_color == 'ug1':
@@ -4460,7 +4494,7 @@ def color_cycle(set_color = None):
         color_list = ['#00FFFF']
     elif set_color == 'Dsm2':
         color_list = ['#6666FF']
-    elif set_color == 'vf':
+    elif set_color == 'vf' or set_color == 'vf_approx':
         color_list = ['#0000FF']
     elif set_color == 'vr':
         color_list = ['#FF00FF']
