@@ -2689,15 +2689,15 @@ the newly calculated :math:`v_{r}` or not
 
         if u_t_avg > 0:
             COV_avg = (u_t_avg * ai_avg**2 / alpha_avg) * np.sqrt(1 - (We_cr / We_avg)) * np.exp(-We_cr / We_avg)
-            COV_RC = self.area_avg('COV_loc') / COV_avg
+            COV_TI = self.area_avg('COV_loc') / COV_avg
 
         else:
             COV_avg = 0
-            COV_RC = 0
+            COV_TI = 0
 
-        self.COV_RC = COV_RC
+        self.COV_TI = COV_TI
 
-        return
+        return COV_TI
     
     
     def reconstruct_void(self, method='talley'):

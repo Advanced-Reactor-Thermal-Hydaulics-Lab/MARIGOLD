@@ -891,8 +891,8 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                 cond.jgatm = jgatm
                 cond.jgloc = jgloc
 
-                cond.COV_RC = cond.calc_COV_RC()
-                cond.COV_TI = cond.calc_COV_TI()
+                cond.calc_COV_RC()
+                cond.calc_COV_TI()
                 
                 '''
                 # Covariance hard-coding (WIP)
