@@ -1019,6 +1019,7 @@ class Condition:
                     vals.append(midas_dict[param])
                 except KeyError:
                     print(self.name, angle, rstar, "has no ", param)
+                    raise(KeyError)
 
         linear_interpolant = interpolate.LinearNDInterpolator(list(zip(phis, rs)), vals)
         self.linear_interp.update({param: linear_interpolant})
