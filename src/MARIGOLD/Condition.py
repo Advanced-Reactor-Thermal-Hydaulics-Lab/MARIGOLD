@@ -2610,7 +2610,7 @@ the newly calculated :math:`v_{r}` or not
         return self.area_avg('lambda')
     
 
-    def calc_COV_RC(self, alpha_max = 0.75, alpha_cr = 0.11, reconstruct_flag = False):
+    def calc_COV_RC(self, alpha_max = 0.75, alpha_cr = 0.11, reconstruct_flag = True):
         """Calculates the experimental Random Collision Covariance based on Talley (2012) method (without modification factor m_RC)
          - Stored in self.COV_RC
          
@@ -2641,7 +2641,6 @@ the newly calculated :math:`v_{r}` or not
 
         alpha_avg       = self.area_avg(alpha_str)
         ai_avg          = self.area_avg('ai')
-        Dsm1_avg        = self.void_area_avg('Dsm1')                        # Try void-weighted?
 
         rho_f           = self.rho_f                                        # Liquid phase density [kg/m**3]
         rho_g           = self.rho_g                                        # Gas phase density [kg/m**3]
@@ -2655,21 +2654,32 @@ the newly calculated :math:`v_{r}` or not
         f_TP            = 0.316 * (mu_m / mu_f / Rem)**0.25                 # Two-phase friction factor, Talley (2012) and Worosz (2015), also used in iate_1d_1g
         eps             = f_TP * v_m**3 / 2 / Dh                            # Energy dissipation rate (Wu et al., 1998; Kim, 1999), also used in iate_1d_1g
         
+        if debug:
+            print(f"alpha_avg: {alpha_avg}")
+        
         for angle, r_dict in self.data.items():
             for rstar, midas_dict in r_dict.items():
                 
                 alpha_loc = midas_dict[alpha_str]
-                Db_loc = midas_dict['Dsm1'] / 1000
-                ai_loc = midas_dict['ai']
-                # Db = 6 * alpha_loc / ai_loc
-
+                
+                if reconstruct_flag == True:
+                    ai_loc = ai_avg * alpha_loc / alpha_avg
+                    try:
+                        Db_loc = 6 * alpha_loc / ai_loc
+                    except:
+                        Db_loc = 0
+                else:
+                    ai_loc = midas_dict['ai']
+                    Db_loc = midas_dict['Dsm1'] / 1000
+                
                 if alpha_loc <= alpha_cr:                                   # Check if local void fraction is less than or equal to alpha_cr
                     u_t = 1.4 * eps**(1/3) * Db_loc**(1/3)                  # Turbulent velocity (Batchelor, 1951; Rotta, 1972), also used in iate_1d_1g
                 else:
                     u_t = 0                                                 # TI and RC are driven by the turbulent fluctuation velocity (u_t)
 
                     if debug:
-                        print(f"alpha_loc: {alpha_loc}")
+                        print(f"{angle}\t\t{rstar}:\t\talpha_loc: {alpha_loc}")
+                        pass
 
                 # Talley 2012, secion 3.3.1
                 COV_loc = u_t * ai_loc**2 / (alpha_max**(1/3) * (alpha_max**(1/3) - (alpha_loc)**(1/3)))
@@ -2694,9 +2704,9 @@ the newly calculated :math:`v_{r}` or not
         return COV_RC
 
 
-    def calc_COV_TI(self, alpha_max = 0.75, alpha_cr = 0.11, We_cr = 5, reconstruct_flag = False):
+    def calc_COV_TI(self, alpha_max = 0.75, alpha_cr = 0.11, We_cr = 5, reconstruct_flag = True):
         
-        debug = True
+        debug = False
 
         if reconstruct_flag == True:
             self.reconstruct_void(method='talley')
@@ -2706,7 +2716,6 @@ the newly calculated :math:`v_{r}` or not
 
         alpha_avg       = self.area_avg(alpha_str)
         ai_avg          = self.area_avg('ai')
-        Dsm1_avg        = self.void_area_avg('Dsm1')                        # Try void-weighted?
 
         rho_f           = self.rho_f                                        # Liquid phase density [kg/m**3]
         rho_g           = self.rho_g                                        # Gas phase density [kg/m**3]
@@ -2721,13 +2730,23 @@ the newly calculated :math:`v_{r}` or not
         f_TP            = 0.316 * (mu_m / mu_f / Rem)**0.25                 # Two-phase friction factor, Talley (2012) and Worosz (2015), also used in iate_1d_1g
         eps             = f_TP * v_m**3 / 2 / Dh                            # Energy dissipation rate (Wu et al., 1998; Kim, 1999), also used in iate_1d_1g
         
+        if debug:
+            print(f"alpha_avg: {alpha_avg}")
+
         for angle, r_dict in self.data.items():
             for rstar, midas_dict in r_dict.items():
                 
                 alpha_loc = midas_dict[alpha_str]
-                Db_loc = midas_dict['Dsm1'] / 1000
-                ai_loc = midas_dict['ai']
-                # Db = 6 * alpha_loc / ai_loc
+
+                if reconstruct_flag == True:
+                    ai_loc = ai_avg * alpha_loc / alpha_avg
+                    try:
+                        Db_loc = 6 * alpha_loc / ai_loc
+                    except:
+                        Db_loc = 0
+                else:
+                    ai_loc = midas_dict['ai']
+                    Db_loc = midas_dict['Dsm1'] / 1000
 
                 if alpha_loc <= alpha_cr:                                   # Check if local void fraction is less than or equal to alpha_cr
                     u_t = 1.4 * eps**(1/3) * Db_loc**(1/3)                  # Turbulent velocity (Batchelor, 1951; Rotta, 1972), also used in iate_1d_1g
@@ -2735,7 +2754,8 @@ the newly calculated :math:`v_{r}` or not
                     u_t = 0                                                 # TI and RC are driven by the turbulent fluctuation velocity (u_t)
 
                     if debug:
-                        print(f"alpha_loc: {alpha_loc}")
+                        # print(f"alpha_loc: {alpha_loc}")
+                        pass
 
                 We = rho_f * u_t**2 * Db_loc / sigma                        # Weber number criterion
 
@@ -2743,7 +2763,7 @@ the newly calculated :math:`v_{r}` or not
                 if We >= We_cr:
                     COV_loc = (u_t * ai_loc**2 / alpha_loc) * np.sqrt(1 - (We_cr / We)) * np.exp(-We_cr / We)
                 else:
-                    COV_loc = 0     # Not true, fix later
+                    COV_loc = 0
                 
                 midas_dict.update({'u_t': u_t})
                 midas_dict.update({'We': We})
@@ -2780,6 +2800,8 @@ the newly calculated :math:`v_{r}` or not
         
         """
 
+        debug = False
+
         if method.lower() == 'talley':
             self.roverRend = -1.472e-5 * self.Ref + 2.571
 
@@ -2812,8 +2834,9 @@ the newly calculated :math:`v_{r}` or not
                 self.alpha_max_reconstructed = result.x
                 find_alpha_max(self.alpha_max_reconstructed)
             else:
-                warnings.warn("Minimization did not return a successful result")
-                print(f"⟨α⟩_data: {self.area_avg('alpha')}\n⟨α⟩_reconstructed: {self.area_avg('alpha_reconstructed')}\n")
+                if debug:
+                    warnings.warn("Minimization did not return a successful result")
+                    print(f"⟨α⟩_data: {self.area_avg('alpha')}\n⟨α⟩_reconstructed: {self.area_avg('alpha_reconstructed')}\n")
 
 
         elif method.lower() == 'not_talley' or method.lower() == 'double_linear':
@@ -2846,8 +2869,9 @@ the newly calculated :math:`v_{r}` or not
                 self.alpha_max_reconstructed = result.x
                 find_alpha_max(self.alpha_max_reconstructed)
             else:
-                warnings.warn("Minimization did not return a successful result")
-                print(f"⟨α⟩_data: {self.area_avg('alpha')}\n⟨α⟩_reconstructed: {self.area_avg('alpha_reconstructed')}\n")
+                if debug:
+                    warnings.warn("Minimization did not return a successful result")
+                    print(f"⟨α⟩_data: {self.area_avg('alpha')}\n⟨α⟩_reconstructed: {self.area_avg('alpha_reconstructed')}\n")
             
         elif method.lower() == 'ryan':
             # TODO
@@ -2888,9 +2912,10 @@ the newly calculated :math:`v_{r}` or not
                 self.reconstruct_sigma = result.x[2]
                 complicated_alpha(result.x)
             else:
-                warnings.warn("Minimization did not return a successful result")
-                complicated_alpha(result.x)
-                print(f"⟨α⟩_data: {self.area_avg('alpha')}\n⟨α⟩_reconstructed: {self.area_avg('alpha_reconstructed')}\n{result.x}")
+                if debug:
+                    warnings.warn("Minimization did not return a successful result")
+                    complicated_alpha(result.x)
+                    print(f"⟨α⟩_data: {self.area_avg('alpha')}\n⟨α⟩_reconstructed: {self.area_avg('alpha_reconstructed')}\n{result.x}")
 
 
         return self.area_avg("alpha_reconstructed")
