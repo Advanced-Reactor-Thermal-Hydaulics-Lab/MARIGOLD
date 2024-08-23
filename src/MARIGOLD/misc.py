@@ -13,6 +13,7 @@ def comp_cond(cond1:Condition, cond2:Condition, tag = 'run_ID') -> Condition:
     - port, use cond.port
     - name, use cond.name
     - exp_cfd, tag1 -> exp, tag2 -> CFD
+    - If given a tuple, tag1 -> tuple[0], tag2 -> tuple[1]
 
     """
     compCond = Condition(cond1.jgref, cond1.jgloc, cond1.jf, cond1.theta, cond1.port, cond1.database)
@@ -40,28 +41,38 @@ def comp_cond(cond1:Condition, cond2:Condition, tag = 'run_ID') -> Condition:
     elif tag == 'exp_CFD':
         tag1 = 'exp'
         tag2 = 'CFD'
+    
+    elif type(tag) == tuple:
+        tag1 = tag[0]
+        tag2 = tag[1]
 
     # Determine which condition has more angles, use that one for rmesh as well
     if len(cond1.data.keys()) > len(cond1.data.keys()):
         compCond._angles = cond1.data.keys()
         rmesh_cond = cond1
+        not_rmesh_cond = cond2
     else:
         compCond._angles = cond2.data.keys()
         rmesh_cond = cond2
+        not_rmesh_cond = cond1
 
     for angle in compCond._angles:
         compCond.data.update({angle:{}})
 
-        for rstar, data_dict in rmesh_cond[angle].items():
-            compCond[angle].update({rstar:{}})
+        for rstar, data_dict in rmesh_cond.data[angle].items():
+            compCond.data[angle].update({rstar:{}})
             for param, val1 in data_dict.items():
                 label1 = param + '_' + tag1
                 label2 = param + '_' + tag2
 
-                compCond[angle][rstar].update({label1:val1})
+                compCond.data[angle][rstar].update({label1:val1})
                 
-                val2 = cond2(angle*np.pi/180, rstar, param, interp_method='linear')
-                compCond[angle][rstar].update({label2:val2})
+                try:
+                    val2 = not_rmesh_cond(angle*np.pi/180, rstar, param, interp_method='linear')
+                    compCond.data[angle][rstar].update({label2:val2})
+                except KeyError:
+                    
+                    compCond.data[angle][rstar].update({label2:np.NaN})
 
     return compCond
 
