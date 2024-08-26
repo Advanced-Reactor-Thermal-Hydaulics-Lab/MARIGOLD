@@ -2679,8 +2679,7 @@ the newly calculated :math:`v_{r}` or not
                     u_t = 0                                                 # TI and RC are driven by the turbulent fluctuation velocity (u_t)
 
                     if debug:
-                        print(f"{angle}\t\t{rstar}:\t\talpha_loc: {alpha_loc}")
-                        pass
+                        print(f"{angle}\t\t{rstar}:\t\talpha_loc: {alpha_loc}\t\talpha_dat: {midas_dict['alpha']}")
 
                 # Talley 2012, secion 3.3.1
                 COV_loc = u_t * ai_loc**2 / (alpha_max**(1/3) * (alpha_max**(1/3) - (alpha_loc)**(1/3)))
@@ -2755,8 +2754,7 @@ the newly calculated :math:`v_{r}` or not
                     u_t = 0                                                 # TI and RC are driven by the turbulent fluctuation velocity (u_t)
 
                     if debug:
-                        # print(f"alpha_loc: {alpha_loc}")
-                        pass
+                        print(f"alpha_loc: {alpha_loc}")
 
                 We = rho_f * u_t**2 * Db_loc / sigma                        # Weber number criterion
 
@@ -2801,63 +2799,78 @@ the newly calculated :math:`v_{r}` or not
         
         """
 
-        debug = False
+        debug = True
 
         if method.lower() == 'talley':
-            self.roverRend = -1.472e-5 * self.Ref + 2.571   # End inner r/R, outer end fixed at r/R = 1
+            self.roverRend = -1.472e-5 * self.Ref + 2.571               # End inner r/R, outer end fixed at r/R = 1
 
-            def find_alpha_max(alpha_max, peak_loc=0.90):
-                for angle, r_dict in self.data.items():
-                    for rstar, midas_dict in r_dict.items():
-                        # Cartesian position of current angle
-                        # x = rstar * np.cos(angle * np.pi / 180)
-                        y = rstar * np.sin(angle * np.pi / 180)
+            def find_alpha_max(alpha_max, rstar_peak=0.90):
+                interps = {}
+                
+                for angle, r_dict in self.data.items():                 # 360 degrees covered, not just one quadrant
+                    
+                    if angle < 90:
+                        interps[angle] = {'angle_nn': angle_q1, 'm_nn': m_i, 'b_nn': b}
 
-                        # Find the peak nearest neighbor
-                        if angle == 90:
-                            # For 90 degrees, just alpha_max
-                            neighbor = alpha_max
+                    # Operate in first quadrant
+                    if angle <= 90:
+                        angle_q1 = angle
+                    elif angle <= 180:
+                        angle_q1 = 180 - angle
+                    elif angle <= 270:
+                        angle_q1 = angle - 180
+                    else:
+                        angle_q1 = 360 - angle
 
-                        elif angle == 0:
-                            # For 0 degrees, value at r/R = 0 along the 90 degree axis
-                            neighbor = float(max((alpha_max / (self.roverRend - peak_loc)) * (0 - peak_loc) + alpha_max, 0))
-                            # neighbor = float(max(m_prev * (0 - peak_loc) + b_prev, 0))
-                            
-                        else:
-                            # Find r* of previous angle at equivalent y-coordinate
-                            rstar_prev = y / np.sin(angle_prev * np.pi / 180)
+                    # Save previous angle linear interpolations for nearest neighbor determination
+                    if angle_q1 != 90:
+                        angle_nn = interps[angle_q1]['angle_nn']
+                        m_nn = interps[angle_q1]['m_nn']
+                        b_nn = interps[angle_q1]['b_nn']
 
-                            # Peak void fraction of current angle defined as void fraction at previous angle r*
-                            neighbor = float(max(m_prev * (rstar_prev - peak_loc) + b_prev, 0))
-                            pass
+                    # Find the peak nearest neighbor
+                    if angle_q1 == 90:
+                        # For 90 degrees, just alpha_max
+                        amax_nn = alpha_max
 
-                        # Linear interpolation, y = mx + b
-                        m_o = -neighbor / (1 - peak_loc)                    # Slope of outer interpolation
-                        m_i = -neighbor / (self.roverRend - peak_loc)       # Slope of inner interpolation
-                        b = neighbor                                        # (Shifted) intercept is the peak void fraction (nearest neighbor for non-90 and non-0)
+                    elif angle_q1 == 0:
+                        # For 0 degrees, value at r/R = 0 along the 90 degree axis
+                        amax_nn = float(max((-alpha_max / (self.roverRend - rstar_peak)) * (0 - rstar_peak) + alpha_max, 0))
+
+                    else:
+                        # Find r* of previous angle at equivalent y-coordinate
+                        y_peak = rstar_peak * np.sin(angle_q1 * np.pi / 180)
+                        rstar_nn = y_peak / np.sin(angle_nn * np.pi / 180)
+
+                        # Peak void fraction of current angle defined as void fraction at previous angle r*
+                        amax_nn = float(max(m_nn * (rstar_nn - rstar_peak) + b_nn, 0))
+
+                    # Linear interpolation, y = mx + b
+                    m_o = -amax_nn / (1 - rstar_peak)                   # Slope of outer interpolation
+                    m_i = -amax_nn / (self.roverRend - rstar_peak)      # Slope of inner interpolation
+                    b = amax_nn                                         # (Shifted) intercept is the peak void fraction (nearest neighbor for non-90 and non-0)
+
+                    for rstar, midas_dict in r_dict.items():            # Only goes from 0.0 to 1.0
+                        
+                        if angle >= 180:
+                            rstar = -rstar
 
                         # Alpha interpolations in terms of r* (see page 134 of Talley 2012)
-                        if rstar > peak_loc:
-                            midas_dict['alpha_reconstructed'] = float(m_o * (rstar - peak_loc) + b)
+                        if rstar > rstar_peak:
+                            # Outer interpolation
+                            midas_dict['alpha_reconstructed'] = float(m_o * (rstar - rstar_peak) + b)
                         else:
-                            if angle == 0:
-                                if -rstar > peak_loc:
-                                    midas_dict['alpha_reconstructed'] = float(m_o * (-rstar - peak_loc) + b)        # Symmetry for 180 degrees
+                            if angle_q1 == 0:
+                                if -rstar > rstar_peak:
+                                    # Symmetry for 180 degrees
+                                    midas_dict['alpha_reconstructed'] = float(m_o * (-rstar - rstar_peak) + b)
                                 else:
-                                    midas_dict['alpha_reconstructed'] = neighbor                                    # Between peak locations, uniform profile
+                                    # Between peak locations, uniform profile
+                                    midas_dict['alpha_reconstructed'] = amax_nn
                             else:
-                                midas_dict['alpha_reconstructed'] = float(max(m_i * (rstar - peak_loc) + b, 0))     # Make sure it's not < 0. This covers for y < roverRend
-
-                        ###############################################################################################
-                        # Debugging -- are all the r* = 0 values the same? Do they get overwritten with each new angle?
-                        if rstar == 0:
-                            print(f"Angle: {angle}\t\tr*: {rstar}\t\talpha: {midas_dict['alpha_reconstructed']}")
-                        ###############################################################################################
-
-                    # Save previous angle linear interpolation for nearest neighbor determination
-                    angle_prev = angle
-                    m_prev = m_i            # Nearest neighbor should never have to use the m_o case
-                    b_prev = b
+                                # Inner interpolation
+                                # Make sure it's not < 0. This covers for y < roverRend
+                                midas_dict['alpha_reconstructed'] = float(max(m_i * (rstar - rstar_peak) + b, 0))
 
                 return abs( self.area_avg('alpha') - self.area_avg('alpha_reconstructed') )
             
@@ -2867,9 +2880,8 @@ the newly calculated :math:`v_{r}` or not
                 self.alpha_max_reconstructed = result.x
                 find_alpha_max(self.alpha_max_reconstructed)
             else:
-                if debug:
-                    warnings.warn("Minimization did not return a successful result")
-                    print(f"⟨α⟩_data: {self.area_avg('alpha')}\n⟨α⟩_reconstructed: {self.area_avg('alpha_reconstructed')}\n")
+                warnings.warn("Minimization did not return a successful result")
+                print(f"⟨α⟩_data: {self.area_avg('alpha')}\n⟨α⟩_reconstructed: {self.area_avg('alpha_reconstructed')}\n")
 
             '''
             def find_alpha_max(alpha_max):
