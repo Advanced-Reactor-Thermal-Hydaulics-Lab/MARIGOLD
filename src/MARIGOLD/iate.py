@@ -17,7 +17,7 @@ def iate_1d_1g(
         void_method = 'driftflux', C_inf = 1.20,
 
         # Temporary arguments
-        restriction = None, cond2 = None, cheat = False, debug = False
+        restriction = None, cond2 = None, debug = False
         ):
     """ Calculate the area-averaged interfacial area concentration at query location based on the 1D 1G IATE
     
@@ -102,23 +102,18 @@ def iate_1d_1g(
         grav = 9.8
 
         cd_method = 'fixed_iter'
-        cheat = True
 
         C0 = 1.12
     elif preset == 'yadav':
         pass
     elif preset == 'talley':
-        if theta == 0:
-            # Horizontal
-            Dh = 0.0254
-            rho_f = 998
-            rho_g = 1.23
-            mu_f = 0.001
-            sigma = 0.07278
+        Dh = 0.0254
+        rho_f = 998
+        rho_g = 1.23
+        mu_f = 0.001
+        sigma = 0.07278
 
-            cd_method = 'doe'
-
-            pass
+        cd_method = 'doe'
     elif preset == 'worosz':
         pass
     
@@ -263,7 +258,7 @@ def iate_1d_1g(
         jgloc       = cond.jgloc                                # [m/s]
         jgatm       = cond.jgatm                                # [m/s]
 
-        if cheat == True:
+        if preset == 'kim':
             # jgloc = cond.jgref      # Testing for Bettis data
 
             ai[0]       = cond.area_avg_ai_sheet
@@ -306,7 +301,7 @@ def iate_1d_1g(
     # Calculate initial pressure and pressure gradient
     p = jgatm * p_atm / jgloc                                   # Back-calculate local corrected absolute pressure
     
-    if cheat == True:
+    if preset == 'kim':
         p = cond.pz                                             # Override
         dpdz = cond.dpdz
 
@@ -483,7 +478,7 @@ def iate_1d_1g(
 
         SVG[i] = ai[i] * dvgdz
 
-        if cheat == True:
+        if preset == 'kim':
             SVG[i] = 0                                          # Suppress VG for Bettis data
 
         # Critical void fraction to shut off turbulence-based mechanisms

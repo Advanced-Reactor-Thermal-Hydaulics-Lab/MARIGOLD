@@ -2804,8 +2804,74 @@ the newly calculated :math:`v_{r}` or not
         debug = False
 
         if method.lower() == 'talley':
-            self.roverRend = -1.472e-5 * self.Ref + 2.571
+            self.roverRend = -1.472e-5 * self.Ref + 2.571   # End inner r/R, outer end fixed at r/R = 1
 
+            def find_alpha_max(alpha_max, peak_loc=0.90):
+                for angle, r_dict in self.data.items():
+                    for rstar, midas_dict in r_dict.items():
+                        # Cartesian position of current angle
+                        # x = rstar * np.cos(angle * np.pi / 180)
+                        y = rstar * np.sin(angle * np.pi / 180)
+
+                        # Find the peak nearest neighbor
+                        if angle == 90:
+                            # For 90 degrees, just alpha_max
+                            neighbor = alpha_max
+
+                        elif angle == 0:
+                            # For 0 degrees, value at r/R = 0 along the 90 degree axis
+                            neighbor = float(max((alpha_max / (self.roverRend - peak_loc)) * (0 - peak_loc) + alpha_max, 0))
+                            # neighbor = float(max(m_prev * (0 - peak_loc) + b_prev, 0))
+                            
+                        else:
+                            # Find r* of previous angle at equivalent y-coordinate
+                            rstar_prev = y * np.arcsin(angle_prev * np.pi / 180)
+
+                            # Peak void fraction of current angle defined as void fraction at previous angle r*
+                            neighbor = float(max(m_prev * (rstar_prev - peak_loc) + b_prev, 0))
+                            pass
+
+                        # Linear interpolation, y = mx + b
+                        m_o = -neighbor / (1 - peak_loc)                    # Slope of outer interpolation
+                        m_i = -neighbor / (self.roverRend - peak_loc)       # Slope of inner interpolation
+                        b = neighbor                                        # (Shifted) intercept is the peak void fraction (nearest neighbor for non-90 and non-0)
+
+                        # Alpha interpolations in terms of r* (see page 134 of Talley 2012)
+                        if rstar > peak_loc:
+                            midas_dict['alpha_reconstructed'] = float(m_o * (rstar - peak_loc) + b)
+                        else:
+                            if angle == 0:
+                                if -rstar > peak_loc:
+                                    midas_dict['alpha_reconstructed'] = float(m_o * (-rstar - peak_loc) + b)        # Symmetry for 180 degrees
+                                else:
+                                    midas_dict['alpha_reconstructed'] = neighbor                                    # Between peak locations, uniform profile
+                            else:
+                                midas_dict['alpha_reconstructed'] = float(max(m_i * (rstar - peak_loc) + b, 0))     # Make sure it's not < 0. This covers for y < roverRend
+
+                        ###############################################################################################
+                        # Debugging -- are all the r* = 0 values the same? Do they get overwritten with each new angle?
+                        if rstar == 0:
+                            print(f"Angle: {angle}\t\tr*: {rstar}\t\talpha: {midas_dict['alpha_reconstructed']}")
+                        ###############################################################################################
+
+                    # Save previous angle linear interpolation for nearest neighbor determination
+                    angle_prev = angle
+                    m_prev = m_i            # Nearest neighbor should never have to use the m_o case
+                    b_prev = b
+
+                return abs( self.area_avg('alpha') - self.area_avg('alpha_reconstructed') )
+            
+            result = minimize(find_alpha_max, x0 = 0.5)
+
+            if result.success:
+                self.alpha_max_reconstructed = result.x
+                find_alpha_max(self.alpha_max_reconstructed)
+            else:
+                if debug:
+                    warnings.warn("Minimization did not return a successful result")
+                    print(f"⟨α⟩_data: {self.area_avg('alpha')}\n⟨α⟩_reconstructed: {self.area_avg('alpha_reconstructed')}\n")
+
+            '''
             def find_alpha_max(alpha_max):
                 for angle, r_dict in self.data.items():
                     for rstar, midas_dict in r_dict.items():
@@ -2838,7 +2904,7 @@ the newly calculated :math:`v_{r}` or not
                 if debug:
                     warnings.warn("Minimization did not return a successful result")
                     print(f"⟨α⟩_data: {self.area_avg('alpha')}\n⟨α⟩_reconstructed: {self.area_avg('alpha_reconstructed')}\n")
-
+            '''
 
         elif method.lower() == 'not_talley' or method.lower() == 'double_linear':
             self.roverRend = -1.472e-5 * self.Ref + 2.571
