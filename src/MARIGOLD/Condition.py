@@ -2825,7 +2825,7 @@ the newly calculated :math:`v_{r}` or not
                             
                         else:
                             # Find r* of previous angle at equivalent y-coordinate
-                            rstar_prev = y * np.arcsin(angle_prev * np.pi / 180)
+                            rstar_prev = y / np.sin(angle_prev * np.pi / 180)
 
                             # Peak void fraction of current angle defined as void fraction at previous angle r*
                             neighbor = float(max(m_prev * (rstar_prev - peak_loc) + b_prev, 0))
