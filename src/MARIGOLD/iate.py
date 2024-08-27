@@ -80,8 +80,8 @@ def iate_1d_1g(
     '''
 
     # MARIGOLD retrieval and setup
-    theta           = cond.theta                                # Pipe inclination angle
-    Dh              = cond.Dh                                   # Hydraulic diameter
+    theta           = cond.theta                                # Pipe inclination angle [degrees]
+    Dh              = cond.Dh                                   # Hydraulic diameter [m]
     rho_f           = cond.rho_f                                # Liquid phase density [kg/m**3]
     rho_g           = cond.rho_g                                # Gas phase density [kg/m**3]
     mu_f            = cond.mu_f                                 # Dynamic viscosity of water [Pa-s]

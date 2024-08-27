@@ -2624,14 +2624,6 @@ the newly calculated :math:`v_{r}` or not
          - Kang (08/19/2024)
         """
 
-        # Notes DHK 16 AUG
-        '''
-        Add a "use data" flag to toggle between using void reconstruct and local data to calculate covariance
-        Reconstructed profile should be saved in midas_dict
-
-        Verify mu_m_avg
-        '''
-
         debug = True
 
         if reconstruct_flag == True:
@@ -2645,7 +2637,7 @@ the newly calculated :math:`v_{r}` or not
 
         rho_f           = self.rho_f                                        # Liquid phase density [kg/m**3]
         rho_g           = self.rho_g                                        # Gas phase density [kg/m**3]
-        Dh              = self.Dh                                           # Hydraulic diameter
+        Dh              = self.Dh                                           # Hydraulic diameter [m]
         mu_f            = self.mu_f                                         # Dynamic viscosity of water [Pa-s]
         mu_m            = mu_f / (1 - alpha_avg)
 
@@ -2655,9 +2647,6 @@ the newly calculated :math:`v_{r}` or not
         f_TP            = 0.316 * (mu_m / mu_f / Rem)**0.25                 # Two-phase friction factor, Talley (2012) and Worosz (2015), also used in iate_1d_1g
         eps             = f_TP * v_m**3 / 2 / Dh                            # Energy dissipation rate (Wu et al., 1998; Kim, 1999), also used in iate_1d_1g
         
-        if debug:
-            print(f"alpha_avg: {alpha_avg}")
-        
         for angle, r_dict in self.data.items():
             for rstar, midas_dict in r_dict.items():
                 
@@ -2665,9 +2654,11 @@ the newly calculated :math:`v_{r}` or not
                 
                 if reconstruct_flag == True:
                     ai_loc = ai_avg * alpha_loc / alpha_avg
-                    try:
+                    midas_dict['ai_reconstructed'] = ai_loc
+
+                    if ai_loc != 0:
                         Db_loc = 6 * alpha_loc / ai_loc
-                    except:
+                    else:
                         Db_loc = 0
                 else:
                     ai_loc = midas_dict['ai']
@@ -2678,23 +2669,26 @@ the newly calculated :math:`v_{r}` or not
                 else:
                     u_t = 0                                                 # TI and RC are driven by the turbulent fluctuation velocity (u_t)
 
-                    if debug:
-                        print(f"{angle}\t\t{rstar}:\t\talpha_loc: {alpha_loc}\t\talpha_dat: {midas_dict['alpha']}")
+                # if debug:
+                #     print(f"{angle}\t{rstar}:\talpha_loc: {alpha_loc:.4f}\talpha_dat: {midas_dict['alpha']:.4f}")
 
                 # Talley 2012, secion 3.3.1
                 COV_loc = u_t * ai_loc**2 / (alpha_max**(1/3) * (alpha_max**(1/3) - (alpha_loc)**(1/3)))
                 
-                midas_dict.update({'u_t': u_t})
-                midas_dict.update({'COV_loc': COV_loc})
+                midas_dict['u_t'] = u_t
+                midas_dict['COV_loc'] = COV_loc
                 
         u_t_avg = self.area_avg('u_t')
+
+        # if debug:
+        #     print(f"\n\tu_t_avg: {u_t_avg}\n")
 
         if u_t_avg > 0:
             COV_avg = u_t_avg * ai_avg**2 / (alpha_max**(1/3) * (alpha_max**(1/3) - alpha_avg**(1/3)))
             COV_RC = self.area_avg('COV_loc') / COV_avg
 
             if debug:
-                print(f"COV_RC_num: {self.area_avg('COV_loc')}\nCOV_RC_den: {COV_avg}\n\n")
+                print(f"COV_RC_num: {self.area_avg('COV_loc')}\tCOV_RC_den: {COV_avg}")
         else:
             COV_avg = 0
             COV_RC = 0
@@ -2706,7 +2700,15 @@ the newly calculated :math:`v_{r}` or not
 
     def calc_COV_TI(self, alpha_max = 0.75, alpha_cr = 0.11, We_cr = 5, reconstruct_flag = True):
         
-        debug = False
+        # NOTES DHK 8/27
+        # Is We_cr applied locally or area-averaged?
+        # If locally, is We_avg calculated by area-averaging We_loc or by recalculating with area-averaged parameters?
+
+        # Definitely local, expressions for COV involve both We and <We>
+        # Then, is <We> area_averaged We or We calculated using area-averaged parameters?
+
+
+        debug = True
 
         if reconstruct_flag == True:
             self.reconstruct_void(method='talley')
@@ -2729,9 +2731,6 @@ the newly calculated :math:`v_{r}` or not
         Rem             = rho_m * v_m * Dh / mu_m                           # Mixture Reynolds number, ***CAREFUL*** I have seen some versions of the IATE script that use rho_f instead as an approximation
         f_TP            = 0.316 * (mu_m / mu_f / Rem)**0.25                 # Two-phase friction factor, Talley (2012) and Worosz (2015), also used in iate_1d_1g
         eps             = f_TP * v_m**3 / 2 / Dh                            # Energy dissipation rate (Wu et al., 1998; Kim, 1999), also used in iate_1d_1g
-        
-        if debug:
-            print(f"alpha_avg: {alpha_avg}")
 
         for angle, r_dict in self.data.items():
             for rstar, midas_dict in r_dict.items():
@@ -2739,10 +2738,12 @@ the newly calculated :math:`v_{r}` or not
                 alpha_loc = midas_dict[alpha_str]
 
                 if reconstruct_flag == True:
-                    ai_loc = ai_avg * alpha_loc / alpha_avg
-                    try:
+                    midas_dict['ai_reconstructed'] = ai_avg * alpha_loc / alpha_avg
+                    ai_loc = midas_dict['ai_reconstructed']
+
+                    if ai_loc != 0:
                         Db_loc = 6 * alpha_loc / ai_loc
-                    except:
+                    else:
                         Db_loc = 0
                 else:
                     ai_loc = midas_dict['ai']
@@ -2753,9 +2754,6 @@ the newly calculated :math:`v_{r}` or not
                 else:
                     u_t = 0                                                 # TI and RC are driven by the turbulent fluctuation velocity (u_t)
 
-                    if debug:
-                        print(f"alpha_loc: {alpha_loc}")
-
                 We = rho_f * u_t**2 * Db_loc / sigma                        # Weber number criterion
 
                 # Talley 2012, secion 3.3.1
@@ -2764,19 +2762,23 @@ the newly calculated :math:`v_{r}` or not
                 else:
                     COV_loc = 0
                 
-                midas_dict.update({'u_t': u_t})
-                midas_dict.update({'We': We})
-                midas_dict.update({'COV_loc': COV_loc})
+                midas_dict['u_t'] = u_t
+                midas_dict['We'] = We
+                midas_dict['COV_loc'] = COV_loc
                 
         u_t_avg = self.area_avg('u_t')
         We_avg = self.area_avg('We')
+        # We_avg = rho_f * u_t_avg**2 * (6 * alpha_avg / ai_avg) / sigma
+
+        # if debug:
+        #     print(f"\n\n<We>: {self.area_avg('We')}\tWe(<>): {rho_f * u_t_avg**2 * (6 * alpha_avg / ai_avg) / sigma}")
 
         if u_t_avg > 0:
             COV_avg = (u_t_avg * ai_avg**2 / alpha_avg) * np.sqrt(1 - (We_cr / We_avg)) * np.exp(-We_cr / We_avg)
             COV_TI = self.area_avg('COV_loc') / COV_avg
 
             if debug:
-                print(f"COV_TI_num: {self.area_avg('COV_loc')}\nCOV_TI_den: {COV_avg}\n\n")
+                print(f"COV_TI_num: {self.area_avg('COV_loc')}\tCOV_TI_den: {COV_avg}")
         else:
             COV_avg = 0
             COV_TI = 0
@@ -2799,7 +2801,7 @@ the newly calculated :math:`v_{r}` or not
         
         """
 
-        debug = True
+        debug = False
 
         if method.lower() == 'talley':
             self.roverRend = -1.472e-5 * self.Ref + 2.571               # End inner r/R, outer end fixed at r/R = 1
@@ -2851,19 +2853,19 @@ the newly calculated :math:`v_{r}` or not
                     b = amax_nn                                         # (Shifted) intercept is the peak void fraction (nearest neighbor for non-90 and non-0)
 
                     for rstar, midas_dict in r_dict.items():            # Only goes from 0.0 to 1.0
-                        
+
                         if angle >= 180:
                             rstar = -rstar
 
                         # Alpha interpolations in terms of r* (see page 134 of Talley 2012)
                         if rstar > rstar_peak:
                             # Outer interpolation
-                            midas_dict['alpha_reconstructed'] = float(m_o * (rstar - rstar_peak) + b)
+                            midas_dict['alpha_reconstructed'] = float(max(m_o * (rstar - rstar_peak) + b,0))
                         else:
                             if angle_q1 == 0:
                                 if -rstar > rstar_peak:
                                     # Symmetry for 180 degrees
-                                    midas_dict['alpha_reconstructed'] = float(m_o * (-rstar - rstar_peak) + b)
+                                    midas_dict['alpha_reconstructed'] = float(max(m_o * (-rstar - rstar_peak) + b,0))
                                 else:
                                     # Between peak locations, uniform profile
                                     midas_dict['alpha_reconstructed'] = amax_nn
@@ -2871,10 +2873,16 @@ the newly calculated :math:`v_{r}` or not
                                 # Inner interpolation
                                 # Make sure it's not < 0. This covers for y < roverRend
                                 midas_dict['alpha_reconstructed'] = float(max(m_i * (rstar - rstar_peak) + b, 0))
+                        
+                        if debug:
+                            print(f"{angle}\t{rstar}:\t\talpha_rec: {midas_dict['alpha_reconstructed']:.4f}\talpha_dat: {midas_dict['alpha']:.4f}")
+
+                if debug:
+                    print(f"data: {self.area_avg('alpha'):.4f}\treconstruction: {self.area_avg('alpha_reconstructed'):.4f}\n")
 
                 return abs( self.area_avg('alpha') - self.area_avg('alpha_reconstructed') )
             
-            result = minimize(find_alpha_max, x0 = 0.5)
+            result = minimize(find_alpha_max, x0 = 0.5, bounds = ((0,1),))      # The way they want me to format bounds is stupid. Python is stupid.
 
             if result.success:
                 self.alpha_max_reconstructed = result.x
