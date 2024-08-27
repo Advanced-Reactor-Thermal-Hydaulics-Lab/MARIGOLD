@@ -46,14 +46,15 @@ def write_CFX_BC(cond:Condition, save_dir = ".", z_loc = 'LoverD', only_90 = Fal
             f.write("[Data],,,,,,,,,\n")
             f.write("radius [mm],z [m],phi [],Velocity u g[m s^-1],Velocity v g[m s^-1],Velocity w g[m s^-1],Volume Fraction [],Velocity u f [m s^-1],Velocity v f [m s^-1],Velocity w f [m s^-1],\n")
 
-            for angle, r_dict in cond.phi.items():
+            for angle, r_dict in cond.data.items():
                     for rstar, midas_output in r_dict.items():
                         if only_90:
                             if angle == 90 or angle == 270:
-                                pass
+                                r = rstar * 12.7 * np.sin(angle * np.pi/180) # r/R * R [mm]
                             else:
                                 continue
-                        r = rstar * 12.7 * np.sin(angle * np.pi/180) # r/R * R [mm]
+                        else:
+                            r = rstar * 12.7 # r/R * R [mm]
 
                         f.write(f"{r},{z_loc},{angle * np.pi/180},{0},{0},{midas_output['ug1']},{midas_output['alpha']},{0},{0},{midas_output['vf']},\n")
         elif interp == 'xy':
@@ -147,10 +148,10 @@ def read_CFX_export(csv_name, jf, jgref, theta, port, database, jgloc=None) -> C
             phi_angle = int(np.arctan2(y, x) * 180/np.pi)
 
             try:
-                cond.phi[phi_angle].update({roverR:data_dict})
+                cond.data[phi_angle].update({roverR:data_dict})
             except:
-                cond.phi.update({phi_angle:{}})
-                cond.phi[phi_angle].update({roverR:data_dict})
+                cond.data.update({phi_angle:{}})
+                cond.data[phi_angle].update({roverR:data_dict})
 
     return cond
 

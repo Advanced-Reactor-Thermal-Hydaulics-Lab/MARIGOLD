@@ -2,19 +2,22 @@ from .config import *
 
 def iate_1d_1g(
         # Basic inputs
-        cond, query, z_step = 0.01, parcel = None, 
+        cond, query, z_step = 0.01, io = None,
         
         # IATE Coefficients
-        C_WE = None, C_RC = None, C_TI = None, alpha_max = 0.75, C = 3, We_cr = 6, acrit_flag = 0, acrit = 0.13, C_inf = 1.20,
+        C_WE = None, C_RC = None, C_TI = None, alpha_max = 0.75, C = 3, We_cr = 6, acrit_flag = 0, acrit = 0.13,
 
         # Method arguments
-        dpdz_method = 'LM', cd_method = 'doe', void_method = 'driftflux',
+        preset = None, cd_method = 'doe',
 
-        # Pressure drop calculation arguments
-        LM_C = 40, k_m = 0.10,
+        # Pressure drop calculation
+        dpdz_method = 'LM', LM_C = 40, k_m = 0.10, m = 0.316, n = 0.25,
+
+        # Void fraction calculation
+        void_method = 'driftflux', C_inf = 1.20,
 
         # Temporary arguments
-        restriction = None, cond2 = None
+        restriction = None, cond2 = None, debug = False
         ):
     """ Calculate the area-averaged interfacial area concentration at query location based on the 1D 1G IATE
     
@@ -22,7 +25,7 @@ def iate_1d_1g(
      - cond:            Condition object, part of MARIGOLD framework
      - query:           L/D endpoint
      - z_step:          Axial mesh cell size [-]
-     - parcel:          Output package of iate_1d_1g(), can be used as input for subsequent runs
+     - io:              Output package of iate_1d_1g(), can be used as input for subsequent runs
      - C_WE:            Wake entrainment coefficient
      - C_RC:            Random collision coefficient
      - C_TI:            Turbulent impact coefficient
@@ -41,34 +44,83 @@ def iate_1d_1g(
      - cond2:           Second condition object, for possible interpolation
 
     Notes:
-     - Isn't this script nice and clean? Follow good coding practices, kids. - David
      - Notice some grav terms are made absolute; needs downward flow fixes
      - IATE coefficients set as optional inputs, with default values set depending on geometry
      - COV terms being implemented in Condition.py, not incorporated into this function yet
      - vgz calculation in elbow and dissipation length regions still need to be implemented
      - Need a way to compute void fraction across restrictions, void fraction prediction falters
      - Modify MG for Yadav data extraction
-     - Revise parcel and cond2 variable names
      - Revise vgj calculation
     """
+
+    # Could make a dictionary with all of the options outside of the fxn and then with kwarg
+    # Inside of the function with whatever kwargs you passed update the dictionary
+
+    '''
+    option_dict = {
+        "dpdz": 'LM',
+        "CD": 0.2
+    }
+
+    def test(**kwargs):
+
+        for option, value in kwargs.items():
+            if option in option_dict.keys():
+                option_dict.update({option:value})
+            else:
+                print(f"Warning: unknown option {option}")
+
+        # Test
+        print(option_dict)
+
+
+    if __name__ == '__main__':
+
+        test(CD = 0.4, m = 4)
+    '''
 
     # MARIGOLD retrieval and setup
     theta           = cond.theta                                # Pipe inclination angle
     Dh              = cond.Dh                                   # Hydraulic diameter
-
     rho_f           = cond.rho_f                                # Liquid phase density [kg/m**3]
     rho_g           = cond.rho_g                                # Gas phase density [kg/m**3]
-    mu_f            = cond.mu_f                                 # Viscosity of water [Pa-s]
+    mu_f            = cond.mu_f                                 # Dynamic viscosity of water [Pa-s]
+    mu_g            = cond.mu_g                                 # Dynamic viscosity of air [Pa-s]
     sigma           = cond.sigma                                # Surface tension of air/water [N/m]
     p_atm           = 101325                                    # Ambient pressure [Pa]
     grav            = 9.81*np.sin((theta)*np.pi/180)            # Gravity constant (added by Drew to account for pipe inclination)
     R_spec          = 287.058                                   # Specific gas constant for dry air [J/kg-K]
     T               = 293.15                                    # Ambient absolute temperature [K], for calculating air density as a function of pressure along channel
+
+    C0 = None
+    if preset == 'kim':
+        rho_f = 998
+        rho_g = 1.226
+        mu_f = 0.001
+        sigma = 0.07278
+        p_atm = 101330
+        grav = 9.8
+
+        cd_method = 'fixed_iter'
+
+        C0 = 1.12
+    elif preset == 'yadav':
+        pass
+    elif preset == 'talley':
+        Dh = 0.0254
+        rho_f = 998
+        rho_g = 1.23
+        mu_f = 0.001
+        sigma = 0.07278
+
+        cd_method = 'doe'
+    elif preset == 'worosz':
+        pass
     
-    if parcel == None:
+    if io == None:
         LoverD      = cond.LoverD                               # Condition L/D
     else:
-        LoverD      = parcel["z_mesh"][-1] / Dh
+        LoverD      = io["z_mesh"][-1] / Dh
     
     # Mesh generation
     if query < LoverD+z_step:
@@ -101,8 +153,42 @@ def iate_1d_1g(
         if C_TI == None:
             C_TI    = 0.014
         
-        COV_RC      = 1
-        COV_TI      = 1
+        We_cr = 5
+        
+        COV_RC      = cond.calc_COV_RC(reconstruct_flag=True)
+        COV_TI      = cond.calc_COV_TI(reconstruct_flag=True)
+
+        print('COV_RC: ',COV_RC)
+        print('COV_TI: ',COV_TI)
+
+        # Row is run, column is port?
+        # I think this should be implemented in extracts and loads, as a cheat option
+        # In here, maybe have an interpolation framework for the COV between ports?
+        '''
+        CovTI = [
+            0.267	0.187	0.187
+            0.112	0.062	0.053
+            1.000	1.000	1.000
+            0.558	0.603	0.603
+            0.188	0.335	0.168
+            1.209	1.000	1.000
+            0.902	1.000	1.000
+            0.422	1.000	0.860
+            0.272	0.395	0.228
+        ];
+    
+        CovRC = [
+            0.843	0.625	0.459
+            0.596	0.070	0.053
+            3.496	2.693	2.759
+            1.135	2.594	1.169
+            0.328	0.460	0.144
+            2.917	1.517	1.525
+            3.290	1.547	1.553
+            0.741	1.605	1.239
+            0.249	0.339	0.143
+        ];
+        '''
 
     elif restriction == 'elbow':                # Elbow (Yadav, 2013)
         if C_WE == None:
@@ -161,50 +247,48 @@ def iate_1d_1g(
     aiexp           = np.empty(len(z_mesh))
     aivg            = np.empty(len(z_mesh))
 
-    if parcel == None:
+    if io == None:
         aiwe[0]     = 0
         airc[0]     = 0
         aiti[0]     = 0
         aiexp[0]    = 0
         aivg[0]     = 0
 
-        try:    ai[0]       = cond.area_avg("ai")                       # [1/m]
-        except: pass
-        try:    ai[0]       = cond.area_avg_ai_sheet
-        except: print(f'Could not find ai for {cond}.')
-
-        try:    alpha[0]    = cond.area_avg("alpha")                    # [-]
-        except: pass
-        try:    alpha[0]    = cond.area_avg_void_sheet
-        except: print(f'Could not find alpha for {cond}.')
-        
-        try:    Db[0]       = cond.void_area_avg("Dsm1") / 1000         # [m]
-        except: pass
-        try:    Db[0]       = cond.area_avg_Dsm_sheet
-        except: print(f'Could not find Dsm for {cond}.')
-        
         jf          = cond.jf                                   # [m/s]
         jgloc       = cond.jgloc                                # [m/s]
         jgatm       = cond.jgatm                                # [m/s]
 
-    else:
-        aiwe[0]     = parcel["aiwe"][-1]
-        airc[0]     = parcel["airc"][-1]
-        aiti[0]     = parcel["aiti"][-1]
-        aiexp[0]    = parcel["aiexp"][-1]
-        aivg[0]     = parcel["aivg"][-1]
+        if preset == 'kim':
+            # jgloc = cond.jgref      # Testing for Bettis data
 
-        ai[0]       = parcel["ai"][-1]
-        alpha[0]    = parcel["alpha"][-1]
-        Db[0]       = parcel["Db"][-1]
-        jf          = parcel["jf"]
-        jgloc       = parcel["jgloc"]
-        jgatm       = parcel["jgatm"]
+            ai[0]       = cond.area_avg_ai_sheet
+            alpha[0]    = cond.area_avg_void_sheet
+            # Db[0]       = cond.area_avg_Dsm_sheet / 1000
+
+            Db[0]       = 6 * alpha[0] / ai[0]
+        else:
+            ai[0]       = cond.area_avg("ai")                       # [1/m]
+            alpha[0]    = cond.area_avg("alpha")                    # [-]
+            Db[0]       = cond.void_area_avg("Dsm1") / 1000         # [m]
+
+    else:
+        aiwe[0]     = io["aiwe"][-1]
+        airc[0]     = io["airc"][-1]
+        aiti[0]     = io["aiti"][-1]
+        aiexp[0]    = io["aiexp"][-1]
+        aivg[0]     = io["aivg"][-1]
+
+        ai[0]       = io["ai"][-1]
+        alpha[0]    = io["alpha"][-1]
+        Db[0]       = io["Db"][-1]
+        jf          = io["jf"]
+        jgloc       = io["jgloc"]
+        jgatm       = io["jgatm"]
 
     ########################################################################################################################
     # Pressure drop [Pa/m]
-    p = (jgatm * p_atm / jgloc) - p_atm                         # Back-calculate local corrected gauge pressure
 
+    # Calculate height change for gravitational loss
     if restriction == 'elbow':
         delta_h = (z_mesh[-1] - z_mesh[0]) * 2 / np.pi          # The height of an elbow is going to be its radius
 
@@ -214,22 +298,31 @@ def iate_1d_1g(
     else:
         delta_h = (z_mesh[-1] - z_mesh[0])                      # Dissipation region is going to be the same as standard VU
 
-    if cond2 == None:
+    # Calculate initial pressure and pressure gradient
+    p = jgatm * p_atm / jgloc                                   # Back-calculate local corrected absolute pressure
+    
+    if preset == 'kim':
+        p = cond.pz                                             # Override
+        dpdz = cond.dpdz
+
+    elif cond2 == None:
         dpdz = cond.calc_dpdz(
             method = dpdz_method, 
-            LM_C = LM_C, 
+            chisholm = LM_C, 
             k_m = k_m, 
             L = (query - LoverD) * Dh
             ) + ((rho_f * grav * delta_h) / (z_mesh[-1] - z_mesh[0]))   # Pressure gradient from gravity
         
     else:
-        dpdz = (((cond2.jgatm * p_atm / cond2.jgloc) - p_atm) - p) / (cond2.LoverD - LoverD)
+        dpdz = ((cond2.jgatm * p_atm / cond2.jgloc) - p) / (cond2.LoverD - LoverD)
 
-    pz = (p + p_atm) * (1 - (z_mesh - z_mesh[0]) * (dpdz / (p + p_atm)))
+    pz = p * (1 - (z_mesh - z_mesh[0]) * (dpdz / p))
     
 	# Local gas density along the test section
-    rho_gz = rho_g * pz / p_atm                                 # Talley
-    # rho_gz = pz / R_spec / T                                  # Worosz, Ideal Gas Law
+    if preset == 'worosz':
+        rho_gz = pz / R_spec / T                                # Worosz, Ideal Gas Law
+    else:
+        rho_gz = rho_g * pz / p                                 # Talley
     
     ############################################################################################################################
     #                                                                                                                          #
@@ -248,9 +341,9 @@ def iate_1d_1g(
 
         ########################################################################################################################
         # Estimate bubble relative velocity <ur> (See Talley, 2012, 4.2.2.6)
-        ur = 0.2                                                    # Set to constant value of 0.23 m/s by Schilling (2007)
+        ur = 0.2                                                # Set to constant value of 0.23 m/s by Schilling (2007)
 
-        if cd_method == 'iter':
+        if cd_method == 'err_iter':
             err = 0.1
             while abs(err) > 0.000001:
                 ReD = rho_f * ur * Db[i] * (1 - alpha[i]) / mu_f    # Bubble Reynolds number
@@ -270,23 +363,46 @@ def iate_1d_1g(
             CDwe = 24 * (1 + 0.1 * ReD**0.75) / ReD
             ur = (4 * abs(grav) * Db[i] / 3 / CDwe)**0.5            # Interestingly, Yadav keeps 9.8 instead of changing grav for angle
 
+        elif cd_method == 'fixed_iter':
+            for loop_idx in range(25):
+                ReD = rho_f * ur * Db[i] * (1 - alpha[i]) / mu_f
+                CDwe = 24 * (1 + 0.1 * ReD**0.75) / ReD
+
+                if preset == 'kim':
+                    ur = (grav * Db[i] / 3 / CDwe)**0.5
+                else:
+                    ur = (4 * grav * Db[i] / 3 / CDwe)**0.5
+            
+            ReD = rho_f * ur * Db[i] * (1 - alpha[i]) / mu_f
+            CDwe = 24 * (1 + 0.1 * ReD**0.75) / ReD
+
         ########################################################################################################################
         # Estimate Energy Dissipation Rate and Turbulent Velocity (See Talley, 2012, 4.2.2.3)
         #   > One-group models written using turbulent fluctuation velocity, while models implemented in TRACE are written using
         #     dissipation rate
-
+    
         mu_m = mu_f / (1 - alpha[i])                            # Mixture viscosity, given by Ishii and Chawla (Eq. 4-10 in Kim, 1999)
         rho_m = (1 - alpha[i]) * rho_f + alpha[i] * rho_gz[i]   # Mixture density
 
         vm = (rho_f * (1 - alpha[i]) * vfz + rho_gz[i] * alpha[i] * vgz[i]) \
             / rho_m                                             # Mixture velocity
         
-        # Rem = rho_f * vm * Dh / mu_m                          # Mixture Reynolds number
-        Rem = rho_m * vm * Dh / mu_m                            # Yadav
+        if preset == 'kim':
+            Rem = rho_f * vm * Dh / mu_m                        # Mixture Reynolds number
+        else:
+            Rem = rho_m * vm * Dh / mu_m                        # Yadav
+
         fTW = 0.316 * (mu_m / mu_f)**0.25 / Rem**0.25           # Two-phase friction factor
         e = fTW * (vm**3) / 2 / Dh                              # Energy dissipation rate (Wu et al., 1998; Kim, 1999)
-        ut = 1.4 * e**(1/3) * Db[i]**(1/3)                      # Turbulent velocity (Batchelor, 1951; Rotta, 1972)
+        u_t = 1.4 * e**(1/3) * Db[i]**(1/3)                     # Turbulent velocity (Batchelor, 1951; Rotta, 1972)
         
+        if debug:
+            with open("H:\TRSL-H\IATE\TEST.txt", mode = 'a+') as FID:
+                print(f"\n\n{i+1}.\tjf = {jf} [m/s], jg = {cond.jgref} [m/s]\n\tL/D: {z/Dh}\n\tur: {ur}\n\tut: {u_t}\n\ta: {alpha[i]}",file=FID)
+
+            with open("H:\TRSL-H\IATE\VZ.txt", mode = 'a+') as FID:
+                print(f"\n\n{i+1}.\tjf = {jf} [m/s], jg = {cond.jgref} [m/s]\n\tL/D: {z/Dh}\n\tvfz: {vfz}\n\tvgz: {vgz[i]}\n\tjg: {jgloc}",file=FID)
+
         ########################################################################################################################
         # Estimate sources & sinks in the Interfacial Area Transport Eqn. (Part 1)
 
@@ -322,13 +438,13 @@ def iate_1d_1g(
             SWE[i] = C_WE * CDwe**(1/3) * ur * ai[i]**2 / 3 / np.pi
         
         # Sink due to Random Collisions	
-        RC1 = ut * ai[i]**2 / alpha_max**(1/3) / (alpha_max**(1/3) - alpha[i]**(1/3))
+        RC1 = u_t * ai[i]**2 / alpha_max**(1/3) / (alpha_max**(1/3) - alpha[i]**(1/3))
         RC2 = 1 - np.exp(-C * alpha_max**(1/3) * alpha[i]**(1/3) / (alpha_max**(1/3) - alpha[i]**(1/3)))
         SRC[i] = COV_RC * C_RC * RC1 * RC2 / 3 / np.pi
         
         # Source due to Turbulent Impact
-        TI1 = ut * ai[i]**2 / alpha[i]
-        We = rho_f * ut**2 * Db[i] / sigma                      # Weber number criterion
+        TI1 = u_t * ai[i]**2 / alpha[i]
+        We = rho_f * u_t**2 * Db[i] / sigma                     # Weber number criterion
 
         if We > We_cr:
             TI2 = (1 - We_cr / We)**0.5 * np.exp(-We_cr / We)
@@ -340,15 +456,16 @@ def iate_1d_1g(
         # Estimate sources & sinks in the Interfacial Area Transport Eqn. (Part 2)
 
         # Source due to Bubble Expansion
-        if i <= 2:      # Previously 3, but in MATLAB (1 indexing vs. 0 indexing)
-            # Forward difference for first node
-            SEXP[i] = -2 / 3 / rho_gz[i] * ai[i] * vgz[i] * (rho_gz[i+1] - rho_gz[i]) / z_step
+        if preset == 'kim' or preset == 'doe' or preset == 'talley':
+            SEXP[i] = -2 / 3 / pz[i] * ai[i] * vgz[i] * (-dpdz)     # Original DOE_MATLAB_IAC
         else:
-            # Backwards difference for remaining nodes
-            SEXP[i] = -2 / 3 / rho_gz[i] * ai[i] * vgz[i] * (rho_gz[i] - rho_gz[i-1]) / z_step
+            if i <= 2:      # Previously 3, but in MATLAB (1 indexing vs. 0 indexing)
+                # Forward difference for first node
+                SEXP[i] = -2 / 3 / rho_gz[i] * ai[i] * vgz[i] * (rho_gz[i+1] - rho_gz[i]) / z_step
+            else:
+                # Backwards difference for remaining nodes
+                SEXP[i] = -2 / 3 / rho_gz[i] * ai[i] * vgz[i] * (rho_gz[i] - rho_gz[i-1]) / z_step
 
-        # SEXP[i] = -2 / 3 / pz[i] * ai[i] * vgz[i] * (-dpdz)   # Original DOE_MATLAB_IAC
-        
         # Source/sink due to Bubble Acceleration (advection in Yadav's script)
         if i <= 2:
             dvg = 0
@@ -360,6 +477,9 @@ def iate_1d_1g(
             dvgdz = dvg / z_step
 
         SVG[i] = ai[i] * dvgdz
+
+        if preset == 'kim':
+            SVG[i] = 0                                          # Suppress VG for Bettis data
 
         # Critical void fraction to shut off turbulence-based mechanisms
         if acrit_flag == 1 and alpha[i] > acrit:
@@ -375,8 +495,12 @@ def iate_1d_1g(
         aiwe[i+1]       = aiwe[i] + z_step * SWE[i] / vgz[i]
         aivg[i+1]       = aivg[i] + z_step * SVG[i] / vgz[i]
 
-        # Estimate Void Fraction for the next step calculation
+        if debug:
+            with open("H:\TRSL-H\IATE\AI.txt", mode = 'a+') as FID:
+                print(f"\n\n{i+1}.\tjf = {jf} [m/s], jg = {cond.jgref} [m/s]\n\tL/D: {z/Dh}\n\tTI: {aiti[i]}\n\tRC: {airc[i]}\n\tEXP: {aiexp[i]}\n\tWE: {aiwe[i]}",file=FID)
 
+        ########################################################################################################################
+        # Estimate Void Fraction for the next step calculation
         if void_method == 'driftflux':      # Drift Flux Model
 
             j = jgloc + jf
@@ -385,10 +509,14 @@ def iate_1d_1g(
             # Applicable for void fractions less than 20%; for void fractions greater than 30%, use Kataoka and Ishii 1987 for drift-velocity
             vgj = (2**0.5) * (sigma * abs(grav) * (rho_f - rho_gz[i]) / (rho_f**2))**0.25 * (1 - alpha[i])**(1.75)
             
-            C0 = C_inf - (C_inf - 1) * np.sqrt(rho_gz[i]/rho_f)     # Round tube drift flux distribution parameter
-            # alpha[i+1] = (jgloc) / (C0 * j + vgj)
+            if C0 == None:
+                C0 = C_inf - (C_inf - 1) * np.sqrt(rho_gz[i]/rho_f)     # Round tube drift flux distribution parameter
+            
+            alpha[i+1] = jgloc / (C0 * j + vgj)
 
-            alpha[i+1] = (jgloc) / (C0 * j + vgj)
+            if debug:
+                with open("H:\TRSL-H\IATE\DF.txt", mode = 'a+') as FID:
+                    print(f"\n\n{i+1}.\tjf = {jf} [m/s], jg = {cond.jgref} [m/s]\n\tL/D: {z/Dh}\n\tC0: {C0}\n\tvgj: {vgj}\n\tj: {j}\n\talpha: {alpha[i]}",file=FID)
 
         elif void_method == 'continuity':   # Continuity
 
@@ -402,11 +530,51 @@ def iate_1d_1g(
 
             else:
                 alpha[i+1] = alpha[i] - (alpha[i] / (rho_gz[i] * vgz[i])) * ((rho_gz[i] * vgz[i]) - (rho_gz[i-1] * vgz[i-1]))
+                
+        elif void_method == 'pressure_kim':
+            f_f, f_g = cond.calc_fric(m = m, n = n)
+            dpdz_f = f_f * 1/Dh * rho_f * jf**2 / 2
+
+            phi_f2 = (dpdz - ((rho_f * grav * delta_h) / (z_mesh[-1] - z_mesh[0]))) / dpdz_f
+
+            rho_x = rho_gz[i] / rho_f
+            mu_x = mu_g / mu_f
+            L_x = query - LoverD             # Restriction length scale, = L/D_restriction
+            Re_f = rho_f * jf * Dh / mu_f
+
+            chiM_inv = (3.165 * k_m / L_x * Re_f**0.25)**0.5
+
+            quad_A = 1
+            quad_B = LM_C * (1 + (chiM_inv**2))**0.5
+            quad_C = 1 + (chiM_inv**2) - phi_f2
+
+            chi_inv = ((-quad_B + (quad_B**2 - 4 * quad_A * quad_C)**0.5) / (2 * quad_A))     # Quadratic formula to solve for 1/X
+            alpha_x = (chi_inv**8 / rho_x**3 / mu_x)**(1/7)                                   # Solve for alpha/(1-alpha)
+
+            alpha[i+1] = alpha_x / (alpha_x + 1)
+
+        elif void_method == 'pressure_LM':
+            f_f, f_g = cond.calc_fric(m = m, n = n)
+            dpdz_f = f_f * 1/Dh * rho_f * jf**2 / 2
+
+            phi_f2 = (dpdz - ((rho_f * grav * delta_h) / (z_mesh[-1] - z_mesh[0]))) / dpdz_f
+
+            rho_x = rho_gz[i] / rho_f
+            mu_x = mu_g / mu_f
+
+            quad_A = 1
+            quad_B = LM_C
+            quad_C = 1 - phi_f2
+
+            chi_inv = ((-quad_B + (quad_B**2 - 4 * quad_A * quad_C)**0.5) / (2 * quad_A))     # Quadratic formula to solve for 1/X
+            alpha_x = (chi_inv**8 / rho_x**3 / mu_x)**(1/7)                                   # Solve for alpha/(1-alpha)
+
+            alpha[i+1] = alpha_x / (alpha_x + 1)
 
         # Estimate Sauter mean diameter for the next step calculation
         Db[i+1] = 6 * alpha[i+1] / ai[i+1]
         
-    parcel = {
+    io = {
         "ai"            : ai,
         "alpha"         : alpha,
         "Db"            : Db,
@@ -423,4 +591,4 @@ def iate_1d_1g(
         "pz"            : pz
     }
 
-    return parcel
+    return io
