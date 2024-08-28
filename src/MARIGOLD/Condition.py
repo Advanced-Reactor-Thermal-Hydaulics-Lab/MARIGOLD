@@ -2920,7 +2920,7 @@ the newly calculated :math:`v_{r}` or not
          
         
         """
-
+        # TODO rewrite so it always loops over a list of params. If there's only one, just put it in a list at the begininng 
 
         plt.rcParams.update({'font.size': 12})
         plt.rcParams["font.family"] = "Times New Roman"
@@ -2936,7 +2936,7 @@ the newly calculated :math:`v_{r}` or not
         ax.tick_params(direction='in',which='both')
 
         ms = marker_cycle()
-        if cs is None:
+        if cs is None or type(param) == list:
             cs = color_cycle()
         elif cs == 'infer' and type(param) == str:
             cs = color_cycle(set_color = param)
@@ -3034,28 +3034,20 @@ the newly calculated :math:`v_{r}` or not
 
                     for specific_param, val_list in zip(param, temp):
                         # print(val_list)
-                        cs = color_cycle(set_color = specific_param)
-
-                        if specific_param == 'alpha':
-                            legend_str = r'$\alpha$'
-                        elif specific_param == 'alpha_G1':
-                            legend_str = r'$\alpha_{G1}$'
-                        elif specific_param == 'alpha_G2':
-                            legend_str = r'$\alpha_{G2}$'
-                        elif specific_param == 'ai':
-                            legend_str = r'$a_{i}$'
-                        elif specific_param == 'ai_G1':
-                            legend_str = r'$a_{i, G1}$'
-                        elif specific_param == 'ai_G2':
-                            legend_str = r'$a_{i, G2}$'
-                        elif specific_param == 'ug1':
-                            legend_str = r'$v_{g, G1}$'
-                        elif specific_param == 'ug2':
-                            legend_str = r'$v_{g, G2}$'
-                        elif specific_param == 'vf':
-                            legend_str = r'$v_{f}$'
-                        elif specific_param == 'vf_approx':
-                            legend_str = r'$v_{f, approx}$'
+                        if cs == 'infer':
+                            cs = color_cycle(set_color = specific_param)
+                        
+                        
+                        legend_str = ''
+                        if 'alpha' in specific_param:
+                            specific_param = specific_param.replace('alpha', r'$\alpha$')
+                        elif 'ai' in specific_param:
+                            specific_param = specific_param.replace('ai', r'$a_{i}$')
+                        elif 'ug' in specific_param:
+                            specific_param = specific_param.replace('ug', r'$v_{g}$')
+                        elif 'vf' in specific_param:
+                            specific_param = specific_param.replace('vf', r'$v_{f}$')
+                        
                         elif specific_param == 'vr':
                             legend_str = r'$v_{r, G1}$'
                         elif specific_param == 'vr2':
@@ -3064,8 +3056,9 @@ the newly calculated :math:`v_{r}` or not
                             legend_str = r'$D_{sm1}$'
                         elif specific_param == 'Dsm2':
                             legend_str = r'$D_{sm2}$'
-                        else:
-                            legend_str = param
+
+                        if legend_str == '':
+                            legend_str = specific_param
 
                         if x_axis == 'vals':
                             ax.plot(val_list, rs, color=next(cs), marker=next(ms), linestyle = '--', label = legend_str)
@@ -4483,6 +4476,7 @@ def color_cycle(set_color = None):
      * Otherwise, it assumes set_color is a list of colors to yield
 
     """
+    color_list = []
     if set_color == None:
         color_list = ['#0000FF',
                       '#FF0000',
@@ -4496,34 +4490,37 @@ def color_cycle(set_color = None):
                       '#000000']
     elif re.search(r'^#(?:[0-9a-fA-F]{3}){1,2}$', set_color):
         color_list = [set_color]
-    elif set_color == 'alpha':
-        color_list = ['#000000']
-    elif set_color == 'alpha_G1':
-        color_list = ['#A0A0A0']
-    elif set_color == 'alpha_G2':
-        color_list = ['#606060']
-    elif set_color == 'ai':
-        color_list = ['#00FF00']
-    elif set_color == 'ai_G2':
-        color_list = ['#66FF66']
-    elif set_color == 'ai_G1':
-        color_list = ['#006600']
-    elif set_color == 'ug1':
-        color_list = ['#FF0000']
-    elif set_color == 'ug2':
-        color_list = ['#ff8080']
-    elif set_color == 'Dsm1':
-        color_list = ['#00FFFF']
-    elif set_color == 'Dsm2':
-        color_list = ['#6666FF']
-    elif set_color == 'vf' or set_color == 'vf_approx':
-        color_list = ['#0000FF']
-    elif set_color == 'vr':
-        color_list = ['#FF00FF']
-    elif set_color == 'vr2':
-        color_list = ['#FF80FF']
+    # I want these to be able to override each other
     else:
-        color_list = ['#000000']
+        if 'alpha' in set_color:
+            color_list = ['#000000']
+        if 'alpha_G1' in set_color:
+            color_list = ['#A0A0A0']
+        if 'alpha_G2' in set_color:
+            color_list = ['#606060']
+        if 'ai' in set_color:
+            color_list = ['#00FF00']
+        if 'ai_G2' in set_color:
+            color_list = ['#66FF66']
+        if 'ai_G1' in set_color:
+            color_list = ['#006600']
+        if 'ug1' in set_color:
+            color_list = ['#FF0000']
+        if 'ug2' in set_color:
+            color_list = ['#ff8080']
+        if 'Dsm1' in set_color:
+            color_list = ['#00FFFF']
+        if 'Dsm2' in set_color:
+            color_list = ['#6666FF']
+        if 'vf' in set_color or 'vf_approx' in set_color:
+            color_list = ['#0000FF']
+        if 'vr' in set_color:
+            color_list = ['#FF00FF']
+        if 'vr2' in set_color:
+            color_list = ['#FF80FF']
+        
+        elif not color_list:
+            color_list = ['#000000']
         
 
     i = 0
