@@ -2625,6 +2625,7 @@ the newly calculated :math:`v_{r}` or not
         """
 
         debug = True
+        debug_var = []
 
         if reconstruct_flag == True:
             self.reconstruct_void(method='talley')
@@ -2669,25 +2670,24 @@ the newly calculated :math:`v_{r}` or not
                 else:
                     u_t = 0                                                 # TI and RC are driven by the turbulent fluctuation velocity (u_t)
 
-                # if debug:
-                #     print(f"{angle}\t{rstar}:\talpha_loc: {alpha_loc:.4f}\talpha_dat: {midas_dict['alpha']:.4f}")
-
                 # Talley 2012, secion 3.3.1
                 COV_loc = u_t * ai_loc**2 / (alpha_max**(1/3) * (alpha_max**(1/3) - (alpha_loc)**(1/3)))
                 
                 midas_dict['u_t'] = u_t
                 midas_dict['COV_loc'] = COV_loc
-                
-        u_t_avg = self.area_avg('u_t')
 
-        # if debug:
-        #     print(f"\n\tu_t_avg: {u_t_avg}\n")
+                if debug:
+                    print(f"{angle:2.1f}\t{rstar:.2f}\t|\tCOV_loc: {COV_loc:.4f}")
+                
+        # Talley does not area-average local u_t; instead computes <u_t> with area-averaged parameters
+        u_t_avg = 1.4 * eps**(1/3) * (6 * alpha_avg / ai_avg)**(1/3)
 
         if u_t_avg > 0:
             COV_avg = u_t_avg * ai_avg**2 / (alpha_max**(1/3) * (alpha_max**(1/3) - alpha_avg**(1/3)))
             COV_RC = self.area_avg('COV_loc') / COV_avg
 
             if debug:
+                print(f"\nu_t_avg: {u_t_avg}\tai_avg: {ai_avg}\talpha_avg: {alpha_avg}\t")
                 print(f"COV_RC_num: {self.area_avg('COV_loc')}\tCOV_RC_den: {COV_avg}")
         else:
             COV_avg = 0
@@ -2708,7 +2708,7 @@ the newly calculated :math:`v_{r}` or not
         # Then, is <We> area_averaged We or We calculated using area-averaged parameters?
 
 
-        debug = True
+        debug = False
 
         if reconstruct_flag == True:
             self.reconstruct_void(method='talley')
@@ -2766,7 +2766,7 @@ the newly calculated :math:`v_{r}` or not
                 midas_dict['We'] = We
                 midas_dict['COV_loc'] = COV_loc
                 
-        u_t_avg = self.area_avg('u_t')
+        u_t_avg = 1.4 * eps**(1/3) * (6 * alpha_avg / ai_avg)**(1/3)
         We_avg = self.area_avg('We')
         # We_avg = rho_f * u_t_avg**2 * (6 * alpha_avg / ai_avg) / sigma
 
@@ -2941,8 +2941,10 @@ the newly calculated :math:`v_{r}` or not
                 self.alpha_max_reconstructed = result.x
                 find_alpha_max(self.alpha_max_reconstructed)
             else:
-                warnings.warn("Minimization did not return a successful result")
-                print(f"⟨α⟩_data: {self.area_avg('alpha')}\n⟨α⟩_reconstructed: {self.area_avg('alpha_reconstructed')}\n")
+                if debug:
+                    warnings.warn("Minimization did not return a successful result")
+                    print(result.message)
+                    print(f"⟨α⟩_data: {self.area_avg('alpha')}\n⟨α⟩_reconstructed: {self.area_avg('alpha_reconstructed')}\n")
 
             '''
             def find_alpha_max(alpha_max):
