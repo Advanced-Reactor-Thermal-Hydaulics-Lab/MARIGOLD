@@ -2673,6 +2673,7 @@ the newly calculated :math:`v_{r}` or not
         """
 
         debug = True
+        debug_var = []
 
         if reconstruct_flag == True:
             self.reconstruct_void(method='talley')
@@ -2717,25 +2718,24 @@ the newly calculated :math:`v_{r}` or not
                 else:
                     u_t = 0                                                 # TI and RC are driven by the turbulent fluctuation velocity (u_t)
 
-                # if debug:
-                #     print(f"{angle}\t{rstar}:\talpha_loc: {alpha_loc:.4f}\talpha_dat: {midas_dict['alpha']:.4f}")
-
                 # Talley 2012, secion 3.3.1
                 COV_loc = u_t * ai_loc**2 / (alpha_max**(1/3) * (alpha_max**(1/3) - (alpha_loc)**(1/3)))
                 
                 midas_dict['u_t'] = u_t
                 midas_dict['COV_loc'] = COV_loc
-                
-        u_t_avg = self.area_avg('u_t')
 
-        # if debug:
-        #     print(f"\n\tu_t_avg: {u_t_avg}\n")
+                if debug:
+                    print(f"{angle:2.1f}\t{rstar:.2f}\t|\tCOV_loc: {COV_loc:.4f}")
+                
+        # Talley does not area-average local u_t; instead computes <u_t> with area-averaged parameters
+        u_t_avg = 1.4 * eps**(1/3) * (6 * alpha_avg / ai_avg)**(1/3)
 
         if u_t_avg > 0:
             COV_avg = u_t_avg * ai_avg**2 / (alpha_max**(1/3) * (alpha_max**(1/3) - alpha_avg**(1/3)))
             COV_RC = self.area_avg('COV_loc') / COV_avg
 
             if debug:
+                print(f"\nu_t_avg: {u_t_avg}\tai_avg: {ai_avg}\talpha_avg: {alpha_avg}\t")
                 print(f"COV_RC_num: {self.area_avg('COV_loc')}\tCOV_RC_den: {COV_avg}")
         else:
             COV_avg = 0
@@ -2756,7 +2756,7 @@ the newly calculated :math:`v_{r}` or not
         # Then, is <We> area_averaged We or We calculated using area-averaged parameters?
 
 
-        debug = True
+        debug = False
 
         if reconstruct_flag == True:
             self.reconstruct_void(method='talley')
@@ -2814,7 +2814,7 @@ the newly calculated :math:`v_{r}` or not
                 midas_dict['We'] = We
                 midas_dict['COV_loc'] = COV_loc
                 
-        u_t_avg = self.area_avg('u_t')
+        u_t_avg = 1.4 * eps**(1/3) * (6 * alpha_avg / ai_avg)**(1/3)
         We_avg = self.area_avg('We')
         # We_avg = rho_f * u_t_avg**2 * (6 * alpha_avg / ai_avg) / sigma
 
@@ -2852,7 +2852,13 @@ the newly calculated :math:`v_{r}` or not
         debug = False
 
         if method.lower() == 'talley':
-            self.roverRend = -1.472e-5 * self.Ref + 2.571               # End inner r/R, outer end fixed at r/R = 1
+            self.roverRend = -1.472e-5 * self.Ref + 2.571               # Inner r/R, outer end fixed at r/R = 1
+
+            # if debug:
+            #     print(self.roverRend)
+
+            def lineq(x, m, x0, b):
+                return float(max(m * (x - x0) + b, 0))
 
             def find_alpha_max(alpha_max, rstar_peak=0.90):
                 interps = {}
@@ -2860,7 +2866,7 @@ the newly calculated :math:`v_{r}` or not
                 for angle, r_dict in self.data.items():                 # 360 degrees covered, not just one quadrant
                     
                     if angle < 90:
-                        interps[angle] = {'angle_nn': angle_q1, 'm_nn': m_i, 'b_nn': b}
+                        interps[angle] = {'angle_nn': angle_q1, 'm_nn': m_i, 'x0_nn': rstar_anchor, 'b_nn': anchor}
 
                     # Operate in first quadrant
                     if angle <= 90:
@@ -2876,57 +2882,104 @@ the newly calculated :math:`v_{r}` or not
                     if angle_q1 != 90:
                         angle_nn = interps[angle_q1]['angle_nn']
                         m_nn = interps[angle_q1]['m_nn']
+                        x0_nn = interps[angle_q1]['x0_nn']
                         b_nn = interps[angle_q1]['b_nn']
 
                     # Find the peak nearest neighbor
                     if angle_q1 == 90:
                         # For 90 degrees, just alpha_max
-                        amax_nn = alpha_max
+                        peak = alpha_max
+
+                        anchor = 0
+                        rstar_anchor = self.roverRend
 
                     elif angle_q1 == 0:
                         # For 0 degrees, value at r/R = 0 along the 90 degree axis
-                        amax_nn = float(max((-alpha_max / (self.roverRend - rstar_peak)) * (0 - rstar_peak) + alpha_max, 0))
+                        peak = lineq(x = 0, 
+                                     m = 0 - alpha_max / (self.roverRend - rstar_peak),
+                                     x0 = rstar_peak,
+                                     b = alpha_max)
+
+                        anchor = peak
+                        rstar_anchor = 0
 
                     else:
                         # Find r* of previous angle at equivalent y-coordinate
                         y_peak = rstar_peak * np.sin(angle_q1 * np.pi / 180)
                         rstar_nn = y_peak / np.sin(angle_nn * np.pi / 180)
 
+                        # if debug:
+                        #     print(f"angle: {angle}\tangle_nn: {angle_nn}")
+
                         # Peak void fraction of current angle defined as void fraction at previous angle r*
-                        amax_nn = float(max(m_nn * (rstar_nn - rstar_peak) + b_nn, 0))
+                        peak = lineq(x = rstar_nn,
+                                     m = m_nn,
+                                     x0 = x0_nn,
+                                     b = b_nn)
+                        
+                        if self.roverRend > 0:
+                            anchor = 0
+                            rstar_anchor = self.roverRend
+                        else:
+                            # Value at r/R = 0 along the 90 degree axis
+                            anchor = lineq(x = 0,
+                                           m = 0 - alpha_max / (self.roverRend - rstar_peak),
+                                           x0 = rstar_peak,
+                                           b = alpha_max)
+                            rstar_anchor = 0
 
                     # Linear interpolation, y = mx + b
-                    m_o = -amax_nn / (1 - rstar_peak)                   # Slope of outer interpolation
-                    m_i = -amax_nn / (self.roverRend - rstar_peak)      # Slope of inner interpolation
-                    b = amax_nn                                         # (Shifted) intercept is the peak void fraction (nearest neighbor for non-90 and non-0)
+                    m_o1 = (0 - peak) / (1 - rstar_peak)                    # Slope of outer interpolation
+                    m_i = (peak - anchor) / (rstar_peak - rstar_anchor)     # Slope of inner interpolation
 
-                    for rstar, midas_dict in r_dict.items():            # Only goes from 0.0 to 1.0
+                    base = lineq(x = -rstar_peak,
+                                 m = m_i,
+                                 x0 = rstar_anchor,
+                                 b = anchor)
+                    rstar_base = -rstar_peak
 
-                        if angle >= 180:
-                            rstar = -rstar
+                    m_o2 = (0 - base) / (-1 - rstar_base)                   # Slope of outer interpolation, on opposite wall
+
+                    for rstar, midas_dict in r_dict.items():                # Only goes from 0.0 to 1.0
+
+                        if angle >= 180 and angle < 360:
+                            rstar = -rstar                                  # Use same slopes for -1.0 to 0.0
 
                         # Alpha interpolations in terms of r* (see page 134 of Talley 2012)
                         if rstar > rstar_peak:
                             # Outer interpolation
-                            midas_dict['alpha_reconstructed'] = float(max(m_o * (rstar - rstar_peak) + b,0))
-                        else:
+                            midas_dict['alpha_reconstructed'] = lineq(x = rstar,
+                                                                      m = m_o1,
+                                                                      x0 = rstar_peak,
+                                                                      b = peak)
+
+                        elif abs(rstar) <= rstar_peak:
                             if angle_q1 == 0:
-                                if -rstar > rstar_peak:
-                                    # Symmetry for 180 degrees
-                                    midas_dict['alpha_reconstructed'] = float(max(m_o * (-rstar - rstar_peak) + b,0))
-                                else:
-                                    # Between peak locations, uniform profile
-                                    midas_dict['alpha_reconstructed'] = amax_nn
+                                # Between peak locations, uniform profile
+                                midas_dict['alpha_reconstructed'] = peak
                             else:
                                 # Inner interpolation
-                                # Make sure it's not < 0. This covers for y < roverRend
-                                midas_dict['alpha_reconstructed'] = float(max(m_i * (rstar - rstar_peak) + b, 0))
-                        
+                                midas_dict['alpha_reconstructed'] = lineq(x = rstar,
+                                                                          m = m_i,
+                                                                          x0 = rstar_anchor,
+                                                                          b = anchor)
+                                
+                        else:
+                            if angle_q1 == 0:
+                                # Symmetry for 180 degrees
+                                midas_dict['alpha_reconstructed'] = lineq(x = rstar,
+                                                                          m = -m_o1,
+                                                                          x0 = rstar_peak,
+                                                                          b = peak)
+                            else:
+                                # Opposite wall interpolation
+                                midas_dict['alpha_reconstructed'] = lineq(x = rstar,
+                                                                          m = m_o2,
+                                                                          x0 = rstar_base,
+                                                                          b = base)
+
                         if debug:
                             print(f"{angle}\t{rstar}:\t\talpha_rec: {midas_dict['alpha_reconstructed']:.4f}\talpha_dat: {midas_dict['alpha']:.4f}")
-
-                if debug:
-                    print(f"data: {self.area_avg('alpha'):.4f}\treconstruction: {self.area_avg('alpha_reconstructed'):.4f}\n")
 
                 return abs( self.area_avg('alpha') - self.area_avg('alpha_reconstructed') )
             
@@ -2936,8 +2989,10 @@ the newly calculated :math:`v_{r}` or not
                 self.alpha_max_reconstructed = result.x
                 find_alpha_max(self.alpha_max_reconstructed)
             else:
-                warnings.warn("Minimization did not return a successful result")
-                print(f"⟨α⟩_data: {self.area_avg('alpha')}\n⟨α⟩_reconstructed: {self.area_avg('alpha_reconstructed')}\n")
+                if debug:
+                    warnings.warn("Minimization did not return a successful result")
+                    print(result.message)
+                    print(f"⟨α⟩_data: {self.area_avg('alpha')}\n⟨α⟩_reconstructed: {self.area_avg('alpha_reconstructed')}\n")
 
             '''
             def find_alpha_max(alpha_max):
@@ -3705,7 +3760,7 @@ the newly calculated :math:`v_{r}` or not
             set_min = np.min(parami)
 
         if set_max == None:
-            set_max = np.max(parami)
+            set_max = np.max(parami) + (np.max(parami) * 0.1)
 
         if set_min > np.min(parami):
             extend_min = True
@@ -3774,7 +3829,7 @@ the newly calculated :math:`v_{r}` or not
             plt.axis('square')
             plt.xlabel (r'$x/R$ [-]')
             plt.ylabel(r'$y/R$ [-]')
-            ax.grid(True)
+            ax.grid(False)
         else:
             ax.set_yticklabels([])
             ax.set_xticklabels([])
@@ -3785,7 +3840,10 @@ the newly calculated :math:`v_{r}` or not
             label_str = param
 
         if not suppress_colorbar:
-            fig.colorbar(mpbl, label=label_str)
+            tx_step = round((set_max - set_min)/5,-int(np.floor(np.log10((set_max - set_min)/10))))
+            tx = np.arange(set_min,set_max,tx_step)
+
+            fig.colorbar(mpbl, label=label_str, ticks=tx)
 
         if title_str != '':
             title = True

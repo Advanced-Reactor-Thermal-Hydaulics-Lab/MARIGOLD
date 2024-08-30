@@ -155,11 +155,10 @@ def iate_1d_1g(
         
         We_cr = 5
         
-        COV_RC      = cond.calc_COV_RC(reconstruct_flag=True)
-        COV_TI      = cond.calc_COV_TI(reconstruct_flag=True)
+        COV_RC      = cond.calc_COV_RC(reconstruct_flag=False)
+        COV_TI      = cond.calc_COV_TI(reconstruct_flag=False)
 
-        print('COV_RC: ',COV_RC)
-        print('COV_TI: ',COV_TI)
+        print(f"COV_RC: {COV_RC}\tCOV_TI: {COV_TI}\n\n")
 
         # Row is run, column is port?
         # I think this should be implemented in extracts and loads, as a cheat option
