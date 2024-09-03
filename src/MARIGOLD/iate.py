@@ -107,7 +107,7 @@ def iate_1d_1g(
     elif preset == 'yadav':
         pass
     elif preset == 'talley':
-        Dh = 0.0254
+        Dh = 0.0381
         rho_f = 998
         rho_g = 1.23
         mu_f = 0.001

@@ -1365,7 +1365,6 @@ class Condition:
             warnings.warn("Mirroring in area-avg")
             self.mirror()
 
-
         for angle, r_dict in self.data.items():
 
             rs_temp = []
@@ -2625,7 +2624,6 @@ the newly calculated :math:`v_{r}` or not
         """
 
         debug = True
-        debug_var = []
 
         if reconstruct_flag == True:
             self.reconstruct_void(method='talley')
@@ -2655,7 +2653,6 @@ the newly calculated :math:`v_{r}` or not
                 
                 if reconstruct_flag == True:
                     ai_loc = ai_avg * alpha_loc / alpha_avg
-                    midas_dict['ai_reconstructed'] = ai_loc
 
                     if ai_loc != 0:
                         Db_loc = 6 * alpha_loc / ai_loc
@@ -2671,26 +2668,24 @@ the newly calculated :math:`v_{r}` or not
                     u_t = 0                                                 # TI and RC are driven by the turbulent fluctuation velocity (u_t)
 
                 # Talley 2012, secion 3.3.1
-                COV_loc = u_t * ai_loc**2 / (alpha_max**(1/3) * (alpha_max**(1/3) - (alpha_loc)**(1/3)))
+                COV_RC_loc = u_t * ai_loc**2 / (alpha_max**(1/3) * (alpha_max**(1/3) - (alpha_loc)**(1/3)))
                 
-                midas_dict['u_t'] = u_t
-                midas_dict['COV_loc'] = COV_loc
+                midas_dict['COV_RC_loc'] = COV_RC_loc
 
-                if debug:
-                    print(f"{angle:2.1f}\t{rstar:.2f}\t|\tCOV_loc: {COV_loc:.4f}")
+                # if debug:
+                #     print(f"{angle:2.1f}\t{rstar:.2f}\t|\tCOV_RC_loc: {COV_RC_loc:.4f}")
                 
         # Talley does not area-average local u_t; instead computes <u_t> with area-averaged parameters
         u_t_avg = 1.4 * eps**(1/3) * (6 * alpha_avg / ai_avg)**(1/3)
 
         if u_t_avg > 0:
-            COV_avg = u_t_avg * ai_avg**2 / (alpha_max**(1/3) * (alpha_max**(1/3) - alpha_avg**(1/3)))
-            COV_RC = self.area_avg('COV_loc') / COV_avg
+            COV_RC_avg = u_t_avg * ai_avg**2 / (alpha_max**(1/3) * (alpha_max**(1/3) - alpha_avg**(1/3)))
+            COV_RC = self.area_avg('COV_RC_loc') / COV_RC_avg
 
             if debug:
                 print(f"\nu_t_avg: {u_t_avg}\tai_avg: {ai_avg}\talpha_avg: {alpha_avg}\t")
-                print(f"COV_RC_num: {self.area_avg('COV_loc')}\tCOV_RC_den: {COV_avg}")
+                print(f"COV_RC_num: {self.area_avg('COV_RC_loc')}\tCOV_RC_den: {COV_RC_avg}")
         else:
-            COV_avg = 0
             COV_RC = 0
 
         self.COV_RC = COV_RC
@@ -2708,7 +2703,7 @@ the newly calculated :math:`v_{r}` or not
         # Then, is <We> area_averaged We or We calculated using area-averaged parameters?
 
 
-        debug = False
+        debug = True
 
         if reconstruct_flag == True:
             self.reconstruct_void(method='talley')
@@ -2738,8 +2733,7 @@ the newly calculated :math:`v_{r}` or not
                 alpha_loc = midas_dict[alpha_str]
 
                 if reconstruct_flag == True:
-                    midas_dict['ai_reconstructed'] = ai_avg * alpha_loc / alpha_avg
-                    ai_loc = midas_dict['ai_reconstructed']
+                    ai_loc = ai_avg * alpha_loc / alpha_avg
 
                     if ai_loc != 0:
                         Db_loc = 6 * alpha_loc / ai_loc
@@ -2758,29 +2752,26 @@ the newly calculated :math:`v_{r}` or not
 
                 # Talley 2012, secion 3.3.1
                 if We >= We_cr:
-                    COV_loc = (u_t * ai_loc**2 / alpha_loc) * np.sqrt(1 - (We_cr / We)) * np.exp(-We_cr / We)
+                    COV_TI_loc = (u_t * ai_loc**2 / alpha_loc) * np.sqrt(1 - (We_cr / We)) * np.exp(-We_cr / We)
                 else:
-                    COV_loc = 0
-                
-                midas_dict['u_t'] = u_t
-                midas_dict['We'] = We
-                midas_dict['COV_loc'] = COV_loc
+                    COV_TI_loc = 0
+
+                midas_dict['COV_TI_loc'] = COV_TI_loc
+
+                # if debug:
+                #     print(f"{angle:2.1f}\t{rstar:.2f}\t|\tWe: {We}\tCOV_TI_loc: {COV_TI_loc:.4f}")
                 
         u_t_avg = 1.4 * eps**(1/3) * (6 * alpha_avg / ai_avg)**(1/3)
-        We_avg = self.area_avg('We')
-        # We_avg = rho_f * u_t_avg**2 * (6 * alpha_avg / ai_avg) / sigma
-
-        # if debug:
-        #     print(f"\n\n<We>: {self.area_avg('We')}\tWe(<>): {rho_f * u_t_avg**2 * (6 * alpha_avg / ai_avg) / sigma}")
+        We_avg = rho_f * u_t_avg**2 * (6 * alpha_avg / ai_avg) / sigma
 
         if u_t_avg > 0:
-            COV_avg = (u_t_avg * ai_avg**2 / alpha_avg) * np.sqrt(1 - (We_cr / We_avg)) * np.exp(-We_cr / We_avg)
-            COV_TI = self.area_avg('COV_loc') / COV_avg
+            COV_TI_avg = (u_t_avg * ai_avg**2 / alpha_avg) * np.sqrt(1 - (We_cr / We_avg)) * np.exp(-We_cr / We_avg)
+            COV_TI = self.area_avg('COV_TI_loc') / COV_TI_avg
 
             if debug:
-                print(f"COV_TI_num: {self.area_avg('COV_loc')}\tCOV_TI_den: {COV_avg}")
+                print(f"\nWe_avg: {We_avg}")
+                print(f"COV_TI_num: {self.area_avg('COV_TI_loc')}\tCOV_TI_den: {COV_TI_avg}")
         else:
-            COV_avg = 0
             COV_TI = 0
 
         self.COV_TI = COV_TI

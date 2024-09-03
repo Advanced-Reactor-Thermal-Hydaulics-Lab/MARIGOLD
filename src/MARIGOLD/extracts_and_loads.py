@@ -891,56 +891,8 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                 cond.jgatm = jgatm
                 cond.jgloc = jgloc
 
-                '''
-                # Covariance hard-coding (WIP)
-                if jf == 3.98:
-                    if jgatm == 0.15:
-                        run_idx = 1
-                    elif jgatm == 0.25:
-                        run_idx = 2
-
-                elif jf == 4.98:
-                    if jgatm == 0.15:
-                        run_idx = 3
-                    elif jgatm == 0.25:
-                        run_idx = 4
-                    elif jgatm == 0.50:
-                        run_idx = 5
-
-                elif jf == 5.98:
-                    if jgatm == 0.15:
-                        run_idx = 6
-                    elif jgatm == 0.25:
-                        run_idx = 7
-                    elif jgatm == 0.50:
-                        run_idx = 8
-                    elif jgatm == 1.00:
-                        run_idx = 9
-                
-                CovTI = [
-                    [0.267, 0.187, 0.187],
-                    [0.112, 0.062, 0.053],
-                    [1.000, 1.000, 1.000],
-                    [0.558, 0.603, 0.603],
-                    [0.188, 0.335, 0.168],
-                    [1.209, 1.000, 1.000],
-                    [0.902, 1.000, 1.000],
-                    [0.422, 1.000, 0.860],
-                    [0.272, 0.395, 0.228],
-                ]
-            
-                CovRC = [
-                    [0.843, 0.625, 0.459],
-                    [0.596, 0.070, 0.053],
-                    [3.496, 2.693, 2.759],
-                    [1.135, 2.594, 1.169],
-                    [0.328, 0.460, 0.144],
-                    [2.917, 1.517, 1.525],
-                    [3.290, 1.547, 1.553],
-                    [0.741, 1.605, 1.239],
-                    [0.249, 0.339, 0.143],
-                ]
-                '''
+                cond.area_avg_void_sheet = ws['B206'].value
+                cond.area_avg_ai_sheet = ws['C206'].value
 
                 i = 0
                 
