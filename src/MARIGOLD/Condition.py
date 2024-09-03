@@ -2569,6 +2569,54 @@ the newly calculated :math:`v_{r}` or not
 
         return self.area_avg(param_error_name)
 
+    def calc_symmetry(self, param, sym_type = 'sym90', method = 'rmse', rel_error = False):
+        """ Function for checking the symmetry of a condition
+
+        sym_type
+         - 'sym90', will compare data at 0° and 180°
+
+        .. math:: \\epsilon = param(0°) - param(180°)
+
+        rel_error will divide by param 0
+
+        Method
+         - rmse, 
+        
+        .. math:: \\epsilon_{sym} = \\sqrt{\\bar{\\epsilon^{2}}}
+
+        Returns
+         - :math:`\\epsilon_{sym}`
+        
+        Stores
+         - :math:`\\epsilon_{sym}`
+        
+        """
+        errs = []
+        if sym_type == 'sym90':
+
+            for rstar, r_dict in self.data[0].items():
+                try:
+                    err = r_dict[param] - self.data[180][rstar][param]
+                except KeyError:
+                    continue
+                if rel_error:
+                    try:
+                        err = err / r_dict[param]
+                    except ZeroDivisionError:
+                        err = 0
+                errs.append(err)
+
+        errs = np.asarray(errs)
+
+        if method == 'rmse':
+            sym_error = np.sqrt(np.mean(errs**2))
+        elif method == 'mean':
+            sym_error = np.mean(errs)
+
+        self.sym_error = sym_error
+
+        return self.sym_error
+
     def calc_avg_lat_sep(self):
         """Calculates average lateral separation distance between bubbles
 

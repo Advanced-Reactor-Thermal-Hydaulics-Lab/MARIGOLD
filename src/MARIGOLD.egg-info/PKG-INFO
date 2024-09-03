@@ -13,6 +13,7 @@ Requires-Dist: numpy
 Requires-Dist: matplotlib
 Requires-Dist: scipy
 Requires-Dist: openpyxl
+Requires-Dist: xlrd
 
 # MARIGOLD
 
