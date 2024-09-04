@@ -872,8 +872,7 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
             ############################################################################################################################
             elif sheet_type == 'talley_template':
                 #print(Q1_ranges, Q2_ranges)
-                phis = [90, 67.5, 45, 22.5, 0]
-
+                
                 ws = wb['Sheet1']
                 jgatm = ws['C3'].value
                 old = True
@@ -893,9 +892,13 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
 
                 cond.area_avg_void_sheet = ws['B206'].value
                 cond.area_avg_ai_sheet = ws['C206'].value
+                
+                ########################################################################################################################
+                # Q1
+
+                phis = [90, 67.5, 45, 22.5, 0]
 
                 i = 0
-                
                 phi_counter = 0
                 next = False
                 while phi_counter < 5:
@@ -920,7 +923,6 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                         data = deepcopy(zero_data)
 
                         if old and ws[f'F{i}'].value:
-                            # use old tab keys
                             for cell in ws[f'A{i}':f'AA{i}'][0]:
                                 midas_output.append(cell.value)
                             
@@ -933,7 +935,6 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                                     print("old tab_keys not the same length as midas_output", file=debugFID)
                                     print(tab_keys, midas_output, file=debugFID)
                         elif ws[f'K{i}'].value:
-                            # use new tab keys
                             roverR = float(ws[f'A{i}'].value)
                             midas_output = []
                             for cell in ws[f'A{i}':f'BD{i}'][0]:
@@ -954,7 +955,55 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                         except KeyError:
                             cond.data.update( {phi:{}} )
                             cond.data[phi].update({1.0: zero_data})
-                            #cond.phi[phi_val].update({0.0: zero_data}) # Cuz I'm paranoid
+                            cond.data[phi].update({roverR: data})
+
+                ########################################################################################################################
+                # Q2
+                phis = [112.5, 135, 157.5]
+
+                i = 0
+                phi_counter = 0
+                next = False
+                while phi_counter < 3 and i < 200:
+                    i += 1
+
+                    if ws[f'AS{i}'].value == 'Spherical':
+                        if debug: print(f'found header in row {i}', file=debugFID)
+                        next = True
+                        continue
+
+                    if next:
+                        try:
+                            # Hopefully in the part of the sheet with data
+                            roverR = float(ws[f'AQ{i}'].value)
+                        except:
+                            # Done reading data
+                            phi_counter += 1
+                            next = False
+                            continue
+
+                        midas_output = []
+                        data = deepcopy(zero_data)
+
+                        if old and ws[f'AV{i}'].value:
+                            for cell in ws[f'AQ{i}':f'BQ{i}'][0]:
+                                midas_output.append(cell.value)
+                            
+                            if len(old_tab_keys) == len( midas_output ):
+                                data = dict( zip( old_tab_keys, midas_output ))
+                            else:
+                                if debug: print("Warning, old tab_keys not the same length as midas_output")
+                                data = dict( zip( old_tab_keys, midas_output ))
+                                if debug:
+                                    print("old tab_keys not the same length as midas_output", file=debugFID)
+                                    print(tab_keys, midas_output, file=debugFID)
+                        
+                        phi = phis[phi_counter]
+                        try:
+                            cond.data[phi].update({roverR: data})
+                        except KeyError:
+                            cond.data.update( {phi:{}} )
+                            cond.data[phi].update({1.0: zero_data})
                             cond.data[phi].update({roverR: data})
 
             ############################################################################################################################

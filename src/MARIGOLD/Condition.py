@@ -1355,8 +1355,7 @@ class Condition:
             return self.area_avgs[param] # why waste time, if we already calculated this don't do it again
         
         if method == 'legacy':
-            # We have to integrate twice, once with resepect to r, again with respect to phi
-            # Start with r
+            # There's definitely a more elegant way to do this, but I just want Talley's data to work for now
 
             I = 0
             param_r = [] # array for parameter integrated wrt r
@@ -1414,8 +1413,6 @@ class Condition:
 
             I = sum(param_r) / 8
             self.area_avgs.update({param: I})
-
-            print(f"param: {param}\tI: {I}")
 
         else:
             # We have to integrate twice, once with resepect to r, again with respect to phi
@@ -2797,7 +2794,7 @@ the newly calculated :math:`v_{r}` or not
          - Kang (08/19/2024)
         """
 
-        debug = True
+        debug = False
 
         if reconstruct_flag == True:
             self.reconstruct_void(method='talley')
@@ -2805,21 +2802,27 @@ the newly calculated :math:`v_{r}` or not
         else:
             alpha_str = 'alpha'
 
-        alpha_avg       = self.area_avg(alpha_str,avg_method)
-        ai_avg          = self.area_avg('ai',avg_method)
+        alpha_avg       = self.area_avg(alpha_str,method=avg_method)
+        ai_avg          = self.area_avg('ai',method=avg_method)
 
-        rho_f           = self.rho_f                                        # Liquid phase density [kg/m**3]
-        rho_g           = self.rho_g                                        # Gas phase density [kg/m**3]
+        # rho_f           = self.rho_f                                        # Liquid phase density [kg/m**3]
+        # rho_g           = self.rho_g                                        # Gas phase density [kg/m**3]
+        # mu_f            = self.mu_f                                         # Dynamic viscosity of water [Pa-s]
+        rho_f = 1000
+        rho_g = 1.22
+        mu_f = 0.001
         Dh              = self.Dh                                           # Hydraulic diameter [m]
-        mu_f            = self.mu_f                                         # Dynamic viscosity of water [Pa-s]
-        mu_m            = mu_f / (1 - alpha_avg)
-
+                
         rho_m           = (1 - alpha_avg) * rho_f + alpha_avg * rho_g       # Mixture density
+        mu_m            = mu_f / (1 - alpha_avg)                            # Mixture viscosity
         v_m             = (rho_f * self.jf + rho_g * self.jgloc) / rho_m    # Mixture velocity
-        Rem             = rho_m * v_m * Dh / mu_m                           # Mixture Reynolds number, ***CAREFUL*** I have seen some versions of the IATE script that use rho_f instead as an approximation
+        # Rem             = rho_m * v_m * Dh / mu_m                           # Mixture Reynolds number, ***CAREFUL*** I have seen some versions of the IATE script that use rho_f instead as an approximation
+        Rem             = rho_m * v_m * Dh / mu_f                           # Mixture Reynolds number, older versions use mu_f as an approximation
         f_TP            = 0.316 * (mu_m / mu_f / Rem)**0.25                 # Two-phase friction factor, Talley (2012) and Worosz (2015), also used in iate_1d_1g
         eps             = f_TP * v_m**3 / 2 / Dh                            # Energy dissipation rate (Wu et al., 1998; Kim, 1999), also used in iate_1d_1g
         
+        if debug: print(f"\trho_m: {rho_m:.2f}\tmu_m: {mu_m:.4f}\tv_m: {v_m:.4f}\tRem: {Rem:.4f}\tf_TP: {f_TP:.4f}\teps: {eps:.4f}")
+
         for angle, r_dict in self.data.items():
             for rstar, midas_dict in r_dict.items():
                 
@@ -2854,11 +2857,11 @@ the newly calculated :math:`v_{r}` or not
 
         if u_t_avg > 0:
             COV_RC_avg = u_t_avg * ai_avg**2 / (alpha_max**(1/3) * (alpha_max**(1/3) - alpha_avg**(1/3)))
-            COV_RC = self.area_avg('COV_RC_loc',avg_method) / COV_RC_avg
+            COV_RC = self.area_avg('COV_RC_loc',method=avg_method) / COV_RC_avg
 
             if debug:
                 print(f"\nu_t_avg: {u_t_avg}\tai_avg: {ai_avg}\talpha_avg: {alpha_avg}\t")
-                print(f"COV_RC_num: {self.area_avg('COV_RC_loc',avg_method)}\tCOV_RC_den: {COV_RC_avg}")
+                print(f"COV_RC_num: {self.area_avg('COV_RC_loc',method=avg_method)}\tCOV_RC_den: {COV_RC_avg}")
         else:
             COV_RC = 0
 
@@ -2868,16 +2871,8 @@ the newly calculated :math:`v_{r}` or not
 
 
     def calc_COV_TI(self, alpha_max = 0.75, alpha_cr = 0.11, We_cr = 5, avg_method = 'legacy', reconstruct_flag = True):
-        
-        # NOTES DHK 8/27
-        # Is We_cr applied locally or area-averaged?
-        # If locally, is We_avg calculated by area-averaging We_loc or by recalculating with area-averaged parameters?
 
-        # Definitely local, expressions for COV involve both We and <We>
-        # Then, is <We> area_averaged We or We calculated using area-averaged parameters?
-
-
-        debug = True
+        debug = False
 
         if reconstruct_flag == True:
             self.reconstruct_void(method='talley')
@@ -2885,22 +2880,27 @@ the newly calculated :math:`v_{r}` or not
         else:
             alpha_str = 'alpha'
 
-        alpha_avg       = self.area_avg(alpha_str,avg_method)
-        ai_avg          = self.area_avg('ai',avg_method)
+        alpha_avg       = self.area_avg(alpha_str,method=avg_method)
+        ai_avg          = self.area_avg('ai',method=avg_method)
 
-        rho_f           = self.rho_f                                        # Liquid phase density [kg/m**3]
-        rho_g           = self.rho_g                                        # Gas phase density [kg/m**3]
-        Dh              = self.Dh                                           # Hydraulic diameter
-        mu_f            = self.mu_f                                         # Dynamic viscosity of water [Pa-s]
-        mu_m            = mu_f / (1 - alpha_avg)
-        sigma           = self.sigma                                        # Surface tension
-
+        # rho_f           = self.rho_f                                        # Liquid phase density [kg/m**3]
+        # rho_g           = self.rho_g                                        # Gas phase density [kg/m**3]
+        # mu_f            = self.mu_f                                         # Dynamic viscosity of water [Pa-s]
+        # sigma           = self.sigma                                        # Surface tension
+        rho_f = 1000
+        rho_g = 1.22
+        mu_f = 0.001
+        sigma = 0.07278
+        Dh              = self.Dh                                           # Hydraulic diameter [m]
+                
         rho_m           = (1 - alpha_avg) * rho_f + alpha_avg * rho_g       # Mixture density
+        mu_m            = mu_f / (1 - alpha_avg)                            # Mixture viscosity
         v_m             = (rho_f * self.jf + rho_g * self.jgloc) / rho_m    # Mixture velocity
-        Rem             = rho_m * v_m * Dh / mu_m                           # Mixture Reynolds number, ***CAREFUL*** I have seen some versions of the IATE script that use rho_f instead as an approximation
+        # Rem             = rho_m * v_m * Dh / mu_m                           # Mixture Reynolds number, ***CAREFUL*** I have seen some versions of the IATE script that use rho_f instead as an approximation
+        Rem             = rho_m * v_m * Dh / mu_f                           # Mixture Reynolds number, older versions use mu_f as an approximation
         f_TP            = 0.316 * (mu_m / mu_f / Rem)**0.25                 # Two-phase friction factor, Talley (2012) and Worosz (2015), also used in iate_1d_1g
         eps             = f_TP * v_m**3 / 2 / Dh                            # Energy dissipation rate (Wu et al., 1998; Kim, 1999), also used in iate_1d_1g
-
+        
         for angle, r_dict in self.data.items():
             for rstar, midas_dict in r_dict.items():
                 
@@ -2938,13 +2938,15 @@ the newly calculated :math:`v_{r}` or not
         u_t_avg = 1.4 * eps**(1/3) * (6 * alpha_avg / ai_avg)**(1/3)
         We_avg = rho_f * u_t_avg**2 * (6 * alpha_avg / ai_avg) / sigma
 
+        print(f"\trho_m: {rho_m:.2f}\tmu_m: {mu_m:.4f}\tv_m: {v_m:.4f}\tRem: {Rem:.4f}\tf_TP: {f_TP:.4f}\teps: {eps:.4f}\tWe_avg: {We_avg:.4f}")
+
         if u_t_avg > 0:
             COV_TI_avg = (u_t_avg * ai_avg**2 / alpha_avg) * np.sqrt(1 - (We_cr / We_avg)) * np.exp(-We_cr / We_avg)
-            COV_TI = self.area_avg('COV_TI_loc',avg_method) / COV_TI_avg
+            COV_TI = self.area_avg('COV_TI_loc',method=avg_method) / COV_TI_avg
 
             if debug:
                 print(f"\nWe_avg: {We_avg}")
-                print(f"COV_TI_num: {self.area_avg('COV_TI_loc',avg_method)}\tCOV_TI_den: {COV_TI_avg}")
+                print(f"COV_TI_num: {self.area_avg('COV_TI_loc',method=avg_method)}\tCOV_TI_den: {COV_TI_avg}")
         else:
             COV_TI = 0
 
@@ -3098,7 +3100,7 @@ the newly calculated :math:`v_{r}` or not
                         if debug:
                             print(f"{angle}\t{rstar}:\t\talpha_rec: {midas_dict['alpha_reconstructed']:.4f}\talpha_dat: {midas_dict['alpha']:.4f}")
 
-                return abs( self.area_avg('alpha',avg_method) - self.area_avg('alpha_reconstructed',avg_method) )
+                return abs( self.area_avg('alpha',method=avg_method) - self.area_avg('alpha_reconstructed',method=avg_method) )
             
             result = minimize(find_alpha_max, x0 = 0.5, bounds = ((0,1),))      # The way they want me to format bounds is stupid. Python is stupid.
 
@@ -3109,7 +3111,7 @@ the newly calculated :math:`v_{r}` or not
                 if debug:
                     warnings.warn("Minimization did not return a successful result")
                     print(result.message)
-                    print(f"⟨α⟩_data: {self.area_avg('alpha')}\n⟨α⟩_reconstructed: {self.area_avg('alpha_reconstructed')}\n")
+                    print(f"⟨α⟩_data: {self.area_avg('alpha',method=avg_method)}\n⟨α⟩_reconstructed: {self.area_avg('alpha_reconstructed',method=avg_method)}\n")
 
             '''
             def find_alpha_max(alpha_max):
