@@ -8,7 +8,7 @@ def iate_1d_1g(
         C_WE = None, C_RC = None, C_TI = None, alpha_max = 0.75, C = 3, We_cr = 6, acrit_flag = 0, acrit = 0.13,
 
         # Method arguments
-        preset = None, cd_method = 'doe',
+        preset = None, avg_method = None, cd_method = 'doe',
 
         # Pressure drop calculation
         dpdz_method = 'LM', LM_C = 40, k_m = 0.10, m = 0.316, n = 0.25,
@@ -114,6 +114,8 @@ def iate_1d_1g(
         sigma = 0.07278
 
         cd_method = 'doe'
+
+        avg_method = 'legacy'
     elif preset == 'worosz':
         pass
     
@@ -155,8 +157,8 @@ def iate_1d_1g(
         
         We_cr = 5
         
-        COV_RC      = cond.calc_COV_RC(reconstruct_flag=False)
-        COV_TI      = cond.calc_COV_TI(reconstruct_flag=False)
+        COV_RC      = cond.calc_COV_RC(avg_method=avg_method, reconstruct_flag=False)
+        COV_TI      = cond.calc_COV_TI(avg_method=avg_method, reconstruct_flag=False)
 
         print(f"COV_RC: {COV_RC}\tCOV_TI: {COV_TI}\n\n")
 
@@ -266,9 +268,9 @@ def iate_1d_1g(
 
             Db[0]       = 6 * alpha[0] / ai[0]
         else:
-            ai[0]       = cond.area_avg("ai")                       # [1/m]
-            alpha[0]    = cond.area_avg("alpha")                    # [-]
-            Db[0]       = cond.void_area_avg("Dsm1") / 1000         # [m]
+            ai[0]       = cond.area_avg("ai",method=avg_method)                     # [1/m]
+            alpha[0]    = cond.area_avg("alpha",method=avg_method)                  # [-]
+            Db[0]       = cond.void_area_avg("Dsm1",method=avg_method) / 1000       # [m]
 
     else:
         aiwe[0]     = io["aiwe"][-1]

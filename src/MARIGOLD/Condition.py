@@ -79,9 +79,9 @@ class Condition:
                 self.LoverD = 146
             elif self.port == 'P5B':
                 self.LoverD = 154
-            elif self.port == 'P6':
+            elif self.port == '0.95':
                 self.LoverD = 190
-            elif self.port == 'P7':
+            elif self.port == '0.9':
                 self.LoverD = 226
             else:
                 self.LoverD = -1
@@ -1327,7 +1327,7 @@ class Condition:
 
         return avg_param / count
 
-    def area_avg(self, param: str, even_opt='first', recalc = True) -> float:
+    def area_avg(self, param: str, even_opt='first', recalc=True, method=None) -> float:
         """Method for calculating the area-average of a parameter, "param"
         
         Inputs:
@@ -1341,7 +1341,7 @@ class Condition:
         Uses Simpson's rule for integration, specifically scipy.integrate.simpsons
         
         """
-        
+
         # Check that the parameter that the user requested exists
         try:
             dummy = self.data[90][1.0][param]
@@ -1354,54 +1354,118 @@ class Condition:
         if (param in self.area_avgs.keys()) and (not recalc):
             return self.area_avgs[param] # why waste time, if we already calculated this don't do it again
         
-        # We have to integrate twice, once with resepect to r, again with respect to phi
-        # Start with r
+        if method == 'legacy':
+            # We have to integrate twice, once with resepect to r, again with respect to phi
+            # Start with r
 
-        I = 0
-        param_r = [] # array for parameter integrated wrt r
-        angles = []
-        
-        if not self.mirrored:
-            warnings.warn("Mirroring in area-avg")
-            self.mirror()
-
-        for angle, r_dict in self.data.items():
-
-            rs_temp = []
-            vars_temp = []
-            angles.append(angle * np.pi/180) # Convert degrees to radians
-            for rstar, midas_dict in r_dict.items():
-                if rstar >= 0: # This should be unnecessary now with the new mirror, but it's not hurting anyone by being here
-                    try:
-                        rs_temp.append( rstar ) # This is proably equivalent to rs = list(r_dict.keys() ), but I'm paranoid about ordering
-                        vars_temp.append( float( midas_dict[param] * rstar)) # Floatify to avoid np inhomogeneous array issues
-                    except:
-                        if debug: print('Problem with:', angle, r_dict, param)
-                    #if debug: print(angle, midas_dict, file=debugFID)
+            I = 0
+            param_r = [] # array for parameter integrated wrt r
+            angles = []
             
+            if not self.mirrored:
+                warnings.warn("Mirroring in area-avg")
+                self.mirror()
+
+            for angle, r_dict in self.data.items():
+                if angle == 360:
+                    continue
+
+                try:
+                    if 0.95 in r_dict:
+                        S_1 = 0.05 * sum((1 * 0,
+                                4 * 0.95 * r_dict[0.95][param],
+                                2 * 0.90 * r_dict[0.90][param],
+                                4 * 0.85 * r_dict[0.85][param],
+                                1 * 0.80 * r_dict[0.80][param],
+                                )) / 3
+                        
+                        S_2 = 0.10 * sum((1 * 0.80 * r_dict[0.8][param],
+                                4 * 0.70 * r_dict[0.7][param],
+                                2 * 0.60 * r_dict[0.6][param],
+                                4 * 0.50 * r_dict[0.5][param],
+                                1 * 0.40 * r_dict[0.4][param],
+                                )) / 3
+                        
+                        S_3 = 0.20 * sum((1 * 0.40 * r_dict[0.4][param],
+                                4 * 0.20 * r_dict[0.2][param],
+                                2 * 0.00 * r_dict[0.0][param],
+                                )) / 3
+                    else:
+                        S_1 = 0
+
+                        S_2 = 0.10 * sum((1 * 0,
+                                4 * 0.90 * r_dict[0.9][param],
+                                2 * 0.80 * r_dict[0.8][param],
+                                4 * 0.70 * r_dict[0.7][param],
+                                2 * 0.60 * r_dict[0.6][param],
+                                4 * 0.50 * r_dict[0.5][param],
+                                1 * 0.40 * r_dict[0.4][param],
+                                )) / 3
+                        
+                        S_3 = 0.20 * sum((1 * 0.40 * r_dict[0.4][param],
+                                4 * 0.20 * r_dict[0.2][param],
+                                2 * 0.00 * r_dict[0.0][param],             # Might be doubling up
+                                )) / 3
+
+                    param_r.append(sum((S_1, S_2, S_3)))
+
+                except Exception as e:
+                    print(e)
+
+            I = sum(param_r) / 8
+            self.area_avgs.update({param: I})
+
+            print(f"param: {param}\tI: {I}")
+
+        else:
+            # We have to integrate twice, once with resepect to r, again with respect to phi
+            # Start with r
+            I = 0
+            param_r = [] # array for parameter integrated wrt r
+            angles = []
             
-            vars = [var for _, var in sorted(zip(rs_temp, vars_temp))]
-            rs = sorted(rs_temp)
+            if not self.mirrored:
+                warnings.warn("Mirroring in area-avg")
+                self.mirror()
 
-            if debug: print("Arrays to integrate", angle, rs, vars, file=debugFID)
+            for angle, r_dict in self.data.items():
 
-            if len(rs) != len(vars):
-                ValueError( f"rs to integrate over {rs} must be the same length as params {vars}, occured at {angle}" )
+                rs_temp = []
+                vars_temp = []
+                angles.append(angle * np.pi/180) # Convert degrees to radians
+                for rstar, midas_dict in r_dict.items():
+                    if rstar >= 0: # This should be unnecessary now with the new mirror, but it's not hurting anyone by being here
+                        try:
+                            rs_temp.append( rstar ) # This is proably equivalent to rs = list(r_dict.keys() ), but I'm paranoid about ordering
+                            vars_temp.append( float( midas_dict[param] * rstar)) # Floatify to avoid np inhomogeneous array issues
+                        except:
+                            if debug: print('Problem with:', angle, r_dict, param)
+                        #if debug: print(angle, midas_dict, file=debugFID)
                 
-            try:
-                param_r.append( integrate.simpson(vars, rs, even=even_opt) ) # Integrate wrt r
-            except Exception as e:
-                print(e)
-                print(rs, vars)
-            if debug: print("calculated integral:", integrate.simpson(vars, rs, even=even_opt), file=debugFID)
-                #I = 2 * np.pi
-        if debug: print("Integrated wrt r", param_r, file=debugFID)
+                
+                vars = [var for _, var in sorted(zip(rs_temp, vars_temp))]
+                rs = sorted(rs_temp)
 
-        param_r = [param for _, param in sorted(zip(angles, param_r))]
-        angles = sorted(angles)
+                if debug: print("Arrays to integrate", angle, rs, vars, file=debugFID)
 
-        I = integrate.simpson(param_r, angles, even=even_opt) / np.pi # Integrate wrt theta, divide by normalized area
-        self.area_avgs.update({param: I})
+                if len(rs) != len(vars):
+                    ValueError( f"rs to integrate over {rs} must be the same length as params {vars}, occured at {angle}" )
+                    
+                try:
+                    param_r.append( integrate.simpson(vars, rs, even=even_opt) ) # Integrate wrt r
+                except Exception as e:
+                    print(e)
+                    print(rs, vars)
+                if debug: print("calculated integral:", integrate.simpson(vars, rs, even=even_opt), file=debugFID)
+                    #I = 2 * np.pi
+            if debug: print("Integrated wrt r", param_r, file=debugFID)
+
+            param_r = [param for _, param in sorted(zip(angles, param_r))]
+            angles = sorted(angles)
+
+            I = integrate.simpson(param_r, angles, even=even_opt) / np.pi # Integrate wrt theta, divide by normalized area
+            self.area_avgs.update({param: I})
+
         return I
 
     def circ_segment_area_avg(self, param:str, hstar:float, ngridr=25, ngridphi=25, int_err = 10**-4) -> float:
@@ -1656,7 +1720,7 @@ class Condition:
         return I
 
 
-    def void_area_avg(self, param: str, even_opt='first') -> float:
+    def void_area_avg(self, param: str, even_opt='first', method = None) -> float:
         """Method for calculating the void-weighted area-average of a parameter, "param"
         
         Inputs:
@@ -1679,46 +1743,108 @@ class Condition:
             if debug: print(self.data, file=debugFID)
             print(f"Could not area-average {param} for condition {self.name}")
             return
-        
-        # We have to integrate twice, once with resepect to r, again with respect to phi
-        # Start with r
 
-        I = 0
-        param_r = [] # array for parameter integrated wrt r
-        angles = []
-        
-        self.mirror()
+        if method == 'legacy':
+            # We have to integrate twice, once with resepect to r, again with respect to phi
+            # Start with r
 
-
-        for angle, r_dict in self.data.items():
-
-            rs_temp = []
-            vars_temp = []
-            angles.append(angle * np.pi/180) # Convert degrees to radians
-            for rstar, midas_dict in r_dict.items():
-                if rstar >= 0: # This should be unnecessary now with the new mirror, but it's not hurting anyone by being here
-                    try:
-                        rs_temp.append( rstar ) # This is proably equivalent to rs = list(r_dict.keys() ), but I'm paranoid about ordering
-                        vars_temp.append( midas_dict[param] * midas_dict['alpha'] * rstar)
-                    except:
-                        if debug: print('Problem with:', angle, r_dict, param)
-                    #if debug: print(angle, midas_dict, file=debugFID)
+            I = 0
+            param_r = [] # array for parameter integrated wrt r
+            angles = []
             
-            
-            vars = [var for _, var in sorted(zip(rs_temp, vars_temp))]
-            rs = sorted(rs_temp)
+            if not self.mirrored:
+                warnings.warn("Mirroring in area-avg")
+                self.mirror()
 
-            if debug: print("Arrays to integrate", angle, rs, vars, file=debugFID)
+            for angle, r_dict in self.data.items():
+                if angle == 360:
+                    continue
+
+                try:
+                    if 0.95 in r_dict:
+                        S_1 = 0.05 * sum((1 * 0,
+                                4 * 0.95 * r_dict[0.95][param] * r_dict[0.95]['alpha'],
+                                2 * 0.90 * r_dict[0.90][param] * r_dict[0.90]['alpha'],
+                                4 * 0.85 * r_dict[0.85][param] * r_dict[0.85]['alpha'],
+                                1 * 0.80 * r_dict[0.80][param] * r_dict[0.80]['alpha'],
+                                )) / 3
+                        
+                        S_2 = 0.10 * sum((1 * 0.80 * r_dict[0.8][param] * r_dict[0.80]['alpha'],
+                                4 * 0.70 * r_dict[0.7][param] * r_dict[0.7]['alpha'],
+                                2 * 0.60 * r_dict[0.6][param] * r_dict[0.6]['alpha'],
+                                4 * 0.50 * r_dict[0.5][param] * r_dict[0.5]['alpha'],
+                                1 * 0.40 * r_dict[0.4][param] * r_dict[0.4]['alpha'],
+                                )) / 3
+                        
+                        S_3 = 0.20 * sum((1 * 0.40 * r_dict[0.4][param] * r_dict[0.4]['alpha'],
+                                4 * 0.20 * r_dict[0.2][param] * r_dict[0.2]['alpha'],
+                                2 * 0.00 * r_dict[0.0][param] * r_dict[0.0]['alpha'],
+                                )) / 3
+                    else:
+                        S_1 = 0
+
+                        S_2 = 0.10 * sum((1 * 0,
+                                4 * 0.90 * r_dict[0.9][param] * r_dict[0.9]['alpha'],
+                                2 * 0.80 * r_dict[0.8][param] * r_dict[0.8]['alpha'],
+                                4 * 0.70 * r_dict[0.7][param] * r_dict[0.7]['alpha'],
+                                2 * 0.60 * r_dict[0.6][param] * r_dict[0.6]['alpha'],
+                                4 * 0.50 * r_dict[0.5][param] * r_dict[0.5]['alpha'],
+                                1 * 0.40 * r_dict[0.4][param] * r_dict[0.4]['alpha'],
+                                )) / 3
+                        
+                        S_3 = 0.20 * sum((1 * 0.40 * r_dict[0.4][param] * r_dict[0.4]['alpha'],
+                                4 * 0.20 * r_dict[0.2][param] * r_dict[0.2]['alpha'],
+                                2 * 0.00 * r_dict[0.0][param] * r_dict[0.0]['alpha'],               # Might be doubling up
+                                )) / 3
+
+                    param_r.append(sum((S_1, S_2, S_3)))
+
+                except Exception as e:
+                    print(e)
+                    
+            I = sum(param_r) / 8
+
+        else:
+            # We have to integrate twice, once with resepect to r, again with respect to phi
+            # Start with r
+
+            I = 0
+            param_r = [] # array for parameter integrated wrt r
+            angles = []
+            
+            self.mirror()
+
+
+            for angle, r_dict in self.data.items():
+
+                rs_temp = []
+                vars_temp = []
+                angles.append(angle * np.pi/180) # Convert degrees to radians
+                for rstar, midas_dict in r_dict.items():
+                    if rstar >= 0: # This should be unnecessary now with the new mirror, but it's not hurting anyone by being here
+                        try:
+                            rs_temp.append( rstar ) # This is proably equivalent to rs = list(r_dict.keys() ), but I'm paranoid about ordering
+                            vars_temp.append( midas_dict[param] * midas_dict['alpha'] * rstar)
+                        except:
+                            if debug: print('Problem with:', angle, r_dict, param)
+                        #if debug: print(angle, midas_dict, file=debugFID)
                 
-            param_r.append( integrate.simpson(vars, rs, even=even_opt) ) # Integrate wrt r
-            if debug: print("calculated integral:", integrate.simpson(vars, rs, even=even_opt), file=debugFID)
-                #I = 2 * np.pi
-        if debug: print("Integrated wrt r", param_r, file=debugFID)
+                
+                vars = [var for _, var in sorted(zip(rs_temp, vars_temp))]
+                rs = sorted(rs_temp)
 
-        param_r = [param for _, param in sorted(zip(angles, param_r))]
-        angles = sorted(angles)
+                if debug: print("Arrays to integrate", angle, rs, vars, file=debugFID)
+                    
+                param_r.append( integrate.simpson(vars, rs, even=even_opt) ) # Integrate wrt r
+                if debug: print("calculated integral:", integrate.simpson(vars, rs, even=even_opt), file=debugFID)
+                    #I = 2 * np.pi
+            if debug: print("Integrated wrt r", param_r, file=debugFID)
 
-        I = integrate.simpson(param_r, angles, even=even_opt) / np.pi / self.area_avg('alpha') # Integrate wrt theta, divide by normalized area
+            param_r = [param for _, param in sorted(zip(angles, param_r))]
+            angles = sorted(angles)
+
+            I = integrate.simpson(param_r, angles, even=even_opt) / np.pi / self.area_avg('alpha') # Integrate wrt theta, divide by normalized area
+
         return I
     
     def interp_area_avg(self, param:str, interp_type = 'linear') -> float:
@@ -2658,7 +2784,7 @@ the newly calculated :math:`v_{r}` or not
         return self.area_avg('lambda')
     
 
-    def calc_COV_RC(self, alpha_max = 0.75, alpha_cr = 0.11, reconstruct_flag = True):
+    def calc_COV_RC(self, alpha_max = 0.75, alpha_cr = 0.11, avg_method = 'legacy', reconstruct_flag = True):
         """Calculates the experimental Random Collision Covariance based on Talley (2012) method (without modification factor m_RC)
          - Stored in self.COV_RC
          
@@ -2679,8 +2805,8 @@ the newly calculated :math:`v_{r}` or not
         else:
             alpha_str = 'alpha'
 
-        alpha_avg       = self.area_avg(alpha_str)
-        ai_avg          = self.area_avg('ai')
+        alpha_avg       = self.area_avg(alpha_str,avg_method)
+        ai_avg          = self.area_avg('ai',avg_method)
 
         rho_f           = self.rho_f                                        # Liquid phase density [kg/m**3]
         rho_g           = self.rho_g                                        # Gas phase density [kg/m**3]
@@ -2728,11 +2854,11 @@ the newly calculated :math:`v_{r}` or not
 
         if u_t_avg > 0:
             COV_RC_avg = u_t_avg * ai_avg**2 / (alpha_max**(1/3) * (alpha_max**(1/3) - alpha_avg**(1/3)))
-            COV_RC = self.area_avg('COV_RC_loc') / COV_RC_avg
+            COV_RC = self.area_avg('COV_RC_loc',avg_method) / COV_RC_avg
 
             if debug:
                 print(f"\nu_t_avg: {u_t_avg}\tai_avg: {ai_avg}\talpha_avg: {alpha_avg}\t")
-                print(f"COV_RC_num: {self.area_avg('COV_RC_loc')}\tCOV_RC_den: {COV_RC_avg}")
+                print(f"COV_RC_num: {self.area_avg('COV_RC_loc',avg_method)}\tCOV_RC_den: {COV_RC_avg}")
         else:
             COV_RC = 0
 
@@ -2741,7 +2867,7 @@ the newly calculated :math:`v_{r}` or not
         return COV_RC
 
 
-    def calc_COV_TI(self, alpha_max = 0.75, alpha_cr = 0.11, We_cr = 5, reconstruct_flag = True):
+    def calc_COV_TI(self, alpha_max = 0.75, alpha_cr = 0.11, We_cr = 5, avg_method = 'legacy', reconstruct_flag = True):
         
         # NOTES DHK 8/27
         # Is We_cr applied locally or area-averaged?
@@ -2759,8 +2885,8 @@ the newly calculated :math:`v_{r}` or not
         else:
             alpha_str = 'alpha'
 
-        alpha_avg       = self.area_avg(alpha_str)
-        ai_avg          = self.area_avg('ai')
+        alpha_avg       = self.area_avg(alpha_str,avg_method)
+        ai_avg          = self.area_avg('ai',avg_method)
 
         rho_f           = self.rho_f                                        # Liquid phase density [kg/m**3]
         rho_g           = self.rho_g                                        # Gas phase density [kg/m**3]
@@ -2814,11 +2940,11 @@ the newly calculated :math:`v_{r}` or not
 
         if u_t_avg > 0:
             COV_TI_avg = (u_t_avg * ai_avg**2 / alpha_avg) * np.sqrt(1 - (We_cr / We_avg)) * np.exp(-We_cr / We_avg)
-            COV_TI = self.area_avg('COV_TI_loc') / COV_TI_avg
+            COV_TI = self.area_avg('COV_TI_loc',avg_method) / COV_TI_avg
 
             if debug:
                 print(f"\nWe_avg: {We_avg}")
-                print(f"COV_TI_num: {self.area_avg('COV_TI_loc')}\tCOV_TI_den: {COV_TI_avg}")
+                print(f"COV_TI_num: {self.area_avg('COV_TI_loc',avg_method)}\tCOV_TI_den: {COV_TI_avg}")
         else:
             COV_TI = 0
 
@@ -2827,7 +2953,7 @@ the newly calculated :math:`v_{r}` or not
         return COV_TI
     
     
-    def reconstruct_void(self, method='talley'):
+    def reconstruct_void(self, method='talley', avg_method = 'legacy'):
         """ Reconstruct the void profile based on various methods
 
         Saves:
@@ -2972,7 +3098,7 @@ the newly calculated :math:`v_{r}` or not
                         if debug:
                             print(f"{angle}\t{rstar}:\t\talpha_rec: {midas_dict['alpha_reconstructed']:.4f}\talpha_dat: {midas_dict['alpha']:.4f}")
 
-                return abs( self.area_avg('alpha') - self.area_avg('alpha_reconstructed') )
+                return abs( self.area_avg('alpha',avg_method) - self.area_avg('alpha_reconstructed',avg_method) )
             
             result = minimize(find_alpha_max, x0 = 0.5, bounds = ((0,1),))      # The way they want me to format bounds is stupid. Python is stupid.
 
