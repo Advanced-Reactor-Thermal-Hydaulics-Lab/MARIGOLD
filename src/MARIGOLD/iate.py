@@ -306,6 +306,8 @@ def iate_1d_1g(
 
         if void_method == 'vgz' and cond2 != None:
             vgz[i] = np.interp(z_mesh[i],(cond.LoverD, cond2.LoverD),(cond.area_avg('ug1'), cond2.area_avg('ug1')))
+        elif void_method == 'vgz' and cond2 == None:
+            vgz[i] = 1.05 * (jf + jgloc) - 1.23                     # Talley 2012, Eq. 3-31
         else:
             vgz[i] = jgloc / alpha[i]                               # Estimate void weighted velocity
 

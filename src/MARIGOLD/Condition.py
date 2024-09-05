@@ -3463,8 +3463,8 @@ the newly calculated :math:`v_{r}` or not
             if set_min == 0 or set_max == 0:
                 ax.spines['left'].set_position(('data', set_min))
                 ax.spines['right'].set_position(('data', 0))
-                ax.yaxis.tick_right()
-                ax.yaxis.set_label_position("right")
+                # ax.yaxis.tick_right()
+                # ax.yaxis.set_label_position("right")
 
             if not show_spines:
                 ax.spines['top'].set_visible(False)
@@ -3498,7 +3498,10 @@ the newly calculated :math:`v_{r}` or not
 
             ax.set_xticks([0, 90, 180, 270, 360])
                
-        if title:
+        if hasattr(title,'__len__'):
+            # Set your own title! -DHK
+            ax.set_title(title)
+        elif title:
             ax.set_title(self.name)
         
 
