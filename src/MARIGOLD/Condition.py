@@ -2938,7 +2938,7 @@ the newly calculated :math:`v_{r}` or not
         u_t_avg = 1.4 * eps**(1/3) * (6 * alpha_avg / ai_avg)**(1/3)
         We_avg = rho_f * u_t_avg**2 * (6 * alpha_avg / ai_avg) / sigma
 
-        print(f"\trho_m: {rho_m:.2f}\tmu_m: {mu_m:.4f}\tv_m: {v_m:.4f}\tRem: {Rem:.4f}\tf_TP: {f_TP:.4f}\teps: {eps:.4f}\tWe_avg: {We_avg:.4f}")
+        # print(f"\trho_m: {rho_m:.2f}\tmu_m: {mu_m:.4f}\tv_m: {v_m:.4f}\tRem: {Rem:.4f}\tf_TP: {f_TP:.4f}\teps: {eps:.4f}\tWe_avg: {We_avg:.4f}")
 
         if u_t_avg > 0:
             COV_TI_avg = (u_t_avg * ai_avg**2 / alpha_avg) * np.sqrt(1 - (We_cr / We_avg)) * np.exp(-We_cr / We_avg)
@@ -3108,10 +3108,10 @@ the newly calculated :math:`v_{r}` or not
                 self.alpha_max_reconstructed = result.x
                 find_alpha_max(self.alpha_max_reconstructed)
             else:
-                if debug:
-                    warnings.warn("Minimization did not return a successful result")
-                    print(result.message)
-                    print(f"⟨α⟩_data: {self.area_avg('alpha',method=avg_method)}\n⟨α⟩_reconstructed: {self.area_avg('alpha_reconstructed',method=avg_method)}\n")
+                warnings.warn("Minimization did not return a successful result")
+                print(result.message)
+            
+            print(f"⟨α⟩_data: {self.area_avg('alpha',method=avg_method)}\n⟨α⟩_reconstructed: {self.area_avg('alpha_reconstructed',method=avg_method)}\n")
 
             '''
             def find_alpha_max(alpha_max):

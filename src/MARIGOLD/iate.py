@@ -91,9 +91,15 @@ def iate_1d_1g(
         mu_f            = 0.001
         sigma           = 0.07278
 
+        cond.mu_g       = 1.73E-5
+
         avg_method      = 'legacy'
         cd_method       = 'doe'
-        void_method     = 'continuity'
+        dpdz_method     = 'LM'
+
+        LM_C = 25
+        # m = 0.079     # Nope, Fanning/Darcy >.>
+        # n = 0.25
 
     elif preset == 'worosz':
         cd_method       = 'err_iter'
@@ -278,6 +284,8 @@ def iate_1d_1g(
         dpdz = cond.calc_dpdz(
             method = dpdz_method, 
             chisholm = LM_C, 
+            m = m, 
+            n = n, 
             k_m = k_m, 
             L = (query - LoverD) * Dh
             ) + ((rho_f * grav * delta_h) / (z_mesh[-1] - z_mesh[0]))   # Pressure gradient from gravity
@@ -302,14 +310,21 @@ def iate_1d_1g(
             break
             
         jgloc = jgatm * p_atm / pz[i]                           # Talley used jgP1 and pressure at P1 instead of jgatm and p_atm
-        vfz = jf / (1 - alpha[i])
+        
+        if void_method == 'vgz_talley':
+            vgz[i] = 1.05 * (jf + jgloc) - 1.23                 # Talley 2012, Eq. 3-31
+            alpha[i] = jgloc / vgz[i]
+            Db[i] = 6 * alpha[i] / ai[i]
 
-        if void_method == 'vgz' and cond2 != None:
+        if void_method == 'vgz_interp' and cond2 != None:
             vgz[i] = np.interp(z_mesh[i],(cond.LoverD, cond2.LoverD),(cond.area_avg('ug1'), cond2.area_avg('ug1')))
-        elif void_method == 'vgz' and cond2 == None:
-            vgz[i] = 1.05 * (jf + jgloc) - 1.23                     # Talley 2012, Eq. 3-31
+            alpha[i] = jgloc / vgz[i]
+            Db[i] = 6 * alpha[i] / ai[i]
+            
         else:
-            vgz[i] = jgloc / alpha[i]                               # Estimate void weighted velocity
+            vgz[i] = jgloc / alpha[i]                           # Estimate void weighted velocity
+
+        vfz = jf / (1 - alpha[i])
 
         ########################################################################################################################
         # Estimate bubble relative velocity <ur> (See Talley, 2012, 4.2.2.6)
@@ -491,7 +506,7 @@ def iate_1d_1g(
                     print(f"\n\n{i+1}.\tjf = {jf} [m/s], jg = {cond.jgref} [m/s]\n\tL/D: {z/Dh}\n\tC0: {C0}\n\tvgj: {vgj}\n\tj: {j}\n\talpha: {alpha[i]}",file=FID)
 
         elif void_method == 'continuity':   # Continuity
-
+            # Original continuity method
             # alpha[i+1] = alpha[i] - alpha[i] / pz[i] * -dpdz * z_step
 
             # Yadav
@@ -503,9 +518,23 @@ def iate_1d_1g(
             else:
                 alpha[i+1] = alpha[i] - (alpha[i] / (rho_gz[i] * vgz[i])) * ((rho_gz[i] * vgz[i]) - (rho_gz[i-1] * vgz[i-1]))
         
-        elif void_method == 'vgz':
-            # Implemented by Talley (2012)
-            alpha[i+1] = (jgatm * p_atm / pz[i+1]) / vgz[i+1]
+        elif void_method == 'vgz_talley':
+            # Alpha calculated in front, still going to double-calculate the i+1 step out of paranoia
+            # The way Talley had this imnplemented in Model_Horz.m is weird
+
+            jgloc = jgatm * p_atm / pz[i+1]
+
+            vgz[i+1] = 1.05 * (jf + jgloc) - 1.23                 # Talley 2012, Eq. 3-31
+            alpha[i+1] = jgloc / vgz[i+1]
+            
+        elif void_method == 'vgz_interp':
+            # Alpha calculated in front, still going to double-calculate the i+1 step out of paranoia
+            # The way Talley had this imnplemented in Model_Horz.m is weird
+
+            jgloc = jgatm * p_atm / pz[i+1]
+
+            vgz[i+1] = np.interp(z_mesh[i+1],(cond.LoverD, cond2.LoverD),(cond.area_avg('ug1'), cond2.area_avg('ug1')))
+            alpha[i+1] = jgloc / vgz[i+1]
 
         elif void_method == 'pressure_kim':
             f_f, f_g = cond.calc_fric(m = m, n = n)
