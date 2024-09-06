@@ -188,8 +188,8 @@ def iate_1d_1g(
         COV_RC1 = np.nan_to_num(cond.calc_COV_RC(reconstruct_flag = rf), nan=1.0)
         COV_TI1 = np.nan_to_num(cond.calc_COV_TI(reconstruct_flag = rf), nan=1.0)
 
-        COV_RC2 = np.nan_to_num(cond.calc_COV_RC(reconstruct_flag = True), nan=1.0)
-        COV_TI2 = np.nan_to_num(cond.calc_COV_TI(reconstruct_flag = True), nan=1.0)
+        COV_RC2 = np.nan_to_num(cond2.calc_COV_RC(reconstruct_flag = True), nan=1.0)
+        COV_TI2 = np.nan_to_num(cond2.calc_COV_TI(reconstruct_flag = True), nan=1.0)
 
         print("*****")
         print(f"{cond}")
