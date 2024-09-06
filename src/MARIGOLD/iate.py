@@ -80,9 +80,6 @@ def iate_1d_1g(
         cd_method       = 'fixed_iter'
         C0              = 1.12
     
-    elif preset == 'yadav':
-        void_method     = 'continuity'
-
     elif preset == 'talley':
         theta           = 0
         Dh              = 0.0381
@@ -98,8 +95,9 @@ def iate_1d_1g(
         dpdz_method     = 'LM'
 
         LM_C = 25
-        # m = 0.079     # Nope, Fanning/Darcy >.>
-        # n = 0.25
+    
+    elif preset == 'yadav':
+        void_method     = 'continuity'
 
     elif preset == 'worosz':
         cd_method       = 'err_iter'
@@ -192,6 +190,12 @@ def iate_1d_1g(
 
         COV_RC2 = np.nan_to_num(cond.calc_COV_RC(reconstruct_flag = True), nan=1.0)
         COV_TI2 = np.nan_to_num(cond.calc_COV_TI(reconstruct_flag = True), nan=1.0)
+
+        print("*****")
+        print(f"{cond}")
+        print(f"L/D: {cond.LoverD}\t\tCOV_RC1: {COV_RC1}\tCOV_TI1: {COV_TI1}\t")
+        print(f"L/D: {cond2.LoverD}\t\tCOV_RC2: {COV_RC2}\tCOV_TI2: {COV_TI2}\t")
+        print("*****")
         
         COV_RC = np.interp(z_mesh,(cond.LoverD, cond2.LoverD),(COV_RC1, COV_RC2))
         COV_TI = np.interp(z_mesh,(cond.LoverD, cond2.LoverD),(COV_TI1, COV_TI2))
@@ -453,7 +457,7 @@ def iate_1d_1g(
                 # Backwards difference for remaining nodes
                 SEXP[i] = -2 / 3 / rho_gz[i] * ai[i] * vgz[i] * (rho_gz[i] - rho_gz[i-1]) / z_step
 
-        # Source/sink due to Bubble Acceleration (advection in Yadav's script)
+        # Source/sink due to Bubble Acceleration (advection in Yadav's script) (VG for velocity gradient)
         if i <= 2:
             dvg = 0
             dvgdz = 0
