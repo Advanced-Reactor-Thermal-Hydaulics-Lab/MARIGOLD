@@ -2781,7 +2781,7 @@ the newly calculated :math:`v_{r}` or not
         return self.area_avg('lambda')
     
 
-    def calc_COV_RC(self, alpha_max = 0.75, alpha_cr = 0.11, avg_method = 'legacy', reconstruct_flag = True):
+    def calc_COV_RC(self, alpha_max = 0.75, alpha_cr = 0.11, avg_method = 'legacy', reconstruct_flag = True, debug = False):
         """Calculates the experimental Random Collision Covariance based on Talley (2012) method (without modification factor m_RC)
          - Stored in self.COV_RC
          
@@ -2794,7 +2794,10 @@ the newly calculated :math:`v_{r}` or not
          - Kang (08/19/2024)
         """
 
-        debug = False
+        if debug:
+            print(f"\t_________________________________________________________")
+            print(f"\t                         COV_RC                          ")
+            print(f"\tjf = {self.jf}, jgref = {self.jgref}, L/D = {self.LoverD}")
 
         if reconstruct_flag == True:
             self.reconstruct_void(method='talley')
@@ -2821,7 +2824,8 @@ the newly calculated :math:`v_{r}` or not
         f_TP            = 0.316 * (mu_m / mu_f / Rem)**0.25                 # Two-phase friction factor, Talley (2012) and Worosz (2015), also used in iate_1d_1g
         eps             = f_TP * v_m**3 / 2 / Dh                            # Energy dissipation rate (Wu et al., 1998; Kim, 1999), also used in iate_1d_1g
         
-        if debug: print(f"\trho_m: {rho_m:.2f}\tmu_m: {mu_m:.4f}\tv_m: {v_m:.4f}\tRem: {Rem:.4f}\tf_TP: {f_TP:.4f}\teps: {eps:.4f}")
+        if debug:
+            print(f"\n\t\tv_m: {v_m:.4f}\tRem: {Rem:.4f}\tf_TP: {f_TP:.4f}\teps: {eps:.4f}\n")
 
         for angle, r_dict in self.data.items():
             for rstar, midas_dict in r_dict.items():
@@ -2849,8 +2853,8 @@ the newly calculated :math:`v_{r}` or not
                 
                 midas_dict['COV_RC_loc'] = COV_RC_loc
 
-                # if debug:
-                #     print(f"{angle:2.1f}\t{rstar:.2f}\t|\tCOV_RC_loc: {COV_RC_loc:.4f}")
+                if debug:
+                    print(f"\t\t\t{angle:2.1f}\t{rstar:.2f}\t|\tCOV_RC_loc: {COV_RC_loc:.4f}")
                 
         # Talley does not area-average local u_t; instead computes <u_t> with area-averaged parameters
         u_t_avg = 1.4 * eps**(1/3) * (6 * alpha_avg / ai_avg)**(1/3)
@@ -2860,8 +2864,8 @@ the newly calculated :math:`v_{r}` or not
             COV_RC = self.area_avg('COV_RC_loc',method=avg_method) / COV_RC_avg
 
             if debug:
-                print(f"\nu_t_avg: {u_t_avg}\tai_avg: {ai_avg}\talpha_avg: {alpha_avg}\t")
-                print(f"COV_RC_num: {self.area_avg('COV_RC_loc',method=avg_method)}\tCOV_RC_den: {COV_RC_avg}")
+                print(f"\n\t\tu_t_avg: {u_t_avg}\tai_avg: {ai_avg}\talpha_avg: {alpha_avg}\t")
+                print(f"\n\tCOV_RC_num: {self.area_avg('COV_RC_loc',method=avg_method)}\tCOV_RC_den: {COV_RC_avg}")
         else:
             COV_RC = 0
 
@@ -2870,9 +2874,12 @@ the newly calculated :math:`v_{r}` or not
         return COV_RC
 
 
-    def calc_COV_TI(self, alpha_max = 0.75, alpha_cr = 0.11, We_cr = 5, avg_method = 'legacy', reconstruct_flag = True):
+    def calc_COV_TI(self, alpha_max = 0.75, alpha_cr = 0.11, We_cr = 5, avg_method = 'legacy', reconstruct_flag = True, debug = False):
 
-        debug = False
+        if debug:
+            print(f"\t_________________________________________________________")
+            print(f"\t                         COV_TI                          ")
+            print(f"\tjf = {self.jf}, jgref = {self.jgref}, L/D = {self.LoverD}")
 
         if reconstruct_flag == True:
             self.reconstruct_void(method='talley')
@@ -2901,6 +2908,9 @@ the newly calculated :math:`v_{r}` or not
         f_TP            = 0.316 * (mu_m / mu_f / Rem)**0.25                 # Two-phase friction factor, Talley (2012) and Worosz (2015), also used in iate_1d_1g
         eps             = f_TP * v_m**3 / 2 / Dh                            # Energy dissipation rate (Wu et al., 1998; Kim, 1999), also used in iate_1d_1g
         
+        if debug:
+            print(f"\n\t\tv_m: {v_m:.4f}\tRem: {Rem:.4f}\tf_TP: {f_TP:.4f}\teps: {eps:.4f}\n")
+
         for angle, r_dict in self.data.items():
             for rstar, midas_dict in r_dict.items():
                 
@@ -2932,21 +2942,19 @@ the newly calculated :math:`v_{r}` or not
 
                 midas_dict['COV_TI_loc'] = COV_TI_loc
 
-                # if debug:
-                #     print(f"{angle:2.1f}\t{rstar:.2f}\t|\tWe: {We}\tCOV_TI_loc: {COV_TI_loc:.4f}")
+                if debug:
+                    print(f"\t\t\t{angle:2.1f}\t{rstar:.2f}\t|\tCOV_TI_loc: {COV_TI_loc:.4f}\tWe: {We}")
                 
         u_t_avg = 1.4 * eps**(1/3) * (6 * alpha_avg / ai_avg)**(1/3)
         We_avg = rho_f * u_t_avg**2 * (6 * alpha_avg / ai_avg) / sigma
 
-        # print(f"\trho_m: {rho_m:.2f}\tmu_m: {mu_m:.4f}\tv_m: {v_m:.4f}\tRem: {Rem:.4f}\tf_TP: {f_TP:.4f}\teps: {eps:.4f}\tWe_avg: {We_avg:.4f}")
-
         if u_t_avg > 0:
             COV_TI_avg = (u_t_avg * ai_avg**2 / alpha_avg) * np.sqrt(1 - (We_cr / We_avg)) * np.exp(-We_cr / We_avg)
             COV_TI = self.area_avg('COV_TI_loc',method=avg_method) / COV_TI_avg
-
+            
             if debug:
-                print(f"\nWe_avg: {We_avg}")
-                print(f"COV_TI_num: {self.area_avg('COV_TI_loc',method=avg_method)}\tCOV_TI_den: {COV_TI_avg}")
+                print(f"\n\t\tWe_avg: {We_avg}")
+                print(f"\n\tCOV_TI_num: {self.area_avg('COV_TI_loc',method=avg_method)}\tCOV_TI_den: {COV_TI_avg}")
         else:
             COV_TI = 0
 
@@ -3111,7 +3119,7 @@ the newly calculated :math:`v_{r}` or not
                 warnings.warn("Minimization did not return a successful result")
                 print(result.message)
             
-            print(f"⟨α⟩_data: {self.area_avg('alpha',method=avg_method)}\n⟨α⟩_reconstructed: {self.area_avg('alpha_reconstructed',method=avg_method)}\n")
+            print(f"\n\t: r/R_end: {self.roverRend}\n\t⟨α⟩_data: {self.area_avg('alpha',method=avg_method)}\n\t⟨α⟩_reconstructed: {self.area_avg('alpha_reconstructed',method=avg_method)}")
 
             '''
             def find_alpha_max(alpha_max):
