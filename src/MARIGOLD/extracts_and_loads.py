@@ -542,9 +542,12 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
        Does not recursively descend, only checks in the path given
     
        Still under construction, but should support sheet types
-       'adix_template4'
-       'ryan_template'
-       'adix_template' (maybe rename this quan_template)
+        - 'adix_template4'
+        - 'ryan_template'
+        - 'adix_template' (maybe rename this quan_template)
+        - 'bettis_template'
+        - 'talley_template'
+        - 'yadav_template'
 
        Also can try to infer the sheet type, xlsm will be adix_template4, if it has P5, 6, or 7 it will
        be classified as an adix_template, different angles ryan, etc. The inference can also be made by 
@@ -1027,6 +1030,9 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
 
                 jgloc = jgatm       # Nope. Either need jgloc or P_loc, but I have neither -- how did Yadav get jgloc for his IATE script?
                 
+                if type(jgloc) == str:
+                    raise TypeError(f"\n\tin {file}\n\tRead in jgloc: {ws['C3'].value}\n\tInvalid type for jgloc")
+
                 '''
                 8 cond x 7 port?
 
