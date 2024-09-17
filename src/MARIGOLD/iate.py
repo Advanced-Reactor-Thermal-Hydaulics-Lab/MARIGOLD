@@ -281,7 +281,6 @@ def iate_1d_1g(
         dpdz = cond.dpdz
 
     elif dpdz_method == 'interp':
-        # Change this to use np.interp() instead
         dpdz = ((cond2.jgatm * p_atm / cond2.jgloc) - p) / (cond2.LoverD - LoverD)
 
     else:

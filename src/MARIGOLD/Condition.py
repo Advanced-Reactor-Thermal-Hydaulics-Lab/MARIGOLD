@@ -2281,12 +2281,12 @@ class Condition:
         return (ff, fg)
 
     
-    def calc_mu_eff(self, method='Ishii', alpha_max = 1.0):
+    def calc_mu_eff(self, method='Ishii', alpha_peak = 1.0):
         """Method for effective/mixture viscosity
         
         Inputs:
          - method, what method to use for modeling :math:`\\mu_{eff}`
-         - alpha_max, parameter for some models
+         - alpha_peak, parameter for some models
         
         Stores:
          - "mu_eff" in midas_dict 
@@ -2308,10 +2308,10 @@ class Condition:
             for rstar, midas_dict in r_dict.items():
 
                 if method.lower() == 'ishii':
-                    mu_m = self.mu_f * (1 - midas_dict['alpha'] / alpha_max)**(-2.5*alpha_max * (self.mu_g + 0.4*self.mu_f) / (self.mu_g + self.mu_f)  )
+                    mu_m = self.mu_f * (1 - midas_dict['alpha'] / alpha_peak)**(-2.5*alpha_peak * (self.mu_g + 0.4*self.mu_f) / (self.mu_g + self.mu_f)  )
 
                 elif method.lower() == 'ishii_AA':
-                    mu_m = self.mu_f * (1 - alpha_avg / alpha_max)**(-2.5*alpha_max * (self.mu_g + 0.4*self.mu_f) / (self.mu_g + self.mu_f)  )
+                    mu_m = self.mu_f * (1 - alpha_avg / alpha_peak)**(-2.5*alpha_peak * (self.mu_g + 0.4*self.mu_f) / (self.mu_g + self.mu_f)  )
                     
                 elif method.lower() == 'avg_void':
                     mu_m = self.mu_f / (1 - alpha_avg)
@@ -2781,12 +2781,12 @@ the newly calculated :math:`v_{r}` or not
         return self.area_avg('lambda')
     
 
-    def calc_COV_RC(self, alpha_max = 0.75, alpha_cr = 0.11, avg_method = 'legacy', reconstruct_flag = True, debug = False):
+    def calc_COV_RC(self, alpha_peak = 0.75, alpha_cr = 0.11, avg_method = 'legacy', reconstruct_flag = True, debug = False):
         """Calculates the experimental Random Collision Covariance based on Talley (2012) method (without modification factor m_RC)
          - Stored in self.COV_RC
          
          Inputs:
-         - alpha_max, maximum void fraction based on hexagonal-closed-packed (HCP) bubble distribution
+         - alpha_peak, maximum void fraction based on hexagonal-closed-packed (HCP) bubble distribution
          - alpha_cr, critical alpha to activate Random Collision, Talley (2012), Kong (2018) 
         
          Authors:
@@ -2849,18 +2849,19 @@ the newly calculated :math:`v_{r}` or not
                     u_t = 0                                                 # TI and RC are driven by the turbulent fluctuation velocity (u_t)
 
                 # Talley 2012, secion 3.3.1
-                COV_RC_loc = u_t * ai_loc**2 / (alpha_max**(1/3) * (alpha_max**(1/3) - (alpha_loc)**(1/3)))
+                COV_RC_loc = u_t * ai_loc**2 / (alpha_peak**(1/3) * (alpha_peak**(1/3) - (alpha_loc)**(1/3)))
                 
                 midas_dict['COV_RC_loc'] = COV_RC_loc
 
                 if debug:
-                    print(f"\t\t\t{angle:2.1f}\t{rstar:.2f}\t|\tCOV_RC_loc: {COV_RC_loc:.4f}")
+                    # print(f"\t\t\t{angle:2.1f}\t{rstar:.2f}\t|\talpha: {alpha_loc:.4f}\tCOV_RC_loc: {COV_RC_loc:.4f}")
+                    pass
                 
         # Talley does not area-average local u_t; instead computes <u_t> with area-averaged parameters
         u_t_avg = 1.4 * eps**(1/3) * (6 * alpha_avg / ai_avg)**(1/3)
 
         if u_t_avg > 0:
-            COV_RC_avg = u_t_avg * ai_avg**2 / (alpha_max**(1/3) * (alpha_max**(1/3) - alpha_avg**(1/3)))
+            COV_RC_avg = u_t_avg * ai_avg**2 / (alpha_peak**(1/3) * (alpha_peak**(1/3) - alpha_avg**(1/3)))
             COV_RC = self.area_avg('COV_RC_loc',method=avg_method) / COV_RC_avg
 
             if debug:
@@ -2874,7 +2875,7 @@ the newly calculated :math:`v_{r}` or not
         return COV_RC
 
 
-    def calc_COV_TI(self, alpha_max = 0.75, alpha_cr = 0.11, We_cr = 5, avg_method = 'legacy', reconstruct_flag = True, debug = False):
+    def calc_COV_TI(self, alpha_peak = 0.75, alpha_cr = 0.11, We_cr = 5, avg_method = 'legacy', reconstruct_flag = True, debug = False):
 
         if debug:
             print(f"\t_________________________________________________________")
@@ -2943,7 +2944,8 @@ the newly calculated :math:`v_{r}` or not
                 midas_dict['COV_TI_loc'] = COV_TI_loc
 
                 if debug:
-                    print(f"\t\t\t{angle:2.1f}\t{rstar:.2f}\t|\tCOV_TI_loc: {COV_TI_loc:.4f}\tWe: {We}")
+                    # print(f"\t\t\t{angle:2.1f}\t{rstar:.2f}\t|\talpha: {alpha_loc:.4f}\tCOV_TI_loc: {COV_TI_loc:.4f}\tWe: {We}")
+                    pass
                 
         u_t_avg = 1.4 * eps**(1/3) * (6 * alpha_avg / ai_avg)**(1/3)
         We_avg = rho_f * u_t_avg**2 * (6 * alpha_avg / ai_avg) / sigma
@@ -2979,7 +2981,7 @@ the newly calculated :math:`v_{r}` or not
         debug = False
 
         if method.lower() == 'talley':
-            self.roverRend = -1.472e-5 * self.Ref + 2.571               # Inner r/R, outer end fixed at r/R = 1
+            self.roverRend = round(-1.472e-5 * self.Ref + 2.571,1)      # Inner r/R, outer end fixed at r/R = 1. Also, Talley rounds his r/R_end to the nearest 0.1
 
             # if debug:
             #     print(self.roverRend)
@@ -2987,7 +2989,7 @@ the newly calculated :math:`v_{r}` or not
             def lineq(x, m, x0, b):
                 return float(max(m * (x - x0) + b, 0))
 
-            def find_alpha_max(alpha_max, rstar_peak=0.90):
+            def find_alpha_peak(alpha_peak, rstar_peak=0.90):
                 interps = {}
                 
                 for angle, r_dict in self.data.items():                 # 360 degrees covered, not just one quadrant
@@ -3014,8 +3016,8 @@ the newly calculated :math:`v_{r}` or not
 
                     # Find the peak nearest neighbor
                     if angle_q1 == 90:
-                        # For 90 degrees, just alpha_max
-                        peak = alpha_max
+                        # For 90 degrees, just alpha_peak
+                        peak = alpha_peak
 
                         anchor = 0
                         rstar_anchor = self.roverRend
@@ -3023,9 +3025,9 @@ the newly calculated :math:`v_{r}` or not
                     elif angle_q1 == 0:
                         # For 0 degrees, value at r/R = 0 along the 90 degree axis
                         peak = lineq(x = 0, 
-                                     m = 0 - alpha_max / (self.roverRend - rstar_peak),
+                                     m = 0 - alpha_peak / (self.roverRend - rstar_peak),
                                      x0 = rstar_peak,
-                                     b = alpha_max)
+                                     b = alpha_peak)
 
                         anchor = peak
                         rstar_anchor = 0
@@ -3044,16 +3046,20 @@ the newly calculated :math:`v_{r}` or not
                                      x0 = x0_nn,
                                      b = b_nn)
                         
-                        if self.roverRend > 0:
-                            anchor = 0
-                            rstar_anchor = self.roverRend
-                        else:
-                            # Value at r/R = 0 along the 90 degree axis
-                            anchor = lineq(x = 0,
-                                           m = 0 - alpha_max / (self.roverRend - rstar_peak),
-                                           x0 = rstar_peak,
-                                           b = alpha_max)
-                            rstar_anchor = 0
+                        anchor = 0
+                        rstar_anchor = self.roverRend / np.cos((90 - angle_q1) * np.pi / 180)       # Talley's implementation in Excel
+                        # rstar_anchor = self.roverRend / np.sin(angle_q1 * np.pi / 180)            # But why not like this
+                        
+                        # if self.roverRend > 0:
+                        #     anchor = 0
+                        #     rstar_anchor = self.roverRend
+                        # else:
+                        #     # Value at r/R = 0 along the 90 degree axis
+                        #     anchor = lineq(x = 0,
+                        #                    m = 0 - alpha_peak / (self.roverRend - rstar_peak),
+                        #                    x0 = rstar_peak,
+                        #                    b = alpha_peak)
+                        #     rstar_anchor = 0
 
                     # Linear interpolation, y = mx + b
                     m_o1 = (0 - peak) / (1 - rstar_peak)                    # Slope of outer interpolation
@@ -3107,22 +3113,27 @@ the newly calculated :math:`v_{r}` or not
 
                         if debug:
                             print(f"{angle}\t{rstar}:\t\talpha_rec: {midas_dict['alpha_reconstructed']:.4f}\talpha_dat: {midas_dict['alpha']:.4f}")
+                    
+                    self.alpha_peak = alpha_peak
 
-                return abs( self.area_avg('alpha',method=avg_method) - self.area_avg('alpha_reconstructed',method=avg_method) )
+                return abs( round(self.area_avg('alpha',method=avg_method),3) - self.area_avg('alpha_reconstructed',method=avg_method) )    # Talley's value is to three decimals of precision
             
-            result = minimize(find_alpha_max, x0 = 0.5, bounds = ((0,1),))      # The way they want me to format bounds is stupid. Python is stupid.
+            result = minimize(find_alpha_peak, x0 = 0.5, bounds = ((0,1),))      # The way they want me to format bounds is stupid. Python is stupid.
 
             if result.success:
-                self.alpha_max_reconstructed = result.x
-                find_alpha_max(self.alpha_max_reconstructed)
+                self.alpha_peak_reconstructed = result.x
+                find_alpha_peak(self.alpha_peak_reconstructed)
             else:
                 warnings.warn("Minimization did not return a successful result")
                 print(result.message)
             
-            print(f"\n\t: r/R_end: {self.roverRend}\n\t⟨α⟩_data: {self.area_avg('alpha',method=avg_method)}\n\t⟨α⟩_reconstructed: {self.area_avg('alpha_reconstructed',method=avg_method)}")
+            print(f"\n\t: r/R_end: {self.roverRend}")
+            print(f"\talpha_peak: {self.alpha_peak}")
+            print(f"\t⟨α⟩_data: {round(self.area_avg('alpha',method=avg_method),3)}")
+            print(f"\t⟨α⟩_reconstructed: {self.area_avg('alpha_reconstructed',method=avg_method)}")
 
             '''
-            def find_alpha_max(alpha_max):
+            def find_alpha_peak(alpha_peak):
                 for angle, r_dict in self.data.items():
                     for rstar, midas_dict in r_dict.items():
 
@@ -3131,9 +3142,9 @@ the newly calculated :math:`v_{r}` or not
 
                         # First calculate centerline void fraction (first linear interpolation)
                         if y > 0.9:
-                            alpha_CL = alpha_max / 0.1 * (1 - y)
+                            alpha_CL = alpha_peak / 0.1 * (1 - y)
                         else:
-                            alpha_CL = max(alpha_max / (0.9 - self.roverRend) * (y - self.roverRend), 0) # make sure it's not < 0. This covers for y < roverRend
+                            alpha_CL = max(alpha_peak / (0.9 - self.roverRend) * (y - self.roverRend), 0) # make sure it's not < 0. This covers for y < roverRend
                         alpha_CL = float(alpha_CL)
 
                         # Then calculate
@@ -3145,11 +3156,11 @@ the newly calculated :math:`v_{r}` or not
 
                 return abs( self.area_avg('alpha') - self.area_avg('alpha_reconstructed') )
             
-            result = minimize(find_alpha_max, x0 = 0.5)
+            result = minimize(find_alpha_peak, x0 = 0.5)
 
             if result.success:
-                self.alpha_max_reconstructed = result.x
-                find_alpha_max(self.alpha_max_reconstructed)
+                self.alpha_peak_reconstructed = result.x
+                find_alpha_peak(self.alpha_peak_reconstructed)
             else:
                 if debug:
                     warnings.warn("Minimization did not return a successful result")
@@ -3159,7 +3170,7 @@ the newly calculated :math:`v_{r}` or not
         elif method.lower() == 'not_talley' or method.lower() == 'double_linear':
             self.roverRend = -1.472e-5 * self.Ref + 2.571
 
-            def find_alpha_max(alpha_max):
+            def find_alpha_peak(alpha_peak):
                 for angle, r_dict in self.data.items():
                     for rstar, midas_dict in r_dict.items():
 
@@ -3168,9 +3179,9 @@ the newly calculated :math:`v_{r}` or not
 
                         # First calculate centerline void fraction (first linear interpolation)
                         if y > 0.9:
-                            alpha_CL = alpha_max / 0.1 * (1 - y)
+                            alpha_CL = alpha_peak / 0.1 * (1 - y)
                         else:
-                            alpha_CL = max(alpha_max / (0.9 - self.roverRend) * (y - self.roverRend), 0) # make sure it's not < 0. This covers for y < roverRend
+                            alpha_CL = max(alpha_peak / (0.9 - self.roverRend) * (y - self.roverRend), 0) # make sure it's not < 0. This covers for y < roverRend
 
                         # 
                         if np.sqrt(1 - y**2) == 0:
@@ -3180,11 +3191,11 @@ the newly calculated :math:`v_{r}` or not
 
                 return abs( self.area_avg('alpha') - self.area_avg('alpha_reconstructed') )
             
-            result = minimize(find_alpha_max, x0 = 0.5)
+            result = minimize(find_alpha_peak, x0 = 0.5)
 
             if result.success:
-                self.alpha_max_reconstructed = result.x
-                find_alpha_max(self.alpha_max_reconstructed)
+                self.alpha_peak_reconstructed = result.x
+                find_alpha_peak(self.alpha_peak_reconstructed)
             else:
                 if debug:
                     warnings.warn("Minimization did not return a successful result")
