@@ -2698,14 +2698,14 @@ the newly calculated :math:`v_{r}` or not
         sym_type
          - 'sym90', will compare data at 0° and 180°
 
-        .. math:: \\epsilon = param(0°) - param(180°)
+        .. math:: \\epsilon(r) = param(r, 0°) - param(r, 180°)
 
         rel_error will divide by param 0
 
         Method
          - rmse, 
         
-        .. math:: \\epsilon_{sym} = \\sqrt{\\bar{\\epsilon^{2}}}
+        .. math:: \\epsilon_{sym} = \\sqrt{\\bar{\\epsilon(r)^{2}}}
 
         Returns
          - :math:`\\epsilon_{sym}`
@@ -3248,7 +3248,7 @@ the newly calculated :math:`v_{r}` or not
 
         return self.area_avg("alpha_reconstructed")
     
-    def plot_profiles2(self, param, save_dir = '.', show=True, x_axis='vals', 
+    def plot_profiles2(self, param, save_dir = '.', show=True, x_axis='vals', errorbars = 0.0, 
                       const_to_plot = [90, 67.5, 45, 22.5, 0], include_complement = True, 
                       fig_size=(4,4), title=True, label_str = '', legend_loc = 'best', xlabel_loc = 'center',
                       set_min = None, set_max = None, show_spines = True, xlabel_loc_coords = None, ylabel_loc_coords = None, cs=None) -> None:
@@ -3269,6 +3269,7 @@ the newly calculated :math:`v_{r}` or not
          - legend_loc, passed to ax.legend
          - xlable_loc, passed to ax.xaxis.set_label_coords
          - xlable_loc_coords, passed to ax.xaxis.set_label_coords
+         - errorbars, value of errorbars to put on the data
          
         
         """
@@ -3371,11 +3372,12 @@ the newly calculated :math:`v_{r}` or not
                 if type(param) == str:
                     vals = [var for _, var in sorted(zip(rs, vals))]
                     rs = sorted(rs)
-                    
+                    errs = errorbars * np.asarray(vals)
+
                     if x_axis == 'vals':
-                        ax.plot(vals, rs, label=f'{angle}°', color=next(cs), marker=next(ms), linestyle = '--')
+                        ax.errorbar(vals, rs, xerr = errs, capsize=3, ecolor = "black", label=f'{angle}°', color=next(cs), marker=next(ms), linestyle = '--')
                     elif x_axis == 'r':
-                        ax.plot(rs, vals, label=f'{angle}°', color=next(cs), marker=next(ms), linestyle = '--')
+                        ax.errorbar(rs, vals, yerr = errs, capsize=3, ecolor = "black", label=f'{angle}°', color=next(cs), marker=next(ms), linestyle = '--')
                 
                 elif type(param) == list:
                     temp = []
@@ -3385,6 +3387,7 @@ the newly calculated :math:`v_{r}` or not
                     rs = sorted(rs)
 
                     for specific_param, val_list in zip(param, temp):
+                        errs = errorbars * np.asarray(val_list)
                         # print(val_list)
                         if cs == 'infer':
                             cs = color_cycle(set_color = specific_param)
@@ -3413,9 +3416,9 @@ the newly calculated :math:`v_{r}` or not
                             legend_str = specific_param
 
                         if x_axis == 'vals':
-                            ax.plot(val_list, rs, color=next(cs), marker=next(ms), linestyle = '--', label = legend_str)
+                            ax.errorbar(val_list, rs, xerr = errs, capsize=3, ecolor = "black", color=next(cs), marker=next(ms), linestyle = '--', label = legend_str)
                         elif x_axis == 'r':
-                            ax.plot(rs, val_list, color=next(cs), marker=next(ms), linestyle = '--', label = legend_str)
+                            ax.errorbar(rs, val_list, yerr = errs, capsize=3, ecolor = "black", color=next(cs), marker=next(ms), linestyle = '--', label = legend_str)
                     
             
             if x_axis == 'vals':
