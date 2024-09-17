@@ -194,7 +194,8 @@ class Condition:
                                 raise 
             except:
                 # Probably input a single phi instead of an array
-                param_values = self.data[round(phi_in * 180 / np.pi, 2)][r_in][param]
+                
+                param_values = self.data[round(phi_in * 180 / np.pi, 2)][float(r_in)][param]
             return param_values
         
         elif interp_method == 'spline':
@@ -515,6 +516,23 @@ class Condition:
 
         return
     
+    def add_mesh_points(self, r_points:list):
+
+        for angle in self.data.keys():
+            for r in r_points:
+                temp_midas_data = []
+                
+                for param in tab_keys:
+                    try:
+                        temp_midas_data.append( self(angle*np.pi/180, r, param, interp_method = 'linear' ) )
+                    except KeyError as e:
+                        print(e)
+                        temp_midas_data.append( 0 )
+                
+                self.data[angle].update( {r: dict(zip(tab_keys, temp_midas_data))} )
+
+        return 1
+    
     def approx_vf(self, n=7) -> None:
         """Method for approximating vf with power-law relation. 
 
@@ -814,15 +832,15 @@ class Condition:
          - "param", string for local parameter to calculate the gradient of
         
         Stores:
-         - "grad_'param'_r"
-         - "grad_'param'_phi"
-         - "grad_'param'_phinor"
-         - "grad_'param'_x"
-         - "grad_'param'_y"
-         - "grad_'param'_total"
+         - grad\_'param'_r
+         - grad\_'param'_phi
+         - grad\_'param'_phinor
+         - grad\_'param'_x
+         - grad\_'param'_y
+         - grad\_'param'_total
 
         Returns:
-         - Area average "grad_'param'_total"
+         - Area average grad\_'param'_total
 
         """
         
@@ -2413,7 +2431,7 @@ the newly calculated :math:`v_{r}` or not
          - quiet, flag for extra debugging messages
         
         Stores:
-         - "vr_'method_name'" in midas_dict 
+         - "vr\_'method_name'" in midas_dict 
          - "vr_model" in midas_dict 
 
         Options for method:
