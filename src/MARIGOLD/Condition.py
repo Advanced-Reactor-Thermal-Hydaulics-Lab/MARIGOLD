@@ -517,6 +517,14 @@ class Condition:
         return
     
     def add_mesh_points(self, r_points:list):
+        """Method for adding additional r/R points
+
+        Data linearly interpolated based on surrounding data (specifically using __call__ at the (angle, r) location in question)
+        
+        Inputs:
+         - r_points, points to add
+        
+        """
 
         for angle in self.data.keys():
             for r in r_points:
