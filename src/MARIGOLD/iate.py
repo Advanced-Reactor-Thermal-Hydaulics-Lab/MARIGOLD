@@ -8,13 +8,13 @@ def iate_1d_1g(
         C_WE = None, C_RC = None, C_TI = None, alpha_max = 0.75, C = 3, We_cr = 6, acrit_flag = 0, acrit = 0.13,
 
         # Method arguments
-        preset = None, cd_method = 'doe',
+        preset = None, avg_method = None, cd_method = 'doe', dpdz_method = 'LM', void_method = 'driftflux',
 
         # Pressure drop calculation
-        dpdz_method = 'LM', LM_C = 40, k_m = 0.10, m = 0.316, n = 0.25,
+        LM_C = 25, k_m = 0.10, m = 0.316, n = 0.25,
 
         # Void fraction calculation
-        void_method = 'driftflux', C_inf = 1.20,
+        C0 = None, C_inf = 1.20,
 
         # Temporary arguments
         restriction = None, cond2 = None, debug = False
@@ -36,7 +36,7 @@ def iate_1d_1g(
      - acrit:           Critical void fraction for shutting off turbulence-based mechanisms
      - C_inf:           Drift flux distribution parameter limiting value
      - dpdz_method:     Pressure drop prediction method, 'LM' or 'Kim'
-     - cd_method:       Drag coefficient prediction method, 'iter' or 'doe'
+     - cd_method:       Drag coefficient prediction method, 'err_iter', 'fixed_iter', or 'doe'
      - void_method:     Void fraction prediction method, 'driftflux' or 'continuity'
      - LM_C:            Lockhart-Martinelli Chisholm parameter
      - k_m:             Minor loss coefficient
@@ -53,32 +53,6 @@ def iate_1d_1g(
      - Revise vgj calculation
     """
 
-    # Could make a dictionary with all of the options outside of the fxn and then with kwarg
-    # Inside of the function with whatever kwargs you passed update the dictionary
-
-    '''
-    option_dict = {
-        "dpdz": 'LM',
-        "CD": 0.2
-    }
-
-    def test(**kwargs):
-
-        for option, value in kwargs.items():
-            if option in option_dict.keys():
-                option_dict.update({option:value})
-            else:
-                print(f"Warning: unknown option {option}")
-
-        # Test
-        print(option_dict)
-
-
-    if __name__ == '__main__':
-
-        test(CD = 0.4, m = 4)
-    '''
-
     # MARIGOLD retrieval and setup
     theta           = cond.theta                                # Pipe inclination angle [degrees]
     Dh              = cond.Dh                                   # Hydraulic diameter [m]
@@ -92,35 +66,47 @@ def iate_1d_1g(
     R_spec          = 287.058                                   # Specific gas constant for dry air [J/kg-K]
     T               = 293.15                                    # Ambient absolute temperature [K], for calculating air density as a function of pressure along channel
 
-    C0 = None
+    # IATE presets (WIP)
     if preset == 'kim':
-        rho_f = 998
-        rho_g = 1.226
-        mu_f = 0.001
-        sigma = 0.07278
-        p_atm = 101330
-        grav = 9.8
+        theta           = 90
+        Dh              = 4*0.20*0.01/2/(0.20+0.01)
+        rho_f           = 998
+        rho_g           = 1.226
+        mu_f            = 0.001
+        sigma           = 0.07278
+        p_atm           = 101330
+        grav            = 9.8
 
-        cd_method = 'fixed_iter'
-
-        C0 = 1.12
-    elif preset == 'yadav':
-        pass
-    elif preset == 'talley':
-        Dh = 0.0254
-        rho_f = 998
-        rho_g = 1.23
-        mu_f = 0.001
-        sigma = 0.07278
-
-        cd_method = 'doe'
-    elif preset == 'worosz':
-        pass
+        cd_method       = 'fixed_iter'
+        C0              = 1.12
     
+    elif preset == 'talley':
+        theta           = 0
+        Dh              = 0.0381
+        rho_f           = 998
+        rho_g           = 1.23
+        mu_f            = 0.001
+        sigma           = 0.07278
+
+        cond.mu_g       = 1.73E-5
+
+        avg_method      = 'legacy'
+        cd_method       = 'doe'
+        dpdz_method     = 'LM'
+
+        LM_C = 25
+    
+    elif preset == 'yadav':
+        void_method     = 'continuity'
+
+    elif preset == 'worosz':
+        cd_method       = 'err_iter'
+    
+    # Starting L/D
     if io == None:
         LoverD      = cond.LoverD                               # Condition L/D
     else:
-        LoverD      = io["z_mesh"][-1] / Dh
+        LoverD      = io["z_mesh"][-1] / Dh                     # Last L/D
     
     # Mesh generation
     if query < LoverD+z_step:
@@ -154,40 +140,6 @@ def iate_1d_1g(
             C_TI    = 0.014
         
         We_cr = 5
-        
-        COV_RC      = cond.calc_COV_RC(reconstruct_flag=False)
-        COV_TI      = cond.calc_COV_TI(reconstruct_flag=False)
-
-        print(f"COV_RC: {COV_RC}\tCOV_TI: {COV_TI}\n\n")
-
-        # Row is run, column is port?
-        # I think this should be implemented in extracts and loads, as a cheat option
-        # In here, maybe have an interpolation framework for the COV between ports?
-        '''
-        CovTI = [
-            0.267	0.187	0.187
-            0.112	0.062	0.053
-            1.000	1.000	1.000
-            0.558	0.603	0.603
-            0.188	0.335	0.168
-            1.209	1.000	1.000
-            0.902	1.000	1.000
-            0.422	1.000	0.860
-            0.272	0.395	0.228
-        ];
-    
-        CovRC = [
-            0.843	0.625	0.459
-            0.596	0.070	0.053
-            3.496	2.693	2.759
-            1.135	2.594	1.169
-            0.328	0.460	0.144
-            2.917	1.517	1.525
-            3.290	1.547	1.553
-            0.741	1.605	1.239
-            0.249	0.339	0.143
-        ];
-        '''
 
     elif restriction == 'elbow':                # Elbow (Yadav, 2013)
         if C_WE == None:
@@ -196,9 +148,6 @@ def iate_1d_1g(
             C_RC    = 0.008
         if C_TI == None:
             C_TI    = 0.085
-        
-        COV_RC      = 1
-        COV_TI      = 1
 
     elif restriction == 'vd':                   # Vertical-downward (Ishii, Paranjape, Kim, and Sun, 2004)
         if C_WE == None:
@@ -207,9 +156,6 @@ def iate_1d_1g(
             C_RC    = 0.004
         if C_TI == None:
             C_TI    = 0.034
-        
-        COV_RC      = 1
-        COV_TI      = 1
 
     else:                                       # Default to vertical-upward, no elbow (Ishii, Kim, and Uhle, 2002)
         if C_WE == None:
@@ -218,10 +164,42 @@ def iate_1d_1g(
             C_RC    = 0.004
         if C_TI == None:
             C_TI    = 0.085
-        
-        COV_RC      = 1
-        COV_TI      = 1
     
+    # # Lets the IATE function take in either scalar or array COV. This is important later, since COV is indexed
+    # if hasattr(COV_RC,"__len__"):
+    #     if len(COV_RC) == 1:
+    #         COV_RC = [COV_RC[0] for _ in range(len(z_mesh))]
+    # else:
+    #     COV_RC = [COV_RC for _ in range(len(z_mesh))]
+
+    # if hasattr(COV_TI,"__len__"):
+    #     if len(COV_TI) == 1:
+    #         COV_TI = [COV_TI[0] for _ in range(len(z_mesh))]
+    # else:
+    #     COV_TI = [COV_TI for _ in range(len(z_mesh))]
+    
+    if cond2 != None:
+        # Use data at initial condition, void reconstruction downstream
+        if io == None:
+            rf = False
+        else:
+            rf = True
+        
+        COV_RC1 = np.nan_to_num(cond.calc_COV_RC(reconstruct_flag = rf, debug = rf), nan=1.0)
+        COV_TI1 = np.nan_to_num(cond.calc_COV_TI(reconstruct_flag = rf, debug = rf), nan=1.0)
+
+        COV_RC2 = np.nan_to_num(cond2.calc_COV_RC(reconstruct_flag = True, debug = rf), nan=1.0)
+        COV_TI2 = np.nan_to_num(cond2.calc_COV_TI(reconstruct_flag = True, debug = rf), nan=1.0)
+
+        # print("*****")
+        # print(f"{cond}")
+        # print(f"L/D: {cond.LoverD}\t\tCOV_RC1: {COV_RC1}\tCOV_TI1: {COV_TI1}\t")
+        # print(f"L/D: {cond2.LoverD}\t\tCOV_RC2: {COV_RC2}\tCOV_TI2: {COV_TI2}\t")
+        # print("*****")
+        
+        COV_RC = np.interp(z_mesh,(cond.LoverD, cond2.LoverD),(COV_RC1, COV_RC2))
+        COV_TI = np.interp(z_mesh,(cond.LoverD, cond2.LoverD),(COV_TI1, COV_TI2))
+
     ############################################################################################################################
     #                                                                                                                          #
     #                                                   BOUNDARY CONDITIONS                                                    #
@@ -262,13 +240,11 @@ def iate_1d_1g(
 
             ai[0]       = cond.area_avg_ai_sheet
             alpha[0]    = cond.area_avg_void_sheet
-            # Db[0]       = cond.area_avg_Dsm_sheet / 1000
-
             Db[0]       = 6 * alpha[0] / ai[0]
         else:
-            ai[0]       = cond.area_avg("ai")                       # [1/m]
-            alpha[0]    = cond.area_avg("alpha")                    # [-]
-            Db[0]       = cond.void_area_avg("Dsm1") / 1000         # [m]
+            ai[0]       = cond.area_avg("ai",method=avg_method)                     # [1/m]
+            alpha[0]    = cond.area_avg("alpha",method=avg_method)                  # [-]
+            Db[0]       = cond.void_area_avg("Dsm1",method=avg_method) / 1000       # [m]
 
     else:
         aiwe[0]     = io["aiwe"][-1]
@@ -304,16 +280,19 @@ def iate_1d_1g(
         p = cond.pz                                             # Override
         dpdz = cond.dpdz
 
-    elif cond2 == None:
+    elif dpdz_method == 'interp':
+        # Change this to use np.interp() instead
+        dpdz = ((cond2.jgatm * p_atm / cond2.jgloc) - p) / (cond2.LoverD - LoverD)
+
+    else:
         dpdz = cond.calc_dpdz(
             method = dpdz_method, 
             chisholm = LM_C, 
+            m = m, 
+            n = n, 
             k_m = k_m, 
             L = (query - LoverD) * Dh
             ) + ((rho_f * grav * delta_h) / (z_mesh[-1] - z_mesh[0]))   # Pressure gradient from gravity
-        
-    else:
-        dpdz = ((cond2.jgatm * p_atm / cond2.jgloc) - p) / (cond2.LoverD - LoverD)
 
     pz = p * (1 - (z_mesh - z_mesh[0]) * (dpdz / p))
     
@@ -335,7 +314,20 @@ def iate_1d_1g(
             break
             
         jgloc = jgatm * p_atm / pz[i]                           # Talley used jgP1 and pressure at P1 instead of jgatm and p_atm
-        vgz[i] = jgloc / alpha[i]                               # Estimate void weighted velocity
+        
+        if void_method == 'vgz_talley':
+            vgz[i] = 1.05 * (jf + jgloc) - 1.23                 # Talley 2012, Eq. 3-31
+            alpha[i] = jgloc / vgz[i]
+            Db[i] = 6 * alpha[i] / ai[i]
+
+        if void_method == 'vgz_interp' and cond2 != None:
+            vgz[i] = np.interp(z_mesh[i],(cond.LoverD, cond2.LoverD),(cond.area_avg('ug1'), cond2.area_avg('ug1')))
+            alpha[i] = jgloc / vgz[i]
+            Db[i] = 6 * alpha[i] / ai[i]
+            
+        else:
+            vgz[i] = jgloc / alpha[i]                           # Estimate void weighted velocity
+
         vfz = jf / (1 - alpha[i])
 
         ########################################################################################################################
@@ -436,10 +428,10 @@ def iate_1d_1g(
         else:
             SWE[i] = C_WE * CDwe**(1/3) * ur * ai[i]**2 / 3 / np.pi
         
-        # Sink due to Random Collisions	
+        # Sink due to Random Collisions
         RC1 = u_t * ai[i]**2 / alpha_max**(1/3) / (alpha_max**(1/3) - alpha[i]**(1/3))
         RC2 = 1 - np.exp(-C * alpha_max**(1/3) * alpha[i]**(1/3) / (alpha_max**(1/3) - alpha[i]**(1/3)))
-        SRC[i] = COV_RC * C_RC * RC1 * RC2 / 3 / np.pi
+        SRC[i] = COV_RC[i] * C_RC * RC1 * RC2 / 3 / np.pi
         
         # Source due to Turbulent Impact
         TI1 = u_t * ai[i]**2 / alpha[i]
@@ -449,13 +441,13 @@ def iate_1d_1g(
             TI2 = (1 - We_cr / We)**0.5 * np.exp(-We_cr / We)
         else:
             TI2 = 0
-        STI[i] = COV_TI * C_TI * TI1 * TI2 / 18
+        STI[i] = COV_TI[i] * C_TI * TI1 * TI2 / 18
 
         ########################################################################################################################
         # Estimate sources & sinks in the Interfacial Area Transport Eqn. (Part 2)
 
         # Source due to Bubble Expansion
-        if preset == 'kim' or preset == 'doe' or preset == 'talley':
+        if preset == 'kim' or preset == 'talley':
             SEXP[i] = -2 / 3 / pz[i] * ai[i] * vgz[i] * (-dpdz)     # Original DOE_MATLAB_IAC
         else:
             if i <= 2:      # Previously 3, but in MATLAB (1 indexing vs. 0 indexing)
@@ -465,7 +457,7 @@ def iate_1d_1g(
                 # Backwards difference for remaining nodes
                 SEXP[i] = -2 / 3 / rho_gz[i] * ai[i] * vgz[i] * (rho_gz[i] - rho_gz[i-1]) / z_step
 
-        # Source/sink due to Bubble Acceleration (advection in Yadav's script)
+        # Source/sink due to Bubble Acceleration (advection in Yadav's script) (VG for velocity gradient)
         if i <= 2:
             dvg = 0
             dvgdz = 0
@@ -518,7 +510,7 @@ def iate_1d_1g(
                     print(f"\n\n{i+1}.\tjf = {jf} [m/s], jg = {cond.jgref} [m/s]\n\tL/D: {z/Dh}\n\tC0: {C0}\n\tvgj: {vgj}\n\tj: {j}\n\talpha: {alpha[i]}",file=FID)
 
         elif void_method == 'continuity':   # Continuity
-
+            # Original continuity method
             # alpha[i+1] = alpha[i] - alpha[i] / pz[i] * -dpdz * z_step
 
             # Yadav
@@ -529,7 +521,25 @@ def iate_1d_1g(
 
             else:
                 alpha[i+1] = alpha[i] - (alpha[i] / (rho_gz[i] * vgz[i])) * ((rho_gz[i] * vgz[i]) - (rho_gz[i-1] * vgz[i-1]))
-                
+        
+        elif void_method == 'vgz_talley':
+            # Alpha calculated in front, still going to double-calculate the i+1 step out of paranoia
+            # The way Talley had this imnplemented in Model_Horz.m is weird
+
+            jgloc = jgatm * p_atm / pz[i+1]
+
+            vgz[i+1] = 1.05 * (jf + jgloc) - 1.23                 # Talley 2012, Eq. 3-31
+            alpha[i+1] = jgloc / vgz[i+1]
+            
+        elif void_method == 'vgz_interp':
+            # Alpha calculated in front, still going to double-calculate the i+1 step out of paranoia
+            # The way Talley had this imnplemented in Model_Horz.m is weird
+
+            jgloc = jgatm * p_atm / pz[i+1]
+
+            vgz[i+1] = np.interp(z_mesh[i+1],(cond.LoverD, cond2.LoverD),(cond.area_avg('ug1'), cond2.area_avg('ug1')))
+            alpha[i+1] = jgloc / vgz[i+1]
+
         elif void_method == 'pressure_kim':
             f_f, f_g = cond.calc_fric(m = m, n = n)
             dpdz_f = f_f * 1/Dh * rho_f * jf**2 / 2
