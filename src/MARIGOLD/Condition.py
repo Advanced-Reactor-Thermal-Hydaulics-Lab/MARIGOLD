@@ -532,7 +532,7 @@ class Condition:
                 
                 for param in tab_keys:
                     try:
-                        temp_midas_data.append( self(angle*np.pi/180, r, param, interp_method = 'linear' ) )
+                        temp_midas_data.append( float(self(angle*np.pi/180, r, param, interp_method = 'linear' ) ))
                     except KeyError as e:
                         print(e)
                         temp_midas_data.append( 0 )
