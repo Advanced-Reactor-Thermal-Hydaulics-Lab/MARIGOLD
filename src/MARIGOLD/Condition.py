@@ -537,7 +537,7 @@ class Condition:
                 
                 for param in params:
                     try:
-                        temp_midas_data.append( self(angle*np.pi/180, r, param, interp_method = 'linear' ) )
+                        temp_midas_data.append( float(self(angle*np.pi/180, r, param, interp_method = 'linear' ) ))
                     except KeyError as e:
                         if suppress == False:
                             print(e)
