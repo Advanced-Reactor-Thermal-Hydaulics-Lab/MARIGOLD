@@ -2878,7 +2878,6 @@ the newly calculated :math:`v_{r}` or not
             print(f"\tjf = {self.jf}, jgref = {self.jgref}, L/D = {self.LoverD}")
 
         if reconstruct_flag == True:
-            self.reconstruct_void(method='talley')
             alpha_str = 'alpha_reconstructed'
         else:
             alpha_str = 'alpha'
@@ -2893,7 +2892,7 @@ the newly calculated :math:`v_{r}` or not
         rho_g = 1.22
         mu_f = 0.001
         Dh              = self.Dh                                           # Hydraulic diameter [m]
-                
+
         rho_m           = (1 - alpha_avg) * rho_f + alpha_avg * rho_g       # Mixture density
         mu_m            = mu_f / (1 - alpha_avg)                            # Mixture viscosity
         v_m             = (rho_f * self.jf + rho_g * self.jgloc) / rho_m    # Mixture velocity
@@ -2902,8 +2901,11 @@ the newly calculated :math:`v_{r}` or not
         f_TP            = 0.316 * (mu_m / mu_f / Rem)**0.25                 # Two-phase friction factor, Talley (2012) and Worosz (2015), also used in iate_1d_1g
         eps             = f_TP * v_m**3 / 2 / Dh                            # Energy dissipation rate (Wu et al., 1998; Kim, 1999), also used in iate_1d_1g
         
+        eps = round(eps,2)
+
         if debug:
-            print(f"\n\t\tv_m: {v_m:.4f}\tRem: {Rem:.4f}\tf_TP: {f_TP:.4f}\teps: {eps:.4f}\n")
+            print(f"\n\t\tv_m: {v_m:.4f}\tRem: {Rem:.4f}\tf_TP: {f_TP:.4f}\teps: {eps:.4f}")
+            print(f"\t\tjf: {self.jf}\tjgloc: {self.jgloc}\trhom: {rho_m}\n")
 
         for angle, r_dict in self.data.items():
             for rstar, midas_dict in r_dict.items():
@@ -2926,13 +2928,13 @@ the newly calculated :math:`v_{r}` or not
                 else:
                     u_t = 0                                                 # TI and RC are driven by the turbulent fluctuation velocity (u_t)
 
-                # Talley 2012, secion 3.3.1
+                # Talley 2012, section 3.3.1
                 COV_RC_loc = u_t * ai_loc**2 / (alpha_peak**(1/3) * (alpha_peak**(1/3) - (alpha_loc)**(1/3)))
                 
                 midas_dict['COV_RC_loc'] = COV_RC_loc
 
                 if debug:
-                    # print(f"\t\t\t{angle:2.1f}\t{rstar:.2f}\t|\talpha: {alpha_loc:.4f}\tCOV_RC_loc: {COV_RC_loc:.4f}")
+                    # print(f"\t\t\t{angle:2.1f}\t{rstar:.2f}\t|\talpha: {alpha_loc:.4f}\tDbloc: {Db_loc:.4f}\tCOV_RC_loc: {COV_RC_loc:.4f}")
                     pass
                 
         # Talley does not area-average local u_t; instead computes <u_t> with area-averaged parameters
@@ -2944,7 +2946,7 @@ the newly calculated :math:`v_{r}` or not
 
             if debug:
                 print(f"\n\t\tu_t_avg: {u_t_avg}\tai_avg: {ai_avg}\talpha_avg: {alpha_avg}\t")
-                print(f"\n\tCOV_RC_num: {self.area_avg('COV_RC_loc',method=avg_method)}\tCOV_RC_den: {COV_RC_avg}")
+                print(f"\n\tCOV_RC: {COV_RC}\tCOV_RC_num: {self.area_avg('COV_RC_loc',method=avg_method)}\tCOV_RC_den: {COV_RC_avg}")
         else:
             COV_RC = 0
 
@@ -2961,7 +2963,6 @@ the newly calculated :math:`v_{r}` or not
             print(f"\tjf = {self.jf}, jgref = {self.jgref}, L/D = {self.LoverD}")
 
         if reconstruct_flag == True:
-            self.reconstruct_void(method='talley')
             alpha_str = 'alpha_reconstructed'
         else:
             alpha_str = 'alpha'
@@ -2987,6 +2988,8 @@ the newly calculated :math:`v_{r}` or not
         f_TP            = 0.316 * (mu_m / mu_f / Rem)**0.25                 # Two-phase friction factor, Talley (2012) and Worosz (2015), also used in iate_1d_1g
         eps             = f_TP * v_m**3 / 2 / Dh                            # Energy dissipation rate (Wu et al., 1998; Kim, 1999), also used in iate_1d_1g
         
+        eps = round(eps,2)
+
         if debug:
             print(f"\n\t\tv_m: {v_m:.4f}\tRem: {Rem:.4f}\tf_TP: {f_TP:.4f}\teps: {eps:.4f}\n")
 
@@ -3034,7 +3037,7 @@ the newly calculated :math:`v_{r}` or not
             
             if debug:
                 print(f"\n\t\tWe_avg: {We_avg}")
-                print(f"\n\tCOV_TI_num: {self.area_avg('COV_TI_loc',method=avg_method)}\tCOV_TI_den: {COV_TI_avg}")
+                print(f"\n\tCOV_TI: {COV_TI}\tCOV_TI_num: {self.area_avg('COV_TI_loc',method=avg_method)}\tCOV_TI_den: {COV_TI_avg}")
         else:
             COV_TI = 0
 

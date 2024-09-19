@@ -185,20 +185,14 @@ def iate_1d_1g(
         else:
             rf = True
         
-        COV_RC1 = np.nan_to_num(cond.calc_COV_RC(reconstruct_flag = rf, debug = rf), nan=1.0)
-        COV_TI1 = np.nan_to_num(cond.calc_COV_TI(reconstruct_flag = rf, debug = rf), nan=1.0)
+        COV_RC1 = np.nan_to_num(cond.calc_COV_RC(reconstruct_flag = rf, debug = True), nan=1.0)
+        COV_TI1 = np.nan_to_num(cond.calc_COV_TI(reconstruct_flag = rf, debug = True), nan=1.0)
 
-        COV_RC2 = np.nan_to_num(cond2.calc_COV_RC(reconstruct_flag = True, debug = rf), nan=1.0)
-        COV_TI2 = np.nan_to_num(cond2.calc_COV_TI(reconstruct_flag = True, debug = rf), nan=1.0)
+        COV_RC2 = np.nan_to_num(cond2.calc_COV_RC(reconstruct_flag = True, debug = True), nan=1.0)
+        COV_TI2 = np.nan_to_num(cond2.calc_COV_TI(reconstruct_flag = True, debug = True), nan=1.0)
 
-        # print("*****")
-        # print(f"{cond}")
-        # print(f"L/D: {cond.LoverD}\t\tCOV_RC1: {COV_RC1}\tCOV_TI1: {COV_TI1}\t")
-        # print(f"L/D: {cond2.LoverD}\t\tCOV_RC2: {COV_RC2}\tCOV_TI2: {COV_TI2}\t")
-        # print("*****")
-        
-        COV_RC = np.interp(z_mesh,(cond.LoverD, cond2.LoverD),(COV_RC1, COV_RC2))
-        COV_TI = np.interp(z_mesh,(cond.LoverD, cond2.LoverD),(COV_TI1, COV_TI2))
+        COV_RC = np.interp(z_mesh / Dh,(cond.LoverD, cond2.LoverD),(COV_RC1, COV_RC2))
+        COV_TI = np.interp(z_mesh / Dh,(cond.LoverD, cond2.LoverD),(COV_TI1, COV_TI2))
 
     ############################################################################################################################
     #                                                                                                                          #
@@ -320,7 +314,7 @@ def iate_1d_1g(
             Db[i] = 6 * alpha[i] / ai[i]
 
         if void_method == 'vgz_interp' and cond2 != None:
-            vgz[i] = np.interp(z_mesh[i],(cond.LoverD, cond2.LoverD),(cond.area_avg('ug1'), cond2.area_avg('ug1')))
+            vgz[i] = np.interp(z_mesh[i] / Dh,(cond.LoverD, cond2.LoverD),(cond.area_avg('ug1'), cond2.area_avg('ug1')))
             alpha[i] = jgloc / vgz[i]
             Db[i] = 6 * alpha[i] / ai[i]
             
