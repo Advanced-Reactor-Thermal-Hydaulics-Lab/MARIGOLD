@@ -181,7 +181,7 @@ class Condition:
         
         if interp_method == 'None':
             try:
-                param_values = np.zeros((r_in.size, phi_in.size)) # TODO check if r_in and phi_in actually exist
+                param_values = np.zeros((r_in.size, phi_in.size)) # To-do: check if r_in and phi_in actually exist
                 for i, r_val in enumerate(r_in):
                     for j, phi_val in enumerate(phi_in):
                         try:
@@ -223,7 +223,7 @@ class Condition:
                 return self.linear_xy_interp[param](x, y)
         
         else:
-            raise NameError(f"{interp_method} not regonized. Accepted arguments are 'None', 'spline', 'linear' or 'linear_xy'")
+            raise NameError(f"{interp_method} not recognized. Accepted arguments are 'None', 'spline', 'linear' or 'linear_xy'")
 
     def pretty_print(self, print_to_file= False, FID=debugFID, mirror=False) -> None:
         """Prints out all the information in a Condition in a structured way 
@@ -516,7 +516,7 @@ class Condition:
 
         return
     
-    def add_mesh_points(self, r_points:list):
+    def add_mesh_points(self, r_points:list, suppress=False):
         """Method for adding additional r/R points
 
         Data linearly interpolated based on surrounding data (specifically using __call__ at the (angle, r) location in question)
@@ -530,11 +530,18 @@ class Condition:
             for r in r_points:
                 temp_midas_data = []
                 
-                for param in tab_keys:
+                r_keys = list(self.data[angle].keys())
+                r_keys.sort()
+
+                params = self.data[angle][r_keys[-2]]
+                
+                for param in params:
                     try:
                         temp_midas_data.append( self(angle*np.pi/180, r, param, interp_method = 'linear' ) )
                     except KeyError as e:
-                        print(e)
+                        if suppress == False:
+                            print(e)
+                        
                         temp_midas_data.append( 0 )
                 
                 self.data[angle].update( {r: dict(zip(tab_keys, temp_midas_data))} )
@@ -1016,7 +1023,7 @@ class Condition:
         self.spline_interp.update({param: spline_interpolant})
         return
     
-    def fit_linear_interp(self, param: str) -> None:
+    def fit_linear_interp(self, param: str, suppress=True) -> None:
         """Makes a LinearNDInterpolator for the given param. 
         
             Access with self.linear_interp[param], phi in radians
@@ -1040,19 +1047,22 @@ class Condition:
         for angle, r_dict in self.data.items():
             for rstar, midas_dict in r_dict.items():
                 rs.append(rstar)
-                phis.append(angle *np.pi/180)
+                phis.append(angle * np.pi/180)
                 try:
                     vals.append(midas_dict[param])
                 except KeyError:
-                    print(self.name, angle, rstar, "has no ", param)
-                    raise(KeyError)
+                    if suppress == False:
+                        print(self.name, angle, rstar, "has no ", param)
+                        raise(KeyError)
+                    
+                    vals.append( 0 )        # Temporary, figure this out later
 
         linear_interpolant = interpolate.LinearNDInterpolator(list(zip(phis, rs)), vals)
         self.linear_interp.update({param: linear_interpolant})
 
         return
     
-    def fit_linear_xy_interp(self, param: str) -> None:
+    def fit_linear_xy_interp(self, param: str, suppress=True) -> None:
         """ Makes a LinearNDInterpolator for the given param in x y coords
         
         Can access  with self.linear_xy_interp[param]
@@ -1080,7 +1090,8 @@ class Condition:
                 try:
                     vals.append(midas_dict[param])
                 except KeyError:
-                    print(self.name, angle, rstar, "has no ", param)
+                    if suppress == False:
+                        print(self.name, angle, rstar, "has no ", param)
 
         linear_interpolant = interpolate.LinearNDInterpolator(list(zip(xs, ys)), vals)
         self.linear_xy_interp.update({param: linear_interpolant})
@@ -1381,8 +1392,6 @@ class Condition:
             return self.area_avgs[param] # why waste time, if we already calculated this don't do it again
         
         if method == 'legacy':
-            # There's definitely a more elegant way to do this, but I just want Talley's data to work for now
-
             I = 0
             param_r = [] # array for parameter integrated wrt r
             angles = []
@@ -1392,50 +1401,93 @@ class Condition:
                 self.mirror()
 
             for angle, r_dict in self.data.items():
-                if angle == 360:
+
+                if angle == 360:    # We already have 0
                     continue
 
-                try:
-                    if 0.95 in r_dict:
-                        S_1 = 0.05 * sum((1 * 0,
-                                4 * 0.95 * r_dict[0.95][param],
-                                2 * 0.90 * r_dict[0.90][param],
-                                4 * 0.85 * r_dict[0.85][param],
-                                1 * 0.80 * r_dict[0.80][param],
-                                )) / 3
-                        
-                        S_2 = 0.10 * sum((1 * 0.80 * r_dict[0.8][param],
-                                4 * 0.70 * r_dict[0.7][param],
-                                2 * 0.60 * r_dict[0.6][param],
-                                4 * 0.50 * r_dict[0.5][param],
-                                1 * 0.40 * r_dict[0.4][param],
-                                )) / 3
-                        
-                        S_3 = 0.20 * sum((1 * 0.40 * r_dict[0.4][param],
-                                4 * 0.20 * r_dict[0.2][param],
-                                2 * 0.00 * r_dict[0.0][param],
-                                )) / 3
+                rs_temp = []
+                vars_temp = []
+                angles.append(angle * np.pi / 180)
+                for rstar, midas_dict in r_dict.items():
+                    if rstar >= 0:
+                        try:
+                            rs_temp.append(rstar)
+                            vars_temp.append(float(midas_dict[param] * rstar))
+                        except:
+                            if debug: print('Problem with:', angle, r_dict, param)
+                
+                vars = [var for _, var in sorted(zip(rs_temp, vars_temp))]
+                rs = sorted(rs_temp)
+
+                vars.reverse()      # I noticed too late that the list goes from r/R = 0 to 1, not the other way around
+                rs.reverse()        # Already wrote the actual Simpson's rule part, easier to just do this
+
+                if debug: print("Arrays to integrate", angle, rs, vars, file=debugFID)
+
+                if len(rs) != len(vars):
+                    ValueError( f"rs to integrate over {rs} must be the same length as params {vars}, occured at {angle}" )
+
+                delta = abs(np.diff(rs))                # r/R steps
+
+                la = 0
+                for idx, var in enumerate(vars):
+                    coeff = 2 * (2**(idx % 2)) / 3      # Simpson's Rule coefficient
+                    
+                    if idx < len(delta):
+                        if idx > 0:
+                            if delta[idx - 1] == delta[idx]:
+                                S = delta[idx] * coeff * var
+                            else:
+                                coeff = coeff / 2
+                                S = (delta[idx - 1] * coeff * var) + (delta[idx] * coeff * var)
+                        else:
+                            S = delta[idx] * coeff * var
                     else:
-                        S_1 = 0
+                        S = delta[idx - 1] * coeff * var
+                    
+                    la = la + S
+                
+                param_r.append(la)
+                
+                '''
+                if 0.95 in r_dict:
+                    S_1 = 0.05 * sum((1 * 0,
+                            4 * 0.95 * r_dict[0.95][param],
+                            2 * 0.90 * r_dict[0.90][param],
+                            4 * 0.85 * r_dict[0.85][param],
+                            1 * 0.80 * r_dict[0.80][param],
+                            )) / 3
+                    
+                    S_2 = 0.10 * sum((1 * 0.80 * r_dict[0.8][param],
+                            4 * 0.70 * r_dict[0.7][param],
+                            2 * 0.60 * r_dict[0.6][param],
+                            4 * 0.50 * r_dict[0.5][param],
+                            1 * 0.40 * r_dict[0.4][param],
+                            )) / 3
+                    
+                    S_3 = 0.20 * sum((1 * 0.40 * r_dict[0.4][param],
+                            4 * 0.20 * r_dict[0.2][param],
+                            2 * 0.00 * r_dict[0.0][param],
+                            )) / 3
+                else:
+                    S_1 = 0
 
-                        S_2 = 0.10 * sum((1 * 0,
-                                4 * 0.90 * r_dict[0.9][param],
-                                2 * 0.80 * r_dict[0.8][param],
-                                4 * 0.70 * r_dict[0.7][param],
-                                2 * 0.60 * r_dict[0.6][param],
-                                4 * 0.50 * r_dict[0.5][param],
-                                1 * 0.40 * r_dict[0.4][param],
-                                )) / 3
-                        
-                        S_3 = 0.20 * sum((1 * 0.40 * r_dict[0.4][param],
-                                4 * 0.20 * r_dict[0.2][param],
-                                2 * 0.00 * r_dict[0.0][param],             # Might be doubling up
-                                )) / 3
+                    S_2 = 0.10 * sum((1 * 0,
+                            4 * 0.90 * r_dict[0.9][param],
+                            2 * 0.80 * r_dict[0.8][param],
+                            4 * 0.70 * r_dict[0.7][param],
+                            2 * 0.60 * r_dict[0.6][param],
+                            4 * 0.50 * r_dict[0.5][param],
+                            1 * 0.40 * r_dict[0.4][param],
+                            )) / 3
+                    
+                    S_3 = 0.20 * sum((1 * 0.40 * r_dict[0.4][param],
+                            4 * 0.20 * r_dict[0.2][param],
+                            2 * 0.00 * r_dict[0.0][param],             # Might be doubling up
+                            )) / 3
 
-                    param_r.append(sum((S_1, S_2, S_3)))
-
-                except Exception as e:
-                    print(e)
+                param_r.append(sum((S_1, S_2, S_3)))
+                '''
 
             I = sum(param_r) / 8
             self.area_avgs.update({param: I})
@@ -3016,6 +3068,11 @@ the newly calculated :math:`v_{r}` or not
                 return float(max(m * (x - x0) + b, 0))
 
             def find_alpha_peak(alpha_peak, rstar_peak=0.90):
+                # Talley's reconstruction has a finer grid than experimental data
+                # This will affect the slope of the drop-off point if r/R_end is not coincident with a point on the experiment mesh
+                r_points = np.arange(0,1,0.05)
+                self.add_mesh_points(r_points)
+
                 interps = {}
                 
                 for angle, r_dict in self.data.items():                 # 360 degrees covered, not just one quadrant
@@ -3153,7 +3210,7 @@ the newly calculated :math:`v_{r}` or not
                 warnings.warn("Minimization did not return a successful result")
                 print(result.message)
             
-            print(f"\n\t: r/R_end: {self.roverRend}")
+            print(f"\n\tr/R_end: {self.roverRend}")
             print(f"\talpha_peak: {self.alpha_peak}")
             print(f"\t⟨α⟩_data: {round(self.area_avg('alpha',method=avg_method),3)}")
             print(f"\t⟨α⟩_reconstructed: {self.area_avg('alpha_reconstructed',method=avg_method)}")
