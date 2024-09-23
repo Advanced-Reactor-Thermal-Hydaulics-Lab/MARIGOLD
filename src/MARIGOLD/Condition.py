@@ -4095,7 +4095,7 @@ the newly calculated :math:`v_{r}` or not
             plt.close()
         return ax
 
-    def plot_surface(self, param:str, save_dir = '.', show=True, rotate_gif=False, elev_angle = 145, 
+    def plot_surface(self, param:str, save_dir = '.', show=True, set_max = None, set_min = None, rotate_gif=False, elev_angle = 145, 
                      azim_angle = 0, roll_angle = 180, title=True, ngridr = 50, ngridphi = 50, 
                      plot_surface_kwargs = None, solid_color = False, label_str = None, title_str = '') -> None:
         """Method to plot a surface of a given param
@@ -4175,7 +4175,7 @@ the newly calculated :math:`v_{r}` or not
 
         if set_max == None:
             set_max = np.max(parami) + (np.max(parami) * 0.1)
-            
+
         tx_step = round((set_max - set_min)/5,-int(np.floor(np.log10((set_max - set_min)/10))))
         tx = np.arange(set_min,set_max,tx_step)
         
