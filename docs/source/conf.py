@@ -5,6 +5,10 @@
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
+import os
+import sys
+
+sys.path.insert(0, os.path.abspath("../../src/MARIGOLD/"))
 
 project = 'MARIGOLD'
 copyright = '2024, adix'
@@ -18,17 +22,26 @@ extensions = [
     'sphinx.ext.intersphinx',
     'sphinx.ext.viewcode',
     'sphinx.ext.napoleon',
-    'sphinx_automodapi.automodapi'
+    'sphinx.ext.autodoc',
+    'sphinx.ext.autosummary',
+    'sphinx_rtd_dark_mode'
 ]
 
 templates_path = ['_templates']
 exclude_patterns = []
+
+autodoc_default_options = {
+    "members": True,
+    "undoc-members": True,
+    "private-members": True
+}
 
 numpydoc_show_class_members = False
 
 napoleon_google_docstring = False
 napoleon_use_param = False
 napoleon_use_ivar = True
+strip_signature_backslash = True
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
