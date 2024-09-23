@@ -1,6 +1,7 @@
 from .config import *
 from scipy import interpolate
 import warnings
+from matplotlib.ticker import FormatStrFormatter
 
 class Condition:
     """ Class to handle the local probe data
@@ -72,15 +73,19 @@ class Condition:
             elif self.port == 'P3':
                 self.LoverD = 110
             elif self.port == 'P4':
-                self.LoverD = 130
+                self.LoverD = 130.0372
             elif self.port == 'P5A':
-                self.LoverD = 146
+                self.LoverD = 144.1743
+            elif self.port == 'P5C':
+                self.LoverD = 147.5743
             elif self.port == 'P5B':
-                self.LoverD = 154
+                self.LoverD = 151.8443
+            elif self.port == 'P6A':
+                self.LoverD = 165.5743
             elif self.port == 'P6':
-                self.LoverD = 190
+                self.LoverD = 194.0743
             elif self.port == 'P7':
-                self.LoverD = 226
+                self.LoverD = 230.0743
             else:
                 self.LoverD = -1
                 print(f"Warning: Could not determine port L/D for {self}")
@@ -2716,7 +2721,7 @@ the newly calculated :math:`v_{r}` or not
             plt.close()
         return
 
-    def plot_contour(self, param:str, save_dir = '.', show=True, set_max = None, set_min = None, fig_size = 4, label_str = None, suppress_colorbar = False,
+    def plot_contour(self, param:str, save_dir = '.', show=True, set_max = None, set_min = None, fig_size = 3, label_str = None, suppress_colorbar = False,
                      rot_angle = 0, ngridr = 50, ngridphi = 50, colormap = 'hot_r', num_levels = 0, level_step = 0.25, title = False, title_str = '', extra_text = '',
                      annotate_h = False, cartesian = False, h_star_kwargs = {'method': 'max_dsm', 'min_void': '0.05'}, plot_measured_points = False) -> None:
         
@@ -2951,7 +2956,7 @@ the newly calculated :math:`v_{r}` or not
         Xi = RI * np.cos(PHII)
         Yi = RI * np.sin(PHII)
 
-        fig, ax = plt.subplots(figsize=(5, 5), subplot_kw={"projection": "3d"})
+        fig, ax = plt.subplots(figsize=(6, 6), subplot_kw={"projection": "3d"})
 
         if 'vmin' not in plot_surface_kwargs.keys(): 
             plot_surface_kwargs.update({'vmin': self.min(param)})
@@ -2966,8 +2971,11 @@ the newly calculated :math:`v_{r}` or not
         
 
         #plt.legend()
-        ax.set_xlabel (r'$x/R$ [-]')
-        ax.set_ylabel(r'$y/R$ [-]')
+        label_fontsize = 20 
+        tick_fontsize = 15  # quan
+        ax.set_xlabel (r'$x/R$ [-]', fontsize=label_fontsize)
+        ax.set_ylabel(r'$y/R$ [-]', fontsize=label_fontsize)
+        ax.set_zlabel(label_str if label_str else param, fontsize=label_fontsize)
 
         ax.set_xlim([-1, 1])
         ax.set_ylim([-1, 1])
@@ -2975,13 +2983,22 @@ the newly calculated :math:`v_{r}` or not
         ax.set_zlim([plot_surface_kwargs['vmin'], plot_surface_kwargs['vmax']])
 
         
-        if label_str:
-            ax.set_zlabel(label_str)
-            fig.colorbar(surf, label=label_str)
-        else:
-            ax.set_zlabel(param)
-            fig.colorbar(surf, label=param)
+        #if label_str:
+        #    ax.set_zlabel(label_str, fontsize=label_fontsize)
+        #    fig.colorbar(surf, label=label_str)
+       # else:
+          #  ax.set_zlabel(param, fontsize=label_fontsize)
+        #    fig.colorbar(surf, label=param)
         
+        if label_str:
+           cbar = fig.colorbar(surf, ax=ax, label=label_str, pad=0.1)
+        else:
+          cbar = fig.colorbar(surf, ax=ax, label=param, pad=0.1)
+
+        cbar.ax.tick_params(labelsize=tick_fontsize)  # Set colorbar tick label size
+        cbar.ax.set_ylabel(label_str if label_str else param, fontsize=label_fontsize)  # Set colorbar label size
+        cbar.ax.yaxis.set_major_formatter(FormatStrFormatter('%.2f'))  # Format tick labels to two decimals # quan
+
         if title: 
             if title_str:
                 plt.title(title_str)
