@@ -315,6 +315,8 @@ def iate_1d_1g(
 
         if void_method == 'vgz_interp' and cond2 != None:
             vgz[i] = np.interp(z_mesh[i] / Dh,(cond.LoverD, cond2.LoverD),(cond.area_avg('ug1'), cond2.area_avg('ug1')))
+
+            print(f"df: {1.05 * (jf + jgloc) - 1.23}\tinterp: {vgz[i]}\tugC1: {cond.area_avg('ug1')}\tugC2: {cond2.area_avg('ug1')}")
             alpha[i] = jgloc / vgz[i]
             Db[i] = 6 * alpha[i] / ai[i]
             

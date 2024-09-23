@@ -2924,12 +2924,12 @@ the newly calculated :math:`v_{r}` or not
                     Db_loc = midas_dict['Dsm1'] / 1000
                 
                 if alpha_loc <= alpha_cr:                                   # Check if local void fraction is less than or equal to alpha_cr
-                    u_t = 1.4 * eps**(1/3) * Db_loc**(1/3)                  # Turbulent velocity (Batchelor, 1951; Rotta, 1972), also used in iate_1d_1g
+                    u_t = 1.4 * np.cbrt(eps) * np.cbrt(Db_loc)              # Turbulent velocity (Batchelor, 1951; Rotta, 1972), also used in iate_1d_1g
                 else:
                     u_t = 0                                                 # TI and RC are driven by the turbulent fluctuation velocity (u_t)
 
                 # Talley 2012, section 3.3.1
-                COV_RC_loc = u_t * ai_loc**2 / (alpha_peak**(1/3) * (alpha_peak**(1/3) - (alpha_loc)**(1/3)))
+                COV_RC_loc = u_t * ai_loc**2 / (np.cbrt(alpha_peak) * (np.cbrt(alpha_peak) - np.cbrt(alpha_loc)))
                 
                 midas_dict['COV_RC_loc'] = COV_RC_loc
 
@@ -2938,10 +2938,10 @@ the newly calculated :math:`v_{r}` or not
                     pass
                 
         # Talley does not area-average local u_t; instead computes <u_t> with area-averaged parameters
-        u_t_avg = 1.4 * eps**(1/3) * (6 * alpha_avg / ai_avg)**(1/3)
+        u_t_avg = 1.4 * np.cbrt(eps) * np.cbrt(6 * alpha_avg / ai_avg)
 
         if u_t_avg > 0:
-            COV_RC_avg = u_t_avg * ai_avg**2 / (alpha_peak**(1/3) * (alpha_peak**(1/3) - alpha_avg**(1/3)))
+            COV_RC_avg = u_t_avg * ai_avg**2 / (np.cbrt(alpha_peak) * (np.cbrt(alpha_peak) - np.cbrt(alpha_avg)))
             COV_RC = self.area_avg('COV_RC_loc',method=avg_method) / COV_RC_avg
 
             if debug:
@@ -3010,7 +3010,7 @@ the newly calculated :math:`v_{r}` or not
                     Db_loc = midas_dict['Dsm1'] / 1000
 
                 if alpha_loc <= alpha_cr:                                   # Check if local void fraction is less than or equal to alpha_cr
-                    u_t = 1.4 * eps**(1/3) * Db_loc**(1/3)                  # Turbulent velocity (Batchelor, 1951; Rotta, 1972), also used in iate_1d_1g
+                    u_t = 1.4 * np.cbrt(eps) * np.cbrt(Db_loc)                  # Turbulent velocity (Batchelor, 1951; Rotta, 1972), also used in iate_1d_1g
                 else:
                     u_t = 0                                                 # TI and RC are driven by the turbulent fluctuation velocity (u_t)
 
@@ -3028,7 +3028,7 @@ the newly calculated :math:`v_{r}` or not
                     # print(f"\t\t\t{angle:2.1f}\t{rstar:.2f}\t|\talpha: {alpha_loc:.4f}\tCOV_TI_loc: {COV_TI_loc:.4f}\tWe: {We}")
                     pass
                 
-        u_t_avg = 1.4 * eps**(1/3) * (6 * alpha_avg / ai_avg)**(1/3)
+        u_t_avg = 1.4 * np.cbrt(eps) * np.cbrt(6 * alpha_avg / ai_avg)
         We_avg = rho_f * u_t_avg**2 * (6 * alpha_avg / ai_avg) / sigma
 
         if u_t_avg > 0:
@@ -4161,7 +4161,6 @@ the newly calculated :math:`v_{r}` or not
 
         surf = ax.plot_surface(Xi, Yi, parami, **plot_surface_kwargs)
         
-
         #plt.legend()
         ax.set_xlabel (r'$x/R$ [-]')
         ax.set_ylabel(r'$y/R$ [-]')
@@ -4170,14 +4169,22 @@ the newly calculated :math:`v_{r}` or not
         ax.set_ylim([-1, 1])
         
         ax.set_zlim([plot_surface_kwargs['vmin'], plot_surface_kwargs['vmax']])
+        
+        if set_min == None:
+            set_min = np.min(parami)
 
+        if set_max == None:
+            set_max = np.max(parami) + (np.max(parami) * 0.1)
+            
+        tx_step = round((set_max - set_min)/5,-int(np.floor(np.log10((set_max - set_min)/10))))
+        tx = np.arange(set_min,set_max,tx_step)
         
         if label_str:
             ax.set_zlabel(label_str)
-            fig.colorbar(surf, label=label_str)
+            fig.colorbar(surf, label=label_str,ticks=tx)
         else:
             ax.set_zlabel(param)
-            fig.colorbar(surf, label=param)
+            fig.colorbar(surf, label=param,ticks=tx)
         
         if title: 
             if title_str:
