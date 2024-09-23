@@ -3933,7 +3933,7 @@ the newly calculated :math:`v_{r}` or not
             fig, ax = plt.subplots(figsize=(fig_size, fig_size), dpi=300)
         else:
             fig, ax = plt.subplots(figsize=(fig_size, fig_size), dpi=300, subplot_kw=dict(projection='polar'))
-        plt.rcParams.update({'font.size': 12})
+        plt.rcParams.update({'font.size': 16})
         plt.rcParams["font.family"] = "Times New Roman"
         plt.rcParams["mathtext.fontset"] = "cm"
         
