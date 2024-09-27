@@ -2103,6 +2103,60 @@ class Condition:
         self.sigma_alpha = I
         return I
     
+    def calc_sigma_ug(self):
+        """Calculates the second moment of ug1
+
+        Inputs:
+         - None
+
+        Stores:
+         - "sigma_ug" in self
+
+        Returns:
+         - second moment of :math:`alpha`
+
+        Mathematically performing the operation
+
+        .. math:: \\frac{\\langle (\\ug - \\langle \\ug \\rangle)^2 \\rangle }{\\langle \\ug \\rangle^2}
+        
+        """
+
+        I = 0
+        param_r = [] # integrated wrt r
+        angles = []
+        
+        self.mirror()
+
+        ug_avg = self.area_avg('ug1')
+
+        for angle, r_dict in self.data.items():
+            rs_temp = []
+            vars_temp = []
+            angles.append(angle * np.pi/180) # Convert degrees to radians
+            for rstar, midas_dict in r_dict.items():
+                if rstar >= 0:
+                    rs_temp.append( rstar ) # This is proably equivalent to rs = list(r_dict.keys() ), but I'm paranoid about ordering
+                    vars_temp.append(rstar * (midas_dict['ug1'] - ug_avg)**2)
+                    if debug: print(angle, midas_dict, file=debugFID)
+            
+            vars = [var for _, var in sorted(zip(rs_temp, vars_temp))]
+            rs = sorted(rs_temp)
+
+            if debug: print("Arrays to integrate", rs, vars, file=debugFID)
+                
+            param_r.append( integrate.simpson(vars, rs) ) # Integrate wrt r
+            if debug: print("calculated integral:", integrate.simpson(vars, rs), file=debugFID)
+                #I = 2 * np.pi
+        if debug: print("Integrated wrt r", param_r, file=debugFID)
+        param_r_int = [var for _, var in sorted(zip(angles, param_r))]
+        angles_int = sorted(angles)
+        I = integrate.simpson(param_r_int, angles_int) / np.pi / ug_avg**2 # Integrate wrt theta, divide by normalized area
+        if debug: print('Calculated sigma_ug: ', I)
+
+        self.sigma_ug = I
+        return I
+
+
     def calc_mu3_alpha(self):
         """Calculates the third moment of alpha
 
