@@ -181,7 +181,7 @@ class Condition:
         
         if interp_method == 'None':
             try:
-                param_values = np.zeros((r_in.size, phi_in.size)) # TODO check if r_in and phi_in actually exist
+                param_values = np.zeros((r_in.size, phi_in.size)) # To-do: check if r_in and phi_in actually exist
                 for i, r_val in enumerate(r_in):
                     for j, phi_val in enumerate(phi_in):
                         try:
@@ -223,7 +223,7 @@ class Condition:
                 return self.linear_xy_interp[param](x, y)
         
         else:
-            raise NameError(f"{interp_method} not regonized. Accepted arguments are 'None', 'spline', 'linear' or 'linear_xy'")
+            raise NameError(f"{interp_method} not recognized. Accepted arguments are 'None', 'spline', 'linear' or 'linear_xy'")
 
     def pretty_print(self, print_to_file= False, FID=debugFID, mirror=False) -> None:
         """Prints out all the information in a Condition in a structured way 
@@ -516,7 +516,7 @@ class Condition:
 
         return
     
-    def add_mesh_points(self, r_points:list):
+    def add_mesh_points(self, r_points:list, suppress=False):
         """Method for adding additional r/R points
 
         Data linearly interpolated based on surrounding data (specifically using __call__ at the (angle, r) location in question)
@@ -530,11 +530,18 @@ class Condition:
             for r in r_points:
                 temp_midas_data = []
                 
-                for param in tab_keys:
+                r_keys = list(self.data[angle].keys())
+                r_keys.sort()
+
+                params = self.data[angle][r_keys[-2]]
+                
+                for param in params:
                     try:
                         temp_midas_data.append( float(self(angle*np.pi/180, r, param, interp_method = 'linear' ) ))
                     except KeyError as e:
-                        print(e)
+                        if suppress == False:
+                            print(e)
+                        
                         temp_midas_data.append( 0 )
                 
                 self.data[angle].update( {r: dict(zip(tab_keys, temp_midas_data))} )
@@ -1016,7 +1023,7 @@ class Condition:
         self.spline_interp.update({param: spline_interpolant})
         return
     
-    def fit_linear_interp(self, param: str) -> None:
+    def fit_linear_interp(self, param: str, suppress=True) -> None:
         """Makes a LinearNDInterpolator for the given param. 
         
             Access with self.linear_interp[param], phi in radians
@@ -1040,19 +1047,22 @@ class Condition:
         for angle, r_dict in self.data.items():
             for rstar, midas_dict in r_dict.items():
                 rs.append(rstar)
-                phis.append(angle *np.pi/180)
+                phis.append(angle * np.pi/180)
                 try:
                     vals.append(midas_dict[param])
                 except KeyError:
-                    print(self.name, angle, rstar, "has no ", param)
-                    raise(KeyError)
+                    if suppress == False:
+                        print(self.name, angle, rstar, "has no ", param)
+                        raise(KeyError)
+                    
+                    vals.append( 0 )        # Temporary, figure this out later
 
         linear_interpolant = interpolate.LinearNDInterpolator(list(zip(phis, rs)), vals)
         self.linear_interp.update({param: linear_interpolant})
 
         return
     
-    def fit_linear_xy_interp(self, param: str) -> None:
+    def fit_linear_xy_interp(self, param: str, suppress=True) -> None:
         """ Makes a LinearNDInterpolator for the given param in x y coords
         
         Can access  with self.linear_xy_interp[param]
@@ -1080,7 +1090,8 @@ class Condition:
                 try:
                     vals.append(midas_dict[param])
                 except KeyError:
-                    print(self.name, angle, rstar, "has no ", param)
+                    if suppress == False:
+                        print(self.name, angle, rstar, "has no ", param)
 
         linear_interpolant = interpolate.LinearNDInterpolator(list(zip(xs, ys)), vals)
         self.linear_xy_interp.update({param: linear_interpolant})
@@ -1381,6 +1392,67 @@ class Condition:
             return self.area_avgs[param] # why waste time, if we already calculated this don't do it again
         
         if method == 'legacy':
+            I = 0
+            param_r = [] # array for parameter integrated wrt r
+            angles = []
+            
+            if not self.mirrored:
+                warnings.warn("Mirroring in area-avg")
+                self.mirror()
+
+            for angle, r_dict in self.data.items():
+
+                if angle == 360:    # We already have 0
+                    continue
+
+                rs_temp = []
+                vars_temp = []
+                angles.append(angle * np.pi / 180)
+                for rstar, midas_dict in r_dict.items():
+                    if rstar >= 0:
+                        try:
+                            rs_temp.append(rstar)
+                            vars_temp.append(float(midas_dict[param] * rstar))
+                        except:
+                            if debug: print('Problem with:', angle, r_dict, param)
+                
+                vars = [var for _, var in sorted(zip(rs_temp, vars_temp))]
+                rs = sorted(rs_temp)
+
+                vars.reverse()      # I noticed too late that the list goes from r/R = 0 to 1, not the other way around
+                rs.reverse()        # Already wrote the actual Simpson's rule part, easier to just do this
+
+                if debug: print("Arrays to integrate", angle, rs, vars, file=debugFID)
+
+                if len(rs) != len(vars):
+                    ValueError( f"rs to integrate over {rs} must be the same length as params {vars}, occured at {angle}" )
+
+                delta = abs(np.diff(rs))                # r/R steps
+
+                la = 0
+                for idx, var in enumerate(vars):
+                    coeff = 2 * (2**(idx % 2)) / 3      # Simpson's Rule coefficient
+                    
+                    if idx < len(delta):
+                        if idx > 0:
+                            if delta[idx - 1] == delta[idx]:
+                                S = delta[idx] * coeff * var
+                            else:
+                                coeff = coeff / 2
+                                S = (delta[idx - 1] * coeff * var) + (delta[idx] * coeff * var)
+                        else:
+                            S = delta[idx] * coeff * var
+                    else:
+                        S = delta[idx - 1] * coeff * var
+                    
+                    la = la + S
+                
+                param_r.append(la)
+
+            I = sum(param_r) / 8
+            self.area_avgs.update({param: I})
+
+        elif method == 'legacy_old':
             # There's definitely a more elegant way to do this, but I just want Talley's data to work for now
 
             I = 0
@@ -1769,6 +1841,66 @@ class Condition:
             return
 
         if method == 'legacy':
+            I = 0
+            param_r = [] # array for parameter integrated wrt r
+            angles = []
+            
+            if not self.mirrored:
+                warnings.warn("Mirroring in area-avg")
+                self.mirror()
+
+            for angle, r_dict in self.data.items():
+
+                if angle == 360:    # We already have 0
+                    continue
+
+                rs_temp = []
+                vars_temp = []
+                angles.append(angle * np.pi / 180)
+                for rstar, midas_dict in r_dict.items():
+                    if rstar >= 0:
+                        try:
+                            rs_temp.append(rstar)
+                            vars_temp.append(float(midas_dict[param] * midas_dict['alpha'] * rstar))
+                        except:
+                            if debug: print('Problem with:', angle, r_dict, param)
+                
+                vars = [var for _, var in sorted(zip(rs_temp, vars_temp))]
+                rs = sorted(rs_temp)
+
+                vars.reverse()      # I noticed too late that the list goes from r/R = 0 to 1, not the other way around
+                rs.reverse()        # Already wrote the actual Simpson's rule part, easier to just do this
+
+                if debug: print("Arrays to integrate", angle, rs, vars, file=debugFID)
+
+                if len(rs) != len(vars):
+                    ValueError( f"rs to integrate over {rs} must be the same length as params {vars}, occured at {angle}" )
+
+                delta = abs(np.diff(rs))                # r/R steps
+
+                la = 0
+                for idx, var in enumerate(vars):
+                    coeff = 2 * (2**(idx % 2)) / 3      # Simpson's Rule coefficient
+                    
+                    if idx < len(delta):
+                        if idx > 0:
+                            if delta[idx - 1] == delta[idx]:
+                                S = delta[idx] * coeff * var
+                            else:
+                                coeff = coeff / 2
+                                S = (delta[idx - 1] * coeff * var) + (delta[idx] * coeff * var)
+                        else:
+                            S = delta[idx] * coeff * var
+                    else:
+                        S = delta[idx - 1] * coeff * var
+                    
+                    la = la + S
+                
+                param_r.append(la)
+
+            I = sum(param_r) / 8 / self.area_avg('alpha',method=method)
+
+        elif method == 'legacy_old':
             # We have to integrate twice, once with resepect to r, again with respect to phi
             # Start with r
 
@@ -1826,7 +1958,7 @@ class Condition:
                 except Exception as e:
                     print(e)
                     
-            I = sum(param_r) / 8
+            I = sum(param_r) / 8 / self.area_avg('alpha',method=method)
 
         else:
             # We have to integrate twice, once with resepect to r, again with respect to phi
@@ -2052,6 +2184,60 @@ class Condition:
         self.sigma_alpha = I
         return I
     
+    def calc_sigma_ug(self):
+        """Calculates the second moment of ug1
+
+        Inputs:
+         - None
+
+        Stores:
+         - "sigma_ug" in self
+
+        Returns:
+         - second moment of :math:`alpha`
+
+        Mathematically performing the operation
+
+        .. math:: \\frac{\\langle (\\ug - \\langle \\ug \\rangle)^2 \\rangle }{\\langle \\ug \\rangle^2}
+        
+        """
+
+        I = 0
+        param_r = [] # integrated wrt r
+        angles = []
+        
+        self.mirror()
+
+        ug_avg = self.area_avg('ug1')
+
+        for angle, r_dict in self.data.items():
+            rs_temp = []
+            vars_temp = []
+            angles.append(angle * np.pi/180) # Convert degrees to radians
+            for rstar, midas_dict in r_dict.items():
+                if rstar >= 0:
+                    rs_temp.append( rstar ) # This is proably equivalent to rs = list(r_dict.keys() ), but I'm paranoid about ordering
+                    vars_temp.append(rstar * (midas_dict['ug1'] - ug_avg)**2)
+                    if debug: print(angle, midas_dict, file=debugFID)
+            
+            vars = [var for _, var in sorted(zip(rs_temp, vars_temp))]
+            rs = sorted(rs_temp)
+
+            if debug: print("Arrays to integrate", rs, vars, file=debugFID)
+                
+            param_r.append( integrate.simpson(vars, rs) ) # Integrate wrt r
+            if debug: print("calculated integral:", integrate.simpson(vars, rs), file=debugFID)
+                #I = 2 * np.pi
+        if debug: print("Integrated wrt r", param_r, file=debugFID)
+        param_r_int = [var for _, var in sorted(zip(angles, param_r))]
+        angles_int = sorted(angles)
+        I = integrate.simpson(param_r_int, angles_int) / np.pi / ug_avg**2 # Integrate wrt theta, divide by normalized area
+        if debug: print('Calculated sigma_ug: ', I)
+
+        self.sigma_ug = I
+        return I
+
+
     def calc_mu3_alpha(self):
         """Calculates the third moment of alpha
 
@@ -2826,21 +3012,29 @@ the newly calculated :math:`v_{r}` or not
             print(f"\t                         COV_RC                          ")
             print(f"\tjf = {self.jf}, jgref = {self.jgref}, L/D = {self.LoverD}")
 
+        # Identical to calc_COV_TI
+        ########################################################################################################################
         if reconstruct_flag == True:
-            self.reconstruct_void(method='talley')
             alpha_str = 'alpha_reconstructed'
         else:
             alpha_str = 'alpha'
 
-        alpha_avg       = self.area_avg(alpha_str,method=avg_method)
+        # Temporary, replace later
+        alpha_avg       = self.area_avg('alpha',method=avg_method)
+        alpha_avg       = round(alpha_avg,3)
+
         ai_avg          = self.area_avg('ai',method=avg_method)
+        ai_avg          = round(ai_avg,2)
 
         # rho_f           = self.rho_f                                        # Liquid phase density [kg/m**3]
         # rho_g           = self.rho_g                                        # Gas phase density [kg/m**3]
         # mu_f            = self.mu_f                                         # Dynamic viscosity of water [Pa-s]
-        rho_f = 1000
-        rho_g = 1.22
-        mu_f = 0.001
+        # sigma           = self.sigma                                        # Surface tension
+
+        rho_f           = 1000
+        rho_g           = 1.22
+        mu_f            = 0.001
+        sigma           = 0.07278
         Dh              = self.Dh                                           # Hydraulic diameter [m]
                 
         rho_m           = (1 - alpha_avg) * rho_f + alpha_avg * rho_g       # Mixture density
@@ -2849,10 +3043,18 @@ the newly calculated :math:`v_{r}` or not
         # Rem             = rho_m * v_m * Dh / mu_m                           # Mixture Reynolds number, ***CAREFUL*** I have seen some versions of the IATE script that use rho_f instead as an approximation
         Rem             = rho_m * v_m * Dh / mu_f                           # Mixture Reynolds number, older versions use mu_f as an approximation
         f_TP            = 0.316 * (mu_m / mu_f / Rem)**0.25                 # Two-phase friction factor, Talley (2012) and Worosz (2015), also used in iate_1d_1g
-        eps             = f_TP * v_m**3 / 2 / Dh                            # Energy dissipation rate (Wu et al., 1998; Kim, 1999), also used in iate_1d_1g
-        
+        eps             = f_TP * v_m**3 / 2 / Dh                            # Energy dissipation rate (Wu et al., 1998; Kim, 1999), also used in iate_1d_1g        
+        eps             = round(eps,2)
+
+        # Switch away from using data
+        alpha_avg       = self.area_avg(alpha_str,method=avg_method)
+
+        Dsm_exp         = 1000 * 6 * alpha_avg / ai_avg
+        Dsm_exp         = round(Dsm_exp,2) / 1000
+
         if debug:
-            print(f"\n\t\tv_m: {v_m:.4f}\tRem: {Rem:.4f}\tf_TP: {f_TP:.4f}\teps: {eps:.4f}\n")
+            print(f"\t\trho_m: {rho_m}\tmu_m: {mu_m}\tv_m: {v_m}\tRem: {Rem}\tf_TP: {f_TP}\teps: {eps}")
+            print(f"\t\tDsm_exp: {Dsm_exp}\talpha_str_avg: {alpha_avg}\tai_avg: {ai_avg}")
 
         for angle, r_dict in self.data.items():
             for rstar, midas_dict in r_dict.items():
@@ -2860,7 +3062,9 @@ the newly calculated :math:`v_{r}` or not
                 alpha_loc = midas_dict[alpha_str]
                 
                 if reconstruct_flag == True:
-                    ai_loc = ai_avg * alpha_loc / alpha_avg
+                    Db_loc = Dsm_exp
+                    # ai_loc = ai_avg * alpha_loc / alpha_avg
+                    ai_loc = 6 * alpha_loc / Dsm_exp
 
                     if ai_loc != 0:
                         Db_loc = 6 * alpha_loc / ai_loc
@@ -2868,32 +3072,38 @@ the newly calculated :math:`v_{r}` or not
                         Db_loc = 0
                 else:
                     ai_loc = midas_dict['ai']
-                    Db_loc = midas_dict['Dsm1'] / 1000
+                    # Db_loc = midas_dict['Dsm1'] / 1000
+                    
+                    if ai_loc != 0:
+                        Db_loc = 6 * alpha_loc / ai_loc
+                    else:
+                        Db_loc = 0
                 
                 if alpha_loc <= alpha_cr:                                   # Check if local void fraction is less than or equal to alpha_cr
-                    u_t = 1.4 * eps**(1/3) * Db_loc**(1/3)                  # Turbulent velocity (Batchelor, 1951; Rotta, 1972), also used in iate_1d_1g
+                    u_t = 1.4 * np.cbrt(eps) * np.cbrt(Db_loc)              # Turbulent velocity (Batchelor, 1951; Rotta, 1972), also used in iate_1d_1g
                 else:
                     u_t = 0                                                 # TI and RC are driven by the turbulent fluctuation velocity (u_t)
 
-                # Talley 2012, secion 3.3.1
-                COV_RC_loc = u_t * ai_loc**2 / (alpha_peak**(1/3) * (alpha_peak**(1/3) - (alpha_loc)**(1/3)))
+                ########################################################################################################################
+                # Talley 2012, section 3.3.1
+                COV_RC_loc = u_t * ai_loc**2 / (np.cbrt(alpha_peak) * (np.cbrt(alpha_peak) - np.cbrt(alpha_loc)))
                 
                 midas_dict['COV_RC_loc'] = COV_RC_loc
 
                 if debug:
-                    # print(f"\t\t\t{angle:2.1f}\t{rstar:.2f}\t|\talpha: {alpha_loc:.4f}\tCOV_RC_loc: {COV_RC_loc:.4f}")
+                    # print(f"\t\t\t{angle:2.1f}\t{rstar:.2f}\t|\talpha: {alpha_loc:.4f}\tDbloc: {Db_loc:.4f}\tCOV_RC_loc: {COV_RC_loc:.4f}")
                     pass
                 
         # Talley does not area-average local u_t; instead computes <u_t> with area-averaged parameters
-        u_t_avg = 1.4 * eps**(1/3) * (6 * alpha_avg / ai_avg)**(1/3)
+        u_t_avg = 1.4 * np.cbrt(eps) * np.cbrt(6 * alpha_avg / ai_avg)
 
         if u_t_avg > 0:
-            COV_RC_avg = u_t_avg * ai_avg**2 / (alpha_peak**(1/3) * (alpha_peak**(1/3) - alpha_avg**(1/3)))
+            COV_RC_avg = u_t_avg * ai_avg**2 / (np.cbrt(alpha_peak) * (np.cbrt(alpha_peak) - np.cbrt(alpha_avg)))
             COV_RC = self.area_avg('COV_RC_loc',method=avg_method) / COV_RC_avg
 
             if debug:
-                print(f"\n\t\tu_t_avg: {u_t_avg}\tai_avg: {ai_avg}\talpha_avg: {alpha_avg}\t")
-                print(f"\n\tCOV_RC_num: {self.area_avg('COV_RC_loc',method=avg_method)}\tCOV_RC_den: {COV_RC_avg}")
+                print(f"\n\t\tu_t_avg: {u_t_avg}")
+                print(f"\n\tCOV_RC: {COV_RC}\tCOV_RC_num: {self.area_avg('COV_RC_loc',method=avg_method)}\tCOV_RC_den: {COV_RC_avg}")
         else:
             COV_RC = 0
 
@@ -2909,23 +3119,29 @@ the newly calculated :math:`v_{r}` or not
             print(f"\t                         COV_TI                          ")
             print(f"\tjf = {self.jf}, jgref = {self.jgref}, L/D = {self.LoverD}")
 
+        # Identical to calc_COV_RC
+        ########################################################################################################################
         if reconstruct_flag == True:
-            self.reconstruct_void(method='talley')
             alpha_str = 'alpha_reconstructed'
         else:
             alpha_str = 'alpha'
 
-        alpha_avg       = self.area_avg(alpha_str,method=avg_method)
+        # Temporary, replace later
+        alpha_avg       = self.area_avg('alpha',method=avg_method)
+        alpha_avg       = round(alpha_avg,3)
+
         ai_avg          = self.area_avg('ai',method=avg_method)
+        ai_avg          = round(ai_avg,2)
 
         # rho_f           = self.rho_f                                        # Liquid phase density [kg/m**3]
         # rho_g           = self.rho_g                                        # Gas phase density [kg/m**3]
         # mu_f            = self.mu_f                                         # Dynamic viscosity of water [Pa-s]
         # sigma           = self.sigma                                        # Surface tension
-        rho_f = 1000
-        rho_g = 1.22
-        mu_f = 0.001
-        sigma = 0.07278
+
+        rho_f           = 1000
+        rho_g           = 1.22
+        mu_f            = 0.001
+        sigma           = 0.07278
         Dh              = self.Dh                                           # Hydraulic diameter [m]
                 
         rho_m           = (1 - alpha_avg) * rho_f + alpha_avg * rho_g       # Mixture density
@@ -2934,18 +3150,28 @@ the newly calculated :math:`v_{r}` or not
         # Rem             = rho_m * v_m * Dh / mu_m                           # Mixture Reynolds number, ***CAREFUL*** I have seen some versions of the IATE script that use rho_f instead as an approximation
         Rem             = rho_m * v_m * Dh / mu_f                           # Mixture Reynolds number, older versions use mu_f as an approximation
         f_TP            = 0.316 * (mu_m / mu_f / Rem)**0.25                 # Two-phase friction factor, Talley (2012) and Worosz (2015), also used in iate_1d_1g
-        eps             = f_TP * v_m**3 / 2 / Dh                            # Energy dissipation rate (Wu et al., 1998; Kim, 1999), also used in iate_1d_1g
-        
+        eps             = f_TP * v_m**3 / 2 / Dh                            # Energy dissipation rate (Wu et al., 1998; Kim, 1999), also used in iate_1d_1g        
+        eps             = round(eps,2)
+
+        # Switch away from using data
+        alpha_avg       = self.area_avg(alpha_str,method=avg_method)
+
+        Dsm_exp         = 1000 * 6 * alpha_avg / ai_avg
+        Dsm_exp         = round(Dsm_exp,2) / 1000
+
         if debug:
-            print(f"\n\t\tv_m: {v_m:.4f}\tRem: {Rem:.4f}\tf_TP: {f_TP:.4f}\teps: {eps:.4f}\n")
+            print(f"\t\trho_m: {rho_m}\tmu_m: {mu_m}\tv_m: {v_m}\tRem: {Rem}\tf_TP: {f_TP}\teps: {eps}")
+            print(f"\t\tDsm_exp: {Dsm_exp}\talpha_str_avg: {alpha_avg}\tai_avg: {ai_avg}")
 
         for angle, r_dict in self.data.items():
             for rstar, midas_dict in r_dict.items():
                 
                 alpha_loc = midas_dict[alpha_str]
-
+                
                 if reconstruct_flag == True:
-                    ai_loc = ai_avg * alpha_loc / alpha_avg
+                    Db_loc = Dsm_exp
+                    # ai_loc = ai_avg * alpha_loc / alpha_avg
+                    ai_loc = 6 * alpha_loc / Dsm_exp
 
                     if ai_loc != 0:
                         Db_loc = 6 * alpha_loc / ai_loc
@@ -2953,16 +3179,22 @@ the newly calculated :math:`v_{r}` or not
                         Db_loc = 0
                 else:
                     ai_loc = midas_dict['ai']
-                    Db_loc = midas_dict['Dsm1'] / 1000
-
+                    # Db_loc = midas_dict['Dsm1'] / 1000
+                    
+                    if ai_loc != 0:
+                        Db_loc = 6 * alpha_loc / ai_loc
+                    else:
+                        Db_loc = 0
+                
                 if alpha_loc <= alpha_cr:                                   # Check if local void fraction is less than or equal to alpha_cr
-                    u_t = 1.4 * eps**(1/3) * Db_loc**(1/3)                  # Turbulent velocity (Batchelor, 1951; Rotta, 1972), also used in iate_1d_1g
+                    u_t = 1.4 * np.cbrt(eps) * np.cbrt(Db_loc)              # Turbulent velocity (Batchelor, 1951; Rotta, 1972), also used in iate_1d_1g
                 else:
                     u_t = 0                                                 # TI and RC are driven by the turbulent fluctuation velocity (u_t)
 
+                ########################################################################################################################
                 We = rho_f * u_t**2 * Db_loc / sigma                        # Weber number criterion
 
-                # Talley 2012, secion 3.3.1
+                # Talley 2012, section 3.3.1
                 if We >= We_cr:
                     COV_TI_loc = (u_t * ai_loc**2 / alpha_loc) * np.sqrt(1 - (We_cr / We)) * np.exp(-We_cr / We)
                 else:
@@ -2971,10 +3203,11 @@ the newly calculated :math:`v_{r}` or not
                 midas_dict['COV_TI_loc'] = COV_TI_loc
 
                 if debug:
-                    # print(f"\t\t\t{angle:2.1f}\t{rstar:.2f}\t|\talpha: {alpha_loc:.4f}\tCOV_TI_loc: {COV_TI_loc:.4f}\tWe: {We}")
+                    print(f"\t\t\t{angle:2.1f}\t{rstar:.2f}\t|\talpha: {alpha_loc:.4f}\tCOV_TI_loc: {COV_TI_loc:.4f}\tu_t: {u_t}\tWe: {We}")
                     pass
-                
-        u_t_avg = 1.4 * eps**(1/3) * (6 * alpha_avg / ai_avg)**(1/3)
+        
+        # Talley does not area-average local u_t; instead computes <u_t> with area-averaged parameters
+        u_t_avg = 1.4 * np.cbrt(eps) * np.cbrt(6 * alpha_avg / ai_avg)
         We_avg = rho_f * u_t_avg**2 * (6 * alpha_avg / ai_avg) / sigma
 
         if u_t_avg > 0:
@@ -2982,8 +3215,8 @@ the newly calculated :math:`v_{r}` or not
             COV_TI = self.area_avg('COV_TI_loc',method=avg_method) / COV_TI_avg
             
             if debug:
-                print(f"\n\t\tWe_avg: {We_avg}")
-                print(f"\n\tCOV_TI_num: {self.area_avg('COV_TI_loc',method=avg_method)}\tCOV_TI_den: {COV_TI_avg}")
+                print(f"\n\t\tu_t_avg: {u_t_avg}\tWe_avg: {We_avg}")
+                print(f"\n\tCOV_TI: {COV_TI}\tCOV_TI_num: {self.area_avg('COV_TI_loc',method=avg_method)}\tCOV_TI_den: {COV_TI_avg}")
         else:
             COV_TI = 0
 
@@ -3017,6 +3250,11 @@ the newly calculated :math:`v_{r}` or not
                 return float(max(m * (x - x0) + b, 0))
 
             def find_alpha_peak(alpha_peak, rstar_peak=0.90):
+                # Talley's reconstruction has a finer grid than experimental data
+                # This will affect the slope of the drop-off point if r/R_end is not coincident with a point on the experiment mesh
+                r_points = np.arange(0,1,0.05)
+                self.add_mesh_points(r_points)
+
                 interps = {}
                 
                 for angle, r_dict in self.data.items():                 # 360 degrees covered, not just one quadrant
@@ -3072,6 +3310,10 @@ the newly calculated :math:`v_{r}` or not
                                      m = m_nn,
                                      x0 = x0_nn,
                                      b = b_nn)
+                        
+                        if debug and angle == 22.5:
+                            print(f"y_peak: {y_peak}\trstar_nn: {rstar_nn}")
+                            pass
                         
                         anchor = 0
                         rstar_anchor = self.roverRend / np.cos((90 - angle_q1) * np.pi / 180)       # Talley's implementation in Excel
@@ -3154,7 +3396,7 @@ the newly calculated :math:`v_{r}` or not
                 warnings.warn("Minimization did not return a successful result")
                 print(result.message)
             
-            print(f"\n\t: r/R_end: {self.roverRend}")
+            print(f"\n\tr/R_end: {self.roverRend}")
             print(f"\talpha_peak: {self.alpha_peak}")
             print(f"\t⟨α⟩_data: {round(self.area_avg('alpha',method=avg_method),3)}")
             print(f"\t⟨α⟩_reconstructed: {self.area_avg('alpha_reconstructed',method=avg_method)}")
@@ -3880,7 +4122,7 @@ the newly calculated :math:`v_{r}` or not
             fig, ax = plt.subplots(figsize=(fig_size, fig_size), dpi=300)
         else:
             fig, ax = plt.subplots(figsize=(fig_size, fig_size), dpi=300, subplot_kw=dict(projection='polar'))
-        plt.rcParams.update({'font.size': 12})
+        plt.rcParams.update({'font.size': 16})
         plt.rcParams["font.family"] = "Times New Roman"
         plt.rcParams["mathtext.fontset"] = "cm"
         
@@ -4042,7 +4284,7 @@ the newly calculated :math:`v_{r}` or not
             plt.close()
         return ax
 
-    def plot_surface(self, param:str, save_dir = '.', show=True, rotate_gif=False, elev_angle = 145, 
+    def plot_surface(self, param:str, save_dir = '.', show=True, set_max = None, set_min = None, rotate_gif=False, elev_angle = 145, 
                      azim_angle = 0, roll_angle = 180, title=True, ngridr = 50, ngridphi = 50, 
                      plot_surface_kwargs = None, solid_color = False, label_str = None, title_str = '') -> None:
         """Method to plot a surface of a given param
@@ -4108,7 +4350,6 @@ the newly calculated :math:`v_{r}` or not
 
         surf = ax.plot_surface(Xi, Yi, parami, **plot_surface_kwargs)
         
-
         #plt.legend()
         ax.set_xlabel (r'$x/R$ [-]')
         ax.set_ylabel(r'$y/R$ [-]')
@@ -4117,14 +4358,22 @@ the newly calculated :math:`v_{r}` or not
         ax.set_ylim([-1, 1])
         
         ax.set_zlim([plot_surface_kwargs['vmin'], plot_surface_kwargs['vmax']])
+        
+        if set_min == None:
+            set_min = np.min(parami)
 
+        if set_max == None:
+            set_max = np.max(parami) + (np.max(parami) * 0.1)
+
+        tx_step = round((set_max - set_min)/5,-int(np.floor(np.log10((set_max - set_min)/10))))
+        tx = np.arange(set_min,set_max,tx_step)
         
         if label_str:
             ax.set_zlabel(label_str)
-            fig.colorbar(surf, label=label_str)
+            fig.colorbar(surf, label=label_str,ticks=tx)
         else:
             ax.set_zlabel(param)
-            fig.colorbar(surf, label=param)
+            fig.colorbar(surf, label=param,ticks=tx)
         
         if title: 
             if title_str:
