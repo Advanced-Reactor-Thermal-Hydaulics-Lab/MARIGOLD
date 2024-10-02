@@ -17,7 +17,7 @@ def iate_1d_1g(
         C0 = None, C_inf = 1.20,
 
         # Temporary arguments
-        restriction = None, cond2 = None, debug = False
+        restriction = None, cond2 = None
         ):
     """ Calculate the area-averaged interfacial area concentration at query location based on the 1D 1G IATE
     
@@ -87,10 +87,11 @@ def iate_1d_1g(
         rho_g           = 1.23
         mu_f            = 0.001
         sigma           = 0.07278
+        p_atm           = 101353        # Implied by subtracting thesis gauge pressures from MATLAB absolute pressures
 
         cond.mu_g       = 1.73E-5
 
-        avg_method      = 'legacy'
+        avg_method      = 'legacy_old'
         cd_method       = 'doe'
         dpdz_method     = 'LM'
 
@@ -165,19 +166,6 @@ def iate_1d_1g(
         if C_TI == None:
             C_TI    = 0.085
     
-    # # Lets the IATE function take in either scalar or array COV. This is important later, since COV is indexed
-    # if hasattr(COV_RC,"__len__"):
-    #     if len(COV_RC) == 1:
-    #         COV_RC = [COV_RC[0] for _ in range(len(z_mesh))]
-    # else:
-    #     COV_RC = [COV_RC for _ in range(len(z_mesh))]
-
-    # if hasattr(COV_TI,"__len__"):
-    #     if len(COV_TI) == 1:
-    #         COV_TI = [COV_TI[0] for _ in range(len(z_mesh))]
-    # else:
-    #     COV_TI = [COV_TI for _ in range(len(z_mesh))]
-    
     if cond2 != None:
         # Use data at initial condition, void reconstruction downstream
         if io == None:
@@ -185,11 +173,11 @@ def iate_1d_1g(
         else:
             rf = True
         
-        COV_RC1 = np.nan_to_num(cond.calc_COV_RC(reconstruct_flag = rf, debug = True), nan=1.0)
-        COV_TI1 = np.nan_to_num(cond.calc_COV_TI(reconstruct_flag = rf, debug = True), nan=1.0)
+        COV_RC1 = np.nan_to_num(cond.calc_COV_RC(reconstruct_flag = rf, avg_method = avg_method, debug = False), nan=1.0)
+        COV_TI1 = np.nan_to_num(cond.calc_COV_TI(reconstruct_flag = rf, avg_method = avg_method, We_cr = We_cr, debug = False), nan=1.0)
 
-        COV_RC2 = np.nan_to_num(cond2.calc_COV_RC(reconstruct_flag = True, debug = True), nan=1.0)
-        COV_TI2 = np.nan_to_num(cond2.calc_COV_TI(reconstruct_flag = True, debug = True), nan=1.0)
+        COV_RC2 = np.nan_to_num(cond2.calc_COV_RC(reconstruct_flag = True, avg_method = avg_method, debug = False), nan=1.0)
+        COV_TI2 = np.nan_to_num(cond2.calc_COV_TI(reconstruct_flag = True, avg_method = avg_method, We_cr = We_cr, debug = False), nan=1.0)
 
         COV_RC = np.interp(z_mesh / Dh,(cond.LoverD, cond2.LoverD),(COV_RC1, COV_RC2))
         COV_TI = np.interp(z_mesh / Dh,(cond.LoverD, cond2.LoverD),(COV_TI1, COV_TI2))
@@ -269,7 +257,7 @@ def iate_1d_1g(
 
     # Calculate initial pressure and pressure gradient
     p = jgatm * p_atm / jgloc                                   # Back-calculate local corrected absolute pressure
-    
+
     if preset == 'kim':
         p = cond.pz                                             # Override
         dpdz = cond.dpdz
@@ -314,9 +302,11 @@ def iate_1d_1g(
             Db[i] = 6 * alpha[i] / ai[i]
 
         if void_method == 'vgz_interp' and cond2 != None:
-            vgz[i] = np.interp(z_mesh[i] / Dh,(cond.LoverD, cond2.LoverD),(cond.area_avg('ug1'), cond2.area_avg('ug1')))
+            vgz[i] = np.interp(z_mesh[i] / Dh,
+                               (cond.LoverD, cond2.LoverD),
+                               (cond.void_area_avg('ug1',method=avg_method), cond2.void_area_avg('ug1',method=avg_method))
+                               )
 
-            print(f"df: {1.05 * (jf + jgloc) - 1.23}\tinterp: {vgz[i]}\tugC1: {cond.area_avg('ug1')}\tugC2: {cond2.area_avg('ug1')}")
             alpha[i] = jgloc / vgz[i]
             Db[i] = 6 * alpha[i] / ai[i]
             
@@ -381,13 +371,6 @@ def iate_1d_1g(
         fTW = 0.316 * (mu_m / mu_f)**0.25 / Rem**0.25           # Two-phase friction factor
         e = fTW * (vm**3) / 2 / Dh                              # Energy dissipation rate (Wu et al., 1998; Kim, 1999)
         u_t = 1.4 * e**(1/3) * Db[i]**(1/3)                     # Turbulent velocity (Batchelor, 1951; Rotta, 1972)
-        
-        if debug:
-            with open("H:\TRSL-H\IATE\TEST.txt", mode = 'a+') as FID:
-                print(f"\n\n{i+1}.\tjf = {jf} [m/s], jg = {cond.jgref} [m/s]\n\tL/D: {z/Dh}\n\tur: {ur}\n\tut: {u_t}\n\ta: {alpha[i]}",file=FID)
-
-            with open("H:\TRSL-H\IATE\VZ.txt", mode = 'a+') as FID:
-                print(f"\n\n{i+1}.\tjf = {jf} [m/s], jg = {cond.jgref} [m/s]\n\tL/D: {z/Dh}\n\tvfz: {vfz}\n\tvgz: {vgz[i]}\n\tjg: {jgloc}",file=FID)
 
         ########################################################################################################################
         # Estimate sources & sinks in the Interfacial Area Transport Eqn. (Part 1)
@@ -481,10 +464,6 @@ def iate_1d_1g(
         aiwe[i+1]       = aiwe[i] + z_step * SWE[i] / vgz[i]
         aivg[i+1]       = aivg[i] + z_step * SVG[i] / vgz[i]
 
-        if debug:
-            with open("H:\TRSL-H\IATE\AI.txt", mode = 'a+') as FID:
-                print(f"\n\n{i+1}.\tjf = {jf} [m/s], jg = {cond.jgref} [m/s]\n\tL/D: {z/Dh}\n\tTI: {aiti[i]}\n\tRC: {airc[i]}\n\tEXP: {aiexp[i]}\n\tWE: {aiwe[i]}",file=FID)
-
         ########################################################################################################################
         # Estimate Void Fraction for the next step calculation
         if void_method == 'driftflux':      # Drift Flux Model
@@ -499,10 +478,6 @@ def iate_1d_1g(
                 C0 = C_inf - (C_inf - 1) * np.sqrt(rho_gz[i]/rho_f)     # Round tube drift flux distribution parameter
             
             alpha[i+1] = jgloc / (C0 * j + vgj)
-
-            if debug:
-                with open("H:\TRSL-H\IATE\DF.txt", mode = 'a+') as FID:
-                    print(f"\n\n{i+1}.\tjf = {jf} [m/s], jg = {cond.jgref} [m/s]\n\tL/D: {z/Dh}\n\tC0: {C0}\n\tvgj: {vgj}\n\tj: {j}\n\talpha: {alpha[i]}",file=FID)
 
         elif void_method == 'continuity':   # Continuity
             # Original continuity method
@@ -532,7 +507,10 @@ def iate_1d_1g(
 
             jgloc = jgatm * p_atm / pz[i+1]
 
-            vgz[i+1] = np.interp(z_mesh[i+1],(cond.LoverD, cond2.LoverD),(cond.area_avg('ug1'), cond2.area_avg('ug1')))
+            vgz[i+1] = np.interp(z_mesh[i] / Dh,
+                               (cond.LoverD, cond2.LoverD),
+                               (cond.void_area_avg('ug1',method=avg_method), cond2.void_area_avg('ug1',method=avg_method))
+                               )
             alpha[i+1] = jgloc / vgz[i+1]
 
         elif void_method == 'pressure_kim':
