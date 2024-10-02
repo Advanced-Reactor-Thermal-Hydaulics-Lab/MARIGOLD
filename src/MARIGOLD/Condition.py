@@ -1477,8 +1477,9 @@ class Condition:
                 try:
                     param_r.append( integrate.simpson(vars, rs, even=even_opt) ) # Integrate wrt r
                 except Exception as e:
-                    print(e)
-                    print(rs, vars)
+                    if debug:
+                        print(e)
+                        print(rs, vars)
                 if debug: print("calculated integral:", integrate.simpson(vars, rs, even=even_opt), file=debugFID)
                     #I = 2 * np.pi
             if debug: print("Integrated wrt r", param_r, file=debugFID)
@@ -3314,6 +3315,9 @@ the newly calculated :math:`v_{r}` or not
         # Tick marks facing in
         ax.tick_params(direction='in',which='both')
 
+        if errorbars > 0:
+            ax.plot([], [], ' ', label = f"{errorbars*100:0.1f}% error bars") # dummy to just get this text in the legend
+
         ms = marker_cycle()
         if cs is None or type(param) == list:
             cs = color_cycle()
@@ -3551,15 +3555,18 @@ the newly calculated :math:`v_{r}` or not
             ax.set_title(title)
         elif title:
             ax.set_title(self.name)
+
+        
         
 
-        ax.legend(loc=legend_loc, edgecolor='white')
+        leg = ax.legend(loc=legend_loc, edgecolor='white')
 
         if xlabel_loc_coords:
             ax.xaxis.set_label_coords(*xlabel_loc_coords)
 
         if ylabel_loc_coords:
             ax.yaxis.set_label_coords(*ylabel_loc_coords)
+
 
         
         ax.set_aspect('auto', adjustable='datalim', share=True)
