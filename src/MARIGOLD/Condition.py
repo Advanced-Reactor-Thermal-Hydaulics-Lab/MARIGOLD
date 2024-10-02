@@ -74,15 +74,19 @@ class Condition:
             elif self.port == 'P3':
                 self.LoverD = 110
             elif self.port == 'P4':
-                self.LoverD = 130
+                self.LoverD = 130.04
             elif self.port == 'P5A':
-                self.LoverD = 146
+                self.LoverD = 144.17
+            elif self.port == 'P5C':
+                self.LoverD = 147.57
             elif self.port == 'P5B':
-                self.LoverD = 154
-            elif self.port == '0.95':
-                self.LoverD = 190
-            elif self.port == '0.9':
-                self.LoverD = 226
+                self.LoverD = 151.84
+            elif self.port == 'P6A':
+                self.LoverD = 165.57
+            elif self.port == 'P6':
+                self.LoverD = 194.07          
+            elif self.port == 'P7':
+                self.LoverD = 230.07
             else:
                 self.LoverD = -1
                 print(f"Warning: Could not determine port L/D for {self}")
