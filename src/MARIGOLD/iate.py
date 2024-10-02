@@ -2,13 +2,16 @@ from .config import *
 
 def iate_1d_1g(
         # Basic inputs
-        cond, query, z_step = 0.01, io = None,
+        cond, query, z_step = 0.01, io = None, geometry = None, cond2 = None,
         
         # IATE Coefficients
         C_WE = None, C_RC = None, C_TI = None, alpha_max = 0.75, C = 3, We_cr = 6, acrit_flag = 0, acrit = 0.13,
 
         # Method arguments
-        preset = None, avg_method = None, cd_method = 'doe', dpdz_method = 'LM', void_method = 'driftflux',
+        preset = None, avg_method = None, cov_method = 'fixed', rf = False, cd_method = 'doe', dpdz_method = 'LM', void_method = 'driftflux',
+
+        # Covariance calculation
+        COV_RC = None, COV_TI = None,
 
         # Pressure drop calculation
         LM_C = 25, k_m = 0.10, m = 0.316, n = 0.25,
@@ -16,8 +19,6 @@ def iate_1d_1g(
         # Void fraction calculation
         C0 = None, C_inf = 1.20,
 
-        # Temporary arguments
-        restriction = None, cond2 = None
         ):
     """ Calculate the area-averaged interfacial area concentration at query location based on the 1D 1G IATE
     
@@ -26,6 +27,8 @@ def iate_1d_1g(
      - query:           L/D endpoint
      - z_step:          Axial mesh cell size [-]
      - io:              Output package of iate_1d_1g(), can be used as input for subsequent runs
+     - geometry:        Geometry type, defaults to None, can be set to 'elbow', 'ubend'
+     - cond2:           Second condition object, for possible interpolation
      - C_WE:            Wake entrainment coefficient
      - C_RC:            Random collision coefficient
      - C_TI:            Turbulent impact coefficient
@@ -34,19 +37,21 @@ def iate_1d_1g(
      - We_cr:           Weber number criterion, used for turbulent impact calculation
      - acrit_flag:      Enable/disable shutting off turbulence-based mechanisms beyond a critical void fraction
      - acrit:           Critical void fraction for shutting off turbulence-based mechanisms
-     - C_inf:           Drift flux distribution parameter limiting value
-     - dpdz_method:     Pressure drop prediction method, 'LM' or 'Kim'
+     - preset:          Author preset, fixes coefficients and method arguments to match old MATLAB runs
+     - avg_method:      Area-averaging method, can be set to None (for Python Simpson's rule), 'legacy' (for Excel Simpson's Rule)
      - cd_method:       Drag coefficient prediction method, 'err_iter', 'fixed_iter', or 'doe'
+     - dpdz_method:     Pressure drop prediction method, 'LM' or 'Kim'
      - void_method:     Void fraction prediction method, 'driftflux' or 'continuity'
      - LM_C:            Lockhart-Martinelli Chisholm parameter
      - k_m:             Minor loss coefficient
-     - restriction:     Restriction type, defaults to None, can be set to 'elbow', 'ubend'
-     - cond2:           Second condition object, for possible interpolation
+     - m:               Friction factor constant
+     - n:               Friction factor constant
+     - C0:              Drift flux distribution parameter overriding value
+     - C_inf:           Drift flux distribution parameter limiting value. Will be used to calculate C0, if none specified
 
     Notes:
      - Notice some grav terms are made absolute; needs downward flow fixes
      - IATE coefficients set as optional inputs, with default values set depending on geometry
-     - COV terms being implemented in Condition.py, not incorporated into this function yet
      - vgz calculation in elbow and dissipation length regions still need to be implemented
      - Need a way to compute void fraction across restrictions, void fraction prediction falters
      - Modify MG for Yadav data extraction
@@ -91,6 +96,7 @@ def iate_1d_1g(
 
         cond.mu_g       = 1.73E-5
 
+        rf              = True
         avg_method      = 'legacy_old'
         cd_method       = 'doe'
         dpdz_method     = 'LM'
@@ -123,7 +129,7 @@ def iate_1d_1g(
     #                                                                                                                          #
     ############################################################################################################################
 
-    # For future reference, when adding other restriction types, want to maintain consistency in if/then logic.
+    # For future reference, when adding other geometry types, want to maintain consistency in if/then logic.
     #  1. Check angles with straight pipes
     #  2. Check angles with restrictions
     #  3. Check restrictions
@@ -132,7 +138,7 @@ def iate_1d_1g(
     #       c. 'dissipation'
     #       d. Other
     #  4. Else, default to vertical-upward
-    if theta == 0 and restriction == None:      # Horizontal, no elbow (Talley, 2012)
+    if theta == 0 and geometry == None:         # Horizontal, no elbow (Talley, 2012)
         if C_WE == None:
             C_WE    = 0.000
         if C_RC == None:
@@ -142,7 +148,7 @@ def iate_1d_1g(
         
         We_cr = 5
 
-    elif restriction == 'elbow':                # Elbow (Yadav, 2013)
+    elif geometry == 'elbow':                   # Elbow (Yadav, 2013)
         if C_WE == None:
             C_WE    = 0.000
         if C_RC == None:
@@ -150,7 +156,7 @@ def iate_1d_1g(
         if C_TI == None:
             C_TI    = 0.085
 
-    elif restriction == 'vd':                   # Vertical-downward (Ishii, Paranjape, Kim, and Sun, 2004)
+    elif geometry == 'vd':                      # Vertical-downward (Ishii, Paranjape, Kim, and Sun, 2004)
         if C_WE == None:
             C_WE    = 0.002
         if C_RC == None:
@@ -166,21 +172,34 @@ def iate_1d_1g(
         if C_TI == None:
             C_TI    = 0.085
     
-    if cond2 != None:
+    if cond2 == None:
+        cov_method = 'fixed'
+
+    if cov_method == 'interp':
         # Use data at initial condition, void reconstruction downstream
         if io == None:
-            rf = False
+            rf1 = False
+            rf2 = rf
         else:
-            rf = True
+            rf1 = rf
+            rf2 = rf
         
-        COV_RC1 = np.nan_to_num(cond.calc_COV_RC(reconstruct_flag = rf, avg_method = avg_method, debug = False), nan=1.0)
-        COV_TI1 = np.nan_to_num(cond.calc_COV_TI(reconstruct_flag = rf, avg_method = avg_method, We_cr = We_cr, debug = False), nan=1.0)
+        if COV_RC == None:
+            COV_RC1 = np.nan_to_num(cond.calc_COV_RC(reconstruct_flag = rf1, avg_method = avg_method, debug = False), nan=1.0)
+            COV_RC2 = np.nan_to_num(cond2.calc_COV_RC(reconstruct_flag = rf2, avg_method = avg_method, debug = False), nan=1.0)
+            COV_RC = np.interp(z_mesh / Dh,(cond.LoverD, cond2.LoverD),(COV_RC1, COV_RC2))
+        
+        if COV_TI == None:
+            COV_TI1 = np.nan_to_num(cond.calc_COV_TI(reconstruct_flag = rf1, avg_method = avg_method, We_cr = We_cr, debug = False), nan=1.0)
+            COV_TI2 = np.nan_to_num(cond2.calc_COV_TI(reconstruct_flag = rf2, avg_method = avg_method, We_cr = We_cr, debug = False), nan=1.0)
+            COV_TI = np.interp(z_mesh / Dh,(cond.LoverD, cond2.LoverD),(COV_TI1, COV_TI2))
 
-        COV_RC2 = np.nan_to_num(cond2.calc_COV_RC(reconstruct_flag = True, avg_method = avg_method, debug = False), nan=1.0)
-        COV_TI2 = np.nan_to_num(cond2.calc_COV_TI(reconstruct_flag = True, avg_method = avg_method, We_cr = We_cr, debug = False), nan=1.0)
+    else:
+        if COV_RC == None:
+            COV_RC = 1
 
-        COV_RC = np.interp(z_mesh / Dh,(cond.LoverD, cond2.LoverD),(COV_RC1, COV_RC2))
-        COV_TI = np.interp(z_mesh / Dh,(cond.LoverD, cond2.LoverD),(COV_TI1, COV_TI2))
+        if COV_TI == None:
+            COV_TI = 1
 
     ############################################################################################################################
     #                                                                                                                          #
@@ -246,10 +265,10 @@ def iate_1d_1g(
     # Pressure drop [Pa/m]
 
     # Calculate height change for gravitational loss
-    if restriction == 'elbow':
+    if geometry == 'elbow':
         delta_h = (z_mesh[-1] - z_mesh[0]) * 2 / np.pi          # The height of an elbow is going to be its radius
 
-    elif restriction == 'ubend':
+    elif geometry == 'ubend':
         delta_h = 0
 
     else:
@@ -376,10 +395,10 @@ def iate_1d_1g(
         # Estimate sources & sinks in the Interfacial Area Transport Eqn. (Part 1)
 
         # Sink due to Wake Entrainment
-        if theta == 0 and restriction == None:
+        if theta == 0 and geometry == None:
             SWE[i] = 0
         
-        elif restriction == 'elbow':
+        elif geometry == 'elbow':
             SWE[i] = 0
             
             # Yadav calculates vgz differently if solving in elbow region and dissipation length region
@@ -521,7 +540,7 @@ def iate_1d_1g(
 
             rho_x = rho_gz[i] / rho_f
             mu_x = mu_g / mu_f
-            L_x = query - LoverD             # Restriction length scale, = L/D_restriction
+            L_x = query - LoverD             # Geometry length scale, = L/D_restriction
             Re_f = rho_f * jf * Dh / mu_f
 
             chiM_inv = (3.165 * k_m / L_x * Re_f**0.25)**0.5
