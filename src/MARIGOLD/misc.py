@@ -85,6 +85,51 @@ def write_excel(cond):
 
     return
 
+def write_pdf(cond:Condition, output_tex = None):
+    """ Export data from a condition to a pdf, using LaTeX table
+
+    calls pdflatex, so that must be installed for this to work properly
+    
+    """
+    # try:
+    #     run("pdflatex")
+    # except:
+    #     print("Error running pdflatex. Is it installed?")
+    #     return -1
+    
+    if output_tex is None:
+        output_tex = "temp.tex"
+
+    with open(output_tex, 'w') as f:
+        print("\
+\\documentclass{article}\n \
+\\nonstopmode\n\
+\\usepackage{array}\n \
+\\begin{document}\n \
+\\begin{center}\n" , file = f)
+
+        for angle, r_dict in cond.data.items():
+            
+            print( "\\section*{%0.1f $\\degree$} " % angle, file = f)
+            print( "\\begin{tabular}{|m{2cm}|m{2cm}|m{2cm}|m{2cm}|m{2cm}|}", file = f)
+            print( " \\hline", file = f)
+            print( " r/R & $\\alpha [-]$ & $a_{i} [m^{-1}]$ & $v_{g} [m/s]$ & $D_{sm} [mm]$ \\\\", file = f)
+            print( " \\hline\\hline", file = f)
+            
+            for rstar, midas_dict in r_dict.items():
+                
+                print(f" {rstar:1.1f} & {midas_dict['alpha']:0.3f} & {midas_dict['ai']:0.1f} & {midas_dict['ug1']:0.2f} & {midas_dict['Dsm1']:0.2f} \\\\", file = f)
+            
+            print( " \\hline\\hline", file = f)
+            print("\\end{tabular}", file=f)
+        
+        print("\
+\\end{center}\n \
+\\end{document}" , file = f)
+
+    run(f"pdflatex {output_tex} -interaction=nonstopmode")
+    return 1
+
 
 def write_inp(roverR, filename, probe_number = 'AM4-5', r01=1.408, r02=1.593, r03=1.597, r12=0.570, r13=0.755, r23=0.343, directory = os.getcwd(), detailedOutput=0, signalOutput=0):
     """ Write an .inp file for MIDAS
