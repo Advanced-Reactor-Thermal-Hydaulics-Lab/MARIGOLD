@@ -105,20 +105,19 @@ def write_pdf(cond:Condition, output_tex = None):
 \\documentclass{article}\n \
 \\nonstopmode\n\
 \\usepackage{array}\n \
+\\usepackage{gensymb}\n\
 \\begin{document}\n \
-\\begin{center}\n" , file = f)
-
+\\begin{center}\n\
+\\section*{$j_{f}$ = %0.1f, $j_{g}$ = %0.3f, Port %s} " % (cond.jf, cond.jgref, cond.port), file = f)
         for angle, r_dict in cond.data.items():
-            
-            print( "\\section*{%0.1f $\\degree$} " % angle, file = f)
-            print( "\\begin{tabular}{|m{2cm}|m{2cm}|m{2cm}|m{2cm}|m{2cm}|}", file = f)
+            print( "\\begin{tabular}{|m{1.5cm}|m{1.5cm}|m{1.5cm}|m{1.5cm}|m{1.5cm}|m{1.5cm}|}", file = f)
             print( " \\hline", file = f)
-            print( " r/R & $\\alpha [-]$ & $a_{i} [m^{-1}]$ & $v_{g} [m/s]$ & $D_{sm} [mm]$ \\\\", file = f)
+            print( " $\\varphi [\\degree]$ & r/R & $\\alpha [-]$ & $a_{i} [m^{-1}]$ & $v_{g} [m/s]$ & $D_{sm} [mm]$ \\\\", file = f)
             print( " \\hline\\hline", file = f)
             
             for rstar, midas_dict in r_dict.items():
                 
-                print(f" {rstar:1.1f} & {midas_dict['alpha']:0.3f} & {midas_dict['ai']:0.1f} & {midas_dict['ug1']:0.2f} & {midas_dict['Dsm1']:0.2f} \\\\", file = f)
+                print(f"{angle:1.1f} & {rstar:1.1f} & {midas_dict['alpha']:0.3f} & {midas_dict['ai']:0.1f} & {midas_dict['ug1']:0.2f} & {midas_dict['Dsm1']:0.2f} \\\\", file = f)
             
             print( " \\hline\\hline", file = f)
             print("\\end{tabular}", file=f)
@@ -130,6 +129,17 @@ def write_pdf(cond:Condition, output_tex = None):
     run(f"pdflatex {output_tex} -interaction=nonstopmode")
     return 1
 
+def write_csv(cond:Condition, output_name = None):
+    if output_name is None:
+        output_name = cond.name + ".csv"
+    
+    with open(output_name, 'w') as f:
+        print(f"phi, r/R, alpha, ai, ug1, Dsm1 ", file = f)
+        for angle, r_dict in cond.data.items():
+            for rstar, midas_dict in r_dict.items(): 
+                print(f"{angle}, {rstar}, {midas_dict['alpha']}, {midas_dict['ai']}, {midas_dict['ug1']}, {midas_dict['Dsm1']} ", file = f)
+
+    return 1
 
 def write_inp(roverR, filename, probe_number = 'AM4-5', r01=1.408, r02=1.593, r03=1.597, r12=0.570, r13=0.755, r23=0.343, directory = os.getcwd(), detailedOutput=0, signalOutput=0):
     """ Write an .inp file for MIDAS
@@ -176,7 +186,7 @@ end"
 
     return
 
-def process_dir(target_dir:str, probe_number:str, r01:float, r02:float, r03:float, r12:float, r13:float, r23:float, signal_output=0, detailed_output=0):
+def process_dir(target_dir:str, probe_number:str, r01:float, r02:float, r03:float, r12:float, r13:float, r23:float, roverR = None, signal_output=0, detailed_output=0):
     """ Runs MIDAS for every dat file in a given directory
 
     Makes a new folder, auto_reprocessed_data_TIMESTAMP, where the .tab files will be put.
@@ -208,8 +218,9 @@ def process_dir(target_dir:str, probe_number:str, r01:float, r02:float, r03:floa
         if file.split('.')[-1] == 'dat':
             copy2(os.path.join(target_dir, file), reprocessed_dir)
 
-            roverR = 0.1 * int(file[1])
-            write_inp(roverR, file.split('.')[0], probe_number = probe_number, r01=r01, r02=r02, r03=r03, r12=r12, r13=r13, r23=r23, directory=reprocessed_dir, signalOutput=signal_output, detailedOutput=detailed_output)
+            if roverR is None:
+                roverR = 0.1 * int(file[1])
+            write_inp(roverR, file.strip('.dat'), probe_number = probe_number, r01=r01, r02=r02, r03=r03, r12=r12, r13=r13, r23=r23, directory=reprocessed_dir, signalOutput=signal_output, detailedOutput=detailed_output)
 
             comp_process = run(os.path.join(reprocessed_dir, 'MIDASv1.14d.exe'), cwd = reprocessed_dir, shell=True)
 
