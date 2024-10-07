@@ -6,6 +6,8 @@
   <title>MARIGOLD.extracts_and_loads &mdash; MARIGOLD 0.0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/dark_mode_css/general.css?v=c0a7eb24" />
+      <link rel="stylesheet" type="text/css" href="../../_static/dark_mode_css/dark.css?v=70edf1c7" />
 
   
   <!--[if lt IE 9]>
@@ -17,6 +19,8 @@
         <script src="../../_static/documentation_options.js?v=d45e8c67"></script>
         <script src="../../_static/doctools.js?v=888ff710"></script>
         <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../_static/dark_mode_js/default_dark.js?v=fd565c74"></script>
+        <script src="../../_static/dark_mode_js/theme_switcher.js?v=358d3910"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -41,12 +45,8 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../MARIGOLD.html">MARIGOLD package</a></li>
-</ul>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../MARIGOLD.html">MARIGOLD package</a></li>
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../MARIGOLD.html">MARIGOLD</a></li>
 </ul>
 
         </div>
@@ -81,6 +81,7 @@
 <span class="kn">from</span> <span class="nn">.Yang_Condition</span> <span class="kn">import</span> <span class="n">Yang_Condition</span>
 
 <span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">xlrd</span>
 
 <div class="viewcode-block" id="extractProbeData">
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.extracts_and_loads.extractProbeData">[docs]</a>
@@ -127,7 +128,7 @@
                 
                 <span class="k">try</span><span class="p">:</span>
                     <span class="n">jf</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">file</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;jf&#39;</span><span class="p">))</span>
-                    <span class="n">jgP3</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">file</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;jg&#39;</span><span class="p">))</span>
+                    <span class="n">jgref</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">file</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;jg&#39;</span><span class="p">))</span>
                     <span class="n">port</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;.xlsx&#39;</span><span class="p">)</span>
                     <span class="n">theta</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">file</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;deg&#39;</span><span class="p">))</span>
                 <span class="k">except</span><span class="p">:</span>
@@ -137,7 +138,7 @@
                 <span class="n">ws</span> <span class="o">=</span> <span class="n">wb</span><span class="p">[</span><span class="s1">&#39;1&#39;</span><span class="p">]</span>
                 <span class="n">jgloc</span> <span class="o">=</span> <span class="n">ws</span><span class="p">[</span><span class="s1">&#39;U23&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
 
-                <span class="n">newCond</span> <span class="o">=</span> <span class="n">Condition</span><span class="p">(</span><span class="n">jgP3</span><span class="p">,</span> <span class="n">jgloc</span><span class="p">,</span> <span class="n">jf</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="s1">&#39;Ryan&#39;</span><span class="p">)</span>
+                <span class="n">newCond</span> <span class="o">=</span> <span class="n">Condition</span><span class="p">(</span><span class="n">jgref</span><span class="p">,</span> <span class="n">jgloc</span><span class="p">,</span> <span class="n">jf</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="s1">&#39;Ryan&#39;</span><span class="p">)</span>
 
                 <span class="k">if</span> <span class="n">newCond</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">all_conditions</span><span class="p">:</span>
                     <span class="n">all_conditions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">newCond</span><span class="p">)</span>
@@ -174,17 +175,17 @@
                                     <span class="nb">print</span><span class="p">(</span><span class="n">tab_keys</span><span class="p">,</span> <span class="n">midas_output</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">debugFID</span><span class="p">)</span>
 
                             <span class="k">try</span><span class="p">:</span>
-                                <span class="n">cond</span><span class="o">.</span><span class="n">phi</span><span class="p">[</span><span class="n">phi</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">roverR</span><span class="p">:</span> <span class="n">data</span><span class="p">})</span>
+                                <span class="n">cond</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">phi</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">roverR</span><span class="p">:</span> <span class="n">data</span><span class="p">})</span>
                             <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                                 <span class="k">if</span> <span class="n">first_phi</span><span class="p">:</span>
                                     <span class="k">pass</span>
                                 <span class="k">else</span><span class="p">:</span>
                                     <span class="k">if</span> <span class="n">debug</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Not my first phi, for some reaseon&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">debugFID</span><span class="p">)</span>
-                                <span class="n">cond</span><span class="o">.</span><span class="n">phi</span><span class="o">.</span><span class="n">update</span><span class="p">(</span> <span class="p">{</span><span class="n">phi</span><span class="p">:{}}</span> <span class="p">)</span>
+                                <span class="n">cond</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">update</span><span class="p">(</span> <span class="p">{</span><span class="n">phi</span><span class="p">:{}}</span> <span class="p">)</span>
                                 <span class="n">first_phi</span> <span class="o">=</span> <span class="kc">False</span>
-                                <span class="n">cond</span><span class="o">.</span><span class="n">phi</span><span class="p">[</span><span class="n">phi</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="mf">1.0</span><span class="p">:</span> <span class="n">zero_data</span><span class="p">})</span>
+                                <span class="n">cond</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">phi</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="mf">1.0</span><span class="p">:</span> <span class="n">zero_data</span><span class="p">})</span>
                                 <span class="c1">#cond.phi[phi_val].update({0.0: zero_data}) # Cuz I&#39;m paranoid</span>
-                                <span class="n">cond</span><span class="o">.</span><span class="n">phi</span><span class="p">[</span><span class="n">phi</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">roverR</span><span class="p">:</span> <span class="n">data</span><span class="p">})</span>
+                                <span class="n">cond</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">phi</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">roverR</span><span class="p">:</span> <span class="n">data</span><span class="p">})</span>
 
 
                 <span class="k">for</span> <span class="n">phi</span><span class="p">,</span> <span class="n">indices</span> <span class="ow">in</span> <span class="n">Q2_ranges</span><span class="p">:</span>
@@ -211,12 +212,12 @@
                                     <span class="nb">print</span><span class="p">(</span><span class="n">tab_keys</span><span class="p">,</span> <span class="n">midas_output</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">debugFID</span><span class="p">)</span>
 
                             <span class="k">try</span><span class="p">:</span>
-                                <span class="n">cond</span><span class="o">.</span><span class="n">phi</span><span class="p">[</span><span class="n">phi</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">roverR</span><span class="p">:</span> <span class="n">data</span><span class="p">})</span>
+                                <span class="n">cond</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">phi</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">roverR</span><span class="p">:</span> <span class="n">data</span><span class="p">})</span>
                             <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-                                <span class="n">cond</span><span class="o">.</span><span class="n">phi</span><span class="o">.</span><span class="n">update</span><span class="p">(</span> <span class="p">{</span><span class="n">phi</span><span class="p">:{}}</span> <span class="p">)</span>
-                                <span class="n">cond</span><span class="o">.</span><span class="n">phi</span><span class="p">[</span><span class="n">phi</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="mf">1.0</span><span class="p">:</span> <span class="n">zero_data</span><span class="p">})</span>
+                                <span class="n">cond</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">update</span><span class="p">(</span> <span class="p">{</span><span class="n">phi</span><span class="p">:{}}</span> <span class="p">)</span>
+                                <span class="n">cond</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">phi</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="mf">1.0</span><span class="p">:</span> <span class="n">zero_data</span><span class="p">})</span>
                                 <span class="c1">#cond.phi[phi_val].update({0.0: zero_data}) # Cuz I&#39;m paranoid</span>
-                                <span class="n">cond</span><span class="o">.</span><span class="n">phi</span><span class="p">[</span><span class="n">phi</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">roverR</span><span class="p">:</span> <span class="n">data</span><span class="p">})</span>
+                                <span class="n">cond</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">phi</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">roverR</span><span class="p">:</span> <span class="n">data</span><span class="p">})</span>
 
     
     <span class="c1">### 38.1 mm data (Talley) ###</span>
@@ -249,7 +250,7 @@
                 
                 <span class="k">try</span><span class="p">:</span>
                     <span class="n">jf</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">file</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;jf&#39;</span><span class="p">))</span>
-                    <span class="n">jgP3</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">file</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;jg&#39;</span><span class="p">))</span>
+                    <span class="n">jgref</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">file</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;jg&#39;</span><span class="p">))</span>
                     <span class="n">port</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;.xlsx&#39;</span><span class="p">)</span>
                     <span class="n">theta</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">file</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;deg&#39;</span><span class="p">))</span>
                 <span class="k">except</span><span class="p">:</span>
@@ -267,7 +268,7 @@
                     <span class="n">old</span> <span class="o">=</span> <span class="kc">True</span>
                 
 
-                <span class="n">newCond</span> <span class="o">=</span> <span class="n">Condition</span><span class="p">(</span><span class="n">jgP3</span><span class="p">,</span> <span class="n">jgloc</span><span class="p">,</span> <span class="n">jf</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="s1">&#39;Talley&#39;</span><span class="p">)</span>
+                <span class="n">newCond</span> <span class="o">=</span> <span class="n">Condition</span><span class="p">(</span><span class="n">jgref</span><span class="p">,</span> <span class="n">jgloc</span><span class="p">,</span> <span class="n">jf</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="s1">&#39;Talley&#39;</span><span class="p">)</span>
 
                 <span class="k">if</span> <span class="n">newCond</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">all_conditions</span><span class="p">:</span>
                     <span class="n">all_conditions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">newCond</span><span class="p">)</span>
@@ -332,12 +333,12 @@
 
                         <span class="n">phi</span> <span class="o">=</span> <span class="n">phis</span><span class="p">[</span><span class="n">phi_counter</span><span class="p">]</span>
                         <span class="k">try</span><span class="p">:</span>
-                            <span class="n">cond</span><span class="o">.</span><span class="n">phi</span><span class="p">[</span><span class="n">phi</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">roverR</span><span class="p">:</span> <span class="n">data</span><span class="p">})</span>
+                            <span class="n">cond</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">phi</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">roverR</span><span class="p">:</span> <span class="n">data</span><span class="p">})</span>
                         <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-                            <span class="n">cond</span><span class="o">.</span><span class="n">phi</span><span class="o">.</span><span class="n">update</span><span class="p">(</span> <span class="p">{</span><span class="n">phi</span><span class="p">:{}}</span> <span class="p">)</span>
-                            <span class="n">cond</span><span class="o">.</span><span class="n">phi</span><span class="p">[</span><span class="n">phi</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="mf">1.0</span><span class="p">:</span> <span class="n">zero_data</span><span class="p">})</span>
+                            <span class="n">cond</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">update</span><span class="p">(</span> <span class="p">{</span><span class="n">phi</span><span class="p">:{}}</span> <span class="p">)</span>
+                            <span class="n">cond</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">phi</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="mf">1.0</span><span class="p">:</span> <span class="n">zero_data</span><span class="p">})</span>
                             <span class="c1">#cond.phi[phi_val].update({0.0: zero_data}) # Cuz I&#39;m paranoid</span>
-                            <span class="n">cond</span><span class="o">.</span><span class="n">phi</span><span class="p">[</span><span class="n">phi</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">roverR</span><span class="p">:</span> <span class="n">data</span><span class="p">})</span>
+                            <span class="n">cond</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">phi</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">roverR</span><span class="p">:</span> <span class="n">data</span><span class="p">})</span>
 
                 <span class="c1">#print(&#39;total rows read:&#39;, i)</span>
 
@@ -373,7 +374,7 @@
                 
                 <span class="k">try</span><span class="p">:</span>
                     <span class="n">jf</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">file</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;jf&#39;</span><span class="p">))</span>
-                    <span class="n">jgP3</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">file</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;jg&#39;</span><span class="p">))</span>
+                    <span class="n">jgref</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">file</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;jg&#39;</span><span class="p">))</span>
                     <span class="n">port</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;.xlsx&#39;</span><span class="p">)</span>
                     <span class="n">theta</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">file</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;deg&#39;</span><span class="p">))</span>
                 <span class="k">except</span><span class="p">:</span>
@@ -389,7 +390,7 @@
                     <span class="n">jgloc</span> <span class="o">=</span> <span class="n">ws</span><span class="p">[</span><span class="s1">&#39;C2&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
                 
 
-                <span class="n">newCond</span> <span class="o">=</span> <span class="n">Condition</span><span class="p">(</span><span class="n">jgP3</span><span class="p">,</span> <span class="n">jgloc</span><span class="p">,</span> <span class="n">jf</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="s1">&#39;Kong&#39;</span><span class="p">)</span>
+                <span class="n">newCond</span> <span class="o">=</span> <span class="n">Condition</span><span class="p">(</span><span class="n">jgref</span><span class="p">,</span> <span class="n">jgloc</span><span class="p">,</span> <span class="n">jf</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="s1">&#39;Kong&#39;</span><span class="p">)</span>
 
                 <span class="k">if</span> <span class="n">newCond</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">all_conditions</span><span class="p">:</span>
                     <span class="n">all_conditions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">newCond</span><span class="p">)</span>
@@ -424,12 +425,12 @@
                                     <span class="nb">print</span><span class="p">(</span><span class="n">tab_keys</span><span class="p">,</span> <span class="n">midas_output</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">debugFID</span><span class="p">)</span>
 
                             <span class="k">try</span><span class="p">:</span>
-                                <span class="n">cond</span><span class="o">.</span><span class="n">phi</span><span class="p">[</span><span class="n">phi</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">roverR</span><span class="p">:</span> <span class="n">data</span><span class="p">})</span>
+                                <span class="n">cond</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">phi</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">roverR</span><span class="p">:</span> <span class="n">data</span><span class="p">})</span>
                             <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-                                <span class="n">cond</span><span class="o">.</span><span class="n">phi</span><span class="o">.</span><span class="n">update</span><span class="p">(</span> <span class="p">{</span><span class="n">phi</span><span class="p">:{}}</span> <span class="p">)</span>
-                                <span class="n">cond</span><span class="o">.</span><span class="n">phi</span><span class="p">[</span><span class="n">phi</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="mf">1.0</span><span class="p">:</span> <span class="n">zero_data</span><span class="p">})</span>
+                                <span class="n">cond</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">update</span><span class="p">(</span> <span class="p">{</span><span class="n">phi</span><span class="p">:{}}</span> <span class="p">)</span>
+                                <span class="n">cond</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">phi</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="mf">1.0</span><span class="p">:</span> <span class="n">zero_data</span><span class="p">})</span>
                                 <span class="c1">#cond.phi[phi_val].update({0.0: zero_data}) # Cuz I&#39;m paranoid</span>
-                                <span class="n">cond</span><span class="o">.</span><span class="n">phi</span><span class="p">[</span><span class="n">phi</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">roverR</span><span class="p">:</span> <span class="n">data</span><span class="p">})</span>
+                                <span class="n">cond</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">phi</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">roverR</span><span class="p">:</span> <span class="n">data</span><span class="p">})</span>
 
 
                 <span class="k">for</span> <span class="n">phi</span><span class="p">,</span> <span class="n">indices</span> <span class="ow">in</span> <span class="n">Q2_ranges</span><span class="p">:</span>
@@ -456,12 +457,12 @@
                                     <span class="nb">print</span><span class="p">(</span><span class="n">tab_keys</span><span class="p">,</span> <span class="n">midas_output</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">debugFID</span><span class="p">)</span>
 
                             <span class="k">try</span><span class="p">:</span>
-                                <span class="n">cond</span><span class="o">.</span><span class="n">phi</span><span class="p">[</span><span class="n">phi</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">roverR</span><span class="p">:</span> <span class="n">data</span><span class="p">})</span>
+                                <span class="n">cond</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">phi</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">roverR</span><span class="p">:</span> <span class="n">data</span><span class="p">})</span>
                             <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-                                <span class="n">cond</span><span class="o">.</span><span class="n">phi</span><span class="o">.</span><span class="n">update</span><span class="p">(</span> <span class="p">{</span><span class="n">phi</span><span class="p">:{}}</span> <span class="p">)</span>
-                                <span class="n">cond</span><span class="o">.</span><span class="n">phi</span><span class="p">[</span><span class="n">phi</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="mf">1.0</span><span class="p">:</span> <span class="n">zero_data</span><span class="p">})</span>
+                                <span class="n">cond</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">update</span><span class="p">(</span> <span class="p">{</span><span class="n">phi</span><span class="p">:{}}</span> <span class="p">)</span>
+                                <span class="n">cond</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">phi</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="mf">1.0</span><span class="p">:</span> <span class="n">zero_data</span><span class="p">})</span>
                                 <span class="c1">#cond.phi[phi_val].update({0.0: zero_data}) # Cuz I&#39;m paranoid</span>
-                                <span class="n">cond</span><span class="o">.</span><span class="n">phi</span><span class="p">[</span><span class="n">phi</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">roverR</span><span class="p">:</span> <span class="n">data</span><span class="p">})</span>
+                                <span class="n">cond</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">phi</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">roverR</span><span class="p">:</span> <span class="n">data</span><span class="p">})</span>
                 
     
     <span class="c1">### Yadav Data ###</span>
@@ -495,7 +496,7 @@
                 
                 <span class="k">try</span><span class="p">:</span>
                     <span class="n">jf</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">file</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;jf&#39;</span><span class="p">))</span>
-                    <span class="n">jgP3</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">file</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;jg&#39;</span><span class="p">))</span>
+                    <span class="n">jgref</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">file</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;jg&#39;</span><span class="p">))</span>
                     <span class="n">port</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;.xlsx&#39;</span><span class="p">)</span>
                     <span class="n">theta</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">file</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;deg&#39;</span><span class="p">))</span>
                 <span class="k">except</span><span class="p">:</span>
@@ -506,9 +507,9 @@
 
                 <span class="c1"># jglocs = [&#39;O16&#39;, &#39;O17&#39;, &#39;O18&#39;, &#39;O19&#39;, &#39;O20&#39;]</span>
                 <span class="c1"># jgloc = ws[jglocs[int(port.strip(&#39;P&#39;))-1]].value</span>
-                <span class="n">jgloc</span> <span class="o">=</span> <span class="n">jgP3</span>
+                <span class="n">jgloc</span> <span class="o">=</span> <span class="n">jgref</span>
                 
-                <span class="n">newCond</span> <span class="o">=</span> <span class="n">Condition</span><span class="p">(</span><span class="n">jgP3</span><span class="p">,</span> <span class="n">jgloc</span><span class="p">,</span> <span class="n">jf</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="s1">&#39;Yadav&#39;</span><span class="p">)</span>
+                <span class="n">newCond</span> <span class="o">=</span> <span class="n">Condition</span><span class="p">(</span><span class="n">jgref</span><span class="p">,</span> <span class="n">jgloc</span><span class="p">,</span> <span class="n">jf</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="s1">&#39;Yadav&#39;</span><span class="p">)</span>
 
                 <span class="k">if</span> <span class="n">newCond</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">all_conditions</span><span class="p">:</span>
                     <span class="n">all_conditions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">newCond</span><span class="p">)</span>
@@ -555,12 +556,12 @@
                                     <span class="nb">print</span><span class="p">(</span><span class="n">tab_keys</span><span class="p">,</span> <span class="n">midas_output</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">debugFID</span><span class="p">)</span>
 
                             <span class="k">try</span><span class="p">:</span>
-                                <span class="n">cond</span><span class="o">.</span><span class="n">phi</span><span class="p">[</span><span class="n">phi</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">roverR</span><span class="p">:</span> <span class="n">data</span><span class="p">})</span>
+                                <span class="n">cond</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">phi</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">roverR</span><span class="p">:</span> <span class="n">data</span><span class="p">})</span>
                             <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-                                <span class="n">cond</span><span class="o">.</span><span class="n">phi</span><span class="o">.</span><span class="n">update</span><span class="p">(</span> <span class="p">{</span><span class="n">phi</span><span class="p">:{}}</span> <span class="p">)</span>
-                                <span class="n">cond</span><span class="o">.</span><span class="n">phi</span><span class="p">[</span><span class="n">phi</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="mf">1.0</span><span class="p">:</span> <span class="n">zero_data</span><span class="p">})</span>
+                                <span class="n">cond</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">update</span><span class="p">(</span> <span class="p">{</span><span class="n">phi</span><span class="p">:{}}</span> <span class="p">)</span>
+                                <span class="n">cond</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">phi</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="mf">1.0</span><span class="p">:</span> <span class="n">zero_data</span><span class="p">})</span>
                                 <span class="c1">#cond.phi[phi_val].update({0.0: zero_data}) # Cuz I&#39;m paranoid</span>
-                                <span class="n">cond</span><span class="o">.</span><span class="n">phi</span><span class="p">[</span><span class="n">phi</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">roverR</span><span class="p">:</span> <span class="n">data</span><span class="p">})</span>
+                                <span class="n">cond</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">phi</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">roverR</span><span class="p">:</span> <span class="n">data</span><span class="p">})</span>
 
 
             <span class="k">for</span> <span class="n">phi</span><span class="p">,</span> <span class="n">indices</span> <span class="ow">in</span> <span class="n">Q2_ranges</span><span class="p">:</span>
@@ -593,14 +594,13 @@
                                 <span class="nb">print</span><span class="p">(</span><span class="n">tab_keys</span><span class="p">,</span> <span class="n">midas_output</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">debugFID</span><span class="p">)</span>
 
                         <span class="k">try</span><span class="p">:</span>
-                            <span class="n">cond</span><span class="o">.</span><span class="n">phi</span><span class="p">[</span><span class="n">phi</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">roverR</span><span class="p">:</span> <span class="n">data</span><span class="p">})</span>
+                            <span class="n">cond</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">phi</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">roverR</span><span class="p">:</span> <span class="n">data</span><span class="p">})</span>
                         <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-                            <span class="n">cond</span><span class="o">.</span><span class="n">phi</span><span class="o">.</span><span class="n">update</span><span class="p">(</span> <span class="p">{</span><span class="n">phi</span><span class="p">:{}}</span> <span class="p">)</span>
-                            <span class="n">cond</span><span class="o">.</span><span class="n">phi</span><span class="p">[</span><span class="n">phi</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="mf">1.0</span><span class="p">:</span> <span class="n">zero_data</span><span class="p">})</span>
+                            <span class="n">cond</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">update</span><span class="p">(</span> <span class="p">{</span><span class="n">phi</span><span class="p">:{}}</span> <span class="p">)</span>
+                            <span class="n">cond</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">phi</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="mf">1.0</span><span class="p">:</span> <span class="n">zero_data</span><span class="p">})</span>
                             <span class="c1">#cond.phi[phi_val].update({0.0: zero_data}) # Cuz I&#39;m paranoid</span>
-                            <span class="n">cond</span><span class="o">.</span><span class="n">phi</span><span class="p">[</span><span class="n">phi</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">roverR</span><span class="p">:</span> <span class="n">data</span><span class="p">})</span> 
+                            <span class="n">cond</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">phi</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">roverR</span><span class="p">:</span> <span class="n">data</span><span class="p">})</span> 
 
-    
     <span class="k">if</span> <span class="n">debug</span> <span class="ow">and</span> <span class="kc">False</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">cond</span> <span class="ow">in</span> <span class="n">all_conditions</span><span class="p">:</span>
             <span class="n">cond</span><span class="o">.</span><span class="n">pretty_print</span><span class="p">()</span>
@@ -610,11 +610,12 @@
     <span class="k">return</span></div>
 
 
+
 <div class="viewcode-block" id="extractLocalDataFromDir">
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.extracts_and_loads.extractLocalDataFromDir">[docs]</a>
 <span class="k">def</span> <span class="nf">extractLocalDataFromDir</span><span class="p">(</span><span class="n">path</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">dump_file</span> <span class="o">=</span> <span class="s1">&#39;database.dat&#39;</span><span class="p">,</span> <span class="n">in_dir</span> <span class="o">=</span> <span class="p">[],</span> <span class="n">require_terms</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;jf&#39;</span><span class="p">],</span> 
                             <span class="n">skip_terms</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;CFD&#39;</span><span class="p">,</span> <span class="s1">&#39;Copy&#39;</span><span class="p">],</span> <span class="n">sheet_type</span> <span class="o">=</span> <span class="s1">&#39;adix_template&#39;</span><span class="p">,</span> <span class="n">append_to_json</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                            <span class="n">pitot_sheet</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                            <span class="n">pitot_sheet</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">print_sheets</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                             <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Function for getting all local data from spreadsheets in a directory, path</span>
@@ -622,9 +623,12 @@
 <span class="sd">       Does not recursively descend, only checks in the path given</span>
 <span class="sd">    </span>
 <span class="sd">       Still under construction, but should support sheet types</span>
-<span class="sd">       &#39;adix_template4&#39;</span>
-<span class="sd">       &#39;ryan_template&#39;</span>
-<span class="sd">       &#39;adix_template&#39; (maybe rename this quan_template)</span>
+<span class="sd">        - &#39;adix_template4&#39;</span>
+<span class="sd">        - &#39;ryan_template&#39;</span>
+<span class="sd">        - &#39;adix_template&#39; (maybe rename this quan_template)</span>
+<span class="sd">        - &#39;bettis_template&#39;</span>
+<span class="sd">        - &#39;talley_template&#39;</span>
+<span class="sd">        - &#39;yadav_template&#39;</span>
 
 <span class="sd">       Also can try to infer the sheet type, xlsm will be adix_template4, if it has P5, 6, or 7 it will</span>
 <span class="sd">       be classified as an adix_template, different angles ryan, etc. The inference can also be made by </span>
@@ -650,23 +654,26 @@
     <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
     
         <span class="c1"># print(file)</span>
-        <span class="k">if</span> <span class="n">debug</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">debugFID</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">print_sheets</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">file</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;xlsx&#39;</span> <span class="ow">or</span> <span class="n">file</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;xlsm&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">file</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;xlsx&#39;</span> <span class="ow">or</span> <span class="n">file</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;xlsm&#39;</span> <span class="ow">or</span> <span class="n">file</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;xls&#39;</span><span class="p">:</span>
 
             <span class="c1"># Check if the file has any skipped/required terms</span>
             <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">term</span> <span class="ow">in</span> <span class="n">file</span> <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="n">skip_terms</span><span class="p">):</span>
                 <span class="k">if</span> <span class="n">debug</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Skipping </span><span class="si">{</span><span class="n">file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">debugFID</span><span class="p">)</span>
                 <span class="k">continue</span>
 
-            <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">term</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">file</span> <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="n">require_terms</span><span class="p">):</span>
-                <span class="k">if</span> <span class="n">debug</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Skipping </span><span class="si">{</span><span class="n">file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">debugFID</span><span class="p">)</span>
-                <span class="k">continue</span>
+            <span class="c1"># if all(term not in file for term in require_terms):</span>
+            <span class="c1">#     if debug: print(f&quot;Skipping {file}&quot;, file=debugFID)</span>
+            <span class="c1">#     continue</span>
             
-            <span class="c1">#if debug: print(path, file=debugFID)</span>
+            <span class="c1"># if debug: print(path, file=debugFID)</span>
             
             <span class="k">try</span><span class="p">:</span>
-                <span class="n">wb</span> <span class="o">=</span> <span class="n">op</span><span class="o">.</span><span class="n">load_workbook</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">file</span><span class="p">),</span> <span class="n">data_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">file</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;xls&#39;</span><span class="p">:</span>
+                    <span class="n">wb</span> <span class="o">=</span> <span class="n">xlrd</span><span class="o">.</span><span class="n">open_workbook</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">file</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">wb</span> <span class="o">=</span> <span class="n">op</span><span class="o">.</span><span class="n">load_workbook</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">file</span><span class="p">),</span> <span class="n">data_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>                    
             <span class="k">except</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error reading wb: </span><span class="si">{</span><span class="n">file</span><span class="si">}</span><span class="se">\n</span><span class="s2">Skipping...&quot;</span><span class="p">)</span>
                 <span class="k">continue</span>
@@ -677,37 +684,469 @@
                 <span class="n">port</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;.xlsx&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;.xlsm&#39;</span><span class="p">)</span>
                 <span class="n">theta</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">file</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;deg&#39;</span><span class="p">))</span>
             <span class="k">except</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Warning: Non-standard excel file name </span><span class="si">{</span><span class="n">file</span><span class="si">}</span><span class="s1">. Skipping...&#39;</span><span class="p">)</span>
-                <span class="k">continue</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Warning: Non-standard excel file name </span><span class="si">{</span><span class="n">file</span><span class="si">}</span><span class="s1">. Is this Bettis template?&#39;</span><span class="p">)</span>
+                
+                <span class="k">if</span> <span class="n">sheet_type</span> <span class="o">==</span> <span class="s1">&#39;bettis_template&#39;</span> <span class="ow">and</span> <span class="s1">&#39;Run&#39;</span> <span class="ow">in</span> <span class="n">file</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Yes, it is. Proceeding...&quot;</span><span class="p">)</span>
+
+                    <span class="n">theta</span> <span class="o">=</span> <span class="mi">90</span>
+                    <span class="n">port</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="n">port_idx</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\d+&#39;</span><span class="p">,</span><span class="n">port</span><span class="p">)))</span>
+                
+                    <span class="k">if</span> <span class="n">file</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;Run1&#39;</span><span class="p">:</span>
+                        <span class="n">jf</span> <span class="o">=</span> <span class="mf">0.32</span>
+                        <span class="n">jgref</span> <span class="o">=</span> <span class="mf">0.047</span>
+                        
+                        <span class="n">run_idx</span> <span class="o">=</span> <span class="mi">1</span>
+                    <span class="k">elif</span> <span class="n">file</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;Run2&#39;</span><span class="p">:</span>
+                        <span class="n">jf</span> <span class="o">=</span> <span class="mf">0.95</span>
+                        <span class="n">jgref</span> <span class="o">=</span> <span class="mf">0.047</span>
+
+                        <span class="n">run_idx</span> <span class="o">=</span> <span class="mi">2</span>
+                    <span class="k">elif</span> <span class="n">file</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;Run3&#39;</span><span class="p">:</span>
+                        <span class="n">jf</span> <span class="o">=</span> <span class="mf">1.89</span>
+                        <span class="n">jgref</span> <span class="o">=</span> <span class="mf">0.095</span>
+                        
+                        <span class="n">run_idx</span> <span class="o">=</span> <span class="mi">3</span>
+                    <span class="k">elif</span> <span class="n">file</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;Run4&#39;</span><span class="p">:</span>
+                        <span class="n">jf</span> <span class="o">=</span> <span class="mf">0.95</span>
+                        <span class="n">jgref</span> <span class="o">=</span> <span class="mf">0.187</span>
+                        
+                        <span class="n">run_idx</span> <span class="o">=</span> <span class="mi">4</span>
+                    <span class="k">elif</span> <span class="n">file</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;Run5&#39;</span><span class="p">:</span>
+                        <span class="n">jf</span> <span class="o">=</span> <span class="mf">1.89</span>
+                        <span class="n">jgref</span> <span class="o">=</span> <span class="mf">0.193</span>
+                        
+                        <span class="n">run_idx</span> <span class="o">=</span> <span class="mi">5</span>
+                    <span class="k">elif</span> <span class="n">file</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;Run6&#39;</span> <span class="ow">and</span> <span class="n">file</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;short&#39;</span><span class="p">:</span>
+                        <span class="n">jf</span> <span class="o">=</span> <span class="mf">0.63</span>
+                        <span class="n">jgref</span> <span class="o">=</span> <span class="mf">0.279</span>
+                        
+                        <span class="n">run_idx</span> <span class="o">=</span> <span class="mi">6</span>
+                        
+                        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Ommitting short runs...&quot;</span><span class="p">)</span>
+                        <span class="k">continue</span>
+                    <span class="k">elif</span> <span class="n">file</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;Run7&#39;</span> <span class="ow">and</span> <span class="n">file</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;short&#39;</span><span class="p">:</span>
+                        <span class="n">jf</span> <span class="o">=</span> <span class="mf">2.84</span>
+                        <span class="n">jgref</span> <span class="o">=</span> <span class="mf">0.287</span>
+                        
+                        <span class="n">run_idx</span> <span class="o">=</span> <span class="mi">7</span>
+
+                        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Ommitting short runs...&quot;</span><span class="p">)</span>
+                        <span class="k">continue</span>
+                    <span class="k">elif</span> <span class="n">file</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;Run6&#39;</span> <span class="ow">and</span> <span class="n">file</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;long&#39;</span><span class="p">:</span>
+                        <span class="n">jf</span> <span class="o">=</span> <span class="mf">0.63</span>
+                        <span class="n">jgref</span> <span class="o">=</span> <span class="mf">0.279</span>
+                        
+                        <span class="n">run_idx</span> <span class="o">=</span> <span class="mi">8</span>
+                    <span class="k">elif</span> <span class="n">file</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;Run7&#39;</span> <span class="ow">and</span> <span class="n">file</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;long&#39;</span><span class="p">:</span>
+                        <span class="n">jf</span> <span class="o">=</span> <span class="mf">2.84</span>
+                        <span class="n">jgref</span> <span class="o">=</span> <span class="mf">0.287</span>
+                        
+                        <span class="n">run_idx</span> <span class="o">=</span> <span class="mi">9</span>
+                    <span class="k">elif</span> <span class="n">file</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;Run8&#39;</span><span class="p">:</span>
+                        <span class="n">jf</span> <span class="o">=</span> <span class="mf">1.89</span>
+                        <span class="n">jgref</span> <span class="o">=</span> <span class="mf">0.385</span>
+                        
+                        <span class="n">run_idx</span> <span class="o">=</span> <span class="mi">10</span>
+                    <span class="k">elif</span> <span class="n">file</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;Run9&#39;</span><span class="p">:</span>
+                        <span class="n">jf</span> <span class="o">=</span> <span class="mf">4.40</span>
+                        <span class="n">jgref</span> <span class="o">=</span> <span class="mf">0.940</span>
+                        
+                        <span class="n">run_idx</span> <span class="o">=</span> <span class="mi">11</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Warning: Run number exceeds highest known run. Skipping...&quot;</span><span class="p">)</span>
+                        <span class="k">continue</span>
+                    
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Nope. Skipping...&#39;</span><span class="p">)</span>
+                    <span class="k">continue</span>
             
-            <span class="c1"># Yadav&#39;s template is a bit chaotic; let&#39;s not try to adapt PITA&#39;s extract logic to it (DHK)</span>
-            <span class="k">if</span> <span class="n">sheet_type</span> <span class="o">==</span> <span class="s1">&#39;yadav_template&#39;</span><span class="p">:</span>
+            <span class="c1">############################################################################################################################</span>
+            <span class="c1">#                                                                                                                          #</span>
+            <span class="c1">#                                                       BETTIS DATA                                                        #</span>
+            <span class="c1">#                                                                                                                          #</span>
+            <span class="c1">############################################################################################################################</span>
+            <span class="k">if</span> <span class="n">sheet_type</span> <span class="o">==</span> <span class="s1">&#39;bettis_template&#39;</span><span class="p">:</span>
+
+<span class="w">                </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">                # Sourced from Kim_Research_BubbleDoc\Bettis\OneGroupEvaluation\AllConditions</span>
+<span class="sd">                jgloc_mat = [</span>
+<span class="sd">                    [0.047 , 0.040 , 0.040 , 0.040 , None  , None  ],   # Run1</span>
+<span class="sd">                    [0.047 , 0.040 , 0.040 , 0.040 , None  , None  ],   # Run2</span>
+<span class="sd">                    [0.095 , 0.070 , 0.070 , 0.070 , None  , None  ],   # Run3</span>
+<span class="sd">                    [0.187 , 0.140 , 0.150 , 0.150 , None  , None  ],   # Run4</span>
+<span class="sd">                    [0.193 , 0.140 , 0.150 , 0.150 , None  , None  ],   # Run5</span>
+<span class="sd">                    [0.279 , 0.220 , None  , 0.220 , None  , None  ],   # Run6_short</span>
+<span class="sd">                    [0.287 , 0.210 , 0.220 , 0.220 , None  , None  ],   # Run7_short</span>
+<span class="sd">                    [None  , 0.219 , None  , 0.234 , None  , 0.251 ],   # Run6_long</span>
+<span class="sd">                    [None  , 0.212 , None  , None  , None  , 0.264 ],   # Run7_long</span>
+<span class="sd">                    [None  , 0.288 , None  , 0.314 , None  , 0.346 ],   # Run8</span>
+<span class="sd">                    [None  , 0.618 , None  , 0.716 , None  , 0.850 ],   # Run9</span>
+<span class="sd">                ]</span>
+
+<span class="sd">                alpha_mat = [</span>
+<span class="sd">                    [0.066 , 0.089 , 0.080 , 0.083 , None  , None  ],   # Run1</span>
+<span class="sd">                    [0.039 , 0.038 , 0.037 , 0.034 , None  , None  ],   # Run2</span>
+<span class="sd">                    [0.035 , 0.038 , 0.031 , 0.034 , None  , None  ],   # Run3</span>
+<span class="sd">                    [0.104 , 0.110 , 0.116 , 0.116 , None  , None  ],   # Run4</span>
+<span class="sd">                    [0.064 , 0.059 , 0.062 , 0.059 , None  , None  ],   # Run5</span>
+<span class="sd">                    [0.220 , 0.173 , None  , 0.248 , None  , None  ],   # Run6_short</span>
+<span class="sd">                    [0.031 , 0.051 , None  , 0.058 , None  , None  ],   # Run7_short</span>
+<span class="sd">                    [None  , 0.207 , None  , 0.222 , None  , 0.237 ],   # Run6_long</span>
+<span class="sd">                    [None  , 0.067 , None  , None  , None  , 0.075 ],   # Run7_long</span>
+<span class="sd">                    [None  , 0.121 , None  , 0.103 , None  , 0.124 ],   # Run8</span>
+<span class="sd">                    [None  , 0.078 , None  , 0.095 , None  , 0.125 ]    # Run9</span>
+<span class="sd">                ]</span>
+
+<span class="sd">                ai_mat = [</span>
+<span class="sd">                    [None  , 190.33, 175.51, 173.26, None  , None  ],   # Run1</span>
+<span class="sd">                    [None  , 78.90 , 77.30 , 71.10 , None  , None  ],   # Run2</span>
+<span class="sd">                    [None  , 87.80 , 76.70 , 78.60 , None  , None  ],   # Run3</span>
+<span class="sd">                    [None  , 210.56, 223.89, 211.69, None  , None  ],   # Run4</span>
+<span class="sd">                    [None  , 125.06, 135.80, 120.97, None  , None  ],   # Run5</span>
+<span class="sd">                    [None  , 432.78, None  , 372.21, None  , None  ],   # Run6_short</span>
+<span class="sd">                    [None  , 151.23, None  , 157.03, None  , None  ],   # Run7_short</span>
+<span class="sd">                    [None  , 470.61, None  , 369.69, None  , 418.74],   # Run6_long</span>
+<span class="sd">                    [None  , 199.34, None  , None  , None  , 222.64],   # Run7_long</span>
+<span class="sd">                    [None  , 209.62, None  , 192.28, None  , 270.00],   # Run8</span>
+<span class="sd">                    [None  , 188.53, None  , 258.80, None  , 345.16],   # Run9</span>
+<span class="sd">                ]</span>
+
+<span class="sd">                Dsm_mat = [</span>
+<span class="sd">                    [None  , 2.56  , None  , 2.61  , None  , None  ],   # Run1</span>
+<span class="sd">                    [None  , 2.87  , None  , 2.71  , None  , None  ],   # Run2</span>
+<span class="sd">                    [None  , 2.55  , None  , 2.59  , None  , None  ],   # Run3</span>
+<span class="sd">                    [None  , 3.06  , None  , 3.06  , None  , None  ],   # Run4</span>
+<span class="sd">                    [None  , 2.92  , None  , 2.92  , None  , None  ],   # Run5</span>
+<span class="sd">                    [None  , 2.33  , None  , 3.81  , None  , None  ],   # Run6_short</span>
+<span class="sd">                    [None  , 2.03  , None  , 2.21  , None  , None  ],   # Run7_short</span>
+<span class="sd">                    [None  , 2.61  , None  , 3.54  , None  , 3.28  ],   # Run6_long</span>
+<span class="sd">                    [None  , 1.98  , None  , None  , None  , 2.01  ],   # Run7_long, last one at 140.1 L/D</span>
+<span class="sd">                    [None  , 2.67  , None  , 3.26  , None  , 2.78  ],   # Run8</span>
+<span class="sd">                    [None  , 2.43  , None  , 2.19  , None  , 2.18  ],   # Run9</span>
+<span class="sd">                ]</span>
+
+<span class="sd">                # Sourced from thesis Table A.E.(a), and MATLAB initcond.m</span>
+<span class="sd">                pz_mat = [</span>
+<span class="sd">                    [None  , 30603.60 , 27710.01 , 24816.42 , None  , None    ],  # Run1</span>
+<span class="sd">                    [None  , 32735.69 , 29567.55 , 26399.42 , None  , None    ],  # Run2</span>
+<span class="sd">                    [None  , 35073.44 , 31433.39 , 27793.33 , None  , None    ],  # Run3</span>
+<span class="sd">                    [None  , 31486.61 , 28501.50 , 25516.40 , None  , None    ],  # Run4</span>
+<span class="sd">                    [None  , 38464.37 , 34860.21 , 31256.04 , None  , None    ],  # Run5</span>
+<span class="sd">                    [None  , 29584.83 , 27028.58 , 24472.33 , None  , None    ],  # Run6_short</span>
+<span class="sd">                    [None  , 36275.59 , 32140.29 , 28004.99 , None  , None    ],  # Run7_short</span>
+<span class="sd">                    [None  , 28213.762, None     , 19814.36 , None  , 11415   ],  # Run6_long</span>
+<span class="sd">                    [None  , 40150.62 , None     , 25970.05 , None  , 11789.5 ],  # Run7_long</span>
+<span class="sd">                    [None  , 34289.443, None     , 22869.15 , None  , 11448.8 ],  # Run8</span>
+<span class="sd">                    [None  , 52254.526, None     , 31247.62 , None  , 10240.7 ],  # Run9</span>
+<span class="sd">                ]</span>
+
+<span class="sd">                LoverD_mat = [8.02, 34.76, 61.49, 88.22, 114.96, 141.70]</span>
+<span class="sd">                dpdz_mat = [9250.38, 10128.04, 11636.70, 9542.94, 11521.98, 8171.95, 13219.94, 8267.13, 13957.25, 11240.45, 20676.09]</span>
+<span class="sd">                &#39;&#39;&#39;</span>
+
+                <span class="c1"># Sourced from \Kim_ThesisFolder\Thesis_Original\OneGroupEvaluation\AllConditions</span>
+                <span class="n">jgloc_mat</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="p">[</span><span class="mf">0.047</span> <span class="p">,</span> <span class="mf">0.040</span> <span class="p">,</span> <span class="mf">0.040</span> <span class="p">,</span> <span class="mf">0.040</span> <span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="kc">None</span>  <span class="p">],</span>   <span class="c1"># Run1</span>
+                    <span class="p">[</span><span class="mf">0.047</span> <span class="p">,</span> <span class="mf">0.040</span> <span class="p">,</span> <span class="mf">0.040</span> <span class="p">,</span> <span class="mf">0.040</span> <span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="kc">None</span>  <span class="p">],</span>   <span class="c1"># Run2</span>
+                    <span class="p">[</span><span class="mf">0.095</span> <span class="p">,</span> <span class="mf">0.070</span> <span class="p">,</span> <span class="mf">0.070</span> <span class="p">,</span> <span class="mf">0.070</span> <span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="kc">None</span>  <span class="p">],</span>   <span class="c1"># Run3</span>
+                    <span class="p">[</span><span class="mf">0.187</span> <span class="p">,</span> <span class="mf">0.140</span> <span class="p">,</span> <span class="mf">0.150</span> <span class="p">,</span> <span class="mf">0.150</span> <span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="kc">None</span>  <span class="p">],</span>   <span class="c1"># Run4</span>
+                    <span class="p">[</span><span class="mf">0.193</span> <span class="p">,</span> <span class="mf">0.140</span> <span class="p">,</span> <span class="mf">0.150</span> <span class="p">,</span> <span class="mf">0.150</span> <span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="kc">None</span>  <span class="p">],</span>   <span class="c1"># Run5</span>
+                    <span class="p">[</span><span class="mf">0.279</span> <span class="p">,</span> <span class="mf">0.220</span> <span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="mf">0.220</span> <span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="kc">None</span>  <span class="p">],</span>   <span class="c1"># Run6_short</span>
+                    <span class="p">[</span><span class="mf">0.287</span> <span class="p">,</span> <span class="mf">0.210</span> <span class="p">,</span> <span class="mf">0.220</span> <span class="p">,</span> <span class="mf">0.220</span> <span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="kc">None</span>  <span class="p">],</span>   <span class="c1"># Run7_short</span>
+                    <span class="p">[</span><span class="kc">None</span>  <span class="p">,</span> <span class="mf">0.28</span>  <span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="mf">0.234</span> <span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="mf">0.251</span> <span class="p">],</span>   <span class="c1"># Run6_long</span>
+                    <span class="p">[</span><span class="kc">None</span>  <span class="p">,</span> <span class="mf">0.3</span>   <span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="mf">0.264</span> <span class="p">],</span>   <span class="c1"># Run7_long</span>
+                    <span class="p">[</span><span class="kc">None</span>  <span class="p">,</span> <span class="mf">0.385</span> <span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="mf">0.314</span> <span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="mf">0.346</span> <span class="p">],</span>   <span class="c1"># Run8</span>
+                    <span class="p">[</span><span class="kc">None</span>  <span class="p">,</span> <span class="mf">0.94</span>  <span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="mf">0.716</span> <span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="mf">0.850</span> <span class="p">],</span>   <span class="c1"># Run9</span>
+                <span class="p">]</span>
+
+                <span class="n">alpha_mat</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="p">[</span><span class="mf">0.066</span> <span class="p">,</span> <span class="mf">0.0839</span><span class="p">,</span> <span class="mf">0.080</span> <span class="p">,</span> <span class="mf">0.083</span> <span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="kc">None</span>  <span class="p">],</span>   <span class="c1"># Run1</span>
+                    <span class="p">[</span><span class="mf">0.039</span> <span class="p">,</span> <span class="mf">0.038</span> <span class="p">,</span> <span class="mf">0.037</span> <span class="p">,</span> <span class="mf">0.034</span> <span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="kc">None</span>  <span class="p">],</span>   <span class="c1"># Run2</span>
+                    <span class="p">[</span><span class="mf">0.035</span> <span class="p">,</span> <span class="mf">0.038</span> <span class="p">,</span> <span class="mf">0.031</span> <span class="p">,</span> <span class="mf">0.034</span> <span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="kc">None</span>  <span class="p">],</span>   <span class="c1"># Run3</span>
+                    <span class="p">[</span><span class="mf">0.104</span> <span class="p">,</span> <span class="mf">0.1097</span><span class="p">,</span> <span class="mf">0.116</span> <span class="p">,</span> <span class="mf">0.116</span> <span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="kc">None</span>  <span class="p">],</span>   <span class="c1"># Run4</span>
+                    <span class="p">[</span><span class="mf">0.064</span> <span class="p">,</span> <span class="mf">0.0592</span><span class="p">,</span> <span class="mf">0.062</span> <span class="p">,</span> <span class="mf">0.059</span> <span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="kc">None</span>  <span class="p">],</span>   <span class="c1"># Run5</span>
+                    <span class="p">[</span><span class="mf">0.220</span> <span class="p">,</span> <span class="mf">0.1727</span><span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="mf">0.248</span> <span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="kc">None</span>  <span class="p">],</span>   <span class="c1"># Run6_short</span>
+                    <span class="p">[</span><span class="mf">0.031</span> <span class="p">,</span> <span class="mf">0.051</span> <span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="mf">0.058</span> <span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="kc">None</span>  <span class="p">],</span>   <span class="c1"># Run7_short</span>
+                    <span class="p">[</span><span class="kc">None</span>  <span class="p">,</span> <span class="mf">0.2068</span><span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="mf">0.222</span> <span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="mf">0.237</span> <span class="p">],</span>   <span class="c1"># Run6_long</span>
+                    <span class="p">[</span><span class="kc">None</span>  <span class="p">,</span> <span class="mf">0.0674</span><span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="mf">0.075</span> <span class="p">],</span>   <span class="c1"># Run7_long</span>
+                    <span class="p">[</span><span class="kc">None</span>  <span class="p">,</span> <span class="mf">0.1149</span><span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="mf">0.103</span> <span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="mf">0.124</span> <span class="p">],</span>   <span class="c1"># Run8</span>
+                    <span class="p">[</span><span class="kc">None</span>  <span class="p">,</span> <span class="mf">0.0782</span><span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="mf">0.095</span> <span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="mf">0.125</span> <span class="p">]</span>    <span class="c1"># Run9</span>
+                <span class="p">]</span>
+
+                <span class="n">ai_mat</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="p">[</span><span class="kc">None</span>  <span class="p">,</span> <span class="mf">190.33</span><span class="p">,</span> <span class="mf">175.51</span><span class="p">,</span> <span class="mf">173.26</span><span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="kc">None</span>  <span class="p">],</span>   <span class="c1"># Run1</span>
+                    <span class="p">[</span><span class="kc">None</span>  <span class="p">,</span> <span class="mf">82.28</span> <span class="p">,</span> <span class="mf">77.30</span> <span class="p">,</span> <span class="mf">71.10</span> <span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="kc">None</span>  <span class="p">],</span>   <span class="c1"># Run2</span>
+                    <span class="p">[</span><span class="kc">None</span>  <span class="p">,</span> <span class="mf">87.70</span> <span class="p">,</span> <span class="mf">76.70</span> <span class="p">,</span> <span class="mf">78.60</span> <span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="kc">None</span>  <span class="p">],</span>   <span class="c1"># Run3</span>
+                    <span class="p">[</span><span class="kc">None</span>  <span class="p">,</span> <span class="mf">210.56</span><span class="p">,</span> <span class="mf">223.89</span><span class="p">,</span> <span class="mf">211.69</span><span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="kc">None</span>  <span class="p">],</span>   <span class="c1"># Run4</span>
+                    <span class="p">[</span><span class="kc">None</span>  <span class="p">,</span> <span class="mf">125.06</span><span class="p">,</span> <span class="mf">135.80</span><span class="p">,</span> <span class="mf">120.97</span><span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="kc">None</span>  <span class="p">],</span>   <span class="c1"># Run5</span>
+                    <span class="p">[</span><span class="kc">None</span>  <span class="p">,</span> <span class="mf">432.78</span><span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="mf">372.21</span><span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="kc">None</span>  <span class="p">],</span>   <span class="c1"># Run6_short</span>
+                    <span class="p">[</span><span class="kc">None</span>  <span class="p">,</span> <span class="mf">151.23</span><span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="mf">157.03</span><span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="kc">None</span>  <span class="p">],</span>   <span class="c1"># Run7_short</span>
+                    <span class="p">[</span><span class="kc">None</span>  <span class="p">,</span> <span class="mf">470.61</span><span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="mf">369.69</span><span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="mf">418.74</span><span class="p">],</span>   <span class="c1"># Run6_long</span>
+                    <span class="p">[</span><span class="kc">None</span>  <span class="p">,</span> <span class="mf">199.34</span><span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="mf">222.64</span><span class="p">],</span>   <span class="c1"># Run7_long</span>
+                    <span class="p">[</span><span class="kc">None</span>  <span class="p">,</span> <span class="mf">209.62</span><span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="mf">192.28</span><span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="mf">270.00</span><span class="p">],</span>   <span class="c1"># Run8</span>
+                    <span class="p">[</span><span class="kc">None</span>  <span class="p">,</span> <span class="mf">188.53</span><span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="mf">258.80</span><span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="mf">345.16</span><span class="p">],</span>   <span class="c1"># Run9</span>
+                <span class="p">]</span>
+
+                <span class="n">Dsm_mat</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="p">[</span><span class="kc">None</span>  <span class="p">,</span> <span class="mf">2.56</span>  <span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="mf">2.61</span>  <span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="kc">None</span>  <span class="p">],</span>   <span class="c1"># Run1</span>
+                    <span class="p">[</span><span class="kc">None</span>  <span class="p">,</span> <span class="mf">2.87</span>  <span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="mf">2.71</span>  <span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="kc">None</span>  <span class="p">],</span>   <span class="c1"># Run2</span>
+                    <span class="p">[</span><span class="kc">None</span>  <span class="p">,</span> <span class="mf">2.55</span>  <span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="mf">2.59</span>  <span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="kc">None</span>  <span class="p">],</span>   <span class="c1"># Run3</span>
+                    <span class="p">[</span><span class="kc">None</span>  <span class="p">,</span> <span class="mf">3.06</span>  <span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="mf">3.06</span>  <span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="kc">None</span>  <span class="p">],</span>   <span class="c1"># Run4</span>
+                    <span class="p">[</span><span class="kc">None</span>  <span class="p">,</span> <span class="mf">2.92</span>  <span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="mf">2.92</span>  <span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="kc">None</span>  <span class="p">],</span>   <span class="c1"># Run5</span>
+                    <span class="p">[</span><span class="kc">None</span>  <span class="p">,</span> <span class="mf">2.33</span>  <span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="mf">3.81</span>  <span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="kc">None</span>  <span class="p">],</span>   <span class="c1"># Run6_short</span>
+                    <span class="p">[</span><span class="kc">None</span>  <span class="p">,</span> <span class="mf">2.03</span>  <span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="mf">2.21</span>  <span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="kc">None</span>  <span class="p">],</span>   <span class="c1"># Run7_short</span>
+                    <span class="p">[</span><span class="kc">None</span>  <span class="p">,</span> <span class="mf">2.61</span>  <span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="mf">3.54</span>  <span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="mf">3.28</span>  <span class="p">],</span>   <span class="c1"># Run6_long</span>
+                    <span class="p">[</span><span class="kc">None</span>  <span class="p">,</span> <span class="mf">1.98</span>  <span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="mf">2.01</span>  <span class="p">],</span>   <span class="c1"># Run7_long, last one at 140.1 L/D</span>
+                    <span class="p">[</span><span class="kc">None</span>  <span class="p">,</span> <span class="mf">2.67</span>  <span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="mf">3.26</span>  <span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="mf">2.78</span>  <span class="p">],</span>   <span class="c1"># Run8</span>
+                    <span class="p">[</span><span class="kc">None</span>  <span class="p">,</span> <span class="mf">2.43</span>  <span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="mf">2.19</span>  <span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="mf">2.18</span>  <span class="p">],</span>   <span class="c1"># Run9</span>
+                <span class="p">]</span>
+
+                <span class="c1"># Sourced from thesis Table A.E.(a), and MATLAB initcond.m</span>
+                <span class="n">pz_mat</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="p">[</span><span class="kc">None</span>  <span class="p">,</span> <span class="mf">30603.60</span> <span class="p">,</span> <span class="mf">27710.01</span> <span class="p">,</span> <span class="mf">24816.42</span> <span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="kc">None</span>    <span class="p">],</span>  <span class="c1"># Run1</span>
+                    <span class="p">[</span><span class="kc">None</span>  <span class="p">,</span> <span class="mf">32735.69</span> <span class="p">,</span> <span class="mf">29567.55</span> <span class="p">,</span> <span class="mf">26399.42</span> <span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="kc">None</span>    <span class="p">],</span>  <span class="c1"># Run2</span>
+                    <span class="p">[</span><span class="kc">None</span>  <span class="p">,</span> <span class="mf">35073.44</span> <span class="p">,</span> <span class="mf">31433.39</span> <span class="p">,</span> <span class="mf">27793.33</span> <span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="kc">None</span>    <span class="p">],</span>  <span class="c1"># Run3</span>
+                    <span class="p">[</span><span class="kc">None</span>  <span class="p">,</span> <span class="mf">31486.61</span> <span class="p">,</span> <span class="mf">28501.50</span> <span class="p">,</span> <span class="mf">25516.40</span> <span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="kc">None</span>    <span class="p">],</span>  <span class="c1"># Run4</span>
+                    <span class="p">[</span><span class="kc">None</span>  <span class="p">,</span> <span class="mf">38464.37</span> <span class="p">,</span> <span class="mf">34860.21</span> <span class="p">,</span> <span class="mf">31256.04</span> <span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="kc">None</span>    <span class="p">],</span>  <span class="c1"># Run5</span>
+                    <span class="p">[</span><span class="kc">None</span>  <span class="p">,</span> <span class="mf">29584.83</span> <span class="p">,</span> <span class="mf">27028.58</span> <span class="p">,</span> <span class="mf">24472.33</span> <span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="kc">None</span>    <span class="p">],</span>  <span class="c1"># Run6_short</span>
+                    <span class="p">[</span><span class="kc">None</span>  <span class="p">,</span> <span class="mf">36275.59</span> <span class="p">,</span> <span class="mf">32140.29</span> <span class="p">,</span> <span class="mf">28004.99</span> <span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="kc">None</span>    <span class="p">],</span>  <span class="c1"># Run7_short</span>
+                    <span class="p">[</span><span class="kc">None</span>  <span class="p">,</span> <span class="mf">28213.762</span><span class="p">,</span> <span class="kc">None</span>     <span class="p">,</span> <span class="mf">19814.36</span> <span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="mi">11415</span>   <span class="p">],</span>  <span class="c1"># Run6_long</span>
+                    <span class="p">[</span><span class="kc">None</span>  <span class="p">,</span> <span class="mf">40150.62</span> <span class="p">,</span> <span class="kc">None</span>     <span class="p">,</span> <span class="mf">25970.05</span> <span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="mf">11789.5</span> <span class="p">],</span>  <span class="c1"># Run7_long</span>
+                    <span class="p">[</span><span class="kc">None</span>  <span class="p">,</span> <span class="mf">34289.443</span><span class="p">,</span> <span class="kc">None</span>     <span class="p">,</span> <span class="mf">22869.15</span> <span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="mf">11448.8</span> <span class="p">],</span>  <span class="c1"># Run8</span>
+                    <span class="p">[</span><span class="kc">None</span>  <span class="p">,</span> <span class="mf">52254.526</span><span class="p">,</span> <span class="kc">None</span>     <span class="p">,</span> <span class="mf">31247.62</span> <span class="p">,</span> <span class="kc">None</span>  <span class="p">,</span> <span class="mf">10240.7</span> <span class="p">],</span>  <span class="c1"># Run9</span>
+                <span class="p">]</span>
+
+                <span class="n">LoverD_mat</span> <span class="o">=</span> <span class="p">[</span><span class="mf">8.02</span><span class="p">,</span> <span class="mf">34.76</span><span class="p">,</span> <span class="mf">61.49</span><span class="p">,</span> <span class="mf">88.22</span><span class="p">,</span> <span class="mf">114.96</span><span class="p">,</span> <span class="mf">141.70</span><span class="p">]</span>
+                <span class="n">dpdz_mat</span> <span class="o">=</span> <span class="p">[</span><span class="mf">9250.38</span><span class="p">,</span> <span class="mf">10128.04</span><span class="p">,</span> <span class="mf">11636.70</span><span class="p">,</span> <span class="mf">9542.94</span><span class="p">,</span> <span class="mf">11521.98</span><span class="p">,</span> <span class="mf">8171.95</span><span class="p">,</span> <span class="mf">13219.94</span><span class="p">,</span> <span class="mf">8267.13</span><span class="p">,</span> <span class="mf">13957.25</span><span class="p">,</span> <span class="mf">11240.45</span><span class="p">,</span> <span class="mf">20676.09</span><span class="p">]</span>
+
+
+                <span class="n">jgloc</span>                   <span class="o">=</span> <span class="n">jgloc_mat</span><span class="p">[</span><span class="n">run_idx</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="n">port_idx</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">area_avg_void_sheet</span>     <span class="o">=</span> <span class="n">alpha_mat</span><span class="p">[</span><span class="n">run_idx</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="n">port_idx</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">area_avg_ai_sheet</span>       <span class="o">=</span> <span class="n">ai_mat</span><span class="p">[</span><span class="n">run_idx</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="n">port_idx</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">area_avg_Dsm_sheet</span>      <span class="o">=</span> <span class="n">Dsm_mat</span><span class="p">[</span><span class="n">run_idx</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="n">port_idx</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">pz</span>                      <span class="o">=</span> <span class="n">pz_mat</span><span class="p">[</span><span class="n">run_idx</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="n">port_idx</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">101330</span>
+                <span class="n">LoverD</span>                  <span class="o">=</span> <span class="n">LoverD_mat</span><span class="p">[</span><span class="n">port_idx</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">dpdz</span>                    <span class="o">=</span> <span class="n">dpdz_mat</span><span class="p">[</span><span class="n">run_idx</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                
+                <span class="n">newCond</span> <span class="o">=</span> <span class="n">Condition</span><span class="p">(</span><span class="n">jgref</span><span class="p">,</span> <span class="n">jgloc</span><span class="p">,</span> <span class="n">jf</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">sheet_type</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+
+                <span class="k">if</span> <span class="n">newCond</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">all_conditions</span><span class="p">:</span>
+                    <span class="n">all_conditions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">newCond</span><span class="p">)</span>
+                    <span class="n">cond</span> <span class="o">=</span> <span class="n">newCond</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">cond</span> <span class="o">=</span> <span class="n">all_conditions</span><span class="p">[</span> <span class="n">all_conditions</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">newCond</span><span class="p">)</span> <span class="p">]</span>
+
+                <span class="n">cond</span><span class="o">.</span><span class="n">Dh</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">*</span> <span class="mf">0.20</span> <span class="o">*</span> <span class="mf">0.01</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="mf">0.20</span> <span class="o">+</span> <span class="mf">0.01</span><span class="p">)</span>        <span class="c1"># 1 x 20 cm^2 rectangular channel</span>
+
+                <span class="n">cond</span><span class="o">.</span><span class="n">area_avg_void_sheet</span> <span class="o">=</span> <span class="n">area_avg_void_sheet</span>
+                <span class="n">cond</span><span class="o">.</span><span class="n">area_avg_ai_sheet</span> <span class="o">=</span> <span class="n">area_avg_ai_sheet</span>
+                <span class="n">cond</span><span class="o">.</span><span class="n">area_avg_Dsm_sheet</span> <span class="o">=</span> <span class="n">area_avg_Dsm_sheet</span>
+                <span class="n">cond</span><span class="o">.</span><span class="n">pz</span> <span class="o">=</span> <span class="n">pz</span>
+                <span class="n">cond</span><span class="o">.</span><span class="n">LoverD</span> <span class="o">=</span> <span class="n">LoverD</span>
+                <span class="n">cond</span><span class="o">.</span><span class="n">dpdz</span> <span class="o">=</span> <span class="n">dpdz</span>
+
+                <span class="n">cond</span><span class="o">.</span><span class="n">jgatm</span> <span class="o">=</span> <span class="n">jgloc</span> <span class="o">*</span> <span class="n">pz</span> <span class="o">/</span> <span class="mi">101330</span>        <span class="c1"># It&#39;s important that P_atm is 101330 if you want to match with old results</span>
+            
+            <span class="c1">############################################################################################################################</span>
+            <span class="c1">#                                                                                                                          #</span>
+            <span class="c1">#                                                       TALLEY DATA                                                        #</span>
+            <span class="c1">#                                                                                                                          #</span>
+            <span class="c1">############################################################################################################################</span>
+            <span class="k">elif</span> <span class="n">sheet_type</span> <span class="o">==</span> <span class="s1">&#39;talley_template&#39;</span><span class="p">:</span>
+                <span class="c1">#print(Q1_ranges, Q2_ranges)</span>
+                
+                <span class="n">ws</span> <span class="o">=</span> <span class="n">wb</span><span class="p">[</span><span class="s1">&#39;Sheet1&#39;</span><span class="p">]</span>
+                <span class="n">jgatm</span> <span class="o">=</span> <span class="n">ws</span><span class="p">[</span><span class="s1">&#39;C3&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+                <span class="n">old</span> <span class="o">=</span> <span class="kc">True</span>
+
+                <span class="n">jgloc</span> <span class="o">=</span> <span class="n">jgref</span>
+                
+                <span class="n">newCond</span> <span class="o">=</span> <span class="n">Condition</span><span class="p">(</span><span class="n">jgatm</span><span class="p">,</span> <span class="n">jgloc</span><span class="p">,</span> <span class="n">jf</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="s1">&#39;Talley&#39;</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">newCond</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">all_conditions</span><span class="p">:</span>
+                    <span class="n">all_conditions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">newCond</span><span class="p">)</span>
+                    <span class="n">cond</span> <span class="o">=</span> <span class="n">newCond</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">cond</span> <span class="o">=</span> <span class="n">all_conditions</span><span class="p">[</span> <span class="n">all_conditions</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">newCond</span><span class="p">)</span> <span class="p">]</span>
+                
+                <span class="n">cond</span><span class="o">.</span><span class="n">jgatm</span> <span class="o">=</span> <span class="n">jgatm</span>
+                <span class="n">cond</span><span class="o">.</span><span class="n">jgloc</span> <span class="o">=</span> <span class="n">jgloc</span>
+
+                <span class="n">cond</span><span class="o">.</span><span class="n">area_avg_void_sheet</span> <span class="o">=</span> <span class="n">ws</span><span class="p">[</span><span class="s1">&#39;B206&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+                <span class="n">cond</span><span class="o">.</span><span class="n">area_avg_ai_sheet</span> <span class="o">=</span> <span class="n">ws</span><span class="p">[</span><span class="s1">&#39;C206&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+                
+                <span class="c1">########################################################################################################################</span>
+                <span class="c1"># Q1</span>
+
+                <span class="n">phis</span> <span class="o">=</span> <span class="p">[</span><span class="mi">90</span><span class="p">,</span> <span class="mf">67.5</span><span class="p">,</span> <span class="mi">45</span><span class="p">,</span> <span class="mf">22.5</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+
+                <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="n">phi_counter</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="nb">next</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">while</span> <span class="n">phi_counter</span> <span class="o">&lt;</span> <span class="mi">5</span><span class="p">:</span>
+                    <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+
+                    <span class="k">if</span> <span class="n">ws</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;E</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="s1">&#39;Spherical&#39;</span> <span class="ow">or</span>  <span class="n">ws</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;C</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="s1">&#39;Spherical&#39;</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">debug</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;found header in row </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">debugFID</span><span class="p">)</span>
+                        <span class="nb">next</span> <span class="o">=</span> <span class="kc">True</span>
+                        <span class="k">continue</span>
+
+                    <span class="k">if</span> <span class="nb">next</span><span class="p">:</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="c1"># Hopefully in the part of the sheet with data</span>
+                            <span class="n">roverR</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">ws</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;A</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+                        <span class="k">except</span><span class="p">:</span>
+                            <span class="c1"># Done reading data</span>
+                            <span class="n">phi_counter</span> <span class="o">+=</span> <span class="mi">1</span>
+                            <span class="nb">next</span> <span class="o">=</span> <span class="kc">False</span>
+                            <span class="k">continue</span>
+
+                        <span class="n">midas_output</span> <span class="o">=</span> <span class="p">[]</span>
+                        <span class="n">data</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">zero_data</span><span class="p">)</span>
+
+                        <span class="k">if</span> <span class="n">old</span> <span class="ow">and</span> <span class="n">ws</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;F</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+                            <span class="k">for</span> <span class="n">cell</span> <span class="ow">in</span> <span class="n">ws</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;A</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">:</span><span class="sa">f</span><span class="s1">&#39;AA</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]:</span>
+                                <span class="n">midas_output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cell</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+                            
+                            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">old_tab_keys</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span> <span class="n">midas_output</span> <span class="p">):</span>
+                                <span class="n">data</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span> <span class="nb">zip</span><span class="p">(</span> <span class="n">old_tab_keys</span><span class="p">,</span> <span class="n">midas_output</span> <span class="p">))</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="k">if</span> <span class="n">debug</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Warning, old tab_keys not the same length as midas_output&quot;</span><span class="p">)</span>
+                                <span class="n">data</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span> <span class="nb">zip</span><span class="p">(</span> <span class="n">old_tab_keys</span><span class="p">,</span> <span class="n">midas_output</span> <span class="p">))</span>
+                                <span class="k">if</span> <span class="n">debug</span><span class="p">:</span>
+                                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;old tab_keys not the same length as midas_output&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">debugFID</span><span class="p">)</span>
+                                    <span class="nb">print</span><span class="p">(</span><span class="n">tab_keys</span><span class="p">,</span> <span class="n">midas_output</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">debugFID</span><span class="p">)</span>
+                        <span class="k">elif</span> <span class="n">ws</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;K</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+                            <span class="n">roverR</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">ws</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;A</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+                            <span class="n">midas_output</span> <span class="o">=</span> <span class="p">[]</span>
+                            <span class="k">for</span> <span class="n">cell</span> <span class="ow">in</span> <span class="n">ws</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;A</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">:</span><span class="sa">f</span><span class="s1">&#39;BD</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]:</span>
+                                <span class="n">midas_output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cell</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+                            
+                            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tab_keys</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span> <span class="n">midas_output</span> <span class="p">):</span>
+                                <span class="n">data</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span> <span class="nb">zip</span><span class="p">(</span> <span class="n">tab_keys</span><span class="p">,</span> <span class="n">midas_output</span> <span class="p">))</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="k">if</span> <span class="n">debug</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Warning, tab_keys not the same length as midas_output&quot;</span><span class="p">)</span>
+                                <span class="n">data</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span> <span class="nb">zip</span><span class="p">(</span> <span class="n">tab_keys</span><span class="p">,</span> <span class="n">midas_output</span> <span class="p">))</span>
+                                <span class="k">if</span> <span class="n">debug</span><span class="p">:</span>
+                                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;tab_keys not the same length as midas_output&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">debugFID</span><span class="p">)</span>
+                                    <span class="nb">print</span><span class="p">(</span><span class="n">tab_keys</span><span class="p">,</span> <span class="n">midas_output</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">debugFID</span><span class="p">)</span>
+
+                        <span class="n">phi</span> <span class="o">=</span> <span class="n">phis</span><span class="p">[</span><span class="n">phi_counter</span><span class="p">]</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">cond</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">phi</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">roverR</span><span class="p">:</span> <span class="n">data</span><span class="p">})</span>
+                        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                            <span class="n">cond</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">update</span><span class="p">(</span> <span class="p">{</span><span class="n">phi</span><span class="p">:{}}</span> <span class="p">)</span>
+                            <span class="n">cond</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">phi</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="mf">1.0</span><span class="p">:</span> <span class="n">zero_data</span><span class="p">})</span>
+                            <span class="n">cond</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">phi</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">roverR</span><span class="p">:</span> <span class="n">data</span><span class="p">})</span>
+
+                <span class="c1">########################################################################################################################</span>
+                <span class="c1"># Q2</span>
+                <span class="n">phis</span> <span class="o">=</span> <span class="p">[</span><span class="mf">112.5</span><span class="p">,</span> <span class="mi">135</span><span class="p">,</span> <span class="mf">157.5</span><span class="p">]</span>
+
+                <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="n">phi_counter</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="nb">next</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">while</span> <span class="n">phi_counter</span> <span class="o">&lt;</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">200</span><span class="p">:</span>
+                    <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+
+                    <span class="k">if</span> <span class="n">ws</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;AS</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="s1">&#39;Spherical&#39;</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">debug</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;found header in row </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">debugFID</span><span class="p">)</span>
+                        <span class="nb">next</span> <span class="o">=</span> <span class="kc">True</span>
+                        <span class="k">continue</span>
+
+                    <span class="k">if</span> <span class="nb">next</span><span class="p">:</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="c1"># Hopefully in the part of the sheet with data</span>
+                            <span class="n">roverR</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">ws</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;AQ</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+                        <span class="k">except</span><span class="p">:</span>
+                            <span class="c1"># Done reading data</span>
+                            <span class="n">phi_counter</span> <span class="o">+=</span> <span class="mi">1</span>
+                            <span class="nb">next</span> <span class="o">=</span> <span class="kc">False</span>
+                            <span class="k">continue</span>
+
+                        <span class="n">midas_output</span> <span class="o">=</span> <span class="p">[]</span>
+                        <span class="n">data</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">zero_data</span><span class="p">)</span>
+
+                        <span class="k">if</span> <span class="n">old</span> <span class="ow">and</span> <span class="n">ws</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;AV</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+                            <span class="k">for</span> <span class="n">cell</span> <span class="ow">in</span> <span class="n">ws</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;AQ</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">:</span><span class="sa">f</span><span class="s1">&#39;BQ</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]:</span>
+                                <span class="n">midas_output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cell</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+                            
+                            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">old_tab_keys</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span> <span class="n">midas_output</span> <span class="p">):</span>
+                                <span class="n">data</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span> <span class="nb">zip</span><span class="p">(</span> <span class="n">old_tab_keys</span><span class="p">,</span> <span class="n">midas_output</span> <span class="p">))</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="k">if</span> <span class="n">debug</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Warning, old tab_keys not the same length as midas_output&quot;</span><span class="p">)</span>
+                                <span class="n">data</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span> <span class="nb">zip</span><span class="p">(</span> <span class="n">old_tab_keys</span><span class="p">,</span> <span class="n">midas_output</span> <span class="p">))</span>
+                                <span class="k">if</span> <span class="n">debug</span><span class="p">:</span>
+                                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;old tab_keys not the same length as midas_output&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">debugFID</span><span class="p">)</span>
+                                    <span class="nb">print</span><span class="p">(</span><span class="n">tab_keys</span><span class="p">,</span> <span class="n">midas_output</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">debugFID</span><span class="p">)</span>
+                        
+                        <span class="n">phi</span> <span class="o">=</span> <span class="n">phis</span><span class="p">[</span><span class="n">phi_counter</span><span class="p">]</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">cond</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">phi</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">roverR</span><span class="p">:</span> <span class="n">data</span><span class="p">})</span>
+                        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                            <span class="n">cond</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">update</span><span class="p">(</span> <span class="p">{</span><span class="n">phi</span><span class="p">:{}}</span> <span class="p">)</span>
+                            <span class="n">cond</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">phi</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="mf">1.0</span><span class="p">:</span> <span class="n">zero_data</span><span class="p">})</span>
+                            <span class="n">cond</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">phi</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">roverR</span><span class="p">:</span> <span class="n">data</span><span class="p">})</span>
+
+            <span class="c1">############################################################################################################################</span>
+            <span class="c1">#                                                                                                                          #</span>
+            <span class="c1">#                                                       YADAV DATA                                                         #</span>
+            <span class="c1">#                                                                                                                          #</span>
+            <span class="c1">############################################################################################################################</span>
+            <span class="k">elif</span> <span class="n">sheet_type</span> <span class="o">==</span> <span class="s1">&#39;yadav_template&#39;</span><span class="p">:</span>
 
                 <span class="n">potent_ranges</span> <span class="o">=</span> <span class="p">[</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">22</span><span class="p">)],</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">48</span><span class="p">,</span> <span class="mi">62</span><span class="p">)],</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">87</span><span class="p">,</span> <span class="mi">101</span><span class="p">)],</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">128</span><span class="p">,</span> <span class="mi">142</span><span class="p">)],</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">168</span><span class="p">,</span> <span class="mi">182</span><span class="p">)],</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">209</span><span class="p">,</span> <span class="mi">223</span><span class="p">)],</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">250</span><span class="p">,</span> <span class="mi">264</span><span class="p">)],</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">290</span><span class="p">,</span> <span class="mi">304</span><span class="p">)]</span> <span class="p">]</span>
                 
-                <span class="c1"># QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE</span>
-                <span class="c1"># QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE</span>
-                <span class="c1"># QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE</span>
-                <span class="c1"># QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE</span>
+                <span class="c1"># ID is going to be at A1, A41, A80, A121, A161, A202, A243, A283</span>
+                <span class="c1"># jgatm C3</span>
+                <span class="c1"># jf C4</span>
 
                 <span class="n">ws</span> <span class="o">=</span> <span class="n">wb</span><span class="p">[</span><span class="s1">&#39;1&#39;</span><span class="p">]</span>
 
-                <span class="n">jglocs</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;O16&#39;</span><span class="p">,</span> <span class="s1">&#39;O17&#39;</span><span class="p">,</span> <span class="s1">&#39;O18&#39;</span><span class="p">,</span> <span class="s1">&#39;O19&#39;</span><span class="p">,</span> <span class="s1">&#39;O20&#39;</span><span class="p">]</span>
-                <span class="k">try</span><span class="p">:</span>
-                    <span class="n">jgloc</span> <span class="o">=</span> <span class="n">ws</span><span class="p">[</span><span class="n">jglocs</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\d+&#39;</span><span class="p">,</span> <span class="n">port</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span><span class="o">.</span><span class="n">value</span>
-                    <span class="c1">#jgloc = ws[jglocs[int(port.strip(&#39;P&#39;))]].value</span>
-                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Warning: Could not identify port # for </span><span class="si">{</span><span class="n">file</span><span class="si">}</span><span class="s2">, setting jgloc = jgref&quot;</span><span class="p">)</span>
-                    <span class="n">jgloc</span> <span class="o">=</span> <span class="n">jgref</span>
+                <span class="n">jgatm</span> <span class="o">=</span> <span class="n">ws</span><span class="p">[</span><span class="s1">&#39;C3&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+                <span class="n">jgref</span> <span class="o">=</span> <span class="n">jgatm</span>
 
-                <span class="c1"># Above jglocs not implemented for Ryan templates (DHK)</span>
-                <span class="k">if</span> <span class="n">jgloc</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">sheet_type</span> <span class="o">==</span> <span class="s1">&#39;ryan_template&#39;</span><span class="p">:</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Sheet type identified as </span><span class="si">{</span><span class="n">sheet_type</span><span class="si">}</span><span class="s2">, referencing cell U23 for jgloc&quot;</span><span class="p">)</span>
-                    <span class="n">jgloc</span> <span class="o">=</span> <span class="n">ws</span><span class="p">[</span><span class="s1">&#39;U23&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
-                <span class="k">elif</span> <span class="n">jgloc</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Warning: jgloc could not be found, setting jgloc = jgref&quot;</span><span class="p">)</span>
-                    <span class="n">jgloc</span> <span class="o">=</span> <span class="n">jgref</span>
+                <span class="n">jglocs</span> <span class="o">=</span> <span class="p">[]</span>
+
+                <span class="n">jgloc</span> <span class="o">=</span> <span class="n">jgatm</span>       <span class="c1"># Nope. Either need jgloc or P_loc, but I have neither -- how did Yadav get jgloc for his IATE script?</span>
+                
+                <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">jgloc</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n\t</span><span class="s2">in </span><span class="si">{</span><span class="n">file</span><span class="si">}</span><span class="se">\n\t</span><span class="s2">Read in jgloc: </span><span class="si">{</span><span class="n">ws</span><span class="p">[</span><span class="s1">&#39;C3&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="se">\n\t</span><span class="s2">Invalid type for jgloc&quot;</span><span class="p">)</span>
+
+<span class="w">                </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">                8 cond x 7 port?</span>
+
+<span class="sd">                % exp_z = [0.38, 1.75, 3.12, 3.59, 4.96, 8.16, 12.58];</span>
+
+<span class="sd">                titles=[&#39;Run1: j_{g}=0.039 [m/s] &amp; j_{f}=0.018 [m/s]&#39;; &#39;Run2: j_{g}=0.039 [m/s] &amp; j_{f}=0.682 [m/s]&#39;...</span>
+<span class="sd">                    ;&#39;Run3: j_{g}=0.136 [m/s] &amp; j_{f}=0.682 [m/s]&#39;;&#39;Run4: j_{g}=0.138 [m/s] &amp; j_{f}=2.336 [m/s]&#39;;...</span>
+<span class="sd">                    &#39;Run5: j_{g}=0.538 [m/s] &amp; j_{f}=5.100 [m/s]&#39;;&#39;Run6: j_{g}=1.234 [m/s] &amp; j_{f}=5.100 [m/s]&#39;;...</span>
+<span class="sd">                    &#39;Run7: j_{g}=0.039 [m/s] &amp; j_{f}=0.064 [m/s]&#39;;&#39;Run8: j_{g}=0.039 [m/s] &amp; j_{f}=0.020 [m/s]&#39;];</span>
+
+<span class="sd">                jg_exp = [</span>
+<span class="sd">                    0.083	0.090	0.099	0.101	0.102	0.104	0.106</span>
+<span class="sd">                    0.136	0.148	0.163	0.166	0.168	0.171	0.175	</span>
+<span class="sd">                    0.200	0.217	0.237	0.241	0.244	0.248	0.254	</span>
+<span class="sd">                    0.072	0.078	0.085	0.087	0.089	0.091	0.095	</span>
+<span class="sd">                    0.118	0.128	0.140	0.143	0.145	0.149	0.156	</span>
+<span class="sd">                    0.177	0.191	0.207	0.212	0.216	0.222	0.232</span>
+<span class="sd">                    0.094	0.101	0.108	0.110	0.113	0.123	0.139</span>
+<span class="sd">                    0.141	0.148	0.159	0.162	0.167	0.182	0.206</span>
+<span class="sd">                    ]</span>
+<span class="sd">                </span>
+<span class="sd">                p_exp = [</span>
+<span class="sd">                    65707       51705.5     37799.6     34874.5     33378.4     31206.5     28138.4</span>
+<span class="sd">                    68051       54277.2     40722.9     37763.4     36191.4     34100.3     30710.1</span>
+<span class="sd">                    72326       58793.3     45604.4     42651.8     40976.4     38958.3     35329.6</span>
+<span class="sd">                    94527       79201.8     64227.2     60578.2     57737.5     53657.9     46885.2</span>
+<span class="sd">                    97147       81952.8     67116.1     63577.4     60495.5     56277.9     49353.5</span>
+<span class="sd">                    100801      85731.1     71121.9     67438.5     64391.0     59910.8     52876.7</span>
+<span class="sd">                    148848      132598.1    115749.7	111996.5	106153.9	89964.0     68377.4</span>
+<span class="sd">                    153108      136853.6    120051.4	116366.2	110189.3	92801.6     69618.0</span>
+<span class="sd">                    ];</span>
+<span class="sd">                &#39;&#39;&#39;</span>
 
                 <span class="n">newCond</span> <span class="o">=</span> <span class="n">Condition</span><span class="p">(</span><span class="n">jgref</span><span class="p">,</span> <span class="n">jgloc</span><span class="p">,</span> <span class="n">jf</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">sheet_type</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
 
@@ -717,15 +1156,10 @@
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">cond</span> <span class="o">=</span> <span class="n">all_conditions</span><span class="p">[</span> <span class="n">all_conditions</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">newCond</span><span class="p">)</span> <span class="p">]</span>
 
-                <span class="n">cond</span><span class="o">.</span><span class="n">run_ID</span> <span class="o">=</span> <span class="n">ws</span><span class="p">[</span><span class="s1">&#39;B2&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+                <span class="n">cond</span><span class="o">.</span><span class="n">jgatm</span> <span class="o">=</span> <span class="n">jgatm</span>
 
-                <span class="c1"># Local corrected gauge pressure can be back-calculated from jgloc and jgatm (DHK)</span>
-                <span class="n">cond</span><span class="o">.</span><span class="n">jgatm</span> <span class="o">=</span> <span class="n">ws</span><span class="p">[</span><span class="s1">&#39;D6&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
-                
-                <span class="n">ws</span> <span class="o">=</span> <span class="n">wb</span><span class="p">[</span><span class="s1">&#39;2&#39;</span><span class="p">]</span>
-
-                <span class="n">cond</span><span class="o">.</span><span class="n">area_avg_void_sheet</span> <span class="o">=</span> <span class="n">ws</span><span class="p">[</span><span class="s1">&#39;G266&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
-                <span class="n">cond</span><span class="o">.</span><span class="n">area_avg_ai_sheet</span> <span class="o">=</span> <span class="n">ws</span><span class="p">[</span><span class="s1">&#39;J266&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+                <span class="n">cond</span><span class="o">.</span><span class="n">area_avg_void_sheet</span> <span class="o">=</span> <span class="n">ws</span><span class="p">[</span><span class="s1">&#39;J328&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+                <span class="n">cond</span><span class="o">.</span><span class="n">area_avg_ai_sheet</span> <span class="o">=</span> <span class="n">ws</span><span class="p">[</span><span class="s1">&#39;K328&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
 
                 <span class="k">for</span> <span class="n">phi</span><span class="p">,</span> <span class="n">indices</span> <span class="ow">in</span> <span class="n">Q1_ranges</span><span class="p">:</span>
                     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">:</span>
@@ -751,18 +1185,18 @@
                                     <span class="nb">print</span><span class="p">(</span><span class="n">tab_keys</span><span class="p">,</span> <span class="n">midas_output</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">debugFID</span><span class="p">)</span>
                             
                             <span class="k">try</span><span class="p">:</span>
-                                <span class="n">cond</span><span class="o">.</span><span class="n">phi</span><span class="p">[</span><span class="n">phi</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">roverR</span><span class="p">:</span> <span class="n">data</span><span class="p">})</span>
+                                <span class="n">cond</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">phi</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">roverR</span><span class="p">:</span> <span class="n">data</span><span class="p">})</span>
                             <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-                                <span class="n">cond</span><span class="o">.</span><span class="n">phi</span><span class="o">.</span><span class="n">update</span><span class="p">(</span> <span class="p">{</span><span class="n">phi</span><span class="p">:{}}</span> <span class="p">)</span>
-                                <span class="n">cond</span><span class="o">.</span><span class="n">phi</span><span class="p">[</span><span class="n">phi</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="mf">1.0</span><span class="p">:</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">zero_data</span><span class="p">)})</span>
+                                <span class="n">cond</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">update</span><span class="p">(</span> <span class="p">{</span><span class="n">phi</span><span class="p">:{}}</span> <span class="p">)</span>
+                                <span class="n">cond</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">phi</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="mf">1.0</span><span class="p">:</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">zero_data</span><span class="p">)})</span>
                                 <span class="c1">#cond.phi[phi_val].update({0.0: zero_data}) # Cuz I&#39;m paranoid</span>
-                                <span class="n">cond</span><span class="o">.</span><span class="n">phi</span><span class="p">[</span><span class="n">phi</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">roverR</span><span class="p">:</span> <span class="n">data</span><span class="p">})</span>
+                                <span class="n">cond</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">phi</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">roverR</span><span class="p">:</span> <span class="n">data</span><span class="p">})</span>
 
-                <span class="c1"># QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE</span>
-                <span class="c1"># QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE</span>
-                <span class="c1"># QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE</span>
-                <span class="c1"># QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE</span>
-            
+            <span class="c1">############################################################################################################################</span>
+            <span class="c1">#                                                                                                                          #</span>
+            <span class="c1">#                                                        PITA DATA                                                         #</span>
+            <span class="c1">#                                                                                                                          #</span>
+            <span class="c1">############################################################################################################################</span>
             <span class="c1"># General PITA template structure holds</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">sheet_type</span> <span class="o">==</span> <span class="s1">&#39;infer&#39;</span><span class="p">:</span>
@@ -823,7 +1257,7 @@
                     <span class="k">return</span>
                 
                 <span class="n">ws</span> <span class="o">=</span> <span class="n">wb</span><span class="p">[</span><span class="s1">&#39;1&#39;</span><span class="p">]</span>
-
+                
                 <span class="n">jglocs</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;O16&#39;</span><span class="p">,</span> <span class="s1">&#39;O17&#39;</span><span class="p">,</span> <span class="s1">&#39;O18&#39;</span><span class="p">,</span> <span class="s1">&#39;O19&#39;</span><span class="p">,</span> <span class="s1">&#39;O20&#39;</span><span class="p">]</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="n">jgloc</span> <span class="o">=</span> <span class="n">ws</span><span class="p">[</span><span class="n">jglocs</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\d+&#39;</span><span class="p">,</span> <span class="n">port</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span><span class="o">.</span><span class="n">value</span>
@@ -851,13 +1285,18 @@
 
                 <span class="n">cond</span><span class="o">.</span><span class="n">run_ID</span> <span class="o">=</span> <span class="n">ws</span><span class="p">[</span><span class="s1">&#39;B2&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
 
-                <span class="c1"># Local corrected gauge pressure can be back-calculated from jgloc and jgatm (DHK)</span>
+                <span class="c1"># Local corrected gauge pressure can also be back-calculated from jgloc and jgatm (DHK)</span>
                 <span class="n">cond</span><span class="o">.</span><span class="n">jgatm</span> <span class="o">=</span> <span class="n">ws</span><span class="p">[</span><span class="s1">&#39;D6&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
-                
-                <span class="n">ws</span> <span class="o">=</span> <span class="n">wb</span><span class="p">[</span><span class="s1">&#39;2&#39;</span><span class="p">]</span>
 
-                <span class="n">cond</span><span class="o">.</span><span class="n">area_avg_void_sheet</span> <span class="o">=</span> <span class="n">ws</span><span class="p">[</span><span class="s1">&#39;G266&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
-                <span class="n">cond</span><span class="o">.</span><span class="n">area_avg_ai_sheet</span> <span class="o">=</span> <span class="n">ws</span><span class="p">[</span><span class="s1">&#39;J266&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+                <span class="n">ws</span> <span class="o">=</span> <span class="n">wb</span><span class="p">[</span><span class="s1">&#39;2&#39;</span><span class="p">]</span>
+                
+                <span class="k">if</span> <span class="n">sheet_type</span> <span class="o">==</span> <span class="s1">&#39;ryan_template&#39;</span><span class="p">:</span>
+                    <span class="n">cond</span><span class="o">.</span><span class="n">area_avg_void_sheet</span> <span class="o">=</span> <span class="n">ws</span><span class="p">[</span><span class="s1">&#39;G266&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+                    <span class="n">cond</span><span class="o">.</span><span class="n">area_avg_ai_sheet</span> <span class="o">=</span> <span class="n">ws</span><span class="p">[</span><span class="s1">&#39;J266&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+                    
+                <span class="k">elif</span> <span class="n">sheet_type</span> <span class="o">==</span> <span class="s1">&#39;adix_template&#39;</span> <span class="ow">or</span> <span class="n">sheet_type</span> <span class="o">==</span> <span class="s1">&#39;adix_template4&#39;</span><span class="p">:</span>
+                    <span class="n">cond</span><span class="o">.</span><span class="n">area_avg_void_sheet</span> <span class="o">=</span> <span class="n">ws</span><span class="p">[</span><span class="s1">&#39;G246&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+                    <span class="n">cond</span><span class="o">.</span><span class="n">area_avg_ai_sheet</span> <span class="o">=</span> <span class="n">ws</span><span class="p">[</span><span class="s1">&#39;J246&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
                 
                 <span class="k">for</span> <span class="n">phi</span><span class="p">,</span> <span class="n">indices</span> <span class="ow">in</span> <span class="n">Q1_ranges</span><span class="p">:</span>
                     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">:</span>
@@ -883,18 +1322,18 @@
                                     <span class="nb">print</span><span class="p">(</span><span class="n">tab_keys</span><span class="p">,</span> <span class="n">midas_output</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">debugFID</span><span class="p">)</span>
                             
                             <span class="k">try</span><span class="p">:</span>
-                                <span class="n">cond</span><span class="o">.</span><span class="n">phi</span><span class="p">[</span><span class="n">phi</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">roverR</span><span class="p">:</span> <span class="n">data</span><span class="p">})</span>
+                                <span class="n">cond</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">phi</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">roverR</span><span class="p">:</span> <span class="n">data</span><span class="p">})</span>
                             <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-                                <span class="n">cond</span><span class="o">.</span><span class="n">phi</span><span class="o">.</span><span class="n">update</span><span class="p">(</span> <span class="p">{</span><span class="n">phi</span><span class="p">:{}}</span> <span class="p">)</span>
-                                <span class="n">cond</span><span class="o">.</span><span class="n">phi</span><span class="p">[</span><span class="n">phi</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="mf">1.0</span><span class="p">:</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">zero_data</span><span class="p">)})</span>
+                                <span class="n">cond</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">update</span><span class="p">(</span> <span class="p">{</span><span class="n">phi</span><span class="p">:{}}</span> <span class="p">)</span>
+                                <span class="n">cond</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">phi</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="mf">1.0</span><span class="p">:</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">zero_data</span><span class="p">)})</span>
                                 <span class="c1">#cond.phi[phi_val].update({0.0: zero_data}) # Cuz I&#39;m paranoid</span>
-                                <span class="n">cond</span><span class="o">.</span><span class="n">phi</span><span class="p">[</span><span class="n">phi</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">roverR</span><span class="p">:</span> <span class="n">data</span><span class="p">})</span>
+                                <span class="n">cond</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">phi</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">roverR</span><span class="p">:</span> <span class="n">data</span><span class="p">})</span>
 
                 
                 <span class="k">if</span> <span class="n">pitot_sheet</span><span class="p">:</span> <span class="c1"># Pitot data for Q1</span>
                     <span class="k">for</span> <span class="n">phi</span><span class="p">,</span> <span class="n">indices</span> <span class="ow">in</span> <span class="n">Q1_ranges</span><span class="p">:</span>
                         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">:</span>
-                            <span class="k">if</span> <span class="n">ws</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">Q1_pitot_check</span><span class="si">}{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="n">ws</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">Q1_pitot_check</span><span class="si">}{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="ow">and</span> <span class="n">ws</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">Q1_check</span><span class="si">}{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
 
                                 <span class="k">try</span><span class="p">:</span>
                                     <span class="n">roverR</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">ws</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">Q1_pitot_start</span><span class="si">}{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
@@ -916,10 +1355,10 @@
                                         <span class="nb">print</span><span class="p">(</span><span class="n">pitot_keys2</span><span class="p">,</span> <span class="n">pitot_output</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">debugFID</span><span class="p">)</span>
 
                                 <span class="k">try</span><span class="p">:</span>
-                                    <span class="n">cond</span><span class="o">.</span><span class="n">phi</span><span class="p">[</span><span class="n">phi</span><span class="p">][</span><span class="n">roverR</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">pitot_data</span><span class="p">)</span>
+                                    <span class="n">cond</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">phi</span><span class="p">][</span><span class="n">roverR</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">pitot_data</span><span class="p">)</span>
                                 <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-                                    <span class="n">cond</span><span class="o">.</span><span class="n">phi</span><span class="p">[</span><span class="n">phi</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">roverR</span><span class="p">:</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">zero_data</span><span class="p">)})</span>
-                                    <span class="n">cond</span><span class="o">.</span><span class="n">phi</span><span class="p">[</span><span class="n">phi</span><span class="p">][</span><span class="n">roverR</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">pitot_data</span><span class="p">)</span>
+                                    <span class="n">cond</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">phi</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">roverR</span><span class="p">:</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">zero_data</span><span class="p">)})</span>
+                                    <span class="n">cond</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">phi</span><span class="p">][</span><span class="n">roverR</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">pitot_data</span><span class="p">)</span>
 
                 <span class="k">for</span> <span class="n">phi</span><span class="p">,</span> <span class="n">indices</span> <span class="ow">in</span> <span class="n">Q2_ranges</span><span class="p">:</span>
                     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">:</span>
@@ -945,12 +1384,12 @@
                                     <span class="nb">print</span><span class="p">(</span><span class="n">tab_keys</span><span class="p">,</span> <span class="n">midas_output</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">debugFID</span><span class="p">)</span>
 
                             <span class="k">try</span><span class="p">:</span>
-                                <span class="n">cond</span><span class="o">.</span><span class="n">phi</span><span class="p">[</span><span class="n">phi</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">roverR</span><span class="p">:</span> <span class="n">data</span><span class="p">})</span>
+                                <span class="n">cond</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">phi</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">roverR</span><span class="p">:</span> <span class="n">data</span><span class="p">})</span>
                             <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-                                <span class="n">cond</span><span class="o">.</span><span class="n">phi</span><span class="o">.</span><span class="n">update</span><span class="p">(</span> <span class="p">{</span><span class="n">phi</span><span class="p">:{}}</span> <span class="p">)</span>
-                                <span class="n">cond</span><span class="o">.</span><span class="n">phi</span><span class="p">[</span><span class="n">phi</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="mf">1.0</span><span class="p">:</span> <span class="n">zero_data</span><span class="p">})</span>
+                                <span class="n">cond</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">update</span><span class="p">(</span> <span class="p">{</span><span class="n">phi</span><span class="p">:{}}</span> <span class="p">)</span>
+                                <span class="n">cond</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">phi</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="mf">1.0</span><span class="p">:</span> <span class="n">zero_data</span><span class="p">})</span>
                                 <span class="c1">#cond.phi[phi_val].update({0.0: zero_data}) # Cuz I&#39;m paranoid</span>
-                                <span class="n">cond</span><span class="o">.</span><span class="n">phi</span><span class="p">[</span><span class="n">phi</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">roverR</span><span class="p">:</span> <span class="n">data</span><span class="p">})</span> 
+                                <span class="n">cond</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">phi</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">roverR</span><span class="p">:</span> <span class="n">data</span><span class="p">})</span> 
 
                 <span class="k">if</span> <span class="n">pitot_sheet</span><span class="p">:</span> <span class="c1"># Pitot data for Q2</span>
                     <span class="k">for</span> <span class="n">phi</span><span class="p">,</span> <span class="n">indices</span> <span class="ow">in</span> <span class="n">Q2_ranges</span><span class="p">:</span>
@@ -977,10 +1416,10 @@
                                         <span class="nb">print</span><span class="p">(</span><span class="n">pitot_keys2</span><span class="p">,</span> <span class="n">pitot_output</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">debugFID</span><span class="p">)</span>
 
                                 <span class="k">try</span><span class="p">:</span>
-                                    <span class="n">cond</span><span class="o">.</span><span class="n">phi</span><span class="p">[</span><span class="n">phi</span><span class="p">][</span><span class="n">roverR</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">pitot_data</span><span class="p">)</span>
+                                    <span class="n">cond</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">phi</span><span class="p">][</span><span class="n">roverR</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">pitot_data</span><span class="p">)</span>
                                 <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-                                    <span class="n">cond</span><span class="o">.</span><span class="n">phi</span><span class="p">[</span><span class="n">phi</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">roverR</span><span class="p">:</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">zero_data</span><span class="p">)})</span>
-                                    <span class="n">cond</span><span class="o">.</span><span class="n">phi</span><span class="p">[</span><span class="n">phi</span><span class="p">][</span><span class="n">roverR</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">pitot_data</span><span class="p">)</span>
+                                    <span class="n">cond</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">phi</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">roverR</span><span class="p">:</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">zero_data</span><span class="p">)})</span>
+                                    <span class="n">cond</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">phi</span><span class="p">][</span><span class="n">roverR</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">pitot_data</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">debug</span> <span class="ow">and</span> <span class="kc">False</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">cond</span> <span class="ow">in</span> <span class="n">all_conditions</span><span class="p">:</span>
@@ -1041,12 +1480,12 @@
                             <span class="n">roverR</span> <span class="o">=</span> <span class="o">-</span><span class="n">roverR</span>
                         <span class="c1">#print(roverR)</span>
                         <span class="k">try</span><span class="p">:</span>
-                            <span class="n">cond</span><span class="o">.</span><span class="n">phi</span><span class="p">[</span><span class="n">phi_val</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">roverR</span><span class="p">:</span> <span class="n">data</span><span class="p">})</span>
+                            <span class="n">cond</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">phi_val</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">roverR</span><span class="p">:</span> <span class="n">data</span><span class="p">})</span>
                         <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-                            <span class="n">cond</span><span class="o">.</span><span class="n">phi</span><span class="o">.</span><span class="n">update</span><span class="p">(</span> <span class="p">{</span><span class="n">phi_val</span><span class="p">:{}}</span> <span class="p">)</span>
-                            <span class="n">cond</span><span class="o">.</span><span class="n">phi</span><span class="p">[</span><span class="n">phi_val</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="mf">1.0</span><span class="p">:</span> <span class="n">zero_data</span><span class="p">})</span>
+                            <span class="n">cond</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">update</span><span class="p">(</span> <span class="p">{</span><span class="n">phi_val</span><span class="p">:{}}</span> <span class="p">)</span>
+                            <span class="n">cond</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">phi_val</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="mf">1.0</span><span class="p">:</span> <span class="n">zero_data</span><span class="p">})</span>
                             <span class="c1">#cond.phi[phi_val].update({0.0: zero_data}) # Cuz I&#39;m paranoid</span>
-                            <span class="n">cond</span><span class="o">.</span><span class="n">phi</span><span class="p">[</span><span class="n">phi_val</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">roverR</span><span class="p">:</span> <span class="n">data</span><span class="p">})</span>                    
+                            <span class="n">cond</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">phi_val</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">roverR</span><span class="p">:</span> <span class="n">data</span><span class="p">})</span>                    
                         
 
                     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
@@ -1091,6 +1530,14 @@
     <span class="k">return</span> <span class="n">data</span></div>
 
 
+<div class="viewcode-block" id="dumpData">
+<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.extracts_and_loads.dumpData">[docs]</a>
+<span class="k">def</span> <span class="nf">dumpData</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">dump_file</span> <span class="o">=</span> <span class="s2">&quot;database.dat&quot;</span><span class="p">):</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">dump_file</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">g</span><span class="p">:</span>
+        <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">g</span><span class="p">)</span>
+    <span class="k">return</span></div>
+
+
 <div class="viewcode-block" id="extractPitotData">
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.extracts_and_loads.extractPitotData">[docs]</a>
 <span class="k">def</span> <span class="nf">extractPitotData</span><span class="p">(</span><span class="n">dump_file</span> <span class="o">=</span> <span class="s1">&#39;Pitot_Database.dat&#39;</span><span class="p">,</span> <span class="n">in_dir</span> <span class="o">=</span> <span class="p">[],</span> <span class="n">require_terms</span> <span class="o">=</span> <span class="p">[],</span> <span class="n">skip_terms</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;CFD&#39;</span><span class="p">,</span> <span class="s1">&#39;Copy&#39;</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -1123,7 +1570,7 @@
             
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">jf</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">file</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;jf&#39;</span><span class="p">))</span>
-                <span class="n">jgP3</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">file</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;jg&#39;</span><span class="p">))</span>
+                <span class="n">jgref</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">file</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;jg&#39;</span><span class="p">))</span>
                 <span class="n">port</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;.xlsx&#39;</span><span class="p">)</span>
                 <span class="n">theta</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">file</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;deg&#39;</span><span class="p">))</span>
             <span class="k">except</span><span class="p">:</span>
@@ -1133,7 +1580,7 @@
             <span class="n">ws</span> <span class="o">=</span> <span class="n">wb</span><span class="p">[</span><span class="s1">&#39;1&#39;</span><span class="p">]</span>
             <span class="n">jgloc</span> <span class="o">=</span> <span class="n">ws</span><span class="p">[</span><span class="s1">&#39;U23&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
 
-            <span class="n">newCond</span> <span class="o">=</span> <span class="n">Condition</span><span class="p">(</span><span class="n">jgP3</span><span class="p">,</span> <span class="n">jgloc</span><span class="p">,</span> <span class="n">jf</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="s1">&#39;Pitot&#39;</span><span class="p">)</span>
+            <span class="n">newCond</span> <span class="o">=</span> <span class="n">Condition</span><span class="p">(</span><span class="n">jgref</span><span class="p">,</span> <span class="n">jgloc</span><span class="p">,</span> <span class="n">jf</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="s1">&#39;Pitot&#39;</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">newCond</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">all_conditions</span><span class="p">:</span>
                 <span class="n">all_conditions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">newCond</span><span class="p">)</span>
@@ -1169,12 +1616,12 @@
                                 <span class="nb">print</span><span class="p">(</span><span class="n">pitot_keys</span><span class="p">,</span> <span class="n">midas_output</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">debugFID</span><span class="p">)</span>
 
                         <span class="k">try</span><span class="p">:</span>
-                            <span class="n">cond</span><span class="o">.</span><span class="n">phi</span><span class="p">[</span><span class="n">phi</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">roverR</span><span class="p">:</span> <span class="n">data</span><span class="p">})</span>
+                            <span class="n">cond</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">phi</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">roverR</span><span class="p">:</span> <span class="n">data</span><span class="p">})</span>
                         <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-                            <span class="n">cond</span><span class="o">.</span><span class="n">phi</span><span class="o">.</span><span class="n">update</span><span class="p">(</span> <span class="p">{</span><span class="n">phi</span><span class="p">:{}}</span> <span class="p">)</span>
-                            <span class="n">cond</span><span class="o">.</span><span class="n">phi</span><span class="p">[</span><span class="n">phi</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="mf">1.0</span><span class="p">:</span> <span class="n">zero_data</span><span class="p">})</span>
+                            <span class="n">cond</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">update</span><span class="p">(</span> <span class="p">{</span><span class="n">phi</span><span class="p">:{}}</span> <span class="p">)</span>
+                            <span class="n">cond</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">phi</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="mf">1.0</span><span class="p">:</span> <span class="n">zero_data</span><span class="p">})</span>
                             <span class="c1">#cond.phi[phi_val].update({0.0: zero_data}) # Cuz I&#39;m paranoid</span>
-                            <span class="n">cond</span><span class="o">.</span><span class="n">phi</span><span class="p">[</span><span class="n">phi</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">roverR</span><span class="p">:</span> <span class="n">data</span><span class="p">})</span>
+                            <span class="n">cond</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">phi</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">roverR</span><span class="p">:</span> <span class="n">data</span><span class="p">})</span>
 
 
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">dump_file</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">g</span><span class="p">:</span>

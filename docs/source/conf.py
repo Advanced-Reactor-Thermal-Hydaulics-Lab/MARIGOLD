@@ -41,6 +41,7 @@ numpydoc_show_class_members = False
 napoleon_google_docstring = False
 napoleon_use_param = False
 napoleon_use_ivar = True
+strip_signature_backslash = True
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output

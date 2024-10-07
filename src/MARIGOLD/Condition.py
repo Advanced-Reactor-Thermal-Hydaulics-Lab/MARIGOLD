@@ -74,15 +74,19 @@ class Condition:
             elif self.port == 'P3':
                 self.LoverD = 110
             elif self.port == 'P4':
-                self.LoverD = 130
+                self.LoverD = 130.04
             elif self.port == 'P5A':
-                self.LoverD = 146
+                self.LoverD = 144.17
+            elif self.port == 'P5C':
+                self.LoverD = 147.57
             elif self.port == 'P5B':
-                self.LoverD = 154
+                self.LoverD = 151.84
+            elif self.port == 'P6A':
+                self.LoverD = 165.57
             elif self.port == 'P6':
-                self.LoverD = 190
+                self.LoverD = 194.07          
             elif self.port == 'P7':
-                self.LoverD = 226
+                self.LoverD = 230.07
             else:
                 self.LoverD = -1
                 print(f"Warning: Could not determine port L/D for {self}")
@@ -181,7 +185,7 @@ class Condition:
         
         if interp_method == 'None':
             try:
-                param_values = np.zeros((r_in.size, phi_in.size)) # TODO check if r_in and phi_in actually exist
+                param_values = np.zeros((r_in.size, phi_in.size)) # To-do: check if r_in and phi_in actually exist
                 for i, r_val in enumerate(r_in):
                     for j, phi_val in enumerate(phi_in):
                         try:
@@ -194,7 +198,8 @@ class Condition:
                                 raise 
             except:
                 # Probably input a single phi instead of an array
-                param_values = self.data[round(phi_in * 180 / np.pi, 2)][r_in][param]
+                
+                param_values = self.data[round(phi_in * 180 / np.pi, 2)][float(r_in)][param]
             return param_values
         
         elif interp_method == 'spline':
@@ -222,7 +227,7 @@ class Condition:
                 return self.linear_xy_interp[param](x, y)
         
         else:
-            raise NameError(f"{interp_method} not regonized. Accepted arguments are 'None', 'spline', 'linear' or 'linear_xy'")
+            raise NameError(f"{interp_method} not recognized. Accepted arguments are 'None', 'spline', 'linear' or 'linear_xy'")
 
     def pretty_print(self, print_to_file= False, FID=debugFID, mirror=False) -> None:
         """Prints out all the information in a Condition in a structured way 
@@ -514,6 +519,38 @@ class Condition:
                         midas_dict.update( {param : 0})
 
         return
+    
+    def add_mesh_points(self, r_points:list, suppress=False):
+        """Method for adding additional r/R points
+
+        Data linearly interpolated based on surrounding data (specifically using __call__ at the (angle, r) location in question)
+        
+        Inputs:
+         - r_points, points to add
+        
+        """
+
+        for angle in self.data.keys():
+            for r in r_points:
+                temp_midas_data = []
+                
+                r_keys = list(self.data[angle].keys())
+                r_keys.sort()
+
+                params = self.data[angle][r_keys[-2]]
+                
+                for param in params:
+                    try:
+                        temp_midas_data.append( float(self(angle*np.pi/180, r, param, interp_method = 'linear' ) ))
+                    except KeyError as e:
+                        if suppress == False:
+                            print(e)
+                        
+                        temp_midas_data.append( 0 )
+                
+                self.data[angle].update( {r: dict(zip(tab_keys, temp_midas_data))} )
+
+        return 1
     
     def approx_vf(self, n=7) -> None:
         """Method for approximating vf with power-law relation. 
@@ -814,15 +851,15 @@ class Condition:
          - "param", string for local parameter to calculate the gradient of
         
         Stores:
-         - "grad_'param'_r"
-         - "grad_'param'_phi"
-         - "grad_'param'_phinor"
-         - "grad_'param'_x"
-         - "grad_'param'_y"
-         - "grad_'param'_total"
+         - grad\_'param'_r
+         - grad\_'param'_phi
+         - grad\_'param'_phinor
+         - grad\_'param'_x
+         - grad\_'param'_y
+         - grad\_'param'_total
 
         Returns:
-         - Area average "grad_'param'_total"
+         - Area average grad\_'param'_total
 
         """
         
@@ -990,7 +1027,7 @@ class Condition:
         self.spline_interp.update({param: spline_interpolant})
         return
     
-    def fit_linear_interp(self, param: str) -> None:
+    def fit_linear_interp(self, param: str, suppress=True) -> None:
         """Makes a LinearNDInterpolator for the given param. 
         
             Access with self.linear_interp[param], phi in radians
@@ -1014,19 +1051,22 @@ class Condition:
         for angle, r_dict in self.data.items():
             for rstar, midas_dict in r_dict.items():
                 rs.append(rstar)
-                phis.append(angle *np.pi/180)
+                phis.append(angle * np.pi/180)
                 try:
                     vals.append(midas_dict[param])
                 except KeyError:
-                    print(self.name, angle, rstar, "has no ", param)
-                    raise(KeyError)
+                    if suppress == False:
+                        print(self.name, angle, rstar, "has no ", param)
+                        raise(KeyError)
+                    
+                    vals.append( 0 )        # Temporary, figure this out later
 
         linear_interpolant = interpolate.LinearNDInterpolator(list(zip(phis, rs)), vals)
         self.linear_interp.update({param: linear_interpolant})
 
         return
     
-    def fit_linear_xy_interp(self, param: str) -> None:
+    def fit_linear_xy_interp(self, param: str, suppress=True) -> None:
         """ Makes a LinearNDInterpolator for the given param in x y coords
         
         Can access  with self.linear_xy_interp[param]
@@ -1054,7 +1094,8 @@ class Condition:
                 try:
                     vals.append(midas_dict[param])
                 except KeyError:
-                    print(self.name, angle, rstar, "has no ", param)
+                    if suppress == False:
+                        print(self.name, angle, rstar, "has no ", param)
 
         linear_interpolant = interpolate.LinearNDInterpolator(list(zip(xs, ys)), vals)
         self.linear_xy_interp.update({param: linear_interpolant})
@@ -1327,7 +1368,7 @@ class Condition:
 
         return avg_param / count
 
-    def area_avg(self, param: str, even_opt='first', recalc = True) -> float:
+    def area_avg(self, param: str, even_opt='first', recalc=True, method=None) -> float:
         """Method for calculating the area-average of a parameter, "param"
         
         Inputs:
@@ -1341,7 +1382,7 @@ class Condition:
         Uses Simpson's rule for integration, specifically scipy.integrate.simpsons
         
         """
-        
+
         # Check that the parameter that the user requested exists
         try:
             dummy = self.data[90][1.0][param]
@@ -1354,55 +1395,177 @@ class Condition:
         if (param in self.area_avgs.keys()) and (not recalc):
             return self.area_avgs[param] # why waste time, if we already calculated this don't do it again
         
-        # We have to integrate twice, once with resepect to r, again with respect to phi
-        # Start with r
-
-        I = 0
-        param_r = [] # array for parameter integrated wrt r
-        angles = []
-        
-        if not self.mirrored:
-            warnings.warn("Mirroring in area-avg")
-            self.mirror()
-
-
-        for angle, r_dict in self.data.items():
-
-            rs_temp = []
-            vars_temp = []
-            angles.append(angle * np.pi/180) # Convert degrees to radians
-            for rstar, midas_dict in r_dict.items():
-                if rstar >= 0: # This should be unnecessary now with the new mirror, but it's not hurting anyone by being here
-                    try:
-                        rs_temp.append( rstar ) # This is proably equivalent to rs = list(r_dict.keys() ), but I'm paranoid about ordering
-                        vars_temp.append( float( midas_dict[param] * rstar)) # Floatify to avoid np inhomogeneous array issues
-                    except:
-                        if debug: print('Problem with:', angle, r_dict, param)
-                    #if debug: print(angle, midas_dict, file=debugFID)
+        if method == 'legacy':
+            I = 0
+            param_r = [] # array for parameter integrated wrt r
+            angles = []
             
-            
-            vars = [var for _, var in sorted(zip(rs_temp, vars_temp))]
-            rs = sorted(rs_temp)
+            if not self.mirrored:
+                warnings.warn("Mirroring in area-avg")
+                self.mirror()
 
-            if debug: print("Arrays to integrate", angle, rs, vars, file=debugFID)
+            for angle, r_dict in self.data.items():
 
-            if len(rs) != len(vars):
-                ValueError( f"rs to integrate over {rs} must be the same length as params {vars}, occured at {angle}" )
+                if angle == 360:    # We already have 0
+                    continue
+
+                rs_temp = []
+                vars_temp = []
+                angles.append(angle * np.pi / 180)
+                for rstar, midas_dict in r_dict.items():
+                    if rstar >= 0:
+                        try:
+                            rs_temp.append(rstar)
+                            vars_temp.append(float(midas_dict[param] * rstar))
+                        except:
+                            if debug: print('Problem with:', angle, r_dict, param)
                 
-            try:
-                param_r.append( integrate.simpson(vars, rs, even=even_opt) ) # Integrate wrt r
-            except Exception as e:
-                print(e)
-                print(rs, vars)
-            if debug: print("calculated integral:", integrate.simpson(vars, rs, even=even_opt), file=debugFID)
-                #I = 2 * np.pi
-        if debug: print("Integrated wrt r", param_r, file=debugFID)
+                vars = [var for _, var in sorted(zip(rs_temp, vars_temp))]
+                rs = sorted(rs_temp)
 
-        param_r = [param for _, param in sorted(zip(angles, param_r))]
-        angles = sorted(angles)
+                vars.reverse()      # I noticed too late that the list goes from r/R = 0 to 1, not the other way around
+                rs.reverse()        # Already wrote the actual Simpson's rule part, easier to just do this
 
-        I = integrate.simpson(param_r, angles, even=even_opt) / np.pi # Integrate wrt theta, divide by normalized area
-        self.area_avgs.update({param: I})
+                if debug: print("Arrays to integrate", angle, rs, vars, file=debugFID)
+
+                if len(rs) != len(vars):
+                    ValueError( f"rs to integrate over {rs} must be the same length as params {vars}, occured at {angle}" )
+
+                delta = abs(np.diff(rs))                # r/R steps
+
+                la = 0
+                for idx, var in enumerate(vars):
+                    coeff = 2 * (2**(idx % 2)) / 3      # Simpson's Rule coefficient
+                    
+                    if idx < len(delta):
+                        if idx > 0:
+                            if delta[idx - 1] == delta[idx]:
+                                S = delta[idx] * coeff * var
+                            else:
+                                coeff = coeff / 2
+                                S = (delta[idx - 1] * coeff * var) + (delta[idx] * coeff * var)
+                        else:
+                            S = delta[idx] * coeff * var
+                    else:
+                        S = delta[idx - 1] * coeff * var
+                    
+                    la = la + S
+                
+                param_r.append(la)
+
+            I = sum(param_r) / 8
+            self.area_avgs.update({param: I})
+
+        elif method == 'legacy_old':
+            # There's definitely a more elegant way to do this, but I just want Talley's data to work for now
+
+            I = 0
+            param_r = [] # array for parameter integrated wrt r
+            angles = []
+            
+            if not self.mirrored:
+                warnings.warn("Mirroring in area-avg")
+                self.mirror()
+
+            for angle, r_dict in self.data.items():
+                if angle == 360:
+                    continue
+
+                try:
+                    if 0.95 in r_dict:
+                        S_1 = 0.05 * sum((1 * 0,
+                                4 * 0.95 * r_dict[0.95][param],
+                                2 * 0.90 * r_dict[0.90][param],
+                                4 * 0.85 * r_dict[0.85][param],
+                                1 * 0.80 * r_dict[0.80][param],
+                                )) / 3
+                        
+                        S_2 = 0.10 * sum((1 * 0.80 * r_dict[0.8][param],
+                                4 * 0.70 * r_dict[0.7][param],
+                                2 * 0.60 * r_dict[0.6][param],
+                                4 * 0.50 * r_dict[0.5][param],
+                                1 * 0.40 * r_dict[0.4][param],
+                                )) / 3
+                        
+                        S_3 = 0.20 * sum((1 * 0.40 * r_dict[0.4][param],
+                                4 * 0.20 * r_dict[0.2][param],
+                                2 * 0.00 * r_dict[0.0][param],
+                                )) / 3
+                    else:
+                        S_1 = 0
+
+                        S_2 = 0.10 * sum((1 * 0,
+                                4 * 0.90 * r_dict[0.9][param],
+                                2 * 0.80 * r_dict[0.8][param],
+                                4 * 0.70 * r_dict[0.7][param],
+                                2 * 0.60 * r_dict[0.6][param],
+                                4 * 0.50 * r_dict[0.5][param],
+                                1 * 0.40 * r_dict[0.4][param],
+                                )) / 3
+                        
+                        S_3 = 0.20 * sum((1 * 0.40 * r_dict[0.4][param],
+                                4 * 0.20 * r_dict[0.2][param],
+                                2 * 0.00 * r_dict[0.0][param],             # Might be doubling up
+                                )) / 3
+
+                    param_r.append(sum((S_1, S_2, S_3)))
+
+                except Exception as e:
+                    print(e)
+
+            I = sum(param_r) / 8
+            self.area_avgs.update({param: I})
+
+        else:
+            # We have to integrate twice, once with resepect to r, again with respect to phi
+            # Start with r
+            I = 0
+            param_r = [] # array for parameter integrated wrt r
+            angles = []
+            
+            if not self.mirrored:
+                warnings.warn("Mirroring in area-avg")
+                self.mirror()
+
+            for angle, r_dict in self.data.items():
+
+                rs_temp = []
+                vars_temp = []
+                angles.append(angle * np.pi/180) # Convert degrees to radians
+                for rstar, midas_dict in r_dict.items():
+                    if rstar >= 0: # This should be unnecessary now with the new mirror, but it's not hurting anyone by being here
+                        try:
+                            rs_temp.append( rstar ) # This is proably equivalent to rs = list(r_dict.keys() ), but I'm paranoid about ordering
+                            vars_temp.append( float( midas_dict[param] * rstar)) # Floatify to avoid np inhomogeneous array issues
+                        except:
+                            if debug: print('Problem with:', angle, r_dict, param)
+                        #if debug: print(angle, midas_dict, file=debugFID)
+                
+                
+                vars = [var for _, var in sorted(zip(rs_temp, vars_temp))]
+                rs = sorted(rs_temp)
+
+                if debug: print("Arrays to integrate", angle, rs, vars, file=debugFID)
+
+                if len(rs) != len(vars):
+                    ValueError( f"rs to integrate over {rs} must be the same length as params {vars}, occured at {angle}" )
+                    
+                try:
+                    param_r.append( integrate.simpson(vars, rs, even=even_opt) ) # Integrate wrt r
+                except Exception as e:
+                    if debug:
+                        print(e)
+                        print(rs, vars)
+                if debug: print("calculated integral:", integrate.simpson(vars, rs, even=even_opt), file=debugFID)
+                    #I = 2 * np.pi
+            if debug: print("Integrated wrt r", param_r, file=debugFID)
+
+            param_r = [param for _, param in sorted(zip(angles, param_r))]
+            angles = sorted(angles)
+
+            I = integrate.simpson(param_r, angles, even=even_opt) / np.pi # Integrate wrt theta, divide by normalized area
+            self.area_avgs.update({param: I})
+
         return I
 
     def circ_segment_area_avg(self, param:str, hstar:float, ngridr=25, ngridphi=25, int_err = 10**-4) -> float:
@@ -1657,7 +1820,7 @@ class Condition:
         return I
 
 
-    def void_area_avg(self, param: str, even_opt='first') -> float:
+    def void_area_avg(self, param: str, even_opt='first', method = None) -> float:
         """Method for calculating the void-weighted area-average of a parameter, "param"
         
         Inputs:
@@ -1680,46 +1843,168 @@ class Condition:
             if debug: print(self.data, file=debugFID)
             print(f"Could not area-average {param} for condition {self.name}")
             return
-        
-        # We have to integrate twice, once with resepect to r, again with respect to phi
-        # Start with r
 
-        I = 0
-        param_r = [] # array for parameter integrated wrt r
-        angles = []
-        
-        self.mirror()
-
-
-        for angle, r_dict in self.data.items():
-
-            rs_temp = []
-            vars_temp = []
-            angles.append(angle * np.pi/180) # Convert degrees to radians
-            for rstar, midas_dict in r_dict.items():
-                if rstar >= 0: # This should be unnecessary now with the new mirror, but it's not hurting anyone by being here
-                    try:
-                        rs_temp.append( rstar ) # This is proably equivalent to rs = list(r_dict.keys() ), but I'm paranoid about ordering
-                        vars_temp.append( midas_dict[param] * midas_dict['alpha'] * rstar)
-                    except:
-                        if debug: print('Problem with:', angle, r_dict, param)
-                    #if debug: print(angle, midas_dict, file=debugFID)
+        if method == 'legacy':
+            I = 0
+            param_r = [] # array for parameter integrated wrt r
+            angles = []
             
-            
-            vars = [var for _, var in sorted(zip(rs_temp, vars_temp))]
-            rs = sorted(rs_temp)
+            if not self.mirrored:
+                warnings.warn("Mirroring in area-avg")
+                self.mirror()
 
-            if debug: print("Arrays to integrate", angle, rs, vars, file=debugFID)
+            for angle, r_dict in self.data.items():
+
+                if angle == 360:    # We already have 0
+                    continue
+
+                rs_temp = []
+                vars_temp = []
+                angles.append(angle * np.pi / 180)
+                for rstar, midas_dict in r_dict.items():
+                    if rstar >= 0:
+                        try:
+                            rs_temp.append(rstar)
+                            vars_temp.append(float(midas_dict[param] * midas_dict['alpha'] * rstar))
+                        except:
+                            if debug: print('Problem with:', angle, r_dict, param)
                 
-            param_r.append( integrate.simpson(vars, rs, even=even_opt) ) # Integrate wrt r
-            if debug: print("calculated integral:", integrate.simpson(vars, rs, even=even_opt), file=debugFID)
-                #I = 2 * np.pi
-        if debug: print("Integrated wrt r", param_r, file=debugFID)
+                vars = [var for _, var in sorted(zip(rs_temp, vars_temp))]
+                rs = sorted(rs_temp)
 
-        param_r = [param for _, param in sorted(zip(angles, param_r))]
-        angles = sorted(angles)
+                vars.reverse()      # I noticed too late that the list goes from r/R = 0 to 1, not the other way around
+                rs.reverse()        # Already wrote the actual Simpson's rule part, easier to just do this
 
-        I = integrate.simpson(param_r, angles, even=even_opt) / np.pi / self.area_avg('alpha') # Integrate wrt theta, divide by normalized area
+                if debug: print("Arrays to integrate", angle, rs, vars, file=debugFID)
+
+                if len(rs) != len(vars):
+                    ValueError( f"rs to integrate over {rs} must be the same length as params {vars}, occured at {angle}" )
+
+                delta = abs(np.diff(rs))                # r/R steps
+
+                la = 0
+                for idx, var in enumerate(vars):
+                    coeff = 2 * (2**(idx % 2)) / 3      # Simpson's Rule coefficient
+                    
+                    if idx < len(delta):
+                        if idx > 0:
+                            if delta[idx - 1] == delta[idx]:
+                                S = delta[idx] * coeff * var
+                            else:
+                                coeff = coeff / 2
+                                S = (delta[idx - 1] * coeff * var) + (delta[idx] * coeff * var)
+                        else:
+                            S = delta[idx] * coeff * var
+                    else:
+                        S = delta[idx - 1] * coeff * var
+                    
+                    la = la + S
+                
+                param_r.append(la)
+
+            I = sum(param_r) / 8 / self.area_avg('alpha',method=method)
+
+        elif method == 'legacy_old':
+            # We have to integrate twice, once with resepect to r, again with respect to phi
+            # Start with r
+
+            I = 0
+            param_r = [] # array for parameter integrated wrt r
+            angles = []
+            
+            if not self.mirrored:
+                warnings.warn("Mirroring in area-avg")
+                self.mirror()
+
+            for angle, r_dict in self.data.items():
+                if angle == 360:
+                    continue
+
+                try:
+                    if 0.95 in r_dict:
+                        S_1 = 0.05 * sum((1 * 0,
+                                4 * 0.95 * r_dict[0.95][param] * r_dict[0.95]['alpha'],
+                                2 * 0.90 * r_dict[0.90][param] * r_dict[0.90]['alpha'],
+                                4 * 0.85 * r_dict[0.85][param] * r_dict[0.85]['alpha'],
+                                1 * 0.80 * r_dict[0.80][param] * r_dict[0.80]['alpha'],
+                                )) / 3
+                        
+                        S_2 = 0.10 * sum((1 * 0.80 * r_dict[0.8][param] * r_dict[0.80]['alpha'],
+                                4 * 0.70 * r_dict[0.7][param] * r_dict[0.7]['alpha'],
+                                2 * 0.60 * r_dict[0.6][param] * r_dict[0.6]['alpha'],
+                                4 * 0.50 * r_dict[0.5][param] * r_dict[0.5]['alpha'],
+                                1 * 0.40 * r_dict[0.4][param] * r_dict[0.4]['alpha'],
+                                )) / 3
+                        
+                        S_3 = 0.20 * sum((1 * 0.40 * r_dict[0.4][param] * r_dict[0.4]['alpha'],
+                                4 * 0.20 * r_dict[0.2][param] * r_dict[0.2]['alpha'],
+                                2 * 0.00 * r_dict[0.0][param] * r_dict[0.0]['alpha'],
+                                )) / 3
+                    else:
+                        S_1 = 0
+
+                        S_2 = 0.10 * sum((1 * 0,
+                                4 * 0.90 * r_dict[0.9][param] * r_dict[0.9]['alpha'],
+                                2 * 0.80 * r_dict[0.8][param] * r_dict[0.8]['alpha'],
+                                4 * 0.70 * r_dict[0.7][param] * r_dict[0.7]['alpha'],
+                                2 * 0.60 * r_dict[0.6][param] * r_dict[0.6]['alpha'],
+                                4 * 0.50 * r_dict[0.5][param] * r_dict[0.5]['alpha'],
+                                1 * 0.40 * r_dict[0.4][param] * r_dict[0.4]['alpha'],
+                                )) / 3
+                        
+                        S_3 = 0.20 * sum((1 * 0.40 * r_dict[0.4][param] * r_dict[0.4]['alpha'],
+                                4 * 0.20 * r_dict[0.2][param] * r_dict[0.2]['alpha'],
+                                2 * 0.00 * r_dict[0.0][param] * r_dict[0.0]['alpha'],               # Might be doubling up
+                                )) / 3
+
+                    param_r.append(sum((S_1, S_2, S_3)))
+
+                except Exception as e:
+                    print(e)
+                    
+            I = sum(param_r) / 8 / self.area_avg('alpha',method=method)
+
+        else:
+            # We have to integrate twice, once with resepect to r, again with respect to phi
+            # Start with r
+
+            I = 0
+            param_r = [] # array for parameter integrated wrt r
+            angles = []
+            
+            self.mirror()
+
+
+            for angle, r_dict in self.data.items():
+
+                rs_temp = []
+                vars_temp = []
+                angles.append(angle * np.pi/180) # Convert degrees to radians
+                for rstar, midas_dict in r_dict.items():
+                    if rstar >= 0: # This should be unnecessary now with the new mirror, but it's not hurting anyone by being here
+                        try:
+                            rs_temp.append( rstar ) # This is proably equivalent to rs = list(r_dict.keys() ), but I'm paranoid about ordering
+                            vars_temp.append( midas_dict[param] * midas_dict['alpha'] * rstar)
+                        except:
+                            if debug: print('Problem with:', angle, r_dict, param)
+                        #if debug: print(angle, midas_dict, file=debugFID)
+                
+                
+                vars = [var for _, var in sorted(zip(rs_temp, vars_temp))]
+                rs = sorted(rs_temp)
+
+                if debug: print("Arrays to integrate", angle, rs, vars, file=debugFID)
+                    
+                param_r.append( integrate.simpson(vars, rs, even=even_opt) ) # Integrate wrt r
+                if debug: print("calculated integral:", integrate.simpson(vars, rs, even=even_opt), file=debugFID)
+                    #I = 2 * np.pi
+            if debug: print("Integrated wrt r", param_r, file=debugFID)
+
+            param_r = [param for _, param in sorted(zip(angles, param_r))]
+            angles = sorted(angles)
+
+            I = integrate.simpson(param_r, angles, even=even_opt) / np.pi / self.area_avg('alpha') # Integrate wrt theta, divide by normalized area
+
         return I
     
     def interp_area_avg(self, param:str, interp_type = 'linear') -> float:
@@ -1903,6 +2188,60 @@ class Condition:
         self.sigma_alpha = I
         return I
     
+    def calc_sigma_ug(self):
+        """Calculates the second moment of ug1
+
+        Inputs:
+         - None
+
+        Stores:
+         - "sigma_ug" in self
+
+        Returns:
+         - second moment of :math:`alpha`
+
+        Mathematically performing the operation
+
+        .. math:: \\frac{\\langle (\\ug - \\langle \\ug \\rangle)^2 \\rangle }{\\langle \\ug \\rangle^2}
+        
+        """
+
+        I = 0
+        param_r = [] # integrated wrt r
+        angles = []
+        
+        self.mirror()
+
+        ug_avg = self.area_avg('ug1')
+
+        for angle, r_dict in self.data.items():
+            rs_temp = []
+            vars_temp = []
+            angles.append(angle * np.pi/180) # Convert degrees to radians
+            for rstar, midas_dict in r_dict.items():
+                if rstar >= 0:
+                    rs_temp.append( rstar ) # This is proably equivalent to rs = list(r_dict.keys() ), but I'm paranoid about ordering
+                    vars_temp.append(rstar * (midas_dict['ug1'] - ug_avg)**2)
+                    if debug: print(angle, midas_dict, file=debugFID)
+            
+            vars = [var for _, var in sorted(zip(rs_temp, vars_temp))]
+            rs = sorted(rs_temp)
+
+            if debug: print("Arrays to integrate", rs, vars, file=debugFID)
+                
+            param_r.append( integrate.simpson(vars, rs) ) # Integrate wrt r
+            if debug: print("calculated integral:", integrate.simpson(vars, rs), file=debugFID)
+                #I = 2 * np.pi
+        if debug: print("Integrated wrt r", param_r, file=debugFID)
+        param_r_int = [var for _, var in sorted(zip(angles, param_r))]
+        angles_int = sorted(angles)
+        I = integrate.simpson(param_r_int, angles_int) / np.pi / ug_avg**2 # Integrate wrt theta, divide by normalized area
+        if debug: print('Calculated sigma_ug: ', I)
+
+        self.sigma_ug = I
+        return I
+
+
     def calc_mu3_alpha(self):
         """Calculates the third moment of alpha
 
@@ -2159,12 +2498,12 @@ class Condition:
         return (ff, fg)
 
     
-    def calc_mu_eff(self, method='Ishii', alpha_max = 1.0):
+    def calc_mu_eff(self, method='Ishii', alpha_peak = 1.0):
         """Method for effective/mixture viscosity
         
         Inputs:
          - method, what method to use for modeling :math:`\\mu_{eff}`
-         - alpha_max, parameter for some models
+         - alpha_peak, parameter for some models
         
         Stores:
          - "mu_eff" in midas_dict 
@@ -2186,10 +2525,10 @@ class Condition:
             for rstar, midas_dict in r_dict.items():
 
                 if method.lower() == 'ishii':
-                    mu_m = self.mu_f * (1 - midas_dict['alpha'] / alpha_max)**(-2.5*alpha_max * (self.mu_g + 0.4*self.mu_f) / (self.mu_g + self.mu_f)  )
+                    mu_m = self.mu_f * (1 - midas_dict['alpha'] / alpha_peak)**(-2.5*alpha_peak * (self.mu_g + 0.4*self.mu_f) / (self.mu_g + self.mu_f)  )
 
                 elif method.lower() == 'ishii_AA':
-                    mu_m = self.mu_f * (1 - alpha_avg / alpha_max)**(-2.5*alpha_max * (self.mu_g + 0.4*self.mu_f) / (self.mu_g + self.mu_f)  )
+                    mu_m = self.mu_f * (1 - alpha_avg / alpha_peak)**(-2.5*alpha_peak * (self.mu_g + 0.4*self.mu_f) / (self.mu_g + self.mu_f)  )
                     
                 elif method.lower() == 'avg_void':
                     mu_m = self.mu_f / (1 - alpha_avg)
@@ -2291,7 +2630,7 @@ the newly calculated :math:`v_{r}` or not
          - quiet, flag for extra debugging messages
         
         Stores:
-         - "vr_'method_name'" in midas_dict 
+         - "vr\_'method_name'" in midas_dict 
          - "vr_model" in midas_dict 
 
         Options for method:
@@ -2570,6 +2909,131 @@ the newly calculated :math:`v_{r}` or not
 
         return self.area_avg(param_error_name)
 
+    def calc_symmetry(self, param, sym_type = 'sym90', method = 'rmse', rel_error = False):
+        """ Function for checking the symmetry of a condition
+
+        sym_type
+         - 'sym90', will compare data at 0° and 180°
+
+        .. math:: \\epsilon(r) = param(r, 0°) - param(r, 180°)
+
+        rel_error will divide by param 0
+
+        Method
+         - rmse, 
+        
+        .. math:: \\epsilon_{sym} = \\sqrt{\\bar{\\epsilon(r)^{2}}}
+
+        Returns
+         - :math:`\\epsilon_{sym}`
+        
+        Stores
+         - :math:`\\epsilon_{sym}`
+        
+        """
+        errs = []
+        if sym_type == 'sym90':
+
+            for rstar, r_dict in self.data[0].items():
+                try:
+                    err = r_dict[param] - self.data[180][rstar][param]
+                except KeyError:
+                    continue
+                if rel_error:
+                    try:
+                        err = err / r_dict[param]
+                    except ZeroDivisionError:
+                        err = 0
+                errs.append(err)
+
+        errs = np.asarray(errs)
+
+        if method == 'rmse':
+            sym_error = np.sqrt(np.mean(errs**2))
+        elif method == 'mean':
+            sym_error = np.mean(errs)
+
+        self.sym_error = sym_error
+
+        return self.sym_error
+
+    def calc_symmetry_area_avg(self, param, sym_type='sym_half', rel_error=True, even_opt='first'):
+        """ Function for checking the area-averaged symmetry of a condition between the left and right half.
+    
+        Inputs:
+        - param: The parameter for which to calculate the symmetry
+        - sym_type: 'sym_half' to compare left half (0-180) and right half (180-360)
+        - rel_error: If true, the error will be relative to the parameter at the left half angles
+        - even_opt: Option for integration method in simpson's rule (as used in area_avg)
+        Returns:
+       - Area-averaged symmetry error across all radial and angular positions
+       """
+        
+        if sym_type != 'sym_half':
+           raise ValueError("This function is only designed for 'sym_half' symmetry type.")
+
+         # Define angle pairs for left-right half symmetry
+        angle_pairs = [(0, 180), (22.5, 202.5), (45, 225), (67.5, 247.5), (90, 270), (292.5, 112.5), (315, 135), (337.5, 157.5)]
+
+        sym_errors = []  # To store symmetry errors for each angle pair
+        areas = []       # To store areas for weighted integration
+
+         # Iterate over angle pairs
+        for angle1, angle2 in angle_pairs:
+            if angle1 not in self.data or angle2 not in self.data:
+                continue  # Skip if angles are not in the data
+
+            param_r = []  # To store the radial integration result
+            rs_list = []  # Radial positions to integrate over
+            
+            # Calculate symmetry error for each radial position
+            for rstar, r_dict in self.data[angle1].items():
+                try:
+                  sym_error = abs(r_dict[param] - self.data[angle2][rstar][param])
+                except KeyError:
+                   continue  # Skip if data is missing for the corresponding rstar in angle2
+
+                if rel_error:
+                    try:
+                       sym_error /= r_dict[param]  # Calculate relative error
+                    except ZeroDivisionError:
+                       sym_error = 0  # Handle division by zero case
+            
+                rs_list.append(rstar)
+                param_r.append(abs(sym_error) * rstar)  # Multiply by rstar for radial area weighting
+
+            # Sort by radial position for integration
+            param_r_sorted = [x for _, x in sorted(zip(rs_list, param_r))]
+            rs_sorted = sorted(rs_list)
+            
+            # Integrate wrt r (radial direction) using simpson's rule
+            if len(rs_sorted) > 1:
+                try:
+                    radial_avg_sym = integrate.simpson(param_r_sorted, rs_sorted, even=even_opt)
+                except Exception as e:
+                    print(f"Integration error: {e}")
+                    radial_avg_sym = 0
+            else:
+                radial_avg_sym = 0
+
+            sym_errors.append(radial_avg_sym)
+            areas.append(1)  # For now, give equal weighting to all angles
+
+            # Now integrate over angles (θ)
+        angles_in_radians = [angle_pair[0] * np.pi / 180 for angle_pair in angle_pairs]
+        if len(sym_errors) > 1:
+            try:
+               # Final integration wrt angle θ
+              area_avg_sym_error = integrate.simpson(sym_errors, angles_in_radians, even=even_opt) / np.pi
+            except Exception as e:
+                print(f"Angle integration error: {e}")
+                area_avg_sym_error = 0
+        else:
+           area_avg_sym_error = 0
+
+        return area_avg_sym_error
+
+
     def calc_avg_lat_sep(self):
         """Calculates average lateral separation distance between bubbles
 
@@ -2611,12 +3075,12 @@ the newly calculated :math:`v_{r}` or not
         return self.area_avg('lambda')
     
 
-    def calc_COV_RC(self, alpha_max = 0.75, alpha_cr = 0.11, reconstruct_flag = True):
+    def calc_COV_RC(self, alpha_peak = 0.75, alpha_cr = 0.11, avg_method = 'legacy', reconstruct_flag = True, debug = False):
         """Calculates the experimental Random Collision Covariance based on Talley (2012) method (without modification factor m_RC)
          - Stored in self.COV_RC
          
          Inputs:
-         - alpha_max, maximum void fraction based on hexagonal-closed-packed (HCP) bubble distribution
+         - alpha_peak, maximum void fraction based on hexagonal-closed-packed (HCP) bubble distribution
          - alpha_cr, critical alpha to activate Random Collision, Talley (2012), Kong (2018) 
         
          Authors:
@@ -2624,80 +3088,104 @@ the newly calculated :math:`v_{r}` or not
          - Kang (08/19/2024)
         """
 
-        # Notes DHK 16 AUG
-        '''
-        Add a "use data" flag to toggle between using void reconstruct and local data to calculate covariance
-        Reconstructed profile should be saved in midas_dict
+        if debug:
+            print(f"\t_________________________________________________________")
+            print(f"\t                         COV_RC                          ")
+            print(f"\tjf = {self.jf}, jgref = {self.jgref}, L/D = {self.LoverD}")
 
-        Verify mu_m_avg
-        '''
-
-        debug = True
-
+        # Identical to calc_COV_TI
+        ########################################################################################################################
         if reconstruct_flag == True:
-            self.reconstruct_void(method='talley')
             alpha_str = 'alpha_reconstructed'
         else:
             alpha_str = 'alpha'
 
-        alpha_avg       = self.area_avg(alpha_str)
-        ai_avg          = self.area_avg('ai')
+        # Temporary, replace later
+        alpha_avg       = self.area_avg('alpha',method=avg_method)
+        alpha_avg       = round(alpha_avg,3)
 
-        rho_f           = self.rho_f                                        # Liquid phase density [kg/m**3]
-        rho_g           = self.rho_g                                        # Gas phase density [kg/m**3]
-        Dh              = self.Dh                                           # Hydraulic diameter
-        mu_f            = self.mu_f                                         # Dynamic viscosity of water [Pa-s]
-        mu_m            = mu_f / (1 - alpha_avg)
+        ai_avg          = self.area_avg('ai',method=avg_method)
+        ai_avg          = round(ai_avg,2)
 
+        # rho_f           = self.rho_f                                        # Liquid phase density [kg/m**3]
+        # rho_g           = self.rho_g                                        # Gas phase density [kg/m**3]
+        # mu_f            = self.mu_f                                         # Dynamic viscosity of water [Pa-s]
+        # sigma           = self.sigma                                        # Surface tension
+
+        rho_f           = 1000
+        rho_g           = 1.22
+        mu_f            = 0.001
+        sigma           = 0.07278
+        Dh              = self.Dh                                           # Hydraulic diameter [m]
+                
         rho_m           = (1 - alpha_avg) * rho_f + alpha_avg * rho_g       # Mixture density
+        mu_m            = mu_f / (1 - alpha_avg)                            # Mixture viscosity
         v_m             = (rho_f * self.jf + rho_g * self.jgloc) / rho_m    # Mixture velocity
-        Rem             = rho_m * v_m * Dh / mu_m                           # Mixture Reynolds number, ***CAREFUL*** I have seen some versions of the IATE script that use rho_f instead as an approximation
+        # Rem             = rho_m * v_m * Dh / mu_m                           # Mixture Reynolds number, ***CAREFUL*** I have seen some versions of the IATE script that use rho_f instead as an approximation
+        Rem             = rho_m * v_m * Dh / mu_f                           # Mixture Reynolds number, older versions use mu_f as an approximation
         f_TP            = 0.316 * (mu_m / mu_f / Rem)**0.25                 # Two-phase friction factor, Talley (2012) and Worosz (2015), also used in iate_1d_1g
-        eps             = f_TP * v_m**3 / 2 / Dh                            # Energy dissipation rate (Wu et al., 1998; Kim, 1999), also used in iate_1d_1g
-        
+        eps             = f_TP * v_m**3 / 2 / Dh                            # Energy dissipation rate (Wu et al., 1998; Kim, 1999), also used in iate_1d_1g        
+        eps             = round(eps,2)
+
+        # Switch away from using data
+        alpha_avg       = self.area_avg(alpha_str,method=avg_method)
+
+        Dsm_exp         = 1000 * 6 * alpha_avg / ai_avg
+        Dsm_exp         = round(Dsm_exp,2) / 1000
+
         if debug:
-            print(f"alpha_avg: {alpha_avg}")
-        
+            print(f"\t\trho_m: {rho_m}\tmu_m: {mu_m}\tv_m: {v_m}\tRem: {Rem}\tf_TP: {f_TP}\teps: {eps}")
+            print(f"\t\tDsm_exp: {Dsm_exp}\talpha_str_avg: {alpha_avg}\tai_avg: {ai_avg}")
+
         for angle, r_dict in self.data.items():
             for rstar, midas_dict in r_dict.items():
                 
                 alpha_loc = midas_dict[alpha_str]
                 
                 if reconstruct_flag == True:
-                    ai_loc = ai_avg * alpha_loc / alpha_avg
-                    try:
+                    Db_loc = Dsm_exp
+                    # ai_loc = ai_avg * alpha_loc / alpha_avg
+                    ai_loc = 6 * alpha_loc / Dsm_exp
+
+                    if ai_loc != 0:
                         Db_loc = 6 * alpha_loc / ai_loc
-                    except:
+                    else:
                         Db_loc = 0
                 else:
                     ai_loc = midas_dict['ai']
-                    Db_loc = midas_dict['Dsm1'] / 1000
+                    # Db_loc = midas_dict['Dsm1'] / 1000
+                    
+                    if ai_loc != 0:
+                        Db_loc = 6 * alpha_loc / ai_loc
+                    else:
+                        Db_loc = 0
                 
                 if alpha_loc <= alpha_cr:                                   # Check if local void fraction is less than or equal to alpha_cr
-                    u_t = 1.4 * eps**(1/3) * Db_loc**(1/3)                  # Turbulent velocity (Batchelor, 1951; Rotta, 1972), also used in iate_1d_1g
+                    u_t = 1.4 * np.cbrt(eps) * np.cbrt(Db_loc)              # Turbulent velocity (Batchelor, 1951; Rotta, 1972), also used in iate_1d_1g
                 else:
                     u_t = 0                                                 # TI and RC are driven by the turbulent fluctuation velocity (u_t)
 
-                    if debug:
-                        print(f"{angle}\t\t{rstar}:\t\talpha_loc: {alpha_loc}")
-                        pass
+                ########################################################################################################################
+                # Talley 2012, section 3.3.1
+                COV_RC_loc = u_t * ai_loc**2 / (np.cbrt(alpha_peak) * (np.cbrt(alpha_peak) - np.cbrt(alpha_loc)))
+                
+                midas_dict['COV_RC_loc'] = COV_RC_loc
 
-                # Talley 2012, secion 3.3.1
-                COV_loc = u_t * ai_loc**2 / (alpha_max**(1/3) * (alpha_max**(1/3) - (alpha_loc)**(1/3)))
+                if debug:
+                    # print(f"\t\t\t{angle:2.1f}\t{rstar:.2f}\t|\talpha: {alpha_loc:.4f}\tDbloc: {Db_loc:.4f}\tCOV_RC_loc: {COV_RC_loc:.4f}")
+                    pass
                 
-                midas_dict.update({'u_t': u_t})
-                midas_dict.update({'COV_loc': COV_loc})
-                
-        u_t_avg = self.area_avg('u_t')
+        # Talley does not area-average local u_t; instead computes <u_t> with area-averaged parameters
+        u_t_avg = 1.4 * np.cbrt(eps) * np.cbrt(6 * alpha_avg / ai_avg)
 
         if u_t_avg > 0:
-            COV_avg = u_t_avg * ai_avg**2 / (alpha_max**(1/3) * (alpha_max**(1/3) - alpha_avg**(1/3)))
-            COV_RC = self.area_avg('COV_loc') / COV_avg
+            COV_RC_avg = u_t_avg * ai_avg**2 / (np.cbrt(alpha_peak) * (np.cbrt(alpha_peak) - np.cbrt(alpha_avg)))
+            COV_RC = self.area_avg('COV_RC_loc',method=avg_method) / COV_RC_avg
 
             if debug:
-                print(f"COV_RC_num: {self.area_avg('COV_loc')}\nCOV_RC_den: {COV_avg}\n\n")
+                print(f"\n\t\tu_t_avg: {u_t_avg}")
+                print(f"\n\tCOV_RC: {COV_RC}\tCOV_RC_num: {self.area_avg('COV_RC_loc',method=avg_method)}\tCOV_RC_den: {COV_RC_avg}")
         else:
-            COV_avg = 0
             COV_RC = 0
 
         self.COV_RC = COV_RC
@@ -2705,82 +3193,112 @@ the newly calculated :math:`v_{r}` or not
         return COV_RC
 
 
-    def calc_COV_TI(self, alpha_max = 0.75, alpha_cr = 0.11, We_cr = 5, reconstruct_flag = True):
-        
-        debug = False
+    def calc_COV_TI(self, alpha_peak = 0.75, alpha_cr = 0.11, We_cr = 5, avg_method = 'legacy', reconstruct_flag = True, debug = False):
 
+        if debug:
+            print(f"\t_________________________________________________________")
+            print(f"\t                         COV_TI                          ")
+            print(f"\tjf = {self.jf}, jgref = {self.jgref}, L/D = {self.LoverD}")
+
+        # Identical to calc_COV_RC
+        ########################################################################################################################
         if reconstruct_flag == True:
-            self.reconstruct_void(method='talley')
             alpha_str = 'alpha_reconstructed'
         else:
             alpha_str = 'alpha'
 
-        alpha_avg       = self.area_avg(alpha_str)
-        ai_avg          = self.area_avg('ai')
+        # Temporary, replace later
+        alpha_avg       = self.area_avg('alpha',method=avg_method)
+        alpha_avg       = round(alpha_avg,3)
 
-        rho_f           = self.rho_f                                        # Liquid phase density [kg/m**3]
-        rho_g           = self.rho_g                                        # Gas phase density [kg/m**3]
-        Dh              = self.Dh                                           # Hydraulic diameter
-        mu_f            = self.mu_f                                         # Dynamic viscosity of water [Pa-s]
-        mu_m            = mu_f / (1 - alpha_avg)
-        sigma           = self.sigma                                        # Surface tension
+        ai_avg          = self.area_avg('ai',method=avg_method)
+        ai_avg          = round(ai_avg,2)
 
+        # rho_f           = self.rho_f                                        # Liquid phase density [kg/m**3]
+        # rho_g           = self.rho_g                                        # Gas phase density [kg/m**3]
+        # mu_f            = self.mu_f                                         # Dynamic viscosity of water [Pa-s]
+        # sigma           = self.sigma                                        # Surface tension
+
+        rho_f           = 1000
+        rho_g           = 1.22
+        mu_f            = 0.001
+        sigma           = 0.07278
+        Dh              = self.Dh                                           # Hydraulic diameter [m]
+                
         rho_m           = (1 - alpha_avg) * rho_f + alpha_avg * rho_g       # Mixture density
+        mu_m            = mu_f / (1 - alpha_avg)                            # Mixture viscosity
         v_m             = (rho_f * self.jf + rho_g * self.jgloc) / rho_m    # Mixture velocity
-        Rem             = rho_m * v_m * Dh / mu_m                           # Mixture Reynolds number, ***CAREFUL*** I have seen some versions of the IATE script that use rho_f instead as an approximation
+        # Rem             = rho_m * v_m * Dh / mu_m                           # Mixture Reynolds number, ***CAREFUL*** I have seen some versions of the IATE script that use rho_f instead as an approximation
+        Rem             = rho_m * v_m * Dh / mu_f                           # Mixture Reynolds number, older versions use mu_f as an approximation
         f_TP            = 0.316 * (mu_m / mu_f / Rem)**0.25                 # Two-phase friction factor, Talley (2012) and Worosz (2015), also used in iate_1d_1g
-        eps             = f_TP * v_m**3 / 2 / Dh                            # Energy dissipation rate (Wu et al., 1998; Kim, 1999), also used in iate_1d_1g
-        
+        eps             = f_TP * v_m**3 / 2 / Dh                            # Energy dissipation rate (Wu et al., 1998; Kim, 1999), also used in iate_1d_1g        
+        eps             = round(eps,2)
+
+        # Switch away from using data
+        alpha_avg       = self.area_avg(alpha_str,method=avg_method)
+
+        Dsm_exp         = 1000 * 6 * alpha_avg / ai_avg
+        Dsm_exp         = round(Dsm_exp,2) / 1000
+
         if debug:
-            print(f"alpha_avg: {alpha_avg}")
+            print(f"\t\trho_m: {rho_m}\tmu_m: {mu_m}\tv_m: {v_m}\tRem: {Rem}\tf_TP: {f_TP}\teps: {eps}")
+            print(f"\t\tDsm_exp: {Dsm_exp}\talpha_str_avg: {alpha_avg}\tai_avg: {ai_avg}")
 
         for angle, r_dict in self.data.items():
             for rstar, midas_dict in r_dict.items():
                 
                 alpha_loc = midas_dict[alpha_str]
-
+                
                 if reconstruct_flag == True:
-                    ai_loc = ai_avg * alpha_loc / alpha_avg
-                    try:
+                    Db_loc = Dsm_exp
+                    # ai_loc = ai_avg * alpha_loc / alpha_avg
+                    ai_loc = 6 * alpha_loc / Dsm_exp
+
+                    if ai_loc != 0:
                         Db_loc = 6 * alpha_loc / ai_loc
-                    except:
+                    else:
                         Db_loc = 0
                 else:
                     ai_loc = midas_dict['ai']
-                    Db_loc = midas_dict['Dsm1'] / 1000
-
+                    # Db_loc = midas_dict['Dsm1'] / 1000
+                    
+                    if ai_loc != 0:
+                        Db_loc = 6 * alpha_loc / ai_loc
+                    else:
+                        Db_loc = 0
+                
                 if alpha_loc <= alpha_cr:                                   # Check if local void fraction is less than or equal to alpha_cr
-                    u_t = 1.4 * eps**(1/3) * Db_loc**(1/3)                  # Turbulent velocity (Batchelor, 1951; Rotta, 1972), also used in iate_1d_1g
+                    u_t = 1.4 * np.cbrt(eps) * np.cbrt(Db_loc)              # Turbulent velocity (Batchelor, 1951; Rotta, 1972), also used in iate_1d_1g
                 else:
                     u_t = 0                                                 # TI and RC are driven by the turbulent fluctuation velocity (u_t)
 
-                    if debug:
-                        # print(f"alpha_loc: {alpha_loc}")
-                        pass
-
+                ########################################################################################################################
                 We = rho_f * u_t**2 * Db_loc / sigma                        # Weber number criterion
 
-                # Talley 2012, secion 3.3.1
+                # Talley 2012, section 3.3.1
                 if We >= We_cr:
-                    COV_loc = (u_t * ai_loc**2 / alpha_loc) * np.sqrt(1 - (We_cr / We)) * np.exp(-We_cr / We)
+                    COV_TI_loc = (u_t * ai_loc**2 / alpha_loc) * np.sqrt(1 - (We_cr / We)) * np.exp(-We_cr / We)
                 else:
-                    COV_loc = 0
-                
-                midas_dict.update({'u_t': u_t})
-                midas_dict.update({'We': We})
-                midas_dict.update({'COV_loc': COV_loc})
-                
-        u_t_avg = self.area_avg('u_t')
-        We_avg = self.area_avg('We')
+                    COV_TI_loc = 0
+
+                midas_dict['COV_TI_loc'] = COV_TI_loc
+
+                if debug:
+                    print(f"\t\t\t{angle:2.1f}\t{rstar:.2f}\t|\talpha: {alpha_loc:.4f}\tCOV_TI_loc: {COV_TI_loc:.4f}\tu_t: {u_t}\tWe: {We}")
+                    pass
+        
+        # Talley does not area-average local u_t; instead computes <u_t> with area-averaged parameters
+        u_t_avg = 1.4 * np.cbrt(eps) * np.cbrt(6 * alpha_avg / ai_avg)
+        We_avg = rho_f * u_t_avg**2 * (6 * alpha_avg / ai_avg) / sigma
 
         if u_t_avg > 0:
-            COV_avg = (u_t_avg * ai_avg**2 / alpha_avg) * np.sqrt(1 - (We_cr / We_avg)) * np.exp(-We_cr / We_avg)
-            COV_TI = self.area_avg('COV_loc') / COV_avg
-
+            COV_TI_avg = (u_t_avg * ai_avg**2 / alpha_avg) * np.sqrt(1 - (We_cr / We_avg)) * np.exp(-We_cr / We_avg)
+            COV_TI = self.area_avg('COV_TI_loc',method=avg_method) / COV_TI_avg
+            
             if debug:
-                print(f"COV_TI_num: {self.area_avg('COV_loc')}\nCOV_TI_den: {COV_avg}\n\n")
+                print(f"\n\t\tu_t_avg: {u_t_avg}\tWe_avg: {We_avg}")
+                print(f"\n\tCOV_TI: {COV_TI}\tCOV_TI_num: {self.area_avg('COV_TI_loc',method=avg_method)}\tCOV_TI_den: {COV_TI_avg}")
         else:
-            COV_avg = 0
             COV_TI = 0
 
         self.COV_TI = COV_TI
@@ -2788,7 +3306,7 @@ the newly calculated :math:`v_{r}` or not
         return COV_TI
     
     
-    def reconstruct_void(self, method='talley'):
+    def reconstruct_void(self, method='talley', avg_method = 'legacy'):
         """ Reconstruct the void profile based on various methods
 
         Saves:
@@ -2804,75 +3322,168 @@ the newly calculated :math:`v_{r}` or not
         debug = False
 
         if method.lower() == 'talley':
-            self.roverRend = -1.472e-5 * self.Ref + 2.571   # End inner r/R, outer end fixed at r/R = 1
+            self.roverRend = round(-1.472e-5 * self.Ref + 2.571,1)      # Inner r/R, outer end fixed at r/R = 1. Also, Talley rounds his r/R_end to the nearest 0.1
 
-            def find_alpha_max(alpha_max, peak_loc=0.90):
-                for angle, r_dict in self.data.items():
-                    for rstar, midas_dict in r_dict.items():
-                        # Cartesian position of current angle
-                        # x = rstar * np.cos(angle * np.pi / 180)
-                        y = rstar * np.sin(angle * np.pi / 180)
+            # if debug:
+            #     print(self.roverRend)
 
-                        # Find the peak nearest neighbor
-                        if angle == 90:
-                            # For 90 degrees, just alpha_max
-                            neighbor = alpha_max
+            def lineq(x, m, x0, b):
+                return float(max(m * (x - x0) + b, 0))
 
-                        elif angle == 0:
-                            # For 0 degrees, value at r/R = 0 along the 90 degree axis
-                            neighbor = float(max((alpha_max / (self.roverRend - peak_loc)) * (0 - peak_loc) + alpha_max, 0))
-                            # neighbor = float(max(m_prev * (0 - peak_loc) + b_prev, 0))
-                            
-                        else:
-                            # Find r* of previous angle at equivalent y-coordinate
-                            rstar_prev = y / np.sin(angle_prev * np.pi / 180)
+            def find_alpha_peak(alpha_peak, rstar_peak=0.90):
+                # Talley's reconstruction has a finer grid than experimental data
+                # This will affect the slope of the drop-off point if r/R_end is not coincident with a point on the experiment mesh
+                r_points = np.arange(0,1,0.05)
+                self.add_mesh_points(r_points)
 
-                            # Peak void fraction of current angle defined as void fraction at previous angle r*
-                            neighbor = float(max(m_prev * (rstar_prev - peak_loc) + b_prev, 0))
+                interps = {}
+                
+                for angle, r_dict in self.data.items():                 # 360 degrees covered, not just one quadrant
+                    
+                    if angle < 90:
+                        interps[angle] = {'angle_nn': angle_q1, 'm_nn': m_i, 'x0_nn': rstar_anchor, 'b_nn': anchor}
+
+                    # Operate in first quadrant
+                    if angle <= 90:
+                        angle_q1 = angle
+                    elif angle <= 180:
+                        angle_q1 = 180 - angle
+                    elif angle <= 270:
+                        angle_q1 = angle - 180
+                    else:
+                        angle_q1 = 360 - angle
+
+                    # Save previous angle linear interpolations for nearest neighbor determination
+                    if angle_q1 != 90:
+                        angle_nn = interps[angle_q1]['angle_nn']
+                        m_nn = interps[angle_q1]['m_nn']
+                        x0_nn = interps[angle_q1]['x0_nn']
+                        b_nn = interps[angle_q1]['b_nn']
+
+                    # Find the peak nearest neighbor
+                    if angle_q1 == 90:
+                        # For 90 degrees, just alpha_peak
+                        peak = alpha_peak
+
+                        anchor = 0
+                        rstar_anchor = self.roverRend
+
+                    elif angle_q1 == 0:
+                        # For 0 degrees, value at r/R = 0 along the 90 degree axis
+                        peak = lineq(x = 0, 
+                                     m = 0 - alpha_peak / (self.roverRend - rstar_peak),
+                                     x0 = rstar_peak,
+                                     b = alpha_peak)
+
+                        anchor = peak
+                        rstar_anchor = 0
+
+                    else:
+                        # Find r* of previous angle at equivalent y-coordinate
+                        y_peak = rstar_peak * np.sin(angle_q1 * np.pi / 180)
+                        rstar_nn = y_peak / np.sin(angle_nn * np.pi / 180)
+
+                        # if debug:
+                        #     print(f"angle: {angle}\tangle_nn: {angle_nn}")
+
+                        # Peak void fraction of current angle defined as void fraction at previous angle r*
+                        peak = lineq(x = rstar_nn,
+                                     m = m_nn,
+                                     x0 = x0_nn,
+                                     b = b_nn)
+                        
+                        if debug and angle == 22.5:
+                            print(f"y_peak: {y_peak}\trstar_nn: {rstar_nn}")
                             pass
+                        
+                        anchor = 0
+                        rstar_anchor = self.roverRend / np.cos((90 - angle_q1) * np.pi / 180)       # Talley's implementation in Excel
+                        # rstar_anchor = self.roverRend / np.sin(angle_q1 * np.pi / 180)            # But why not like this
+                        
+                        # if self.roverRend > 0:
+                        #     anchor = 0
+                        #     rstar_anchor = self.roverRend
+                        # else:
+                        #     # Value at r/R = 0 along the 90 degree axis
+                        #     anchor = lineq(x = 0,
+                        #                    m = 0 - alpha_peak / (self.roverRend - rstar_peak),
+                        #                    x0 = rstar_peak,
+                        #                    b = alpha_peak)
+                        #     rstar_anchor = 0
 
-                        # Linear interpolation, y = mx + b
-                        m_o = -neighbor / (1 - peak_loc)                    # Slope of outer interpolation
-                        m_i = -neighbor / (self.roverRend - peak_loc)       # Slope of inner interpolation
-                        b = neighbor                                        # (Shifted) intercept is the peak void fraction (nearest neighbor for non-90 and non-0)
+                    # Linear interpolation, y = mx + b
+                    m_o1 = (0 - peak) / (1 - rstar_peak)                    # Slope of outer interpolation
+                    m_i = (peak - anchor) / (rstar_peak - rstar_anchor)     # Slope of inner interpolation
+
+                    base = lineq(x = -rstar_peak,
+                                 m = m_i,
+                                 x0 = rstar_anchor,
+                                 b = anchor)
+                    rstar_base = -rstar_peak
+
+                    m_o2 = (0 - base) / (-1 - rstar_base)                   # Slope of outer interpolation, on opposite wall
+
+                    for rstar, midas_dict in r_dict.items():                # Only goes from 0.0 to 1.0
+
+                        if angle >= 180 and angle < 360:
+                            rstar = -rstar                                  # Use same slopes for -1.0 to 0.0
 
                         # Alpha interpolations in terms of r* (see page 134 of Talley 2012)
-                        if rstar > peak_loc:
-                            midas_dict['alpha_reconstructed'] = float(m_o * (rstar - peak_loc) + b)
-                        else:
-                            if angle == 0:
-                                if -rstar > peak_loc:
-                                    midas_dict['alpha_reconstructed'] = float(m_o * (-rstar - peak_loc) + b)        # Symmetry for 180 degrees
-                                else:
-                                    midas_dict['alpha_reconstructed'] = neighbor                                    # Between peak locations, uniform profile
+                        if rstar > rstar_peak:
+                            # Outer interpolation
+                            midas_dict['alpha_reconstructed'] = lineq(x = rstar,
+                                                                      m = m_o1,
+                                                                      x0 = rstar_peak,
+                                                                      b = peak)
+
+                        elif abs(rstar) <= rstar_peak:
+                            if angle_q1 == 0:
+                                # Between peak locations, uniform profile
+                                midas_dict['alpha_reconstructed'] = peak
                             else:
-                                midas_dict['alpha_reconstructed'] = float(max(m_i * (rstar - peak_loc) + b, 0))     # Make sure it's not < 0. This covers for y < roverRend
+                                # Inner interpolation
+                                midas_dict['alpha_reconstructed'] = lineq(x = rstar,
+                                                                          m = m_i,
+                                                                          x0 = rstar_anchor,
+                                                                          b = anchor)
+                                
+                        else:
+                            if angle_q1 == 0:
+                                # Symmetry for 180 degrees
+                                midas_dict['alpha_reconstructed'] = lineq(x = rstar,
+                                                                          m = -m_o1,
+                                                                          x0 = rstar_peak,
+                                                                          b = peak)
+                            else:
+                                # Opposite wall interpolation
+                                midas_dict['alpha_reconstructed'] = lineq(x = rstar,
+                                                                          m = m_o2,
+                                                                          x0 = rstar_base,
+                                                                          b = base)
 
-                        ###############################################################################################
-                        # Debugging -- are all the r* = 0 values the same? Do they get overwritten with each new angle?
-                        if rstar == 0:
-                            print(f"Angle: {angle}\t\tr*: {rstar}\t\talpha: {midas_dict['alpha_reconstructed']}")
-                        ###############################################################################################
+                        if debug:
+                            print(f"{angle}\t{rstar}:\t\talpha_rec: {midas_dict['alpha_reconstructed']:.4f}\talpha_dat: {midas_dict['alpha']:.4f}")
+                    
+                    self.alpha_peak = alpha_peak
 
-                    # Save previous angle linear interpolation for nearest neighbor determination
-                    angle_prev = angle
-                    m_prev = m_i            # Nearest neighbor should never have to use the m_o case
-                    b_prev = b
-
-                return abs( self.area_avg('alpha') - self.area_avg('alpha_reconstructed') )
+                return abs( round(self.area_avg('alpha',method=avg_method),3) - self.area_avg('alpha_reconstructed',method=avg_method) )    # Talley's value is to three decimals of precision
             
-            result = minimize(find_alpha_max, x0 = 0.5)
+            result = minimize(find_alpha_peak, x0 = 0.5, bounds = ((0,1),))      # The way they want me to format bounds is stupid. Python is stupid.
 
             if result.success:
-                self.alpha_max_reconstructed = result.x
-                find_alpha_max(self.alpha_max_reconstructed)
+                self.alpha_peak_reconstructed = result.x
+                find_alpha_peak(self.alpha_peak_reconstructed)
             else:
-                if debug:
-                    warnings.warn("Minimization did not return a successful result")
-                    print(f"⟨α⟩_data: {self.area_avg('alpha')}\n⟨α⟩_reconstructed: {self.area_avg('alpha_reconstructed')}\n")
+                warnings.warn("Minimization did not return a successful result")
+                print(result.message)
+            
+            print(f"\n\tr/R_end: {self.roverRend}")
+            print(f"\talpha_peak: {self.alpha_peak}")
+            print(f"\t⟨α⟩_data: {round(self.area_avg('alpha',method=avg_method),3)}")
+            print(f"\t⟨α⟩_reconstructed: {self.area_avg('alpha_reconstructed',method=avg_method)}")
 
             '''
-            def find_alpha_max(alpha_max):
+            def find_alpha_peak(alpha_peak):
                 for angle, r_dict in self.data.items():
                     for rstar, midas_dict in r_dict.items():
 
@@ -2881,9 +3492,9 @@ the newly calculated :math:`v_{r}` or not
 
                         # First calculate centerline void fraction (first linear interpolation)
                         if y > 0.9:
-                            alpha_CL = alpha_max / 0.1 * (1 - y)
+                            alpha_CL = alpha_peak / 0.1 * (1 - y)
                         else:
-                            alpha_CL = max(alpha_max / (0.9 - self.roverRend) * (y - self.roverRend), 0) # make sure it's not < 0. This covers for y < roverRend
+                            alpha_CL = max(alpha_peak / (0.9 - self.roverRend) * (y - self.roverRend), 0) # make sure it's not < 0. This covers for y < roverRend
                         alpha_CL = float(alpha_CL)
 
                         # Then calculate
@@ -2895,11 +3506,11 @@ the newly calculated :math:`v_{r}` or not
 
                 return abs( self.area_avg('alpha') - self.area_avg('alpha_reconstructed') )
             
-            result = minimize(find_alpha_max, x0 = 0.5)
+            result = minimize(find_alpha_peak, x0 = 0.5)
 
             if result.success:
-                self.alpha_max_reconstructed = result.x
-                find_alpha_max(self.alpha_max_reconstructed)
+                self.alpha_peak_reconstructed = result.x
+                find_alpha_peak(self.alpha_peak_reconstructed)
             else:
                 if debug:
                     warnings.warn("Minimization did not return a successful result")
@@ -2909,7 +3520,7 @@ the newly calculated :math:`v_{r}` or not
         elif method.lower() == 'not_talley' or method.lower() == 'double_linear':
             self.roverRend = -1.472e-5 * self.Ref + 2.571
 
-            def find_alpha_max(alpha_max):
+            def find_alpha_peak(alpha_peak):
                 for angle, r_dict in self.data.items():
                     for rstar, midas_dict in r_dict.items():
 
@@ -2918,9 +3529,9 @@ the newly calculated :math:`v_{r}` or not
 
                         # First calculate centerline void fraction (first linear interpolation)
                         if y > 0.9:
-                            alpha_CL = alpha_max / 0.1 * (1 - y)
+                            alpha_CL = alpha_peak / 0.1 * (1 - y)
                         else:
-                            alpha_CL = max(alpha_max / (0.9 - self.roverRend) * (y - self.roverRend), 0) # make sure it's not < 0. This covers for y < roverRend
+                            alpha_CL = max(alpha_peak / (0.9 - self.roverRend) * (y - self.roverRend), 0) # make sure it's not < 0. This covers for y < roverRend
 
                         # 
                         if np.sqrt(1 - y**2) == 0:
@@ -2930,11 +3541,11 @@ the newly calculated :math:`v_{r}` or not
 
                 return abs( self.area_avg('alpha') - self.area_avg('alpha_reconstructed') )
             
-            result = minimize(find_alpha_max, x0 = 0.5)
+            result = minimize(find_alpha_peak, x0 = 0.5)
 
             if result.success:
-                self.alpha_max_reconstructed = result.x
-                find_alpha_max(self.alpha_max_reconstructed)
+                self.alpha_peak_reconstructed = result.x
+                find_alpha_peak(self.alpha_peak_reconstructed)
             else:
                 if debug:
                     warnings.warn("Minimization did not return a successful result")
@@ -2987,7 +3598,7 @@ the newly calculated :math:`v_{r}` or not
 
         return self.area_avg("alpha_reconstructed")
     
-    def plot_profiles2(self, param, save_dir = '.', show=True, x_axis='vals', 
+    def plot_profiles2(self, param, save_dir = '.', show=True, x_axis='vals', errorbars = 0.0, 
                       const_to_plot = [90, 67.5, 45, 22.5, 0], include_complement = True, 
                       fig_size=(4,4), title=True, label_str = '', legend_loc = 'best', xlabel_loc = 'center',
                       set_min = None, set_max = None, show_spines = True, xlabel_loc_coords = None, ylabel_loc_coords = None, cs=None) -> None:
@@ -3008,10 +3619,11 @@ the newly calculated :math:`v_{r}` or not
          - legend_loc, passed to ax.legend
          - xlable_loc, passed to ax.xaxis.set_label_coords
          - xlable_loc_coords, passed to ax.xaxis.set_label_coords
+         - errorbars, value of errorbars to put on the data
          
         
         """
-
+        # TODO rewrite so it always loops over a list of params. If there's only one, just put it in a list at the begininng 
 
         plt.rcParams.update({'font.size': 12})
         plt.rcParams["font.family"] = "Times New Roman"
@@ -3026,8 +3638,11 @@ the newly calculated :math:`v_{r}` or not
         # Tick marks facing in
         ax.tick_params(direction='in',which='both')
 
+        if errorbars > 0:
+            ax.plot([], [], ' ', label = f"{errorbars*100:0.1f}% error bars") # dummy to just get this text in the legend
+
         ms = marker_cycle()
-        if cs is None:
+        if cs is None or type(param) == list:
             cs = color_cycle()
         elif cs == 'infer' and type(param) == str:
             cs = color_cycle(set_color = param)
@@ -3110,11 +3725,12 @@ the newly calculated :math:`v_{r}` or not
                 if type(param) == str:
                     vals = [var for _, var in sorted(zip(rs, vals))]
                     rs = sorted(rs)
-                    
+                    errs = errorbars * np.asarray(vals)
+
                     if x_axis == 'vals':
-                        ax.plot(vals, rs, label=f'{angle}°', color=next(cs), marker=next(ms), linestyle = '--')
+                        ax.errorbar(vals, rs, xerr = errs, capsize=3, ecolor = "black", label=f'{angle}°', color=next(cs), marker=next(ms), linestyle = '--')
                     elif x_axis == 'r':
-                        ax.plot(rs, vals, label=f'{angle}°', color=next(cs), marker=next(ms), linestyle = '--')
+                        ax.errorbar(rs, vals, yerr = errs, capsize=3, ecolor = "black", label=f'{angle}°', color=next(cs), marker=next(ms), linestyle = '--')
                 
                 elif type(param) == list:
                     temp = []
@@ -3124,29 +3740,22 @@ the newly calculated :math:`v_{r}` or not
                     rs = sorted(rs)
 
                     for specific_param, val_list in zip(param, temp):
+                        errs = errorbars * np.asarray(val_list)
                         # print(val_list)
-                        cs = color_cycle(set_color = specific_param)
-
-                        if specific_param == 'alpha':
-                            legend_str = r'$\alpha$'
-                        elif specific_param == 'alpha_G1':
-                            legend_str = r'$\alpha_{G1}$'
-                        elif specific_param == 'alpha_G2':
-                            legend_str = r'$\alpha_{G2}$'
-                        elif specific_param == 'ai':
-                            legend_str = r'$a_{i}$'
-                        elif specific_param == 'ai_G1':
-                            legend_str = r'$a_{i, G1}$'
-                        elif specific_param == 'ai_G2':
-                            legend_str = r'$a_{i, G2}$'
-                        elif specific_param == 'ug1':
-                            legend_str = r'$v_{g, G1}$'
-                        elif specific_param == 'ug2':
-                            legend_str = r'$v_{g, G2}$'
-                        elif specific_param == 'vf':
-                            legend_str = r'$v_{f}$'
-                        elif specific_param == 'vf_approx':
-                            legend_str = r'$v_{f, approx}$'
+                        if cs == 'infer':
+                            cs = color_cycle(set_color = specific_param)
+                        
+                        
+                        legend_str = ''
+                        if 'alpha' in specific_param:
+                            specific_param = specific_param.replace('alpha', r'$\alpha$')
+                        elif 'ai' in specific_param:
+                            specific_param = specific_param.replace('ai', r'$a_{i}$')
+                        elif 'ug' in specific_param:
+                            specific_param = specific_param.replace('ug', r'$v_{g}$')
+                        elif 'vf' in specific_param:
+                            specific_param = specific_param.replace('vf', r'$v_{f}$')
+                        
                         elif specific_param == 'vr':
                             legend_str = r'$v_{r, G1}$'
                         elif specific_param == 'vr2':
@@ -3155,13 +3764,14 @@ the newly calculated :math:`v_{r}` or not
                             legend_str = r'$D_{sm1}$'
                         elif specific_param == 'Dsm2':
                             legend_str = r'$D_{sm2}$'
-                        else:
-                            legend_str = param
+
+                        if legend_str == '':
+                            legend_str = specific_param
 
                         if x_axis == 'vals':
-                            ax.plot(val_list, rs, color=next(cs), marker=next(ms), linestyle = '--', label = legend_str)
+                            ax.errorbar(val_list, rs, xerr = errs, capsize=3, ecolor = "black", color=next(cs), marker=next(ms), linestyle = '--', label = legend_str)
                         elif x_axis == 'r':
-                            ax.plot(rs, val_list, color=next(cs), marker=next(ms), linestyle = '--', label = legend_str)
+                            ax.errorbar(rs, val_list, yerr = errs, capsize=3, ecolor = "black", color=next(cs), marker=next(ms), linestyle = '--', label = legend_str)
                     
             
             if x_axis == 'vals':
@@ -3228,8 +3838,8 @@ the newly calculated :math:`v_{r}` or not
             if set_min == 0 or set_max == 0:
                 ax.spines['left'].set_position(('data', set_min))
                 ax.spines['right'].set_position(('data', 0))
-                ax.yaxis.tick_right()
-                ax.yaxis.set_label_position("right")
+                # ax.yaxis.tick_right()
+                # ax.yaxis.set_label_position("right")
 
             if not show_spines:
                 ax.spines['top'].set_visible(False)
@@ -3263,17 +3873,23 @@ the newly calculated :math:`v_{r}` or not
 
             ax.set_xticks([0, 90, 180, 270, 360])
                
-        if title:
+        if hasattr(title,'__len__'):
+            # Set your own title! -DHK
+            ax.set_title(title)
+        elif title:
             ax.set_title(self.name)
+
+        
         
 
-        ax.legend(loc=legend_loc, edgecolor='white')
+        leg = ax.legend(loc=legend_loc, edgecolor='white')
 
         if xlabel_loc_coords:
             ax.xaxis.set_label_coords(*xlabel_loc_coords)
 
         if ylabel_loc_coords:
             ax.yaxis.set_label_coords(*ylabel_loc_coords)
+
 
         
         ax.set_aspect('auto', adjustable='datalim', share=True)
@@ -3587,7 +4203,7 @@ the newly calculated :math:`v_{r}` or not
             fig, ax = plt.subplots(figsize=(fig_size, fig_size), dpi=300)
         else:
             fig, ax = plt.subplots(figsize=(fig_size, fig_size), dpi=300, subplot_kw=dict(projection='polar'))
-        plt.rcParams.update({'font.size': 12})
+        plt.rcParams.update({'font.size': 16})
         plt.rcParams["font.family"] = "Times New Roman"
         plt.rcParams["mathtext.fontset"] = "cm"
         
@@ -3644,7 +4260,7 @@ the newly calculated :math:`v_{r}` or not
             set_min = np.min(parami)
 
         if set_max == None:
-            set_max = np.max(parami)
+            set_max = np.max(parami) + (np.max(parami) * 0.1)
 
         if set_min > np.min(parami):
             extend_min = True
@@ -3713,7 +4329,7 @@ the newly calculated :math:`v_{r}` or not
             plt.axis('square')
             plt.xlabel (r'$x/R$ [-]')
             plt.ylabel(r'$y/R$ [-]')
-            ax.grid(True)
+            ax.grid(False)
         else:
             ax.set_yticklabels([])
             ax.set_xticklabels([])
@@ -3724,7 +4340,10 @@ the newly calculated :math:`v_{r}` or not
             label_str = param
 
         if not suppress_colorbar:
-            fig.colorbar(mpbl, label=label_str)
+            tx_step = round((set_max - set_min)/5,-int(np.floor(np.log10((set_max - set_min)/10))))
+            tx = np.arange(set_min,set_max,tx_step)
+
+            fig.colorbar(mpbl, label=label_str, ticks=tx)
 
         if title_str != '':
             title = True
@@ -3746,7 +4365,7 @@ the newly calculated :math:`v_{r}` or not
             plt.close()
         return ax
 
-    def plot_surface(self, param:str, save_dir = '.', show=True, rotate_gif=False, elev_angle = 145, 
+    def plot_surface(self, param:str, save_dir = '.', show=True, set_max = None, set_min = None, rotate_gif=False, elev_angle = 145, 
                      azim_angle = 0, roll_angle = 180, title=True, ngridr = 50, ngridphi = 50, 
                      plot_surface_kwargs = None, solid_color = False, label_str = None, title_str = '') -> None:
         """Method to plot a surface of a given param
@@ -3812,7 +4431,6 @@ the newly calculated :math:`v_{r}` or not
 
         surf = ax.plot_surface(Xi, Yi, parami, **plot_surface_kwargs)
         
-
         #plt.legend()
         ax.set_xlabel (r'$x/R$ [-]')
         ax.set_ylabel(r'$y/R$ [-]')
@@ -3821,14 +4439,22 @@ the newly calculated :math:`v_{r}` or not
         ax.set_ylim([-1, 1])
         
         ax.set_zlim([plot_surface_kwargs['vmin'], plot_surface_kwargs['vmax']])
+        
+        if set_min == None:
+            set_min = np.min(parami)
 
+        if set_max == None:
+            set_max = np.max(parami) + (np.max(parami) * 0.1)
+
+        tx_step = round((set_max - set_min)/5,-int(np.floor(np.log10((set_max - set_min)/10))))
+        tx = np.arange(set_min,set_max,tx_step)
         
         if label_str:
             ax.set_zlabel(label_str)
-            fig.colorbar(surf, label=label_str)
+            fig.colorbar(surf, label=label_str,ticks=tx)
         else:
             ax.set_zlabel(param)
-            fig.colorbar(surf, label=param)
+            fig.colorbar(surf, label=param,ticks=tx)
         
         if title: 
             if title_str:
@@ -4574,6 +5200,7 @@ def color_cycle(set_color = None):
      * Otherwise, it assumes set_color is a list of colors to yield
 
     """
+    color_list = []
     if set_color == None:
         color_list = ['#0000FF',
                       '#FF0000',
@@ -4587,34 +5214,37 @@ def color_cycle(set_color = None):
                       '#000000']
     elif re.search(r'^#(?:[0-9a-fA-F]{3}){1,2}$', set_color):
         color_list = [set_color]
-    elif set_color == 'alpha':
-        color_list = ['#000000']
-    elif set_color == 'alpha_G1':
-        color_list = ['#A0A0A0']
-    elif set_color == 'alpha_G2':
-        color_list = ['#606060']
-    elif set_color == 'ai':
-        color_list = ['#00FF00']
-    elif set_color == 'ai_G2':
-        color_list = ['#66FF66']
-    elif set_color == 'ai_G1':
-        color_list = ['#006600']
-    elif set_color == 'ug1':
-        color_list = ['#FF0000']
-    elif set_color == 'ug2':
-        color_list = ['#ff8080']
-    elif set_color == 'Dsm1':
-        color_list = ['#00FFFF']
-    elif set_color == 'Dsm2':
-        color_list = ['#6666FF']
-    elif set_color == 'vf' or set_color == 'vf_approx':
-        color_list = ['#0000FF']
-    elif set_color == 'vr':
-        color_list = ['#FF00FF']
-    elif set_color == 'vr2':
-        color_list = ['#FF80FF']
+    # I want these to be able to override each other
     else:
-        color_list = ['#000000']
+        if 'alpha' in set_color:
+            color_list = ['#000000']
+        if 'alpha_G1' in set_color:
+            color_list = ['#A0A0A0']
+        if 'alpha_G2' in set_color:
+            color_list = ['#606060']
+        if 'ai' in set_color:
+            color_list = ['#00FF00']
+        if 'ai_G2' in set_color:
+            color_list = ['#66FF66']
+        if 'ai_G1' in set_color:
+            color_list = ['#006600']
+        if 'ug1' in set_color:
+            color_list = ['#FF0000']
+        if 'ug2' in set_color:
+            color_list = ['#ff8080']
+        if 'Dsm1' in set_color:
+            color_list = ['#00FFFF']
+        if 'Dsm2' in set_color:
+            color_list = ['#6666FF']
+        if 'vf' in set_color or 'vf_approx' in set_color:
+            color_list = ['#0000FF']
+        if 'vr' in set_color:
+            color_list = ['#FF00FF']
+        if 'vr2' in set_color:
+            color_list = ['#FF80FF']
+        
+        elif not color_list:
+            color_list = ['#000000']
         
 
     i = 0

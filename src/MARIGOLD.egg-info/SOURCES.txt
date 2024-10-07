@@ -5,6 +5,7 @@ setup.cfg
 src/MARIGOLD/CFD.py
 src/MARIGOLD/Condition.py
 src/MARIGOLD/Iskandrani_Condition.py
+src/MARIGOLD/Rect_Condition.py
 src/MARIGOLD/Yang_Condition.py
 src/MARIGOLD/__init__.py
 src/MARIGOLD/config.py

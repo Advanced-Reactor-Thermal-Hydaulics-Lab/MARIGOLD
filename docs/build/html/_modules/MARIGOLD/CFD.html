@@ -6,6 +6,8 @@
   <title>MARIGOLD.CFD &mdash; MARIGOLD 0.0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/dark_mode_css/general.css?v=c0a7eb24" />
+      <link rel="stylesheet" type="text/css" href="../../_static/dark_mode_css/dark.css?v=70edf1c7" />
 
   
   <!--[if lt IE 9]>
@@ -17,6 +19,8 @@
         <script src="../../_static/documentation_options.js?v=d45e8c67"></script>
         <script src="../../_static/doctools.js?v=888ff710"></script>
         <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../_static/dark_mode_js/default_dark.js?v=fd565c74"></script>
+        <script src="../../_static/dark_mode_js/theme_switcher.js?v=358d3910"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -80,7 +84,7 @@
 
 <div class="viewcode-block" id="write_CFX_BC">
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.CFD.write_CFX_BC">[docs]</a>
-<span class="k">def</span> <span class="nf">write_CFX_BC</span><span class="p">(</span><span class="n">cond</span><span class="p">:</span><span class="n">Condition</span><span class="p">,</span> <span class="n">save_dir</span> <span class="o">=</span> <span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="n">z_loc</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">only_90</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">write_CFX_BC</span><span class="p">(</span><span class="n">cond</span><span class="p">:</span><span class="n">Condition</span><span class="p">,</span> <span class="n">save_dir</span> <span class="o">=</span> <span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="n">z_loc</span> <span class="o">=</span> <span class="s1">&#39;LoverD&#39;</span><span class="p">,</span> <span class="n">only_90</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">interp</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">csv_name</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">ngrid</span> <span class="o">=</span> <span class="mi">100</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Write a csv file for CFX based on cond</span>
 
 <span class="sd">    z_loc can be set by the user, or set to &quot;LoverD&quot; to use the cond L/D information</span>
@@ -90,41 +94,78 @@
 <span class="sd">    only_90 option for writing data only down the 90 degree line</span>
 <span class="sd">    </span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">dummy</span> <span class="o">=</span> <span class="n">cond</span><span class="o">.</span><span class="n">run_ID</span>
+    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+        <span class="n">cond</span><span class="o">.</span><span class="n">run_ID</span> <span class="o">=</span> <span class="n">cond</span><span class="o">.</span><span class="n">database</span>
 
-    <span class="k">if</span> <span class="n">only_90</span><span class="p">:</span>
-        <span class="n">csv_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">cond</span><span class="o">.</span><span class="n">run_ID</span><span class="si">}</span><span class="s2">_jf</span><span class="si">{</span><span class="n">cond</span><span class="o">.</span><span class="n">jf</span><span class="si">:</span><span class="s2">0.1f</span><span class="si">}</span><span class="s2">_jg</span><span class="si">{</span><span class="n">cond</span><span class="o">.</span><span class="n">jgref</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">cond</span><span class="o">.</span><span class="n">theta</span><span class="si">}</span><span class="s2">_90deg.csv&quot;</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">csv_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">cond</span><span class="o">.</span><span class="n">run_ID</span><span class="si">}</span><span class="s2">_jf</span><span class="si">{</span><span class="n">cond</span><span class="o">.</span><span class="n">jf</span><span class="si">:</span><span class="s2">0.1f</span><span class="si">}</span><span class="s2">_jg</span><span class="si">{</span><span class="n">cond</span><span class="o">.</span><span class="n">jgref</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">cond</span><span class="o">.</span><span class="n">theta</span><span class="si">}</span><span class="s2">.csv&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">csv_name</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">only_90</span><span class="p">:</span>
+            <span class="n">csv_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">cond</span><span class="o">.</span><span class="n">run_ID</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">cond</span><span class="o">.</span><span class="n">theta</span><span class="si">}</span><span class="s2">deg_jf</span><span class="si">{</span><span class="n">cond</span><span class="o">.</span><span class="n">jf</span><span class="si">:</span><span class="s2">0.1f</span><span class="si">}</span><span class="s2">_jg</span><span class="si">{</span><span class="n">cond</span><span class="o">.</span><span class="n">jgref</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">cond</span><span class="o">.</span><span class="n">port</span><span class="si">}</span><span class="s2">_BC_90deg.csv&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">csv_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">cond</span><span class="o">.</span><span class="n">run_ID</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">cond</span><span class="o">.</span><span class="n">theta</span><span class="si">}</span><span class="s2">deg_jf</span><span class="si">{</span><span class="n">cond</span><span class="o">.</span><span class="n">jf</span><span class="si">:</span><span class="s2">0.1f</span><span class="si">}</span><span class="s2">_jg</span><span class="si">{</span><span class="n">cond</span><span class="o">.</span><span class="n">jgref</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">cond</span><span class="o">.</span><span class="n">port</span><span class="si">}</span><span class="s2">_BC.csv&quot;</span>
 
     <span class="n">path_to_csv</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">save_dir</span><span class="p">,</span> <span class="n">csv_name</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">z_loc</span> <span class="o">==</span> <span class="s1">&#39;LoverD&#39;</span><span class="p">:</span>
         <span class="n">z_loc</span> <span class="o">=</span> <span class="n">cond</span><span class="o">.</span><span class="n">LoverD</span>
 
+
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path_to_csv</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">R</span> <span class="o">=</span> <span class="n">cond</span><span class="o">.</span><span class="n">Dh</span><span class="o">/</span><span class="mi">2</span>
 
         <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;[Name],,,,,,,,,</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">cond</span><span class="o">.</span><span class="n">run_ID</span><span class="si">}</span><span class="s2">data,,,,,,,,,</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">cond</span><span class="o">.</span><span class="n">port</span><span class="si">}</span><span class="s2">data,,,,,,,,,</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;[Spatial Fields],,,,,,,,,</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;radius,z,phi,,,,,,,</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;[Data],,,,,,,,,</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;radius [mm],z [m],phi [],Velocity u [m s^-1],Velocity v [m s^-1],Velocity w [m s^-1],Volume Fraction [],Velocity u f [m s^-1],Velocity v f [m s^-1],Velocity w f [m s^-1],</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">interp</span><span class="p">:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;radius,z,phi,,,,,,,</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;[Data],,,,,,,,,</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;radius [mm],z [m],phi [],Velocity u g[m s^-1],Velocity v g[m s^-1],Velocity w g[m s^-1],Volume Fraction [],Velocity u f [m s^-1],Velocity v f [m s^-1],Velocity w f [m s^-1],</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
 
-        <span class="k">for</span> <span class="n">angle</span><span class="p">,</span> <span class="n">r_dict</span> <span class="ow">in</span> <span class="n">cond</span><span class="o">.</span><span class="n">phi</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                <span class="k">for</span> <span class="n">rstar</span><span class="p">,</span> <span class="n">midas_output</span> <span class="ow">in</span> <span class="n">r_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                    <span class="k">if</span> <span class="n">only_90</span><span class="p">:</span>
-                        <span class="k">if</span> <span class="n">angle</span> <span class="o">==</span> <span class="mi">90</span> <span class="ow">or</span> <span class="n">angle</span> <span class="o">==</span> <span class="mi">270</span><span class="p">:</span>
-                            <span class="k">pass</span>
+            <span class="k">for</span> <span class="n">angle</span><span class="p">,</span> <span class="n">r_dict</span> <span class="ow">in</span> <span class="n">cond</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="k">for</span> <span class="n">rstar</span><span class="p">,</span> <span class="n">midas_output</span> <span class="ow">in</span> <span class="n">r_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                        <span class="k">if</span> <span class="n">only_90</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="n">angle</span> <span class="o">==</span> <span class="mi">90</span> <span class="ow">or</span> <span class="n">angle</span> <span class="o">==</span> <span class="mi">270</span><span class="p">:</span>
+                                <span class="n">r</span> <span class="o">=</span> <span class="n">rstar</span> <span class="o">*</span> <span class="mf">12.7</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">angle</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">180</span><span class="p">)</span> <span class="c1"># r/R * R [mm]</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="k">continue</span>
                         <span class="k">else</span><span class="p">:</span>
-                            <span class="k">continue</span>
-                    <span class="n">r</span> <span class="o">=</span> <span class="n">rstar</span> <span class="o">*</span> <span class="mf">12.7</span> <span class="c1"># r/R * R [mm]</span>
-                    <span class="k">try</span><span class="p">:</span>
-                        <span class="n">vf</span> <span class="o">=</span> <span class="n">midas_output</span><span class="p">[</span><span class="s1">&#39;vf&#39;</span><span class="p">]</span>
-                    <span class="k">except</span><span class="p">:</span>
-                        <span class="n">cond</span><span class="o">.</span><span class="n">approx_vf</span><span class="p">()</span>
-                        <span class="n">vf</span> <span class="o">=</span> <span class="n">midas_output</span><span class="p">[</span><span class="s1">&#39;vf&#39;</span><span class="p">]</span>
+                            <span class="n">r</span> <span class="o">=</span> <span class="n">rstar</span> <span class="o">*</span> <span class="mf">12.7</span> <span class="c1"># r/R * R [mm]</span>
 
-                    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">r</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="n">z_loc</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="n">angle</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">180</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="mi">0</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="n">midas_output</span><span class="p">[</span><span class="s1">&#39;ug1&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="mi">0</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="n">midas_output</span><span class="p">[</span><span class="s1">&#39;alpha&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="mi">0</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="n">vf</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="mi">0</span><span class="si">}</span><span class="s2">,</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+                        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">r</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="n">z_loc</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="n">angle</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">180</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="mi">0</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="mi">0</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="n">midas_output</span><span class="p">[</span><span class="s1">&#39;ug1&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="n">midas_output</span><span class="p">[</span><span class="s1">&#39;alpha&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="mi">0</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="mi">0</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="n">midas_output</span><span class="p">[</span><span class="s1">&#39;vf&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">,</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">interp</span> <span class="o">==</span> <span class="s1">&#39;xy&#39;</span><span class="p">:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;x,y,z,,,,,,,</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;[Data],,,,,,,,,</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;x [m],y [m],z [m],Velocity u g [m s^-1],Velocity v g [m s^-1],Velocity w g [m s^-1],Volume Fraction [],Velocity u f [m s^-1],Velocity v f [m s^-1],Velocity w f [m s^-1],</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+            <span class="n">ys</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="n">R</span><span class="p">,</span> <span class="n">R</span><span class="p">,</span> <span class="n">ngrid</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">only_90</span><span class="p">:</span>
+                <span class="n">xs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">ys</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">xs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="n">R</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">R</span><span class="p">,</span> <span class="n">ngrid</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">xs</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">ys</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">x</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">y</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">R</span><span class="p">:</span>
+                        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="n">y</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="n">z_loc</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="mi">0</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="mi">0</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="w"> </span><span class="n">cond</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;ug1&#39;</span><span class="p">,</span><span class="w"> </span><span class="n">interp_method</span><span class="o">=</span><span class="s1">&#39;linear_xy&#39;</span><span class="p">)</span><span class="w"> </span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="n">cond</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;alpha&#39;</span><span class="p">,</span><span class="w"> </span><span class="n">interp_method</span><span class="o">=</span><span class="s1">&#39;linear_xy&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="mi">0</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="mi">0</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="n">cond</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;vf&#39;</span><span class="p">,</span><span class="w"> </span><span class="n">interp_method</span><span class="o">=</span><span class="s1">&#39;linear_xy&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">,</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;radius,z,phi,,,,,,,</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;[Data],,,,,,,,,</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;radius [mm],z [m],phi [],Velocity u g [m s^-1],Velocity v g [m s^-1],Velocity w g [m s^-1],Volume Fraction [],Velocity u f [m s^-1],Velocity v f [m s^-1],Velocity w f [m s^-1],</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+            <span class="n">rs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">R</span><span class="p">,</span> <span class="n">ngrid</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">only_90</span><span class="p">:</span>
+                <span class="n">phis</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">phis</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="n">ngrid</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">rs</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">phi</span> <span class="ow">in</span> <span class="n">phis</span><span class="p">:</span>
+                    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">r</span><span class="o">*</span><span class="mi">1000</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="n">z_loc</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="n">phi</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="mi">0</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="mi">0</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="w"> </span><span class="n">cond</span><span class="p">(</span><span class="n">phi</span><span class="p">,</span><span class="w"> </span><span class="n">r</span><span class="o">/</span><span class="n">R</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;ug1&#39;</span><span class="p">,</span><span class="w"> </span><span class="n">interp_method</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">)</span><span class="w"> </span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="n">cond</span><span class="p">(</span><span class="n">phi</span><span class="p">,</span><span class="w"> </span><span class="n">r</span><span class="o">/</span><span class="n">R</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;alpha&#39;</span><span class="p">,</span><span class="w"> </span><span class="n">interp_method</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="mi">0</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="mi">0</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="n">cond</span><span class="p">(</span><span class="n">phi</span><span class="p">,</span><span class="w"> </span><span class="n">r</span><span class="o">/</span><span class="n">R</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;vf&#39;</span><span class="p">,</span><span class="w"> </span><span class="n">interp_method</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">,</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
 
     <span class="k">return</span></div>
 
@@ -188,10 +229,10 @@
             <span class="n">phi_angle</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> <span class="o">*</span> <span class="mi">180</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
 
             <span class="k">try</span><span class="p">:</span>
-                <span class="n">cond</span><span class="o">.</span><span class="n">phi</span><span class="p">[</span><span class="n">phi_angle</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">roverR</span><span class="p">:</span><span class="n">data_dict</span><span class="p">})</span>
+                <span class="n">cond</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">phi_angle</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">roverR</span><span class="p">:</span><span class="n">data_dict</span><span class="p">})</span>
             <span class="k">except</span><span class="p">:</span>
-                <span class="n">cond</span><span class="o">.</span><span class="n">phi</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">phi_angle</span><span class="p">:{}})</span>
-                <span class="n">cond</span><span class="o">.</span><span class="n">phi</span><span class="p">[</span><span class="n">phi_angle</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">roverR</span><span class="p">:</span><span class="n">data_dict</span><span class="p">})</span>
+                <span class="n">cond</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">phi_angle</span><span class="p">:{}})</span>
+                <span class="n">cond</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">phi_angle</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">roverR</span><span class="p">:</span><span class="n">data_dict</span><span class="p">})</span>
 
     <span class="k">return</span> <span class="n">cond</span></div>
 
@@ -199,9 +240,9 @@
 
 <div class="viewcode-block" id="make_ICEM_pipe_mesh">
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.CFD.make_ICEM_pipe_mesh">[docs]</a>
-<span class="k">def</span> <span class="nf">make_ICEM_pipe_mesh</span><span class="p">(</span><span class="n">r_divs</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">theta_divs</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">z_divs</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">o_point</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">L</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> 
-                        <span class="n">case_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">turb_model</span> <span class="o">=</span> <span class="s1">&#39;ke&#39;</span><span class="p">,</span> <span class="n">Ref</span> <span class="o">=</span> <span class="mi">20000</span><span class="p">,</span> <span class="n">growth_ratio</span> <span class="o">=</span> <span class="mf">1.2</span><span class="p">,</span> 
-                        <span class="n">fluent_translator_path</span> <span class="o">=</span> <span class="s2">&quot;/apps/cent7/ansys22/v221/icemcfd/linux64_amd/icemcfd/output-interfaces/fluent6&quot;</span><span class="p">,</span>
+<span class="k">def</span> <span class="nf">make_ICEM_pipe_mesh</span><span class="p">(</span><span class="n">r_divs</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">theta_divs</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">z_divs</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">o_point</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">Lmesh</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> 
+                        <span class="n">case_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">turb_model</span> <span class="o">=</span> <span class="s1">&#39;ke&#39;</span><span class="p">,</span> <span class="n">Ref</span> <span class="o">=</span> <span class="mi">20000</span><span class="p">,</span> <span class="n">growth_ratio</span> <span class="o">=</span> <span class="mf">1.2</span><span class="p">,</span> <span class="n">L</span> <span class="o">=</span> <span class="mf">1.2</span><span class="p">,</span>
+                        <span class="n">fluent_translator_path</span> <span class="o">=</span> <span class="s2">&quot;/apps/external/apps/ansys/2022r2/ansys_inc/v222/icemcfd/linux64_amd/icemcfd/output-interfaces/fluent6&quot;</span><span class="p">,</span>
                         <span class="n">cleanup</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Function for making an O-grid pipe mesh using ANSYS ICEM</span>
 
@@ -242,7 +283,7 @@
 <span class="s1">ic_point </span><span class="se">{{}}</span><span class="s1"> GEOM pnt.00 0,0,0</span><span class="se">\n\</span>
 <span class="s1">ic_undo_group_end </span><span class="se">\n\</span>
 <span class="s1">ic_undo_group_begin </span><span class="se">\n\</span>
-<span class="s1">ic_point </span><span class="se">{{}}</span><span class="s1"> GEOM pnt.01 0,0,2.54</span><span class="se">\n\</span>
+<span class="s1">ic_point </span><span class="se">{{}}</span><span class="s1"> GEOM pnt.01 0,0,</span><span class="si">{</span><span class="n">Lmesh</span><span class="si">}</span><span class="se">\n\</span>
 <span class="s1">ic_undo_group_end </span><span class="se">\n\</span>
 <span class="s1">ic_set_global geo_cad 0 toptol_userset</span><span class="se">\n\</span>
 <span class="s1">ic_set_global geo_cad 0.001 toler</span><span class="se">\n\</span>
@@ -421,7 +462,8 @@
     <span class="k">except</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">CalledProcessError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Continuing...&quot;</span><span class="p">)</span>
-    <span class="n">subprocess</span><span class="o">.</span><span class="n">check_call</span><span class="p">(</span><span class="s1">&#39;icemcfd -x ./mesh_replay.rpl &gt; auto_cfx_run.log&#39;</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">comp_process</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="s1">&#39;icemcfd -x ./mesh_replay.rpl &gt; auto_cfx_run.log&#39;</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">comp_process</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">cleanup</span><span class="p">:</span>
         <span class="n">subprocess</span><span class="o">.</span><span class="n">check_call</span><span class="p">(</span><span class="s1">&#39;rm mesh_replay.rpl&#39;</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">subprocess</span><span class="o">.</span><span class="n">check_call</span><span class="p">(</span><span class="s1">&#39;rm project1.*&#39;</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -505,7 +547,7 @@
                           <span class="n">inDataFile</span><span class="o">=</span> <span class="s1">&#39;/home/adix/CFD/exp_BCs/in_H_0.csv&#39;</span><span class="p">,</span> 
                           <span class="n">outDataFile</span> <span class="o">=</span> <span class="s1">&#39;/home/adix/CFD/exp_BCs/out_H_0.csv&#39;</span><span class="p">,</span> 
                           <span class="n">Db</span><span class="o">=</span><span class="mf">0.0018</span><span class="p">,</span> <span class="n">CL</span> <span class="o">=</span> <span class="mf">0.25</span><span class="p">,</span> <span class="n">CTD</span> <span class="o">=</span> <span class="mf">0.25</span><span class="p">,</span> <span class="n">theta</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">mdot</span> <span class="o">=</span> <span class="mf">2.02277</span><span class="p">,</span>
-                          <span class="n">Kf</span> <span class="o">=</span> <span class="mf">0.083</span><span class="p">,</span> <span class="n">Kw</span> <span class="o">=</span> <span class="mf">0.98</span><span class="p">,</span> <span class="n">CD</span> <span class="o">=</span> <span class="mf">0.44</span><span class="p">,</span> <span class="n">jf</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span> <span class="n">jg</span> <span class="o">=</span> <span class="mf">0.11</span><span class="p">,</span>
+                          <span class="n">Kf</span> <span class="o">=</span> <span class="mf">0.083</span><span class="p">,</span> <span class="n">Kw</span> <span class="o">=</span> <span class="mf">0.98</span><span class="p">,</span> <span class="n">CD</span> <span class="o">=</span> <span class="mf">0.44</span><span class="p">,</span> <span class="n">jf</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span> <span class="n">jg</span> <span class="o">=</span> <span class="mf">0.11</span><span class="p">,</span> <span class="n">p_out</span> <span class="o">=</span> <span class="mi">20</span><span class="p">,</span>
                           <span class="n">num_iter</span> <span class="o">=</span> <span class="mi">10000</span><span class="p">,</span> <span class="n">resid_target</span> <span class="o">=</span> <span class="mf">1e-6</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Function to write the CCL file that CFX reads</span>
 
@@ -531,9 +573,9 @@
         <span class="n">trash</span> <span class="o">=</span> <span class="n">infi</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
         <span class="n">InletData</span> <span class="o">=</span> <span class="n">infi</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="c1"># Name of function in csv</span>
 
-    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">outDataFile</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">infi</span><span class="p">:</span>
-        <span class="n">trash</span> <span class="o">=</span> <span class="n">infi</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
-        <span class="n">OutletData</span> <span class="o">=</span> <span class="n">infi</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="c1"># Name of function in csv</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">outDataFile</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">outfi</span><span class="p">:</span>
+        <span class="n">trash</span> <span class="o">=</span> <span class="n">outfi</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+        <span class="n">OutletData</span> <span class="o">=</span> <span class="n">outfi</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="c1"># Name of function in csv</span>
     <span class="n">CD_CFX</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="k">if</span> <span class="n">mom_source</span> <span class="o">==</span> <span class="s1">&#39;IS&#39;</span><span class="p">:</span>
         <span class="n">mom_source_to_write</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;ISfx&#39;</span><span class="p">,</span> <span class="s1">&#39;ISfy&#39;</span><span class="p">,</span> <span class="s1">&#39;ISfz&#39;</span><span class="p">,</span> <span class="s1">&#39;ISgx&#39;</span><span class="p">,</span> <span class="s1">&#39;ISgy&#39;</span><span class="p">,</span> <span class="s1">&#39;ISgz&#39;</span><span class="p">]</span>
@@ -549,10 +591,14 @@
 
     <span class="k">if</span> <span class="n">CL</span> <span class="o">==</span> <span class="s1">&#39;tomiyama&#39;</span><span class="p">:</span>
         <span class="n">lift_string</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Option = Tomiyama </span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="k">elif</span> <span class="n">CL</span> <span class="o">==</span> <span class="s1">&#39;legendre&#39;</span><span class="p">:</span>
+        <span class="n">lift_string</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Option = Legendre </span><span class="se">\n</span><span class="s2">&quot;</span>
     <span class="k">else</span><span class="p">:</span>
 
         <span class="k">if</span> <span class="n">CL</span> <span class="o">==</span> <span class="s1">&#39;ryan_DFM&#39;</span><span class="p">:</span>
             <span class="n">CL</span> <span class="o">=</span> <span class="n">calculate_CL_Ryan</span><span class="p">(</span><span class="n">jf</span><span class="o">=</span><span class="n">jf</span><span class="p">,</span> <span class="n">jg</span><span class="o">=</span><span class="n">jg</span><span class="p">,</span> <span class="n">theta</span><span class="o">=</span><span class="n">theta</span><span class="p">,</span> <span class="n">Db</span><span class="o">=</span><span class="n">Db</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">CL</span> <span class="o">==</span> <span class="s1">&#39;tomi-sharma&#39;</span><span class="p">:</span>
+            <span class="n">CL</span> <span class="o">=</span> <span class="s1">&#39;CL&#39;</span>
 
         <span class="n">lift_string</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Lift Coefficient = </span><span class="si">{</span><span class="n">CL</span><span class="si">}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">Option = Lift Coefficient </span><span class="se">\n</span><span class="s2">&quot;</span>
 
@@ -576,17 +622,25 @@
 <span class="s2">gravy = -9.81 [m s^-2]*cos(facilitytheta* pi / 180) </span><span class="se">\n\</span>
 <span class="s2">gravz = -9.81 [m s^-2]*sin(facilitytheta* pi / 180) </span><span class="se">\n\</span>
 <span class="s2">liquidWEff = (1 - Kf - Kw * gas.Volume Fraction * CD^(1/3) ) * liquid.w </span><span class="se">\n\</span>
-<span class="s2">phi = if(y&gt;0 [m], pi/2+atan(x/y), 3*pi/2+atan(x/y)) </span><span class="se">\n\</span>
+<span class="s2">phi = atan2(y, x) </span><span class="se">\n\</span>
 <span class="s2">radius = sqrt(x^2 + y^2) </span><span class="se">\n\</span>
 <span class="s2">vrNorm = sqrt( (gas.u - liquid.u)^2+ (gas.v - liquid.v)^2+ (gas.w - liquidWEff)^2 ) </span><span class="se">\n\</span>
+<span class="s2">Eo = gravz * (liquid.density - gas.density) * ( gas.Mean Particle Diameter )^2 / (gas | liquid.Surface Tension Coefficient) </span><span class="se">\n\</span>
+<span class="s2">Eop = gravz * (liquid.density - gas.density) * ( gas.Mean Particle Diameter * (1+0.136*Eo^0.757)^(1/3.) )^2 / (gas | liquid.Surface Tension Coefficient) </span><span class="se">\n\</span>
+<span class="s2">Rep = liquid.density * abs(gas.w - liquidWEff) * gas.Mean Particle Diameter / liquid.viscosity </span><span class="se">\n\</span>
+<span class="s2">f = 0.00105*Eop^3-0.0159*Eop^2-0.0204*Eop + 0.474 </span><span class="se">\n\</span>
+<span class="s2">CLtomiyama = min( 0.288*tanh(0.121*Rep) , f )</span><span class="se">\n\</span>
+<span class="s2">Ref = liquid.density * areaAve(liquid.w)@inlet * 0.0254 [m] / liquid.viscosity</span><span class="se">\n\</span>
+<span class="s2">sharmaFactor = exp( (max(Ref, 5e4) - 5e4) / (-1.22e5) )</span><span class="se">\n\</span>
+<span class="s2">CL = CLtomiyama * sharmaFactor</span><span class="se">\n\</span>
 <span class="s2">END </span><span class="se">\n\</span>
 <span class="s2">FUNCTION: </span><span class="si">{</span><span class="n">InletData</span><span class="si">}</span><span class="s2"> </span><span class="se">\n\</span>
 <span class="s2">Argument Units = [mm], [m], [] </span><span class="se">\n\</span>
 <span class="s2">Option = Profile Data </span><span class="se">\n\</span>
 <span class="s2">Reference Coord Frame = Coord 0 </span><span class="se">\n\</span>
 <span class="s2">Spatial Fields = radius, z, phi </span><span class="se">\n\</span>
-<span class="s2">DATA FIELD: Velocity u </span><span class="se">\n\</span>
-<span class="s2">Field Name = Velocity u </span><span class="se">\n\</span>
+<span class="s2">DATA FIELD: Velocity u g</span><span class="se">\n\</span>
+<span class="s2">Field Name = Velocity u g</span><span class="se">\n\</span>
 <span class="s2">Parameter List = U,Velocity r Component,Wall U,Wall Velocity r Component </span><span class="se">\n\</span>
 <span class="s2">Result Units = [m s^-1] </span><span class="se">\n\</span>
 <span class="s2">END </span><span class="se">\n\</span>
@@ -595,8 +649,8 @@
 <span class="s2">Parameter List = U,Velocity r Component,Wall U,Wall Velocity r Component </span><span class="se">\n\</span>
 <span class="s2">Result Units = [m s^-1] </span><span class="se">\n\</span>
 <span class="s2">END </span><span class="se">\n\</span>
-<span class="s2">DATA FIELD: Velocity v </span><span class="se">\n\</span>
-<span class="s2">Field Name = Velocity v </span><span class="se">\n\</span>
+<span class="s2">DATA FIELD: Velocity v g</span><span class="se">\n\</span>
+<span class="s2">Field Name = Velocity v g</span><span class="se">\n\</span>
 <span class="s2">Parameter List = V,Velocity Theta Component,Wall V,Wall Velocity Theta Component </span><span class="se">\n\</span>
 <span class="s2">Result Units = [m s^-1] </span><span class="se">\n\</span>
 <span class="s2">END </span><span class="se">\n\</span>
@@ -605,8 +659,8 @@
 <span class="s2">Parameter List = V,Velocity Theta Component,Wall V,Wall Velocity Theta Component </span><span class="se">\n\</span>
 <span class="s2">Result Units = [m s^-1] </span><span class="se">\n\</span>
 <span class="s2">END </span><span class="se">\n\</span>
-<span class="s2">DATA FIELD: Velocity w </span><span class="se">\n\</span>
-<span class="s2">Field Name = Velocity w </span><span class="se">\n\</span>
+<span class="s2">DATA FIELD: Velocity w g</span><span class="se">\n\</span>
+<span class="s2">Field Name = Velocity w g</span><span class="se">\n\</span>
 <span class="s2">Parameter List = Velocity Axial Component,W,Wall Velocity Axial Component,Wall W </span><span class="se">\n\</span>
 <span class="s2">Result Units = [m s^-1] </span><span class="se">\n\</span>
 <span class="s2">END </span><span class="se">\n\</span>
@@ -630,8 +684,8 @@
 <span class="s2">Option = Profile Data </span><span class="se">\n\</span>
 <span class="s2">Reference Coord Frame = Coord 0 </span><span class="se">\n\</span>
 <span class="s2">Spatial Fields = radius, z, phi </span><span class="se">\n\</span>
-<span class="s2">DATA FIELD: Velocity u </span><span class="se">\n\</span>
-<span class="s2">Field Name = Velocity u </span><span class="se">\n\</span>
+<span class="s2">DATA FIELD: Velocity u g</span><span class="se">\n\</span>
+<span class="s2">Field Name = Velocity u g</span><span class="se">\n\</span>
 <span class="s2">Parameter List = U,Velocity r Component,Wall U,Wall Velocity r Component </span><span class="se">\n\</span>
 <span class="s2">Result Units = [m s^-1] </span><span class="se">\n\</span>
 <span class="s2">END </span><span class="se">\n\</span>
@@ -639,8 +693,8 @@
 <span class="s2">Field Name = Velocity u f </span><span class="se">\n\</span>
 <span class="s2">Result Units = [m s^-1] </span><span class="se">\n\</span>
 <span class="s2">END </span><span class="se">\n\</span>
-<span class="s2">DATA FIELD: Velocity v </span><span class="se">\n\</span>
-<span class="s2">Field Name = Velocity v </span><span class="se">\n\</span>
+<span class="s2">DATA FIELD: Velocity v g</span><span class="se">\n\</span>
+<span class="s2">Field Name = Velocity v g</span><span class="se">\n\</span>
 <span class="s2">Parameter List = V,Velocity Theta Component,Wall V,Wall Velocity Theta Component </span><span class="se">\n\</span>
 <span class="s2">Result Units = [m s^-1] </span><span class="se">\n\</span>
 <span class="s2">END </span><span class="se">\n\</span>
@@ -648,8 +702,8 @@
 <span class="s2">Field Name = Velocity v f </span><span class="se">\n\</span>
 <span class="s2">Result Units = [m s^-1] </span><span class="se">\n\</span>
 <span class="s2">END </span><span class="se">\n\</span>
-<span class="s2">DATA FIELD: Velocity w </span><span class="se">\n\</span>
-<span class="s2">Field Name = Velocity w </span><span class="se">\n\</span>
+<span class="s2">DATA FIELD: Velocity w g</span><span class="se">\n\</span>
+<span class="s2">Field Name = Velocity w g</span><span class="se">\n\</span>
 <span class="s2">Parameter List = Velocity Axial Component,W,Wall Velocity Axial Component,Wall W </span><span class="se">\n\</span>
 <span class="s2">Result Units = [m s^-1] </span><span class="se">\n\</span>
 <span class="s2">END </span><span class="se">\n\</span>
@@ -804,7 +858,7 @@
 <span class="s2">Option = Cartesian Velocity Components </span><span class="se">\n\</span>
 <span class="s2">U = 0 [m s^-1] </span><span class="se">\n\</span>
 <span class="s2">V = 0 [m s^-1] </span><span class="se">\n\</span>
-<span class="s2">W = </span><span class="si">{</span><span class="n">InletData</span><span class="si">}</span><span class="s2">.Velocity v(radius,z,phi) </span><span class="se">\n\</span>
+<span class="s2">W = </span><span class="si">{</span><span class="n">InletData</span><span class="si">}</span><span class="s2">.Velocity w g(radius,z,phi) </span><span class="se">\n\</span>
 <span class="s2">END </span><span class="se">\n\</span>
 <span class="s2">VOLUME FRACTION: </span><span class="se">\n\</span>
 <span class="s2">Option = Value </span><span class="se">\n\</span>
@@ -841,7 +895,7 @@
 <span class="s2">END</span><span class="se">\n\</span>
 <span class="s2">MASS AND MOMENTUM:</span><span class="se">\n\</span>
 <span class="s2">Option = Opening Pressure and Direction</span><span class="se">\n\</span>
-<span class="s2">Relative Pressure = 0 [Pa]</span><span class="se">\n\</span>
+<span class="s2">Relative Pressure = </span><span class="si">{</span><span class="n">p_out</span><span class="si">}</span><span class="s2"> [psi]</span><span class="se">\n\</span>
 <span class="s2">END</span><span class="se">\n\</span>
 <span class="s2">TURBULENCE:</span><span class="se">\n\</span>
 <span class="s2">Option = Medium Intensity and Eddy Viscosity Ratio</span><span class="se">\n\</span>
@@ -1005,33 +1059,39 @@
 <span class="s2">END </span><span class="se">\n\</span>
 <span class="s2">END </span><span class="se">\n\</span>
 <span class="s2">END </span><span class="se">\n\</span>
-<span class="s2">INITIALISATION: </span><span class="se">\n\</span>
-<span class="s2">Option = Automatic </span><span class="se">\n\</span>
-<span class="s2">FLUID: gas </span><span class="se">\n\</span>
-<span class="s2">INITIAL CONDITIONS: </span><span class="se">\n\</span>
-<span class="s2">Velocity Type = Cartesian </span><span class="se">\n\</span>
-<span class="s2">CARTESIAN VELOCITY COMPONENTS: </span><span class="se">\n\</span>
+<span class="s2">INITIALISATION:</span><span class="se">\n\</span>
 <span class="s2">Option = Automatic</span><span class="se">\n\</span>
-<span class="s2">END </span><span class="se">\n\</span>
-<span class="s2">VOLUME FRACTION: </span><span class="se">\n\</span>
-<span class="s2">Option = Automatic </span><span class="se">\n\</span>
-<span class="s2">END </span><span class="se">\n\</span>
-<span class="s2">END </span><span class="se">\n\</span>
-<span class="s2">END </span><span class="se">\n\</span>
-<span class="s2">FLUID: liquid </span><span class="se">\n\</span>
-<span class="s2">INITIAL CONDITIONS: </span><span class="se">\n\</span>
-<span class="s2">Velocity Type = Cartesian </span><span class="se">\n\</span>
-<span class="s2">CARTESIAN VELOCITY COMPONENTS: </span><span class="se">\n\</span>
+<span class="s2">FLUID: gas</span><span class="se">\n\</span>
+<span class="s2">INITIAL CONDITIONS:</span><span class="se">\n\</span>
+<span class="s2">Velocity Type = Cartesian</span><span class="se">\n\</span>
+<span class="s2">CARTESIAN VELOCITY COMPONENTS:</span><span class="se">\n\</span>
+<span class="s2">Option = Automatic with Value</span><span class="se">\n\</span>
+<span class="s2">U = 0 [m s^-1]</span><span class="se">\n\</span>
+<span class="s2">V = 0 [m s^-1]</span><span class="se">\n\</span>
+<span class="s2">W = 3.5 [m s^-1]</span><span class="se">\n\</span>
+<span class="s2">END</span><span class="se">\n\</span>
+<span class="s2">VOLUME FRACTION:</span><span class="se">\n\</span>
 <span class="s2">Option = Automatic</span><span class="se">\n\</span>
-<span class="s2">END </span><span class="se">\n\</span>
-<span class="s2">TURBULENCE INITIAL CONDITIONS: </span><span class="se">\n\</span>
-<span class="s2">Option = Medium Intensity and Eddy Viscosity Ratio </span><span class="se">\n\</span>
-<span class="s2">END </span><span class="se">\n\</span>
-<span class="s2">VOLUME FRACTION: </span><span class="se">\n\</span>
+<span class="s2">END</span><span class="se">\n\</span>
+<span class="s2">END</span><span class="se">\n\</span>
+<span class="s2">END</span><span class="se">\n\</span>
+<span class="s2">FLUID: liquid</span><span class="se">\n\</span>
+<span class="s2">INITIAL CONDITIONS:</span><span class="se">\n\</span>
+<span class="s2">Velocity Type = Cartesian</span><span class="se">\n\</span>
+<span class="s2">CARTESIAN VELOCITY COMPONENTS:</span><span class="se">\n\</span>
+<span class="s2">Option = Automatic with Value</span><span class="se">\n\</span>
+<span class="s2">U = 0 [m s^-1]</span><span class="se">\n\</span>
+<span class="s2">V = 0 [m s^-1]</span><span class="se">\n\</span>
+<span class="s2">W = 4 [m s^-1]</span><span class="se">\n\</span>
+<span class="s2">END</span><span class="se">\n\</span>
+<span class="s2">TURBULENCE INITIAL CONDITIONS:</span><span class="se">\n\</span>
+<span class="s2">Option = Medium Intensity and Eddy Viscosity Ratio</span><span class="se">\n\</span>
+<span class="s2">END</span><span class="se">\n\</span>
+<span class="s2">VOLUME FRACTION:</span><span class="se">\n\</span>
 <span class="s2">Option = Automatic</span><span class="se">\n\</span>
-<span class="s2">END </span><span class="se">\n\</span>
-<span class="s2">END </span><span class="se">\n\</span>
-<span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">END</span><span class="se">\n\</span>
+<span class="s2">END</span><span class="se">\n\</span>
+<span class="s2">END</span><span class="se">\n\</span>
 <span class="s2">INITIAL CONDITIONS: </span><span class="se">\n\</span>
 <span class="s2">STATIC PRESSURE: </span><span class="se">\n\</span>
 <span class="s2">Option = Automatic </span><span class="se">\n\</span>
@@ -1114,6 +1174,10 @@
 <span class="s2">Volume Fraction Coupling = Coupled </span><span class="se">\n\</span>
 <span class="s2">END </span><span class="se">\n\</span>
 <span class="s2">END </span><span class="se">\n\</span>
+<span class="s2">EXPERT PARAMETERS: </span><span class="se">\n\</span>
+<span class="s2">diffusion coef averaging type = 3 </span><span class="se">\n\</span>
+<span class="s2">stress coef averaging type = 3 </span><span class="se">\n\</span>
+<span class="s2">END </span><span class="se">\n\</span>
 <span class="s2">END </span><span class="se">\n\</span>
 <span class="s2">COMMAND FILE: </span><span class="se">\n\</span>
 <span class="s2">Version = 22.2 </span><span class="se">\n\</span>
@@ -1157,16 +1221,11 @@
 <span class="se">\n\</span>
 <span class="s2">&gt; quit &quot;</span><span class="p">,</span> <span class="n">file</span> <span class="o">=</span> <span class="n">fi</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;$</span><span class="se">\n</span><span class="s1">cfx5pre -s CFXPre_Commands.pre&#39;</span><span class="p">)</span>
-    <span class="k">try</span><span class="p">:</span>
-        <span class="n">subprocess</span><span class="o">.</span><span class="n">check_call</span><span class="p">(</span><span class="s2">&quot;ml ansys&quot;</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="k">except</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">CalledProcessError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Continuing...&quot;</span><span class="p">)</span>
-    <span class="k">try</span><span class="p">:</span>
-        <span class="n">subprocess</span><span class="o">.</span><span class="n">check_call</span><span class="p">(</span><span class="s1">&#39;cfx5pre -s CFXPre_Commands.pre -line &gt; auto_cfx_run.log&#39;</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="k">except</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">CalledProcessError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">returncode</span><span class="p">)</span>
+    
+    <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="s2">&quot;ml ansys&quot;</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    
+    <span class="n">comp_process</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">check_call</span><span class="p">(</span><span class="s1">&#39;cfx5pre -s CFXPre_Commands.pre -line &gt; auto_cfx_run.log&#39;</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">comp_process</span><span class="p">)</span>
     <span class="k">return</span></div>
 
 
@@ -1180,11 +1239,8 @@
 <span class="sd">    Can run in parallel, specify the number of cores with npart</span>
 <span class="sd">    </span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">try</span><span class="p">:</span>
-        <span class="n">subprocess</span><span class="o">.</span><span class="n">check_call</span><span class="p">(</span><span class="s2">&quot;ml ansys&quot;</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="k">except</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">CalledProcessError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Continuing...&quot;</span><span class="p">)</span>
+    <span class="n">comp_process</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="s2">&quot;ml ansys&quot;</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">comp_process</span><span class="p">)</span>
 
     <span class="n">run_string</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;cfx5solve -def </span><span class="si">{</span><span class="n">case_name</span><span class="si">}</span><span class="s2">.def -monitor </span><span class="si">{</span><span class="n">case_name</span><span class="si">}</span><span class="s2">_001.out -double&quot;</span>
     
@@ -1200,7 +1256,9 @@
     <span class="n">run_string</span> <span class="o">+=</span> <span class="s2">&quot; &gt; auto_cfx_run.log&quot;</span>
 
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;$</span><span class="si">{</span><span class="n">run_string</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-    <span class="n">subprocess</span><span class="o">.</span><span class="n">check_call</span><span class="p">(</span><span class="n">run_string</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">comp_process</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">run_string</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">comp_process</span><span class="o">.</span><span class="n">returncode</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">comp_process</span><span class="p">)</span>
     <span class="k">return</span></div>
 
 
@@ -1343,14 +1401,13 @@
 <span class="s1">&gt;quit     </span><span class="se">\n\</span>
 <span class="s1">        </span><span class="se">\</span>
 <span class="s1">        &#39;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">fi</span><span class="p">)</span>
-    <span class="k">try</span><span class="p">:</span>
-        <span class="n">subprocess</span><span class="o">.</span><span class="n">check_call</span><span class="p">(</span><span class="s2">&quot;ml ansys&quot;</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="k">except</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">CalledProcessError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Continuing...&quot;</span><span class="p">)</span>
+
+    <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="s2">&quot;ml ansys&quot;</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
     <span class="nb">print</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">())</span>
     <span class="n">subprocess</span><span class="o">.</span><span class="n">check_call</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;rm -rf ./</span><span class="si">{</span><span class="n">case_name</span><span class="si">}</span><span class="s1">_Results&#39;</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">subprocess</span><span class="o">.</span><span class="n">check_call</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;cfx5post -play CFXPost_Commands.cse -line &gt; auto_cfx_run.log&#39;</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+    <span class="n">comp_process</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;cfx5post -play CFXPost_Commands.cse -line &gt; auto_cfx_run.log&#39;</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">comp_process</span><span class="p">)</span></div>
 
 
 
