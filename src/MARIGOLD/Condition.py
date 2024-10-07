@@ -2957,6 +2957,83 @@ the newly calculated :math:`v_{r}` or not
 
         return self.sym_error
 
+    def calc_symmetry_area_avg(self, param, sym_type='sym_half', rel_error=True, even_opt='first'):
+        """ Function for checking the area-averaged symmetry of a condition between the left and right half.
+    
+        Inputs:
+        - param: The parameter for which to calculate the symmetry
+        - sym_type: 'sym_half' to compare left half (0-180) and right half (180-360)
+        - rel_error: If true, the error will be relative to the parameter at the left half angles
+        - even_opt: Option for integration method in simpson's rule (as used in area_avg)
+        Returns:
+       - Area-averaged symmetry error across all radial and angular positions
+       """
+        
+        if sym_type != 'sym_half':
+           raise ValueError("This function is only designed for 'sym_half' symmetry type.")
+
+         # Define angle pairs for left-right half symmetry
+        angle_pairs = [(0, 180), (22.5, 202.5), (45, 225), (67.5, 247.5), (90, 270), (292.5, 112.5), (315, 135), (337.5, 157.5)]
+
+        sym_errors = []  # To store symmetry errors for each angle pair
+        areas = []       # To store areas for weighted integration
+
+         # Iterate over angle pairs
+        for angle1, angle2 in angle_pairs:
+            if angle1 not in self.data or angle2 not in self.data:
+                continue  # Skip if angles are not in the data
+
+            param_r = []  # To store the radial integration result
+            rs_list = []  # Radial positions to integrate over
+            
+            # Calculate symmetry error for each radial position
+            for rstar, r_dict in self.data[angle1].items():
+                try:
+                  sym_error = abs(r_dict[param] - self.data[angle2][rstar][param])
+                except KeyError:
+                   continue  # Skip if data is missing for the corresponding rstar in angle2
+
+                if rel_error:
+                    try:
+                       sym_error /= r_dict[param]  # Calculate relative error
+                    except ZeroDivisionError:
+                       sym_error = 0  # Handle division by zero case
+            
+                rs_list.append(rstar)
+                param_r.append(abs(sym_error) * rstar)  # Multiply by rstar for radial area weighting
+
+            # Sort by radial position for integration
+            param_r_sorted = [x for _, x in sorted(zip(rs_list, param_r))]
+            rs_sorted = sorted(rs_list)
+            
+            # Integrate wrt r (radial direction) using simpson's rule
+            if len(rs_sorted) > 1:
+                try:
+                    radial_avg_sym = integrate.simpson(param_r_sorted, rs_sorted, even=even_opt)
+                except Exception as e:
+                    print(f"Integration error: {e}")
+                    radial_avg_sym = 0
+            else:
+                radial_avg_sym = 0
+
+            sym_errors.append(radial_avg_sym)
+            areas.append(1)  # For now, give equal weighting to all angles
+
+            # Now integrate over angles (θ)
+        angles_in_radians = [angle_pair[0] * np.pi / 180 for angle_pair in angle_pairs]
+        if len(sym_errors) > 1:
+            try:
+               # Final integration wrt angle θ
+              area_avg_sym_error = integrate.simpson(sym_errors, angles_in_radians, even=even_opt) / np.pi
+            except Exception as e:
+                print(f"Angle integration error: {e}")
+                area_avg_sym_error = 0
+        else:
+           area_avg_sym_error = 0
+
+        return area_avg_sym_error
+
+
     def calc_avg_lat_sep(self):
         """Calculates average lateral separation distance between bubbles
 
