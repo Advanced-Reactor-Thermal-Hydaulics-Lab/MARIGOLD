@@ -141,11 +141,11 @@ def write_csv(cond:Condition, output_name = None):
 
     return 1
 
-def write_inp(roverR, filename, probe_number = 'AM4-5', r01=1.408, r02=1.593, r03=1.597, r12=0.570, r13=0.755, r23=0.343, directory = os.getcwd(), detailedOutput=0, signalOutput=0):
+def write_inp(roverR, filename, probe_number = 'AM4-5', r01=1.408, r02=1.593, r03=1.597, r12=0.570, r13=0.755, r23=0.343, directory = os.getcwd(), detailedOutput=0, signalOutput=0, inp_name = 'Input.inp'):
     """ Write an .inp file for MIDAS
     
     """
-    with open(os.path.join(directory, 'Input.inp'), 'w') as f:
+    with open(os.path.join(directory, inp_name), 'w') as f:
         f.write(
 f"*PROBE NUMBER: {probe_number}\n\
 probetype=4\n\
@@ -186,7 +186,8 @@ end"
 
     return
 
-def process_dir(target_dir:str, probe_number:str, r01:float, r02:float, r03:float, r12:float, r13:float, r23:float, roverR = None, signal_output=0, detailed_output=0):
+def process_dir(target_dir:str, probe_number:str, r01:float, r02:float, r03:float, r12:float, r13:float, r23:float, roverR = None, 
+                signal_output=0, detailed_output=0, multiprocess = False, num_cpus = None):
     """ Runs MIDAS for every dat file in a given directory
 
     Makes a new folder, auto_reprocessed_data_TIMESTAMP, where the .tab files will be put.
@@ -213,23 +214,70 @@ def process_dir(target_dir:str, probe_number:str, r01:float, r02:float, r03:floa
 
     os.chdir(reprocessed_dir)
 
-    for file in os.listdir(target_dir):
-        # print(file)
-        if file.split('.')[-1] == 'dat':
-            copy2(os.path.join(target_dir, file), reprocessed_dir)
+    if not multiprocess:
+        for file in os.listdir(target_dir):
+            # print(file)
+            if file.split('.')[-1] == 'dat':
+                copy2(os.path.join(target_dir, file), reprocessed_dir)
+
+                if roverR is None:
+                    roverR = 0.1 * int(file[1])
+                write_inp(roverR, file.strip('.dat'), probe_number = probe_number, r01=r01, r02=r02, r03=r03, r12=r12, r13=r13, r23=r23, 
+                          directory=reprocessed_dir, signalOutput=signal_output, detailedOutput=detailed_output)
+
+                comp_process = run(os.path.join(reprocessed_dir, 'MIDASv1.14d.exe'), cwd = reprocessed_dir, shell=True)
+
+                if comp_process.returncode != 0:
+                    print(comp_process)
+                try:
+                    os.remove(os.path.join(reprocessed_dir, file))
+                except OSError as e:
+                    print("Failed to remove .dat file, ", e)
+
+    else:
+        import multiprocessing
+        import subprocess
+        from multiprocessing.pool import ThreadPool
+        
+        def write_inp_run_midas(file, roverR):
+
+            input_name = file.strip('.dat') + "_input.inp"
 
             if roverR is None:
                 roverR = 0.1 * int(file[1])
-            write_inp(roverR, file.strip('.dat'), probe_number = probe_number, r01=r01, r02=r02, r03=r03, r12=r12, r13=r13, r23=r23, directory=reprocessed_dir, signalOutput=signal_output, detailedOutput=detailed_output)
+            
+            write_inp(roverR, file.strip('.dat'), probe_number = probe_number, r01=r01, r02=r02, r03=r03, r12=r12, r13=r13, r23=r23, 
+                      directory=reprocessed_dir, signalOutput=signal_output, detailedOutput=detailed_output, inp_name=input_name)
 
-            comp_process = run(os.path.join(reprocessed_dir, 'MIDASv1.14d.exe'), cwd = reprocessed_dir, shell=True)
+            p = subprocess.Popen(["MIDASv1.14d.exe", input_name], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
-            if comp_process.returncode != 0:
-                print(comp_process)
-            try:
-                os.remove(os.path.join(reprocessed_dir, file))
-            except OSError as e:
-                print("Failed to remove .dat file, ", e)
+            out, err = p.communicate()
+            return (out, err)
+        
+        if num_cpus is None:
+            num_cpus = multiprocessing.cpu_count()
+        pool = ThreadPool(num_cpus)
+        results = []
+
+        for file in os.listdir(target_dir):
+            if file.split('.')[-1] == 'dat':
+                # print(file)
+                copy2(os.path.join(target_dir, file), reprocessed_dir)
+                
+                results.append(pool.apply_async(write_inp_run_midas, (file, roverR) ) )
+
+        pool.close()
+        pool.join()
+
+        for result in results:
+            out, err = result.get()
+            print("out: {} err: {}".format(out, err))
+
+        # for file in os.listdir(target_dir):
+        #     try:
+        #         os.remove(os.path.join(reprocessed_dir, file))
+        #     except OSError as e:
+        #         print("Failed to remove .dat file, ", e)
 
     return reprocessed_dir
             
