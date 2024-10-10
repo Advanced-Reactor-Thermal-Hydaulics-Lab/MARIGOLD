@@ -141,7 +141,7 @@ def write_csv(cond:Condition, output_name = None):
 
     return 1
 
-def write_inp(roverR, filename, probe_number = 'AM4-5', r01=1.408, r02=1.593, r03=1.597, r12=0.570, r13=0.755, r23=0.343, directory = os.getcwd(), detailedOutput=0, signalOutput=0, inp_name = 'Input.inp'):
+def write_inp(roverR, filename, probe_number = 'AM4-5', r01=1.408, r02=1.593, r03=1.597, r12=0.570, r13=0.755, r23=0.343, directory = os.getcwd(), detailedOutput=0, signalOutput=0, inp_name = 'Input.inp', measure_time = 30):
     """ Write an .inp file for MIDAS
     
     """
@@ -157,7 +157,7 @@ r12={r12}\n\
 r13={r13}\n\
 r23={r23}\n\
 frequency=50000\n\
-measuretime=30\n\
+measuretime={measure_time}\n\
 Filename={filename}\n\
 DetailedOutput={detailedOutput}\n\
 SignalOutput={signalOutput}\n\
@@ -186,7 +186,7 @@ end"
 
     return
 
-def process_dir(target_dir:str, probe_number:str, r01:float, r02:float, r03:float, r12:float, r13:float, r23:float, roverR = None, 
+def process_dir(target_dir:str, probe_number:str, r01:float, r02:float, r03:float, r12:float, r13:float, r23:float, roverR = None, measure_time = 30,
                 signal_output=0, detailed_output=0, multiprocess = False, num_cpus = None):
     """ Runs MIDAS for every dat file in a given directory
 
@@ -210,7 +210,10 @@ def process_dir(target_dir:str, probe_number:str, r01:float, r02:float, r03:floa
     
     os.makedirs( reprocessed_dir )
 
-    copy2(os.path.join(target_dir, "MIDASv1.14d.exe"), reprocessed_dir)
+    try:
+        copy2(os.path.join(target_dir, "MIDASv1.14d.exe"), reprocessed_dir)
+    except FileNotFoundError:
+        copy2(os.path.join("Z:\TRSL\PITA", "MIDASv1.14d.exe"), reprocessed_dir)
 
     os.chdir(reprocessed_dir)
 
@@ -222,8 +225,8 @@ def process_dir(target_dir:str, probe_number:str, r01:float, r02:float, r03:floa
 
                 if roverR is None:
                     roverR = 0.1 * int(file[1])
-                write_inp(roverR, file.strip('.dat'), probe_number = probe_number, r01=r01, r02=r02, r03=r03, r12=r12, r13=r13, r23=r23, 
-                          directory=reprocessed_dir, signalOutput=signal_output, detailedOutput=detailed_output)
+                write_inp(roverR, file.replace('.dat', ''), probe_number = probe_number, r01=r01, r02=r02, r03=r03, r12=r12, r13=r13, r23=r23, 
+                          directory=reprocessed_dir, signalOutput=signal_output, detailedOutput=detailed_output, measure_time=measure_time)
 
                 comp_process = run(os.path.join(reprocessed_dir, 'MIDASv1.14d.exe'), cwd = reprocessed_dir, shell=True)
 
@@ -246,8 +249,8 @@ def process_dir(target_dir:str, probe_number:str, r01:float, r02:float, r03:floa
             if roverR is None:
                 roverR = 0.1 * int(file[1])
             
-            write_inp(roverR, file.strip('.dat'), probe_number = probe_number, r01=r01, r02=r02, r03=r03, r12=r12, r13=r13, r23=r23, 
-                      directory=reprocessed_dir, signalOutput=signal_output, detailedOutput=detailed_output, inp_name=input_name)
+            write_inp(roverR, file.replace('.dat', ''), probe_number = probe_number, r01=r01, r02=r02, r03=r03, r12=r12, r13=r13, r23=r23, 
+                      directory=reprocessed_dir, signalOutput=signal_output, detailedOutput=detailed_output, inp_name=input_name, measure_time=measure_time)
 
             p = subprocess.Popen(["MIDASv1.14d.exe", input_name], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
