@@ -2030,6 +2030,30 @@ class Condition:
         
         I = integrate.dblquad(integrand, 0, 1, 0, np.pi * 2)[0] / np.pi
         return I
+    
+    def interp_void_area_avg(self, param:str, interp_type = 'linear') -> float:
+        """Method for calculating the void-weighted area-average of a parameter, "param", based on an interpolation of the data
+        
+        Inputs:
+         - param, string of local parameter to area-average
+         - interp_type, option for what kind of interpolation to use
+
+        Options for interp_type:
+         - linear, see :any:`fit_linear_interp`
+         - spline, see :any:`fit_spline`
+
+        Returns:
+         - void weighted area-averaged parameter
+        
+        Uses scipy.integrate.dblquad, may be computationally expensive
+        
+        """
+
+        def integrand(phi, r): # phi will be in radians from dblquad
+            return self(phi, r, param, interp_method=interp_type) * self(phi, r, 'alpha', interp_method=interp_type) * r
+        
+        I = integrate.dblquad(integrand, 0, 1, 0, np.pi * 2)[0] / np.pi
+        return I
 
     def spline_void_area_avg(self, param:str) -> float:
         """Function to void-weighted area-average param based on a spline interpolation
