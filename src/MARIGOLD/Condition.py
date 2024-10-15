@@ -2007,7 +2007,7 @@ class Condition:
 
         return I
     
-    def interp_area_avg(self, param:str, interp_type = 'linear') -> float:
+    def interp_area_avg(self, param:str, interp_type = 'linear', int_error = 10**-6) -> float:
         """Method for calculating the area-average of a parameter, "param", based on an interpolation of the data
         
         Inputs:
@@ -2028,10 +2028,10 @@ class Condition:
         def integrand(phi, r): # phi will be in radians from dblquad
             return self(phi, r, param, interp_method=interp_type) * r
         
-        I = integrate.dblquad(integrand, 0, 1, 0, np.pi * 2)[0] / np.pi
+        I = integrate.dblquad(integrand, 0, 1, 0, np.pi * 2, epsabs = int_error)[0] / np.pi
         return I
     
-    def interp_void_area_avg(self, param:str, interp_type = 'linear') -> float:
+    def interp_void_area_avg(self, param:str, interp_type = 'linear', int_error = 10**-6) -> float:
         """Method for calculating the void-weighted area-average of a parameter, "param", based on an interpolation of the data
         
         Inputs:
@@ -2052,10 +2052,10 @@ class Condition:
         def integrand(phi, r): # phi will be in radians from dblquad
             return self(phi, r, param, interp_method=interp_type) * self(phi, r, 'alpha', interp_method=interp_type) * r
         
-        I = integrate.dblquad(integrand, 0, 1, 0, np.pi * 2)[0] / np.pi
+        I = integrate.dblquad(integrand, 0, 1, 0, np.pi * 2, epsabs = int_error)[0] / self.interp_area_avg('alpha') / np.pi
         return I
 
-    def spline_void_area_avg(self, param:str) -> float:
+    def spline_void_area_avg(self, param:str, int_error = 10**-6) -> float:
         """Function to void-weighted area-average param based on a spline interpolation
 
         Inputs:
@@ -2069,7 +2069,7 @@ class Condition:
         def integrand_denom(phi, r):
             return self.spline_interp['alpha'](phi * 180/np.pi, r) * r
         
-        I = integrate.dblquad(integrand, 0, 1, 0, np.pi * 2)[0] / integrate.dblquad(integrand_denom, 0, 1, 0, np.pi * 2)[0]
+        I = integrate.dblquad(integrand, 0, 1, 0, np.pi * 2, epsabs = int_error)[0] / integrate.dblquad(integrand_denom, 0, 1, 0, np.pi * 2, epsabs = int_error)[0]
         return I
     
     def spline_circ_seg_area_avg(self, param:str, hstar:float, int_err = 10**-4) -> float:
