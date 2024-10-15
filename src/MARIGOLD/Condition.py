@@ -2871,7 +2871,7 @@ the newly calculated :math:`v_{r}` or not
         self.aa_vr = vr
         return vr
     
-    def calc_errors(self, param1:str, param2:str):
+    def calc_errors(self, param1:str, param2:str) -> float:
         """ Calculates the errors, ε, between two parameters (param1 - param2) in midas_dict
 
         Usually want to do param1=predicted, param2=experimental
@@ -2908,6 +2908,20 @@ the newly calculated :math:`v_{r}` or not
                     midas_dict[param_abs_rel_error_name] = 0
 
         return self.area_avg(param_error_name)
+    
+    def calc_AA_error(self, param1:str, param2:str) -> float:
+        """ Calculates the error, ε, between the area-average of two parameters (⟨param1⟩ - ⟨param2⟩) in midas_dict
+
+        Usually want to do param1=predicted, param2=experimental
+        
+        Returns
+         - relative error (⟨param1⟩ - ⟨param2⟩) / ⟨param1⟩
+        
+        """
+        eps = self.area_avg(param1) - self.area_avg(param2)
+        rel_error = eps / self.area_avg(param1)
+
+        return rel_error
 
     def calc_symmetry(self, param, sym_type = 'sym90', method = 'rmse', rel_error = False):
         """ Function for checking the symmetry of a condition
