@@ -3,7 +3,7 @@ from .config import *
 from subprocess import run
 from shutil import copy2
 
-def comp_cond(cond1:Condition, cond2:Condition, tag = 'run_ID') -> Condition:
+def comp_cond(cond1:Condition, cond2:Condition, tag = 'run_ID', rmesh_preference = '1') -> Condition:
     """ Collate data from cond1 and cond2 into a single condition
     
     Each param will be tagged with "tag", options are
@@ -15,47 +15,68 @@ def comp_cond(cond1:Condition, cond2:Condition, tag = 'run_ID') -> Condition:
     - exp_cfd, tag1 -> exp, tag2 -> CFD
     - If given a tuple, tag1 -> tuple[0], tag2 -> tuple[1]
 
+    rmesh_preference controls which mesh to use. If the mesh point doesn't exist for the other condition,
+    it will be linearly interpolated.
+
+    Options:
+     - '1', cond1 mesh will be used
+     - '2', cond2 mesh will be used
+     - 'finer', whichever condition has a finer mesh (more angles)
+
     """
     compCond = Condition(cond1.jgref, cond1.jgloc, cond1.jf, cond1.theta, cond1.port, cond1.database)
 
-    if tag == 'run_ID':
+    if tag.lower() == 'run_ID':
         tag1 = cond1.run_ID
         tag2 = cond2.run_ID
 
-    elif tag == 'jf':
+    elif tag.lower() == 'jf':
         tag1 = cond1.jf
         tag2 = cond2.jf
 
-    elif tag == 'jgloc':
+    elif tag.lower() == 'jgloc':
         tag1 = cond1.jf
         tag2 = cond2.jf
 
-    elif tag == 'port':
+    elif tag.lower() == 'port':
         tag1 = cond1.port
         tag2 = cond2.port
 
-    elif tag == 'name':
+    elif tag.lower() == 'name':
         tag1 = cond1.name
         tag2 = cond2.name
 
-    elif tag == 'exp_CFD':
+    elif tag.lower() == 'exp_cfd':
         tag1 = 'exp'
         tag2 = 'CFD'
     
     elif type(tag) == tuple:
         tag1 = tag[0]
         tag2 = tag[1]
+    else:
+        print("Invalid tag selected, defaulting to 1 and 2")
+        tag1 = '1'
+        tag2 = '2'
 
     # Determine which condition has more angles, use that one for rmesh as well
-    if len(cond1.data.keys()) > len(cond1.data.keys()):
-        compCond._angles = cond1.data.keys()
+    if rmesh_preference.lower() == 'finer':
+        if len(cond1.data.keys()) > len(cond1.data.keys()):
+            rmesh_cond = cond1
+            not_rmesh_cond = cond2
+        else:
+            rmesh_cond = cond2
+            not_rmesh_cond = cond1
+
+    elif rmesh_preference == '1':
         rmesh_cond = cond1
         not_rmesh_cond = cond2
-    else:
-        compCond._angles = cond2.data.keys()
+
+    elif rmesh_preference == '2':
         rmesh_cond = cond2
         not_rmesh_cond = cond1
 
+    compCond._angles = rmesh_cond.data.keys()
+    
     for angle in compCond._angles:
         compCond.data.update({angle:{}})
 

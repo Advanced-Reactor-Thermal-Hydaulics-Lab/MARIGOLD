@@ -91,7 +91,7 @@ def write_CFX_BC(cond:Condition, save_dir = ".", z_loc = 'LoverD', only_90 = Fal
 
     return
 
-def read_CFX_export(csv_name, jf, jgref, theta, port, database, jgloc=None) -> Condition:
+def read_CFX_export(csv_path, jf, jgref, theta, port, database, jgloc=None) -> Condition:
     """ Read CFX csv export into a MARIGOLD Condition object
 
     Must supply jf, jgref, theta, port, database, jgloc, etc. for Condition
@@ -104,7 +104,7 @@ def read_CFX_export(csv_name, jf, jgref, theta, port, database, jgloc=None) -> C
     cond = Condition(jgref, jgloc, jf, theta, port, database)
     cond.run_ID = 'CFD'
 
-    with open(csv_name) as fi:
+    with open(csv_path) as fi:
         fi.readline()             # 
         fi.readline()             # [Name]
         fi.readline()             # port3
