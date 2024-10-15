@@ -374,7 +374,7 @@ ic_undo_group_end \n\
 ic_uns_min_metric Quality {{}} {{}} \n\
 ic_exit\n', file=fi)
     try:
-        subprocess.check_call("ml ansys", shell=True)
+        subprocess.check_call("ml ansys/2024R2", shell=True)
     except subprocess.CalledProcessError as e:
         print(e)
         print("Continuing...")
@@ -1129,7 +1129,7 @@ END\n\
 > quit ", file = fi)
     print('$\ncfx5pre -s CFXPre_Commands.pre')
     
-    subprocess.run("ml ansys", shell=True)
+    subprocess.run("ml ansys/2024R2", shell=True)
     
     comp_process = subprocess.check_call('cfx5pre -s CFXPre_Commands.pre -line > auto_cfx_run.log', shell=True)
     print(comp_process)
@@ -1143,7 +1143,7 @@ def run_CFX_case(case_name, parallel=True, npart = 4, init_fi = None, interactiv
     Can run in parallel, specify the number of cores with npart
     
     """
-    comp_process = subprocess.run("ml ansys", shell=True)
+    comp_process = subprocess.run("ml ansys/2024R2", shell=True)
     print(comp_process)
 
     run_string = f"cfx5solve -def {case_name}.def -monitor {case_name}_001.out -double"
@@ -1303,7 +1303,7 @@ END\n\
         \
         ', file=fi)
 
-    subprocess.run("ml ansys", shell=True)
+    subprocess.run("ml ansys/2024R2", shell=True)
 
     print(os.getcwd())
     subprocess.check_call(f'rm -rf ./{case_name}_Results', shell=True)
