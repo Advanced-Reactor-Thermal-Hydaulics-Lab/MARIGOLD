@@ -1,6 +1,7 @@
-from .Condition import Condition
+from .Condition import Condition, zero_data
 from .config import *
 import subprocess
+from copy import copy
 
 """ Functions for interfacing with CFX
 
@@ -103,6 +104,7 @@ def read_CFX_export(csv_path, jf, jgref, theta, port, database, jgloc=None) -> C
         jgloc = jgref
     cond = Condition(jgref, jgloc, jf, theta, port, database)
     cond.run_ID = 'CFD'
+    cond._angles = [0, 360]
 
     with open(csv_path) as fi:
         fi.readline()             # 
@@ -119,6 +121,8 @@ def read_CFX_export(csv_path, jf, jgref, theta, port, database, jgloc=None) -> C
         alpha_idx = [idx for idx, s in enumerate(variables) if 'gas.Volume' in s][0]
         x_idx = [idx for idx, s in enumerate(variables) if 'X [ m ]' in s][0]
         y_idx = [idx for idx, s in enumerate(variables) if 'Y [ m ]' in s][0]
+
+        doublecheck_angles = []
 
         while True:
             try:
@@ -145,13 +149,55 @@ def read_CFX_export(csv_path, jf, jgref, theta, port, database, jgloc=None) -> C
             data_dict = {'ug1': vg, 'vf': vf, 'alpha': alpha}
             
             roverR = np.sqrt(x**2 + y**2) / 0.0127
-            phi_angle = int(np.arctan2(y, x) * 180/np.pi)
+            phi_angle = (int(np.arctan2(y,x) * 180/np.pi) +360) % 360
+            if (phi_angle < 0):
+                print(x, y, phi_angle)
+
+            if phi_angle not in cond._angles:
+                cond._angles.append(phi_angle)
+
+            if roverR > 1.0 or roverR < 0:
+                continue
+
+            if phi_angle < 0 or phi_angle > 360:
+                continue
 
             try:
                 cond.data[phi_angle].update({roverR:data_dict})
             except:
                 cond.data.update({phi_angle:{}})
                 cond.data[phi_angle].update({roverR:data_dict})
+                cond.data[phi_angle].update({1.0:zero_data})
+
+            try:
+                cond.data[phi_angle].update({0.0:data_at_zero})
+            except UnboundLocalError:
+                doublecheck_angles.append(phi_angle)
+                pass
+
+            if roverR == 0 and alpha > 0:
+                data_at_zero = copy(data_dict)
+
+        
+        for phi_angle in doublecheck_angles:
+            try:
+                cond.data[phi_angle].update({0.0:data_at_zero})
+            except UnboundLocalError:
+                pass
+
+        # for angle in cond._angles:
+        #     if angle < 180:
+        #         if (180 - angle) not in cond._angles:
+        #             cond._angles.append(180 - angle)
+
+        #     elif angle > 180:
+        #         if (360 - angle + 180) not in cond._angles:
+        #             cond._angles.append(360 - angle + 180)
+
+
+        cond._angles.sort()
+
+        print(cond._angles)
 
     return cond
 

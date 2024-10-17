@@ -175,11 +175,11 @@ class Condition:
            
         """
         if type(phi_in) != np.ndarray:
-            warnings.warn("Converting phi_in to np.ndarray")
+            if debug: warnings.warn("Converting phi_in to np.ndarray")
             phi_in = np.asarray(phi_in)
 
         if type(r_in) != np.ndarray:
-            warnings.warn("Converting r_in to np.ndarray")
+            if debug: warnings.warn("Converting r_in to np.ndarray")
             r_in = np.asarray(r_in)
 
         
@@ -376,7 +376,7 @@ class Condition:
 
         angles_with_data += angles_to_add
         if debug: print('Angles with data after comp_angle: ', angles_with_data, file=debugFID)
-
+        
         if (360 not in (angles_with_data)) and (0 in angles_with_data):
             ref_angle = 0
             data = deepcopy(self.data[ref_angle])
@@ -470,6 +470,11 @@ class Condition:
                     self.data[angle].update( data )
 
         if uniform_rmesh:
+            for angle in self.data.keys():
+                if angle not in self._angles:
+                    self._angles.append(angle)
+            for param in tab_keys:
+                self.fit_linear_interp(param)
             #print(all_rs)
             # Make sure all the angles have data for all the rpoints
             self.all_rs = list(all_rs)
@@ -481,32 +486,45 @@ class Condition:
                         self.data[angle].update({r: deepcopy(zero_data)})
             
             # so go through and interpolate the points where we have data on either side
-            for angle in self._angles:
-                for i in range(len(self.all_rs) - 2):
-                    #print(angle, self.all_rs[i+1])
-                    if (self.data[angle][self.all_rs[i+2]]['alpha'] != 0) and (self.data[angle][self.all_rs[i]]['alpha'] != 0) and (self.data[angle][self.all_rs[i+1]]['alpha'] == 0):
-                        print(f"Warning: interpolating data for {angle}°, {self.all_rs[i+1]} to maintain uniform r/R mesh")
-                        for param in tab_keys:
-                            try:
+            # for angle in self._angles:
+            #     for i in range(len(self.all_rs) - 2):
+            #         #print(angle, self.all_rs[i+1])
+            #         if (self.data[angle][self.all_rs[i+2]]['alpha'] != 0) and (self.data[angle][self.all_rs[i]]['alpha'] != 0) and (self.data[angle][self.all_rs[i+1]]['alpha'] == 0):
+            #             print(f"Warning: interpolating data for {angle}°, {self.all_rs[i+1]} to maintain uniform r/R mesh")
+            #             for param in tab_keys:
+            #                 try:
 
-                                x = self.all_rs[i+1]
-                                x1 = self.all_rs[i+2]
-                                y1 = self.data[angle][x1][param]
-                                x2 = self.all_rs[i]
-                                y2 = self.data[angle][x2][param]
+            #                     x = self.all_rs[i+1]
+            #                     x1 = self.all_rs[i+2]
+            #                     y1 = self.data[angle][x1][param]
+            #                     x2 = self.all_rs[i]
+            #                     y2 = self.data[angle][x2][param]
 
-                                interp = y1 + (y2-y1)/(x2-x1) * (x - x1)
-                                self.data[angle][self.all_rs[i+1]][param] = interp
+            #                     interp = y1 + (y2-y1)/(x2-x1) * (x - x1)
+            #                     self.data[angle][self.all_rs[i+1]][param] = interp
                             
-                            except KeyError:
-                                #print(f"{param} not found for {angle}°, {self.all_rs[i+1]}")
-                                continue
+            #                 except KeyError:
+            #                     #print(f"{param} not found for {angle}°, {self.all_rs[i+1]}")
+            #                     continue
                         
-                        self.data[angle][self.all_rs[i+1]]['roverR'] = f"interpolated, {angle}, {i+1}"
-                    else:
-                        pass
-                        #print(f"I'm not interpolating for {angle}°, {self.all_rs[i+1]}")
+            #             self.data[angle][self.all_rs[i+1]]['roverR'] = f"interpolated, {angle}, {i+1}"
+            #         else:
+            #             pass
+            #             #print(f"I'm not interpolating for {angle}°, {self.all_rs[i+1]}")
 
+
+            for phi in self._angles:
+                for r in all_rs:
+                    for param in tab_keys:
+                        try:
+                            if self.data[phi][r][param] == 0 and r < 1.0:
+                                self.data[phi][r][param] = self(phi*np.pi/180, r, param, interp_method = 'linear')
+                        except Exception as e:
+                            if debug: print("Error interpolating in unifrom rmesh, ", phi, r, e)
+                            pass
+
+            for param in tab_keys:
+                self.fit_linear_interp(param) # Because it was created without the filled-in data before
 
         self.mirrored = True
 
@@ -709,7 +727,7 @@ class Condition:
 
         return self.area_avg('vf_naive')
     
-    def calc_vr(self, warn_approx = True) -> None:
+    def calc_vr(self, quiet = False) -> None:
         """Method for calculating relative velocity. 
         
         Inputs:
@@ -733,7 +751,7 @@ class Condition:
                 try:
                     vf = midas_dict['vf']
                 except:
-                    if warn_approx:
+                    if not quiet:
                         print("Warning: Approximating vf in calculating vr, since no data found")
                         warn_approx = False
                     self.approx_vf()
@@ -749,8 +767,10 @@ class Condition:
                 try:
                     if abs( midas_dict['vr'] - vr ) < 0.00001:
                         pass
-                    else:
+                    elif not quiet:
                         print(f"Warning: vr already present for {rstar}, {angle}°, but doesn't match subtraction. Will update and overwrite")
+                        midas_dict.update({'vr': vr})
+                    elif quiet:    
                         midas_dict.update({'vr': vr})
                 except:
                     midas_dict.update({'vr': vr})
@@ -1061,7 +1081,7 @@ class Condition:
                     
                     vals.append( 0 )        # Temporary, figure this out later
 
-        linear_interpolant = interpolate.LinearNDInterpolator(list(zip(phis, rs)), vals)
+        linear_interpolant = interpolate.LinearNDInterpolator(list(zip(phis, rs)), vals, fill_value=0)
         self.linear_interp.update({param: linear_interpolant})
 
         return
@@ -1097,7 +1117,7 @@ class Condition:
                     if suppress == False:
                         print(self.name, angle, rstar, "has no ", param)
 
-        linear_interpolant = interpolate.LinearNDInterpolator(list(zip(xs, ys)), vals)
+        linear_interpolant = interpolate.LinearNDInterpolator(list(zip(xs, ys)), vals, fill_value=0)
         self.linear_xy_interp.update({param: linear_interpolant})
 
         return
@@ -1385,7 +1405,7 @@ class Condition:
 
         # Check that the parameter that the user requested exists
         try:
-            dummy = self.data[90][1.0][param]
+            dummy = self.data[self._angles[0]][1.0][param]
         except KeyError as e:
             print(f"KeyError: {e}")
             if debug: print(self.data, file=debugFID)
@@ -1585,7 +1605,7 @@ class Condition:
 
         # Check that the parameter that the user requested exists
         try:
-            dummy = self.data[90][1.0][param]
+            dummy = self.data[self._angles[0]][1.0][param]
         except KeyError as e:
             print(f"KeyError: {e}")
             if debug: print(self.data, file=debugFID)
@@ -1651,7 +1671,7 @@ class Condition:
 
         # Check that the parameter that the user requested exists
         try:
-            dummy = self.data[90][1.0][param]
+            dummy = self.data[self._angles[0]][1.0][param]
         except KeyError as e:
             print(f"KeyError: {e}")
             if debug: print(self.data, file=debugFID)
@@ -1726,7 +1746,7 @@ class Condition:
 
 
         try:
-            dummy = self.data[90][1.0][param]
+            dummy = self.data[self._angles[0]][1.0][param]
         except KeyError as e:
             print(f"KeyError: {e}")
             if debug: print(self.data, file=debugFID)
@@ -1786,7 +1806,7 @@ class Condition:
 
 
         try:
-            dummy = self.data[90][1.0][param]
+            dummy = self.data[self._angles[0]][1.0][param]
         except KeyError as e:
             print(f"KeyError: {e}")
             if debug: print(self.data, file=debugFID)
@@ -1837,7 +1857,7 @@ class Condition:
 
         # Check that the parameter that the user requested exists
         try:
-            dummy = self.data[90][1.0][param]
+            dummy = self.data[self._angles[0]][1.0][param]
         except KeyError as e:
             print(f"KeyError: {e}")
             if debug: print(self.data, file=debugFID)
@@ -2028,7 +2048,7 @@ class Condition:
         def integrand(phi, r): # phi will be in radians from dblquad
             return self(phi, r, param, interp_method=interp_type) * r
         
-        I = integrate.dblquad(integrand, 0, 1, 0, np.pi * 2, epsabs = int_error)[0] / np.pi
+        I = integrate.nquad(integrand, ranges = [(0, 1), (0, np.pi * 2)], opts = {'epsabs': int_error, 'points': list(self.data[0].keys()), 'points': list(self.data.keys())})[0] / self.interp_area_avg('alpha') / np.pi
         return I
     
     def interp_void_area_avg(self, param:str, interp_type = 'linear', int_error = 10**-6) -> float:
@@ -2052,7 +2072,7 @@ class Condition:
         def integrand(phi, r): # phi will be in radians from dblquad
             return self(phi, r, param, interp_method=interp_type) * self(phi, r, 'alpha', interp_method=interp_type) * r
         
-        I = integrate.dblquad(integrand, 0, 1, 0, np.pi * 2, epsabs = int_error)[0] / self.interp_area_avg('alpha') / np.pi
+        I = integrate.nquad(integrand, ranges = [(0, 1), (0, np.pi * 2)], opts = {'epsabs': int_error, 'points': list(self.data.keys()), 'points': list(self.data[0].keys())} )[0] / self.interp_area_avg('alpha') / np.pi
         return I
 
     def spline_void_area_avg(self, param:str, int_error = 10**-6) -> float:
@@ -4245,7 +4265,7 @@ the newly calculated :math:`v_{r}` or not
         plt.rcParams["font.family"] = "Times New Roman"
         plt.rcParams["mathtext.fontset"] = "cm"
         
-        self.mirror()
+        # self.mirror()
         rs = []
         phis = []
         vals = []
