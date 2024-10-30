@@ -26,7 +26,11 @@ def comp_cond(cond1:Condition, cond2:Condition, tag = 'run_ID', rmesh_preference
     """
     compCond = Condition(cond1.jgref, cond1.jgloc, cond1.jf, cond1.theta, cond1.port, cond1.database)
 
-    if tag.lower() == 'run_ID':
+    if type(tag) == tuple:
+        tag1 = tag[0]
+        tag2 = tag[1]
+
+    elif tag.lower() == 'run_ID':
         tag1 = cond1.run_ID
         tag2 = cond2.run_ID
 
@@ -50,9 +54,6 @@ def comp_cond(cond1:Condition, cond2:Condition, tag = 'run_ID', rmesh_preference
         tag1 = 'exp'
         tag2 = 'CFD'
     
-    elif type(tag) == tuple:
-        tag1 = tag[0]
-        tag2 = tag[1]
     else:
         print("Invalid tag selected, defaulting to 1 and 2")
         tag1 = '1'

@@ -7,7 +7,7 @@ from copy import copy
 
 """
 
-def write_CFX_BC(cond:Condition, save_dir = ".", z_loc = 'LoverD', only_90 = False, interp = False, csv_name = False, ngrid = 100):
+def write_CFX_BC(cond:Condition, save_dir = ".", z_loc = 'LoverD', only_90 = False, interp = False, csv_name = None, ngrid = 100):
     """ Write a csv file for CFX based on cond
 
     z_loc can be set by the user, or set to "LoverD" to use the cond L/D information
@@ -22,7 +22,7 @@ def write_CFX_BC(cond:Condition, save_dir = ".", z_loc = 'LoverD', only_90 = Fal
     except AttributeError:
         cond.run_ID = cond.database
 
-    if not csv_name:
+    if csv_name is None:
         if only_90:
             csv_name = f"{cond.run_ID}_{cond.theta}deg_jf{cond.jf:0.1f}_jg{cond.jgref}_{cond.port}_BC_90deg.csv"
         else:
@@ -33,6 +33,9 @@ def write_CFX_BC(cond:Condition, save_dir = ".", z_loc = 'LoverD', only_90 = Fal
     if z_loc == 'LoverD':
         z_loc = cond.LoverD
 
+    if not cond.check_param('vf'):
+        cond.approx_vf()
+
 
     with open(path_to_csv, "w") as f:
         R = cond.Dh/2
@@ -40,7 +43,6 @@ def write_CFX_BC(cond:Condition, save_dir = ".", z_loc = 'LoverD', only_90 = Fal
         f.write("[Name],,,,,,,,,\n")
         f.write(f"{cond.port}data,,,,,,,,,\n")
         f.write("[Spatial Fields],,,,,,,,,\n")
-        
         
         if not interp:
             f.write("radius,z,phi,,,,,,,\n")
@@ -67,7 +69,9 @@ def write_CFX_BC(cond:Condition, save_dir = ".", z_loc = 'LoverD', only_90 = Fal
             if only_90:
                 xs = np.zeros(ys.shape)
             else:
-                xs = np.linspace(-R / 2, R, ngrid)
+                xs = np.linspace(-R, R, ngrid)
+
+            
 
             for x in xs:
                 for y in ys:
@@ -89,7 +93,7 @@ def write_CFX_BC(cond:Condition, save_dir = ".", z_loc = 'LoverD', only_90 = Fal
                 for phi in phis:
                     f.write(f"{r*1000},{z_loc},{phi},{0},{0},{ cond(phi, r/R, 'ug1', interp_method='linear') },{cond(phi, r/R, 'alpha', interp_method='linear')},{0},{0},{cond(phi, r/R, 'vf', interp_method='linear')},\n")
 
-
+    print(cond, "written to CFX BC")
     return
 
 def read_CFX_export(csv_path, jf, jgref, theta, port, database, jgloc=None) -> Condition:
@@ -565,7 +569,7 @@ def write_CCL(mom_source = 'normal_drag_mom_source', ccl_name = 'auto_setup.ccl'
 LIBRARY: \n\
 CEL: \n\
 EXPRESSIONS: \n\
-CD = 0.44 \n\
+CD = {CD} \n\
 FDGx = - 3/4 * CD / (gas.Mean Particle Diameter) * (gas.Volume Fraction) * liquid.density * (vrNorm) * (gas.u - liquid.u) \n\
 FDGy = - 3/4 * CD / (gas.Mean Particle Diameter) * (gas.Volume Fraction) * liquid.density* (vrNorm) * (gas.v - liquid.v) \n\
 FDGz = - 3/4 * CD / (gas.Mean Particle Diameter) * (gas.Volume Fraction) * liquid.density* (vrNorm) * (gas.w - liquidWEff) \n\
