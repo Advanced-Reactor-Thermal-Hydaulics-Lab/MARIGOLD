@@ -175,11 +175,11 @@ class Condition:
            
         """
         if type(phi_in) != np.ndarray:
-            warnings.warn("Converting phi_in to np.ndarray")
+            if debug: warnings.warn("Converting phi_in to np.ndarray")
             phi_in = np.asarray(phi_in)
 
         if type(r_in) != np.ndarray:
-            warnings.warn("Converting r_in to np.ndarray")
+            if debug: warnings.warn("Converting r_in to np.ndarray")
             r_in = np.asarray(r_in)
 
         
@@ -376,7 +376,7 @@ class Condition:
 
         angles_with_data += angles_to_add
         if debug: print('Angles with data after comp_angle: ', angles_with_data, file=debugFID)
-
+        
         if (360 not in (angles_with_data)) and (0 in angles_with_data):
             ref_angle = 0
             data = deepcopy(self.data[ref_angle])
@@ -470,6 +470,11 @@ class Condition:
                     self.data[angle].update( data )
 
         if uniform_rmesh:
+            for angle in self.data.keys():
+                if angle not in self._angles:
+                    self._angles.append(angle)
+            for param in tab_keys:
+                self.fit_linear_interp(param)
             #print(all_rs)
             # Make sure all the angles have data for all the rpoints
             self.all_rs = list(all_rs)
@@ -481,32 +486,45 @@ class Condition:
                         self.data[angle].update({r: deepcopy(zero_data)})
             
             # so go through and interpolate the points where we have data on either side
-            for angle in self._angles:
-                for i in range(len(self.all_rs) - 2):
-                    #print(angle, self.all_rs[i+1])
-                    if (self.data[angle][self.all_rs[i+2]]['alpha'] != 0) and (self.data[angle][self.all_rs[i]]['alpha'] != 0) and (self.data[angle][self.all_rs[i+1]]['alpha'] == 0):
-                        print(f"Warning: interpolating data for {angle}°, {self.all_rs[i+1]} to maintain uniform r/R mesh")
-                        for param in tab_keys:
-                            try:
+            # for angle in self._angles:
+            #     for i in range(len(self.all_rs) - 2):
+            #         #print(angle, self.all_rs[i+1])
+            #         if (self.data[angle][self.all_rs[i+2]]['alpha'] != 0) and (self.data[angle][self.all_rs[i]]['alpha'] != 0) and (self.data[angle][self.all_rs[i+1]]['alpha'] == 0):
+            #             print(f"Warning: interpolating data for {angle}°, {self.all_rs[i+1]} to maintain uniform r/R mesh")
+            #             for param in tab_keys:
+            #                 try:
 
-                                x = self.all_rs[i+1]
-                                x1 = self.all_rs[i+2]
-                                y1 = self.data[angle][x1][param]
-                                x2 = self.all_rs[i]
-                                y2 = self.data[angle][x2][param]
+            #                     x = self.all_rs[i+1]
+            #                     x1 = self.all_rs[i+2]
+            #                     y1 = self.data[angle][x1][param]
+            #                     x2 = self.all_rs[i]
+            #                     y2 = self.data[angle][x2][param]
 
-                                interp = y1 + (y2-y1)/(x2-x1) * (x - x1)
-                                self.data[angle][self.all_rs[i+1]][param] = interp
+            #                     interp = y1 + (y2-y1)/(x2-x1) * (x - x1)
+            #                     self.data[angle][self.all_rs[i+1]][param] = interp
                             
-                            except KeyError:
-                                #print(f"{param} not found for {angle}°, {self.all_rs[i+1]}")
-                                continue
+            #                 except KeyError:
+            #                     #print(f"{param} not found for {angle}°, {self.all_rs[i+1]}")
+            #                     continue
                         
-                        self.data[angle][self.all_rs[i+1]]['roverR'] = f"interpolated, {angle}, {i+1}"
-                    else:
-                        pass
-                        #print(f"I'm not interpolating for {angle}°, {self.all_rs[i+1]}")
+            #             self.data[angle][self.all_rs[i+1]]['roverR'] = f"interpolated, {angle}, {i+1}"
+            #         else:
+            #             pass
+            #             #print(f"I'm not interpolating for {angle}°, {self.all_rs[i+1]}")
 
+
+            for phi in self._angles:
+                for r in all_rs:
+                    for param in tab_keys:
+                        try:
+                            if self.data[phi][r][param] == 0 and r < 1.0:
+                                self.data[phi][r][param] = self(phi*np.pi/180, r, param, interp_method = 'linear')
+                        except Exception as e:
+                            if debug: print("Error interpolating in unifrom rmesh, ", phi, r, e)
+                            pass
+
+            for param in tab_keys:
+                self.fit_linear_interp(param) # Because it was created without the filled-in data before
 
         self.mirrored = True
 
@@ -709,7 +727,7 @@ class Condition:
 
         return self.area_avg('vf_naive')
     
-    def calc_vr(self, warn_approx = True) -> None:
+    def calc_vr(self, quiet = False) -> None:
         """Method for calculating relative velocity. 
         
         Inputs:
@@ -733,7 +751,7 @@ class Condition:
                 try:
                     vf = midas_dict['vf']
                 except:
-                    if warn_approx:
+                    if not quiet:
                         print("Warning: Approximating vf in calculating vr, since no data found")
                         warn_approx = False
                     self.approx_vf()
@@ -749,8 +767,10 @@ class Condition:
                 try:
                     if abs( midas_dict['vr'] - vr ) < 0.00001:
                         pass
-                    else:
+                    elif not quiet:
                         print(f"Warning: vr already present for {rstar}, {angle}°, but doesn't match subtraction. Will update and overwrite")
+                        midas_dict.update({'vr': vr})
+                    elif quiet:    
                         midas_dict.update({'vr': vr})
                 except:
                     midas_dict.update({'vr': vr})
@@ -986,6 +1006,10 @@ class Condition:
         
         """
         
+        if not self.check_param(param):
+            raise TypeError(f"Invalid parameter {param} selected. Not present at {self.check_param_loc(param)}")
+
+
         try: dummy = self.spline_interp
         except:
             self.spline_interp = {}
@@ -1034,6 +1058,10 @@ class Condition:
              
         """
 
+        if not self.check_param(param):
+            raise TypeError(f"Invalid parameter {param} selected. Not present at {self.check_param_loc(param)}")
+
+
         try: dummy = self.linear_interp
         except:
             self.linear_interp = {}
@@ -1061,7 +1089,7 @@ class Condition:
                     
                     vals.append( 0 )        # Temporary, figure this out later
 
-        linear_interpolant = interpolate.LinearNDInterpolator(list(zip(phis, rs)), vals)
+        linear_interpolant = interpolate.LinearNDInterpolator(list(zip(phis, rs)), vals, fill_value=0)
         self.linear_interp.update({param: linear_interpolant})
 
         return
@@ -1072,6 +1100,9 @@ class Condition:
         Can access  with self.linear_xy_interp[param]
                           
         """
+
+        if not self.check_param(param):
+            raise TypeError(f"Invalid parameter {param} selected. Not present at {self.check_param_loc(param)}")
 
         try: dummy = self.linear_xy_interp
         except:
@@ -1097,7 +1128,7 @@ class Condition:
                     if suppress == False:
                         print(self.name, angle, rstar, "has no ", param)
 
-        linear_interpolant = interpolate.LinearNDInterpolator(list(zip(xs, ys)), vals)
+        linear_interpolant = interpolate.LinearNDInterpolator(list(zip(xs, ys)), vals, fill_value=0)
         self.linear_xy_interp.update({param: linear_interpolant})
 
         return
@@ -1367,6 +1398,30 @@ class Condition:
                         avg_param += midas_dict[param]
 
         return avg_param / count
+    
+    def check_param(self, param:str) -> bool:
+        """ Checks if a given parameter is present everywhere in midas_dict
+        
+        """
+
+        for angle, r_dict in self.data.items():
+            for rstar, midas_dict in r_dict.items():
+                if param not in midas_dict.keys():
+                    return False
+
+        return True
+    
+    def check_param_loc(self, param:str) -> tuple:
+        """ Checks if a given parameter is present everywhere in midas_dict
+        
+        """
+
+        for angle, r_dict in self.data.items():
+            for rstar, midas_dict in r_dict.items():
+                if param not in midas_dict.keys():
+                    return (angle, rstar)
+
+        return ()
 
     def area_avg(self, param: str, even_opt='first', recalc=True, method=None) -> float:
         """Method for calculating the area-average of a parameter, "param"
@@ -1384,13 +1439,8 @@ class Condition:
         """
 
         # Check that the parameter that the user requested exists
-        try:
-            dummy = self.data[90][1.0][param]
-        except KeyError as e:
-            print(f"KeyError: {e}")
-            if debug: print(self.data, file=debugFID)
-            print(f"Could not area-average {param} for condition {self.name}")
-            return None
+        if not self.check_param(param):
+            raise TypeError(f"Invalid parameter {param} selected. Not present at {self.check_param_loc(param)}")
         
         if (param in self.area_avgs.keys()) and (not recalc):
             return self.area_avgs[param] # why waste time, if we already calculated this don't do it again
@@ -1551,19 +1601,19 @@ class Condition:
                     ValueError( f"rs to integrate over {rs} must be the same length as params {vars}, occured at {angle}" )
                     
                 try:
-                    param_r.append( integrate.simpson(vars, rs, even=even_opt) ) # Integrate wrt r
+                    param_r.append( integrate.simpson(y=vars, x=rs) ) # Integrate wrt r
                 except Exception as e:
                     if debug:
                         print(e)
                         print(rs, vars)
-                if debug: print("calculated integral:", integrate.simpson(vars, rs, even=even_opt), file=debugFID)
+                if debug: print("calculated integral:", integrate.simpson(y=vars, x=rs), file=debugFID)
                     #I = 2 * np.pi
             if debug: print("Integrated wrt r", param_r, file=debugFID)
 
             param_r = [param for _, param in sorted(zip(angles, param_r))]
             angles = sorted(angles)
 
-            I = integrate.simpson(param_r, angles, even=even_opt) / np.pi # Integrate wrt theta, divide by normalized area
+            I = integrate.simpson(y=param_r, x=angles) / np.pi # Integrate wrt theta, divide by normalized area
             self.area_avgs.update({param: I})
 
         return I
@@ -1584,13 +1634,9 @@ class Condition:
         """
 
         # Check that the parameter that the user requested exists
-        try:
-            dummy = self.data[90][1.0][param]
-        except KeyError as e:
-            print(f"KeyError: {e}")
-            if debug: print(self.data, file=debugFID)
-            print(f"Could not area-average {param} for condition {self.name}")
-            return
+        # Check that the parameter that the user requested exists
+        if not self.check_param(param):
+            raise TypeError(f"Invalid parameter {param} selected. Not present at {self.check_param_loc(param)}")
         
         self.mirror()
 
@@ -1650,13 +1696,9 @@ class Condition:
         """
 
         # Check that the parameter that the user requested exists
-        try:
-            dummy = self.data[90][1.0][param]
-        except KeyError as e:
-            print(f"KeyError: {e}")
-            if debug: print(self.data, file=debugFID)
-            print(f"Could not area-average {param} for condition {self.name}")
-            return
+        if not self.check_param(param):
+            raise TypeError(f"Invalid parameter {param} selected. Not present at {self.check_param_loc(param)}")
+        
         
         self.mirror()
 
@@ -1725,13 +1767,8 @@ class Condition:
             return
 
 
-        try:
-            dummy = self.data[90][1.0][param]
-        except KeyError as e:
-            print(f"KeyError: {e}")
-            if debug: print(self.data, file=debugFID)
-            print(f"Could not area-average {param} for condition {self.name}")
-            return
+        if not self.check_param(param):
+            raise TypeError(f"Invalid parameter {param} selected. Not present at {self.check_param_loc(param)}")
 
         r_for_int = []
         var_for_int = []
@@ -1755,7 +1792,7 @@ class Condition:
         var_for_int = [param for _, param in sorted(zip(r_for_int, var_for_int))]
         r_for_int = sorted(r_for_int)
 
-        I = integrate.simpson(var_for_int, r_for_int, even=even_opt) / 2 # Integrate wrt theta, divide by normalized length
+        I = integrate.simpson(y=var_for_int, x=r_for_int) / 2 # Integrate wrt theta, divide by normalized length
 
         return I
 
@@ -1785,13 +1822,9 @@ class Condition:
             return
 
 
-        try:
-            dummy = self.data[90][1.0][param]
-        except KeyError as e:
-            print(f"KeyError: {e}")
-            if debug: print(self.data, file=debugFID)
-            print(f"Could not area-average {param} for condition {self.name}")
-            return
+        if not self.check_param(param):
+            raise TypeError(f"Invalid parameter {param} selected. Not present at {self.check_param_loc(param)}")
+
 
         r_for_int = []
         var_for_int = []
@@ -1815,7 +1848,7 @@ class Condition:
         var_for_int = [param for _, param in sorted(zip(r_for_int, var_for_int))]
         r_for_int = sorted(r_for_int)
 
-        I = integrate.simpson(var_for_int, r_for_int, even=even_opt) / 2 / self.area_avg(param)**2 # Integrate wrt theta, divide by normalized length
+        I = integrate.simpson(y=var_for_int, x=r_for_int) / 2 / self.area_avg(param)**2 # Integrate wrt theta, divide by normalized length
 
         return I
 
@@ -1836,13 +1869,9 @@ class Condition:
         """
 
         # Check that the parameter that the user requested exists
-        try:
-            dummy = self.data[90][1.0][param]
-        except KeyError as e:
-            print(f"KeyError: {e}")
-            if debug: print(self.data, file=debugFID)
-            print(f"Could not area-average {param} for condition {self.name}")
-            return
+        if not self.check_param(param):
+            raise TypeError(f"Invalid parameter {param} selected. Not present at {self.check_param_loc(param)}")
+
 
         if method == 'legacy':
             I = 0
@@ -1995,19 +2024,19 @@ class Condition:
 
                 if debug: print("Arrays to integrate", angle, rs, vars, file=debugFID)
                     
-                param_r.append( integrate.simpson(vars, rs, even=even_opt) ) # Integrate wrt r
-                if debug: print("calculated integral:", integrate.simpson(vars, rs, even=even_opt), file=debugFID)
+                param_r.append( integrate.simpson(y=vars, x=rs) ) # Integrate wrt r
+                if debug: print("calculated integral:", integrate.simpson(y=vars, x=rs), file=debugFID)
                     #I = 2 * np.pi
             if debug: print("Integrated wrt r", param_r, file=debugFID)
 
             param_r = [param for _, param in sorted(zip(angles, param_r))]
             angles = sorted(angles)
 
-            I = integrate.simpson(param_r, angles, even=even_opt) / np.pi / self.area_avg('alpha') # Integrate wrt theta, divide by normalized area
+            I = integrate.simpson(y=param_r, x=angles) / np.pi / self.area_avg('alpha') # Integrate wrt theta, divide by normalized area
 
         return I
     
-    def interp_area_avg(self, param:str, interp_type = 'linear') -> float:
+    def interp_area_avg(self, param:str, interp_type = 'linear', int_error = 10**-6) -> float:
         """Method for calculating the area-average of a parameter, "param", based on an interpolation of the data
         
         Inputs:
@@ -2028,10 +2057,34 @@ class Condition:
         def integrand(phi, r): # phi will be in radians from dblquad
             return self(phi, r, param, interp_method=interp_type) * r
         
-        I = integrate.dblquad(integrand, 0, 1, 0, np.pi * 2)[0] / np.pi
+        I = integrate.nquad(integrand, ranges = [(0, 1), (0, np.pi * 2)], opts = {'epsabs': int_error, 'points': list(self.data[0].keys()), 'points': list(self.data.keys())})[0] / self.interp_area_avg('alpha') / np.pi
+        return I
+    
+    def interp_void_area_avg(self, param:str, interp_type = 'linear', int_error = 10**-6) -> float:
+        """Method for calculating the void-weighted area-average of a parameter, "param", based on an interpolation of the data
+        
+        Inputs:
+         - param, string of local parameter to area-average
+         - interp_type, option for what kind of interpolation to use
+
+        Options for interp_type:
+         - linear, see :any:`fit_linear_interp`
+         - spline, see :any:`fit_spline`
+
+        Returns:
+         - void weighted area-averaged parameter
+        
+        Uses scipy.integrate.dblquad, may be computationally expensive
+        
+        """
+
+        def integrand(phi, r): # phi will be in radians from dblquad
+            return self(phi, r, param, interp_method=interp_type) * self(phi, r, 'alpha', interp_method=interp_type) * r
+        
+        I = integrate.nquad(integrand, ranges = [(0, 1), (0, np.pi * 2)], opts = {'epsabs': int_error, 'points': list(self.data.keys()), 'points': list(self.data[0].keys())} )[0] / self.interp_area_avg('alpha') / np.pi
         return I
 
-    def spline_void_area_avg(self, param:str) -> float:
+    def spline_void_area_avg(self, param:str, int_error = 10**-6) -> float:
         """Function to void-weighted area-average param based on a spline interpolation
 
         Inputs:
@@ -2045,7 +2098,7 @@ class Condition:
         def integrand_denom(phi, r):
             return self.spline_interp['alpha'](phi * 180/np.pi, r) * r
         
-        I = integrate.dblquad(integrand, 0, 1, 0, np.pi * 2)[0] / integrate.dblquad(integrand_denom, 0, 1, 0, np.pi * 2)[0]
+        I = integrate.dblquad(integrand, 0, 1, 0, np.pi * 2, epsabs = int_error)[0] / integrate.dblquad(integrand_denom, 0, 1, 0, np.pi * 2, epsabs = int_error)[0]
         return I
     
     def spline_circ_seg_area_avg(self, param:str, hstar:float, int_err = 10**-4) -> float:
@@ -2124,13 +2177,13 @@ class Condition:
 
             if debug: print("Arrays to integrate", rs, vars, file=debugFID)
                 
-            param_r.append( integrate.simpson(vars, rs) ) # Integrate wrt r
-            if debug: print("calculated integral:", integrate.simpson(vars, rs), file=debugFID)
+            param_r.append( integrate.simpson(y=vars, x=rs) ) # Integrate wrt r
+            if debug: print("calculated integral:", integrate.simpson(y=vars, x=rs), file=debugFID)
                 #I = 2 * np.pi
         if debug: print("Integrated wrt r", param_r, file=debugFID)
         param_r_int = [var for _, var in sorted(zip(angles, param_r))]
         angles_int = sorted(angles)
-        I = integrate.simpson(param_r_int, angles_int) / np.pi / self.area_avg('alpha')**2 # Integrate wrt theta, divide by normalized area
+        I = integrate.simpson(y=param_r_int, x=angles_int) / np.pi / self.area_avg('alpha')**2 # Integrate wrt theta, divide by normalized area
 
         self.void_cov = I
         return I
@@ -2176,13 +2229,13 @@ class Condition:
 
             if debug: print("Arrays to integrate", rs, vars, file=debugFID)
                 
-            param_r.append( integrate.simpson(vars, rs) ) # Integrate wrt r
-            if debug: print("calculated integral:", integrate.simpson(vars, rs), file=debugFID)
+            param_r.append( integrate.simpson(y=vars, x=rs) ) # Integrate wrt r
+            if debug: print("calculated integral:", integrate.simpson(y=vars, x=rs), file=debugFID)
                 #I = 2 * np.pi
         if debug: print("Integrated wrt r", param_r, file=debugFID)
         param_r_int = [var for _, var in sorted(zip(angles, param_r))]
         angles_int = sorted(angles)
-        I = integrate.simpson(param_r_int, angles_int) / np.pi / alpha_avg**2 # Integrate wrt theta, divide by normalized area
+        I = integrate.simpson(y=param_r_int, x=angles_int) / np.pi / alpha_avg**2 # Integrate wrt theta, divide by normalized area
         if debug: print('Calculated sigma_alpha: ', I)
 
         self.sigma_alpha = I
@@ -2229,13 +2282,13 @@ class Condition:
 
             if debug: print("Arrays to integrate", rs, vars, file=debugFID)
                 
-            param_r.append( integrate.simpson(vars, rs) ) # Integrate wrt r
-            if debug: print("calculated integral:", integrate.simpson(vars, rs), file=debugFID)
+            param_r.append( integrate.simpson(y=vars, x=rs) ) # Integrate wrt r
+            if debug: print("calculated integral:", integrate.simpson(y=vars, x=rs), file=debugFID)
                 #I = 2 * np.pi
         if debug: print("Integrated wrt r", param_r, file=debugFID)
         param_r_int = [var for _, var in sorted(zip(angles, param_r))]
         angles_int = sorted(angles)
-        I = integrate.simpson(param_r_int, angles_int) / np.pi / ug_avg**2 # Integrate wrt theta, divide by normalized area
+        I = integrate.simpson(y=param_r_int, x=angles_int) / np.pi / ug_avg**2 # Integrate wrt theta, divide by normalized area
         if debug: print('Calculated sigma_ug: ', I)
 
         self.sigma_ug = I
@@ -2283,13 +2336,13 @@ class Condition:
 
             if debug: print("Arrays to integrate", rs, vars, file=debugFID)
                 
-            param_r.append( integrate.simpson(vars, rs) ) # Integrate wrt r
-            if debug: print("calculated integral:", integrate.simpson(vars, rs), file=debugFID)
+            param_r.append( integrate.simpson(y=vars, x=rs) ) # Integrate wrt r
+            if debug: print("calculated integral:", integrate.simpson(y=vars, x=rs), file=debugFID)
                 #I = 2 * np.pi
         if debug: print("Integrated wrt r", param_r, file=debugFID)
         param_r_int = [var for _, var in sorted(zip(angles, param_r))]
         angles_int = sorted(angles)
-        I = integrate.simpson(param_r_int, angles_int) / np.pi / alpha_avg**3 # Integrate wrt theta, divide by normalized area
+        I = integrate.simpson(y=param_r_int, x=angles_int) / np.pi / alpha_avg**3 # Integrate wrt theta, divide by normalized area
         if debug: print('Calculated mu3_alpha: ', I)
 
         self.mu3_alpha = I
@@ -2341,15 +2394,15 @@ class Condition:
 
             if debug: print("Arrays to integrate", angle, rs, vars, file=debugFID)
                 
-            param_r.append( integrate.simpson(vars, rs, even=even_opt) ) # Integrate wrt r
-            if debug: print("calculated integral:", integrate.simpson(vars, rs, even=even_opt), file=debugFID)
+            param_r.append( integrate.simpson(y=vars, x=rs) ) # Integrate wrt r
+            if debug: print("calculated integral:", integrate.simpson(y=vars, x=rs), file=debugFID)
                 #I = 2 * np.pi
         if debug: print("Integrated wrt r", param_r, file=debugFID)
 
         param_r = [param for _, param in sorted(zip(angles, param_r))]
         angles = sorted(angles)
 
-        I = integrate.simpson(param_r, angles, even=even_opt) / np.pi # Integrate wrt theta, divide by normalized area
+        I = integrate.simpson(y=param_r, x=angles) / np.pi # Integrate wrt theta, divide by normalized area
         return I
 
     def calc_dpdz(self, method = 'LM', m = 0.316, n = 0.25, chisholm = 25, k_m = 0.10, L = None, alpha = None, akapower = 0.875):
@@ -2871,7 +2924,7 @@ the newly calculated :math:`v_{r}` or not
         self.aa_vr = vr
         return vr
     
-    def calc_errors(self, param1:str, param2:str):
+    def calc_errors(self, param1:str, param2:str) -> float:
         """ Calculates the errors, ε, between two parameters (param1 - param2) in midas_dict
 
         Usually want to do param1=predicted, param2=experimental
@@ -2908,6 +2961,20 @@ the newly calculated :math:`v_{r}` or not
                     midas_dict[param_abs_rel_error_name] = 0
 
         return self.area_avg(param_error_name)
+    
+    def calc_AA_error(self, param1:str, param2:str) -> float:
+        """ Calculates the error, ε, between the area-average of two parameters (⟨param1⟩ - ⟨param2⟩) in midas_dict
+
+        Usually want to do param1=predicted, param2=experimental
+        
+        Returns
+         - relative error (⟨param1⟩ - ⟨param2⟩) / ⟨param1⟩
+        
+        """
+        eps = self.area_avg(param1) - self.area_avg(param2)
+        rel_error = eps / self.area_avg(param1)
+
+        return rel_error
 
     def calc_symmetry(self, param, sym_type = 'sym90', method = 'rmse', rel_error = False):
         """ Function for checking the symmetry of a condition
@@ -2956,6 +3023,83 @@ the newly calculated :math:`v_{r}` or not
         self.sym_error = sym_error
 
         return self.sym_error
+
+    def calc_symmetry_area_avg(self, param, sym_type='sym_half', rel_error=True, even_opt='first'):
+        """ Function for checking the area-averaged symmetry of a condition between the left and right half.
+    
+        Inputs:
+        - param: The parameter for which to calculate the symmetry
+        - sym_type: 'sym_half' to compare left half (0-180) and right half (180-360)
+        - rel_error: If true, the error will be relative to the parameter at the left half angles
+        - even_opt: Option for integration method in simpson's rule (as used in area_avg)
+        Returns:
+       - Area-averaged symmetry error across all radial and angular positions
+       """
+        
+        if sym_type != 'sym_half':
+           raise ValueError("This function is only designed for 'sym_half' symmetry type.")
+
+         # Define angle pairs for left-right half symmetry
+        angle_pairs = [(0, 180), (22.5, 202.5), (45, 225), (67.5, 247.5), (90, 270), (292.5, 112.5), (315, 135), (337.5, 157.5)]
+
+        sym_errors = []  # To store symmetry errors for each angle pair
+        areas = []       # To store areas for weighted integration
+
+         # Iterate over angle pairs
+        for angle1, angle2 in angle_pairs:
+            if angle1 not in self.data or angle2 not in self.data:
+                continue  # Skip if angles are not in the data
+
+            param_r = []  # To store the radial integration result
+            rs_list = []  # Radial positions to integrate over
+            
+            # Calculate symmetry error for each radial position
+            for rstar, r_dict in self.data[angle1].items():
+                try:
+                  sym_error = abs(r_dict[param] - self.data[angle2][rstar][param])
+                except KeyError:
+                   continue  # Skip if data is missing for the corresponding rstar in angle2
+
+                if rel_error:
+                    try:
+                       sym_error /= r_dict[param]  # Calculate relative error
+                    except ZeroDivisionError:
+                       sym_error = 0  # Handle division by zero case
+            
+                rs_list.append(rstar)
+                param_r.append(abs(sym_error) * rstar)  # Multiply by rstar for radial area weighting
+
+            # Sort by radial position for integration
+            param_r_sorted = [x for _, x in sorted(zip(rs_list, param_r))]
+            rs_sorted = sorted(rs_list)
+            
+            # Integrate wrt r (radial direction) using simpson's rule
+            if len(rs_sorted) > 1:
+                try:
+                    radial_avg_sym = integrate.simpson(y=param_r_sorted, x=rs_sorted)
+                except Exception as e:
+                    print(f"Integration error: {e}")
+                    radial_avg_sym = 0
+            else:
+                radial_avg_sym = 0
+
+            sym_errors.append(radial_avg_sym)
+            areas.append(1)  # For now, give equal weighting to all angles
+
+            # Now integrate over angles (θ)
+        angles_in_radians = [angle_pair[0] * np.pi / 180 for angle_pair in angle_pairs]
+        if len(sym_errors) > 1:
+            try:
+               # Final integration wrt angle θ
+              area_avg_sym_error = integrate.simpson(y=sym_errors, x=angles_in_radians) / np.pi
+            except Exception as e:
+                print(f"Angle integration error: {e}")
+                area_avg_sym_error = 0
+        else:
+           area_avg_sym_error = 0
+
+        return area_avg_sym_error
+
 
     def calc_avg_lat_sep(self):
         """Calculates average lateral separation distance between bubbles
@@ -4130,7 +4274,7 @@ the newly calculated :math:`v_{r}` or not
         plt.rcParams["font.family"] = "Times New Roman"
         plt.rcParams["mathtext.fontset"] = "cm"
         
-        self.mirror()
+        # self.mirror()
         rs = []
         phis = []
         vals = []

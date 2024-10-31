@@ -1,12 +1,13 @@
-from .Condition import Condition
+from .Condition import Condition, zero_data
 from .config import *
 import subprocess
+from copy import copy
 
 """ Functions for interfacing with CFX
 
 """
 
-def write_CFX_BC(cond:Condition, save_dir = ".", z_loc = 'LoverD', only_90 = False, interp = False, csv_name = False, ngrid = 100):
+def write_CFX_BC(cond:Condition, save_dir = ".", z_loc = 'LoverD', only_90 = False, interp = False, csv_name = None, ngrid = 100):
     """ Write a csv file for CFX based on cond
 
     z_loc can be set by the user, or set to "LoverD" to use the cond L/D information
@@ -21,7 +22,7 @@ def write_CFX_BC(cond:Condition, save_dir = ".", z_loc = 'LoverD', only_90 = Fal
     except AttributeError:
         cond.run_ID = cond.database
 
-    if not csv_name:
+    if csv_name is None:
         if only_90:
             csv_name = f"{cond.run_ID}_{cond.theta}deg_jf{cond.jf:0.1f}_jg{cond.jgref}_{cond.port}_BC_90deg.csv"
         else:
@@ -32,6 +33,9 @@ def write_CFX_BC(cond:Condition, save_dir = ".", z_loc = 'LoverD', only_90 = Fal
     if z_loc == 'LoverD':
         z_loc = cond.LoverD
 
+    if not cond.check_param('vf'):
+        cond.approx_vf()
+
 
     with open(path_to_csv, "w") as f:
         R = cond.Dh/2
@@ -39,7 +43,6 @@ def write_CFX_BC(cond:Condition, save_dir = ".", z_loc = 'LoverD', only_90 = Fal
         f.write("[Name],,,,,,,,,\n")
         f.write(f"{cond.port}data,,,,,,,,,\n")
         f.write("[Spatial Fields],,,,,,,,,\n")
-        
         
         if not interp:
             f.write("radius,z,phi,,,,,,,\n")
@@ -66,7 +69,9 @@ def write_CFX_BC(cond:Condition, save_dir = ".", z_loc = 'LoverD', only_90 = Fal
             if only_90:
                 xs = np.zeros(ys.shape)
             else:
-                xs = np.linspace(-R / 2, R, ngrid)
+                xs = np.linspace(-R, R, ngrid)
+
+            
 
             for x in xs:
                 for y in ys:
@@ -88,10 +93,10 @@ def write_CFX_BC(cond:Condition, save_dir = ".", z_loc = 'LoverD', only_90 = Fal
                 for phi in phis:
                     f.write(f"{r*1000},{z_loc},{phi},{0},{0},{ cond(phi, r/R, 'ug1', interp_method='linear') },{cond(phi, r/R, 'alpha', interp_method='linear')},{0},{0},{cond(phi, r/R, 'vf', interp_method='linear')},\n")
 
-
+    print(cond, "written to CFX BC")
     return
 
-def read_CFX_export(csv_name, jf, jgref, theta, port, database, jgloc=None) -> Condition:
+def read_CFX_export(csv_path, jf, jgref, theta, port, database, jgloc=None) -> Condition:
     """ Read CFX csv export into a MARIGOLD Condition object
 
     Must supply jf, jgref, theta, port, database, jgloc, etc. for Condition
@@ -103,8 +108,9 @@ def read_CFX_export(csv_name, jf, jgref, theta, port, database, jgloc=None) -> C
         jgloc = jgref
     cond = Condition(jgref, jgloc, jf, theta, port, database)
     cond.run_ID = 'CFD'
+    cond._angles = [0, 360]
 
-    with open(csv_name) as fi:
+    with open(csv_path) as fi:
         fi.readline()             # 
         fi.readline()             # [Name]
         fi.readline()             # port3
@@ -119,6 +125,8 @@ def read_CFX_export(csv_name, jf, jgref, theta, port, database, jgloc=None) -> C
         alpha_idx = [idx for idx, s in enumerate(variables) if 'gas.Volume' in s][0]
         x_idx = [idx for idx, s in enumerate(variables) if 'X [ m ]' in s][0]
         y_idx = [idx for idx, s in enumerate(variables) if 'Y [ m ]' in s][0]
+
+        doublecheck_angles = []
 
         while True:
             try:
@@ -145,13 +153,55 @@ def read_CFX_export(csv_name, jf, jgref, theta, port, database, jgloc=None) -> C
             data_dict = {'ug1': vg, 'vf': vf, 'alpha': alpha}
             
             roverR = np.sqrt(x**2 + y**2) / 0.0127
-            phi_angle = int(np.arctan2(y, x) * 180/np.pi)
+            phi_angle = (int(np.arctan2(y,x) * 180/np.pi) +360) % 360
+            if (phi_angle < 0):
+                print(x, y, phi_angle)
+
+            if phi_angle not in cond._angles:
+                cond._angles.append(phi_angle)
+
+            if roverR > 1.0 or roverR < 0:
+                continue
+
+            if phi_angle < 0 or phi_angle > 360:
+                continue
 
             try:
                 cond.data[phi_angle].update({roverR:data_dict})
             except:
                 cond.data.update({phi_angle:{}})
                 cond.data[phi_angle].update({roverR:data_dict})
+                cond.data[phi_angle].update({1.0:zero_data})
+
+            try:
+                cond.data[phi_angle].update({0.0:data_at_zero})
+            except UnboundLocalError:
+                doublecheck_angles.append(phi_angle)
+                pass
+
+            if roverR == 0 and alpha > 0:
+                data_at_zero = copy(data_dict)
+
+        
+        for phi_angle in doublecheck_angles:
+            try:
+                cond.data[phi_angle].update({0.0:data_at_zero})
+            except UnboundLocalError:
+                pass
+
+        # for angle in cond._angles:
+        #     if angle < 180:
+        #         if (180 - angle) not in cond._angles:
+        #             cond._angles.append(180 - angle)
+
+        #     elif angle > 180:
+        #         if (360 - angle + 180) not in cond._angles:
+        #             cond._angles.append(360 - angle + 180)
+
+
+        cond._angles.sort()
+
+        print(cond._angles)
 
     return cond
 
@@ -374,7 +424,7 @@ ic_undo_group_end \n\
 ic_uns_min_metric Quality {{}} {{}} \n\
 ic_exit\n', file=fi)
     try:
-        subprocess.check_call("ml ansys", shell=True)
+        subprocess.check_call("ml ansys/2024R2", shell=True)
     except subprocess.CalledProcessError as e:
         print(e)
         print("Continuing...")
@@ -519,7 +569,7 @@ def write_CCL(mom_source = 'normal_drag_mom_source', ccl_name = 'auto_setup.ccl'
 LIBRARY: \n\
 CEL: \n\
 EXPRESSIONS: \n\
-CD = 0.44 \n\
+CD = {CD} \n\
 FDGx = - 3/4 * CD / (gas.Mean Particle Diameter) * (gas.Volume Fraction) * liquid.density * (vrNorm) * (gas.u - liquid.u) \n\
 FDGy = - 3/4 * CD / (gas.Mean Particle Diameter) * (gas.Volume Fraction) * liquid.density* (vrNorm) * (gas.v - liquid.v) \n\
 FDGz = - 3/4 * CD / (gas.Mean Particle Diameter) * (gas.Volume Fraction) * liquid.density* (vrNorm) * (gas.w - liquidWEff) \n\
@@ -1129,7 +1179,7 @@ END\n\
 > quit ", file = fi)
     print('$\ncfx5pre -s CFXPre_Commands.pre')
     
-    subprocess.run("ml ansys", shell=True)
+    subprocess.run("ml ansys/2024R2", shell=True)
     
     comp_process = subprocess.check_call('cfx5pre -s CFXPre_Commands.pre -line > auto_cfx_run.log', shell=True)
     print(comp_process)
@@ -1143,7 +1193,7 @@ def run_CFX_case(case_name, parallel=True, npart = 4, init_fi = None, interactiv
     Can run in parallel, specify the number of cores with npart
     
     """
-    comp_process = subprocess.run("ml ansys", shell=True)
+    comp_process = subprocess.run("ml ansys/2024R2", shell=True)
     print(comp_process)
 
     run_string = f"cfx5solve -def {case_name}.def -monitor {case_name}_001.out -double"
@@ -1303,7 +1353,7 @@ END\n\
         \
         ', file=fi)
 
-    subprocess.run("ml ansys", shell=True)
+    subprocess.run("ml ansys/2024R2", shell=True)
 
     print(os.getcwd())
     subprocess.check_call(f'rm -rf ./{case_name}_Results', shell=True)
