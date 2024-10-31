@@ -80,13 +80,16 @@
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.iate.iate_1d_1g">[docs]</a>
 <span class="k">def</span> <span class="nf">iate_1d_1g</span><span class="p">(</span>
         <span class="c1"># Basic inputs</span>
-        <span class="n">cond</span><span class="p">,</span> <span class="n">query</span><span class="p">,</span> <span class="n">z_step</span> <span class="o">=</span> <span class="mf">0.01</span><span class="p">,</span> <span class="n">io</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">cond</span><span class="p">,</span> <span class="n">query</span><span class="p">,</span> <span class="n">z_step</span> <span class="o">=</span> <span class="mf">0.01</span><span class="p">,</span> <span class="n">io</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">geometry</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">cond2</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         
         <span class="c1"># IATE Coefficients</span>
         <span class="n">C_WE</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">C_RC</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">C_TI</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">alpha_max</span> <span class="o">=</span> <span class="mf">0.75</span><span class="p">,</span> <span class="n">C</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span> <span class="n">We_cr</span> <span class="o">=</span> <span class="mi">6</span><span class="p">,</span> <span class="n">acrit_flag</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">acrit</span> <span class="o">=</span> <span class="mf">0.13</span><span class="p">,</span>
 
         <span class="c1"># Method arguments</span>
-        <span class="n">preset</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">avg_method</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">cd_method</span> <span class="o">=</span> <span class="s1">&#39;doe&#39;</span><span class="p">,</span> <span class="n">dpdz_method</span> <span class="o">=</span> <span class="s1">&#39;LM&#39;</span><span class="p">,</span> <span class="n">void_method</span> <span class="o">=</span> <span class="s1">&#39;driftflux&#39;</span><span class="p">,</span>
+        <span class="n">preset</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">avg_method</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">cov_method</span> <span class="o">=</span> <span class="s1">&#39;fixed&#39;</span><span class="p">,</span> <span class="n">rf</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">cd_method</span> <span class="o">=</span> <span class="s1">&#39;doe&#39;</span><span class="p">,</span> <span class="n">dpdz_method</span> <span class="o">=</span> <span class="s1">&#39;LM&#39;</span><span class="p">,</span> <span class="n">void_method</span> <span class="o">=</span> <span class="s1">&#39;driftflux&#39;</span><span class="p">,</span>
+
+        <span class="c1"># Covariance calculation</span>
+        <span class="n">COV_RC</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">COV_TI</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 
         <span class="c1"># Pressure drop calculation</span>
         <span class="n">LM_C</span> <span class="o">=</span> <span class="mi">25</span><span class="p">,</span> <span class="n">k_m</span> <span class="o">=</span> <span class="mf">0.10</span><span class="p">,</span> <span class="n">m</span> <span class="o">=</span> <span class="mf">0.316</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="mf">0.25</span><span class="p">,</span>
@@ -94,8 +97,6 @@
         <span class="c1"># Void fraction calculation</span>
         <span class="n">C0</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">C_inf</span> <span class="o">=</span> <span class="mf">1.20</span><span class="p">,</span>
 
-        <span class="c1"># Temporary arguments</span>
-        <span class="n">restriction</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">cond2</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">debug</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Calculate the area-averaged interfacial area concentration at query location based on the 1D 1G IATE</span>
 <span class="sd">    </span>
@@ -104,6 +105,8 @@
 <span class="sd">     - query:           L/D endpoint</span>
 <span class="sd">     - z_step:          Axial mesh cell size [-]</span>
 <span class="sd">     - io:              Output package of iate_1d_1g(), can be used as input for subsequent runs</span>
+<span class="sd">     - geometry:        Geometry type, defaults to None, can be set to &#39;elbow&#39;, &#39;ubend&#39;</span>
+<span class="sd">     - cond2:           Second condition object, for possible interpolation</span>
 <span class="sd">     - C_WE:            Wake entrainment coefficient</span>
 <span class="sd">     - C_RC:            Random collision coefficient</span>
 <span class="sd">     - C_TI:            Turbulent impact coefficient</span>
@@ -112,19 +115,21 @@
 <span class="sd">     - We_cr:           Weber number criterion, used for turbulent impact calculation</span>
 <span class="sd">     - acrit_flag:      Enable/disable shutting off turbulence-based mechanisms beyond a critical void fraction</span>
 <span class="sd">     - acrit:           Critical void fraction for shutting off turbulence-based mechanisms</span>
-<span class="sd">     - C_inf:           Drift flux distribution parameter limiting value</span>
-<span class="sd">     - dpdz_method:     Pressure drop prediction method, &#39;LM&#39; or &#39;Kim&#39;</span>
+<span class="sd">     - preset:          Author preset, fixes coefficients and method arguments to match old MATLAB runs</span>
+<span class="sd">     - avg_method:      Area-averaging method, can be set to None (for Python Simpson&#39;s rule), &#39;legacy&#39; (for Excel Simpson&#39;s Rule)</span>
 <span class="sd">     - cd_method:       Drag coefficient prediction method, &#39;err_iter&#39;, &#39;fixed_iter&#39;, or &#39;doe&#39;</span>
+<span class="sd">     - dpdz_method:     Pressure drop prediction method, &#39;LM&#39; or &#39;Kim&#39;</span>
 <span class="sd">     - void_method:     Void fraction prediction method, &#39;driftflux&#39; or &#39;continuity&#39;</span>
 <span class="sd">     - LM_C:            Lockhart-Martinelli Chisholm parameter</span>
 <span class="sd">     - k_m:             Minor loss coefficient</span>
-<span class="sd">     - restriction:     Restriction type, defaults to None, can be set to &#39;elbow&#39;, &#39;ubend&#39;</span>
-<span class="sd">     - cond2:           Second condition object, for possible interpolation</span>
+<span class="sd">     - m:               Friction factor constant</span>
+<span class="sd">     - n:               Friction factor constant</span>
+<span class="sd">     - C0:              Drift flux distribution parameter overriding value</span>
+<span class="sd">     - C_inf:           Drift flux distribution parameter limiting value. Will be used to calculate C0, if none specified</span>
 
 <span class="sd">    Notes:</span>
 <span class="sd">     - Notice some grav terms are made absolute; needs downward flow fixes</span>
 <span class="sd">     - IATE coefficients set as optional inputs, with default values set depending on geometry</span>
-<span class="sd">     - COV terms being implemented in Condition.py, not incorporated into this function yet</span>
 <span class="sd">     - vgz calculation in elbow and dissipation length regions still need to be implemented</span>
 <span class="sd">     - Need a way to compute void fraction across restrictions, void fraction prediction falters</span>
 <span class="sd">     - Modify MG for Yadav data extraction</span>
@@ -165,10 +170,12 @@
         <span class="n">rho_g</span>           <span class="o">=</span> <span class="mf">1.23</span>
         <span class="n">mu_f</span>            <span class="o">=</span> <span class="mf">0.001</span>
         <span class="n">sigma</span>           <span class="o">=</span> <span class="mf">0.07278</span>
+        <span class="n">p_atm</span>           <span class="o">=</span> <span class="mi">101353</span>        <span class="c1"># Implied by subtracting thesis gauge pressures from MATLAB absolute pressures</span>
 
         <span class="n">cond</span><span class="o">.</span><span class="n">mu_g</span>       <span class="o">=</span> <span class="mf">1.73E-5</span>
 
-        <span class="n">avg_method</span>      <span class="o">=</span> <span class="s1">&#39;legacy&#39;</span>
+        <span class="n">rf</span>              <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">avg_method</span>      <span class="o">=</span> <span class="s1">&#39;legacy_old&#39;</span>
         <span class="n">cd_method</span>       <span class="o">=</span> <span class="s1">&#39;doe&#39;</span>
         <span class="n">dpdz_method</span>     <span class="o">=</span> <span class="s1">&#39;LM&#39;</span>
 
@@ -200,7 +207,7 @@
     <span class="c1">#                                                                                                                          #</span>
     <span class="c1">############################################################################################################################</span>
 
-    <span class="c1"># For future reference, when adding other restriction types, want to maintain consistency in if/then logic.</span>
+    <span class="c1"># For future reference, when adding other geometry types, want to maintain consistency in if/then logic.</span>
     <span class="c1">#  1. Check angles with straight pipes</span>
     <span class="c1">#  2. Check angles with restrictions</span>
     <span class="c1">#  3. Check restrictions</span>
@@ -209,7 +216,7 @@
     <span class="c1">#       c. &#39;dissipation&#39;</span>
     <span class="c1">#       d. Other</span>
     <span class="c1">#  4. Else, default to vertical-upward</span>
-    <span class="k">if</span> <span class="n">theta</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">restriction</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>      <span class="c1"># Horizontal, no elbow (Talley, 2012)</span>
+    <span class="k">if</span> <span class="n">theta</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">geometry</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>         <span class="c1"># Horizontal, no elbow (Talley, 2012)</span>
         <span class="k">if</span> <span class="n">C_WE</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">C_WE</span>    <span class="o">=</span> <span class="mf">0.000</span>
         <span class="k">if</span> <span class="n">C_RC</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
@@ -219,7 +226,7 @@
         
         <span class="n">We_cr</span> <span class="o">=</span> <span class="mi">5</span>
 
-    <span class="k">elif</span> <span class="n">restriction</span> <span class="o">==</span> <span class="s1">&#39;elbow&#39;</span><span class="p">:</span>                <span class="c1"># Elbow (Yadav, 2013)</span>
+    <span class="k">elif</span> <span class="n">geometry</span> <span class="o">==</span> <span class="s1">&#39;elbow&#39;</span><span class="p">:</span>                   <span class="c1"># Elbow (Yadav, 2013)</span>
         <span class="k">if</span> <span class="n">C_WE</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">C_WE</span>    <span class="o">=</span> <span class="mf">0.000</span>
         <span class="k">if</span> <span class="n">C_RC</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
@@ -227,7 +234,7 @@
         <span class="k">if</span> <span class="n">C_TI</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">C_TI</span>    <span class="o">=</span> <span class="mf">0.085</span>
 
-    <span class="k">elif</span> <span class="n">restriction</span> <span class="o">==</span> <span class="s1">&#39;vd&#39;</span><span class="p">:</span>                   <span class="c1"># Vertical-downward (Ishii, Paranjape, Kim, and Sun, 2004)</span>
+    <span class="k">elif</span> <span class="n">geometry</span> <span class="o">==</span> <span class="s1">&#39;vd&#39;</span><span class="p">:</span>                      <span class="c1"># Vertical-downward (Ishii, Paranjape, Kim, and Sun, 2004)</span>
         <span class="k">if</span> <span class="n">C_WE</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">C_WE</span>    <span class="o">=</span> <span class="mf">0.002</span>
         <span class="k">if</span> <span class="n">C_RC</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
@@ -243,40 +250,34 @@
         <span class="k">if</span> <span class="n">C_TI</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">C_TI</span>    <span class="o">=</span> <span class="mf">0.085</span>
     
-    <span class="c1"># # Lets the IATE function take in either scalar or array COV. This is important later, since COV is indexed</span>
-    <span class="c1"># if hasattr(COV_RC,&quot;__len__&quot;):</span>
-    <span class="c1">#     if len(COV_RC) == 1:</span>
-    <span class="c1">#         COV_RC = [COV_RC[0] for _ in range(len(z_mesh))]</span>
-    <span class="c1"># else:</span>
-    <span class="c1">#     COV_RC = [COV_RC for _ in range(len(z_mesh))]</span>
+    <span class="k">if</span> <span class="n">cond2</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">cov_method</span> <span class="o">=</span> <span class="s1">&#39;fixed&#39;</span>
 
-    <span class="c1"># if hasattr(COV_TI,&quot;__len__&quot;):</span>
-    <span class="c1">#     if len(COV_TI) == 1:</span>
-    <span class="c1">#         COV_TI = [COV_TI[0] for _ in range(len(z_mesh))]</span>
-    <span class="c1"># else:</span>
-    <span class="c1">#     COV_TI = [COV_TI for _ in range(len(z_mesh))]</span>
-    
-    <span class="k">if</span> <span class="n">cond2</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">cov_method</span> <span class="o">==</span> <span class="s1">&#39;interp&#39;</span><span class="p">:</span>
         <span class="c1"># Use data at initial condition, void reconstruction downstream</span>
         <span class="k">if</span> <span class="n">io</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">rf</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">rf1</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">rf2</span> <span class="o">=</span> <span class="n">rf</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">rf</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">rf1</span> <span class="o">=</span> <span class="n">rf</span>
+            <span class="n">rf2</span> <span class="o">=</span> <span class="n">rf</span>
         
-        <span class="n">COV_RC1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="n">cond</span><span class="o">.</span><span class="n">calc_COV_RC</span><span class="p">(</span><span class="n">reconstruct_flag</span> <span class="o">=</span> <span class="n">rf</span><span class="p">,</span> <span class="n">debug</span> <span class="o">=</span> <span class="n">rf</span><span class="p">),</span> <span class="n">nan</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
-        <span class="n">COV_TI1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="n">cond</span><span class="o">.</span><span class="n">calc_COV_TI</span><span class="p">(</span><span class="n">reconstruct_flag</span> <span class="o">=</span> <span class="n">rf</span><span class="p">,</span> <span class="n">debug</span> <span class="o">=</span> <span class="n">rf</span><span class="p">),</span> <span class="n">nan</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
-
-        <span class="n">COV_RC2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="n">cond2</span><span class="o">.</span><span class="n">calc_COV_RC</span><span class="p">(</span><span class="n">reconstruct_flag</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">debug</span> <span class="o">=</span> <span class="n">rf</span><span class="p">),</span> <span class="n">nan</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
-        <span class="n">COV_TI2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="n">cond2</span><span class="o">.</span><span class="n">calc_COV_TI</span><span class="p">(</span><span class="n">reconstruct_flag</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">debug</span> <span class="o">=</span> <span class="n">rf</span><span class="p">),</span> <span class="n">nan</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
-
-        <span class="c1"># print(&quot;*****&quot;)</span>
-        <span class="c1"># print(f&quot;{cond}&quot;)</span>
-        <span class="c1"># print(f&quot;L/D: {cond.LoverD}\t\tCOV_RC1: {COV_RC1}\tCOV_TI1: {COV_TI1}\t&quot;)</span>
-        <span class="c1"># print(f&quot;L/D: {cond2.LoverD}\t\tCOV_RC2: {COV_RC2}\tCOV_TI2: {COV_TI2}\t&quot;)</span>
-        <span class="c1"># print(&quot;*****&quot;)</span>
+        <span class="k">if</span> <span class="n">COV_RC</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">COV_RC1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="n">cond</span><span class="o">.</span><span class="n">calc_COV_RC</span><span class="p">(</span><span class="n">reconstruct_flag</span> <span class="o">=</span> <span class="n">rf1</span><span class="p">,</span> <span class="n">avg_method</span> <span class="o">=</span> <span class="n">avg_method</span><span class="p">,</span> <span class="n">debug</span> <span class="o">=</span> <span class="kc">False</span><span class="p">),</span> <span class="n">nan</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+            <span class="n">COV_RC2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="n">cond2</span><span class="o">.</span><span class="n">calc_COV_RC</span><span class="p">(</span><span class="n">reconstruct_flag</span> <span class="o">=</span> <span class="n">rf2</span><span class="p">,</span> <span class="n">avg_method</span> <span class="o">=</span> <span class="n">avg_method</span><span class="p">,</span> <span class="n">debug</span> <span class="o">=</span> <span class="kc">False</span><span class="p">),</span> <span class="n">nan</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+            <span class="n">COV_RC</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">z_mesh</span> <span class="o">/</span> <span class="n">Dh</span><span class="p">,(</span><span class="n">cond</span><span class="o">.</span><span class="n">LoverD</span><span class="p">,</span> <span class="n">cond2</span><span class="o">.</span><span class="n">LoverD</span><span class="p">),(</span><span class="n">COV_RC1</span><span class="p">,</span> <span class="n">COV_RC2</span><span class="p">))</span>
         
-        <span class="n">COV_RC</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">z_mesh</span><span class="p">,(</span><span class="n">cond</span><span class="o">.</span><span class="n">LoverD</span><span class="p">,</span> <span class="n">cond2</span><span class="o">.</span><span class="n">LoverD</span><span class="p">),(</span><span class="n">COV_RC1</span><span class="p">,</span> <span class="n">COV_RC2</span><span class="p">))</span>
-        <span class="n">COV_TI</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">z_mesh</span><span class="p">,(</span><span class="n">cond</span><span class="o">.</span><span class="n">LoverD</span><span class="p">,</span> <span class="n">cond2</span><span class="o">.</span><span class="n">LoverD</span><span class="p">),(</span><span class="n">COV_TI1</span><span class="p">,</span> <span class="n">COV_TI2</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">COV_TI</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">COV_TI1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="n">cond</span><span class="o">.</span><span class="n">calc_COV_TI</span><span class="p">(</span><span class="n">reconstruct_flag</span> <span class="o">=</span> <span class="n">rf1</span><span class="p">,</span> <span class="n">avg_method</span> <span class="o">=</span> <span class="n">avg_method</span><span class="p">,</span> <span class="n">We_cr</span> <span class="o">=</span> <span class="n">We_cr</span><span class="p">,</span> <span class="n">debug</span> <span class="o">=</span> <span class="kc">False</span><span class="p">),</span> <span class="n">nan</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+            <span class="n">COV_TI2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="n">cond2</span><span class="o">.</span><span class="n">calc_COV_TI</span><span class="p">(</span><span class="n">reconstruct_flag</span> <span class="o">=</span> <span class="n">rf2</span><span class="p">,</span> <span class="n">avg_method</span> <span class="o">=</span> <span class="n">avg_method</span><span class="p">,</span> <span class="n">We_cr</span> <span class="o">=</span> <span class="n">We_cr</span><span class="p">,</span> <span class="n">debug</span> <span class="o">=</span> <span class="kc">False</span><span class="p">),</span> <span class="n">nan</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+            <span class="n">COV_TI</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">z_mesh</span> <span class="o">/</span> <span class="n">Dh</span><span class="p">,(</span><span class="n">cond</span><span class="o">.</span><span class="n">LoverD</span><span class="p">,</span> <span class="n">cond2</span><span class="o">.</span><span class="n">LoverD</span><span class="p">),(</span><span class="n">COV_TI1</span><span class="p">,</span> <span class="n">COV_TI2</span><span class="p">))</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">COV_RC</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">COV_RC</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="k">if</span> <span class="n">COV_TI</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">COV_TI</span> <span class="o">=</span> <span class="mi">1</span>
 
     <span class="c1">############################################################################################################################</span>
     <span class="c1">#                                                                                                                          #</span>
@@ -342,10 +343,10 @@
     <span class="c1"># Pressure drop [Pa/m]</span>
 
     <span class="c1"># Calculate height change for gravitational loss</span>
-    <span class="k">if</span> <span class="n">restriction</span> <span class="o">==</span> <span class="s1">&#39;elbow&#39;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">geometry</span> <span class="o">==</span> <span class="s1">&#39;elbow&#39;</span><span class="p">:</span>
         <span class="n">delta_h</span> <span class="o">=</span> <span class="p">(</span><span class="n">z_mesh</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">z_mesh</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>          <span class="c1"># The height of an elbow is going to be its radius</span>
 
-    <span class="k">elif</span> <span class="n">restriction</span> <span class="o">==</span> <span class="s1">&#39;ubend&#39;</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">geometry</span> <span class="o">==</span> <span class="s1">&#39;ubend&#39;</span><span class="p">:</span>
         <span class="n">delta_h</span> <span class="o">=</span> <span class="mi">0</span>
 
     <span class="k">else</span><span class="p">:</span>
@@ -353,13 +354,12 @@
 
     <span class="c1"># Calculate initial pressure and pressure gradient</span>
     <span class="n">p</span> <span class="o">=</span> <span class="n">jgatm</span> <span class="o">*</span> <span class="n">p_atm</span> <span class="o">/</span> <span class="n">jgloc</span>                                   <span class="c1"># Back-calculate local corrected absolute pressure</span>
-    
+
     <span class="k">if</span> <span class="n">preset</span> <span class="o">==</span> <span class="s1">&#39;kim&#39;</span><span class="p">:</span>
         <span class="n">p</span> <span class="o">=</span> <span class="n">cond</span><span class="o">.</span><span class="n">pz</span>                                             <span class="c1"># Override</span>
         <span class="n">dpdz</span> <span class="o">=</span> <span class="n">cond</span><span class="o">.</span><span class="n">dpdz</span>
 
     <span class="k">elif</span> <span class="n">dpdz_method</span> <span class="o">==</span> <span class="s1">&#39;interp&#39;</span><span class="p">:</span>
-        <span class="c1"># Change this to use np.interp() instead</span>
         <span class="n">dpdz</span> <span class="o">=</span> <span class="p">((</span><span class="n">cond2</span><span class="o">.</span><span class="n">jgatm</span> <span class="o">*</span> <span class="n">p_atm</span> <span class="o">/</span> <span class="n">cond2</span><span class="o">.</span><span class="n">jgloc</span><span class="p">)</span> <span class="o">-</span> <span class="n">p</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">cond2</span><span class="o">.</span><span class="n">LoverD</span> <span class="o">-</span> <span class="n">LoverD</span><span class="p">)</span>
 
     <span class="k">else</span><span class="p">:</span>
@@ -399,7 +399,11 @@
             <span class="n">Db</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">6</span> <span class="o">*</span> <span class="n">alpha</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">/</span> <span class="n">ai</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
 
         <span class="k">if</span> <span class="n">void_method</span> <span class="o">==</span> <span class="s1">&#39;vgz_interp&#39;</span> <span class="ow">and</span> <span class="n">cond2</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">vgz</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">z_mesh</span><span class="p">[</span><span class="n">i</span><span class="p">],(</span><span class="n">cond</span><span class="o">.</span><span class="n">LoverD</span><span class="p">,</span> <span class="n">cond2</span><span class="o">.</span><span class="n">LoverD</span><span class="p">),(</span><span class="n">cond</span><span class="o">.</span><span class="n">area_avg</span><span class="p">(</span><span class="s1">&#39;ug1&#39;</span><span class="p">),</span> <span class="n">cond2</span><span class="o">.</span><span class="n">area_avg</span><span class="p">(</span><span class="s1">&#39;ug1&#39;</span><span class="p">)))</span>
+            <span class="n">vgz</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">z_mesh</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">/</span> <span class="n">Dh</span><span class="p">,</span>
+                               <span class="p">(</span><span class="n">cond</span><span class="o">.</span><span class="n">LoverD</span><span class="p">,</span> <span class="n">cond2</span><span class="o">.</span><span class="n">LoverD</span><span class="p">),</span>
+                               <span class="p">(</span><span class="n">cond</span><span class="o">.</span><span class="n">void_area_avg</span><span class="p">(</span><span class="s1">&#39;ug1&#39;</span><span class="p">,</span><span class="n">method</span><span class="o">=</span><span class="n">avg_method</span><span class="p">),</span> <span class="n">cond2</span><span class="o">.</span><span class="n">void_area_avg</span><span class="p">(</span><span class="s1">&#39;ug1&#39;</span><span class="p">,</span><span class="n">method</span><span class="o">=</span><span class="n">avg_method</span><span class="p">))</span>
+                               <span class="p">)</span>
+
             <span class="n">alpha</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">jgloc</span> <span class="o">/</span> <span class="n">vgz</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
             <span class="n">Db</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">6</span> <span class="o">*</span> <span class="n">alpha</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">/</span> <span class="n">ai</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
             
@@ -464,22 +468,15 @@
         <span class="n">fTW</span> <span class="o">=</span> <span class="mf">0.316</span> <span class="o">*</span> <span class="p">(</span><span class="n">mu_m</span> <span class="o">/</span> <span class="n">mu_f</span><span class="p">)</span><span class="o">**</span><span class="mf">0.25</span> <span class="o">/</span> <span class="n">Rem</span><span class="o">**</span><span class="mf">0.25</span>           <span class="c1"># Two-phase friction factor</span>
         <span class="n">e</span> <span class="o">=</span> <span class="n">fTW</span> <span class="o">*</span> <span class="p">(</span><span class="n">vm</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">/</span> <span class="n">Dh</span>                              <span class="c1"># Energy dissipation rate (Wu et al., 1998; Kim, 1999)</span>
         <span class="n">u_t</span> <span class="o">=</span> <span class="mf">1.4</span> <span class="o">*</span> <span class="n">e</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span> <span class="o">*</span> <span class="n">Db</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span>                     <span class="c1"># Turbulent velocity (Batchelor, 1951; Rotta, 1972)</span>
-        
-        <span class="k">if</span> <span class="n">debug</span><span class="p">:</span>
-            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;H:\TRSL-H\IATE\TEST.txt&quot;</span><span class="p">,</span> <span class="n">mode</span> <span class="o">=</span> <span class="s1">&#39;a+&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">FID</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="si">{</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2">.</span><span class="se">\t</span><span class="s2">jf = </span><span class="si">{</span><span class="n">jf</span><span class="si">}</span><span class="s2"> [m/s], jg = </span><span class="si">{</span><span class="n">cond</span><span class="o">.</span><span class="n">jgref</span><span class="si">}</span><span class="s2"> [m/s]</span><span class="se">\n\t</span><span class="s2">L/D: </span><span class="si">{</span><span class="n">z</span><span class="o">/</span><span class="n">Dh</span><span class="si">}</span><span class="se">\n\t</span><span class="s2">ur: </span><span class="si">{</span><span class="n">ur</span><span class="si">}</span><span class="se">\n\t</span><span class="s2">ut: </span><span class="si">{</span><span class="n">u_t</span><span class="si">}</span><span class="se">\n\t</span><span class="s2">a: </span><span class="si">{</span><span class="n">alpha</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span><span class="n">file</span><span class="o">=</span><span class="n">FID</span><span class="p">)</span>
-
-            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;H:\TRSL-H\IATE\VZ.txt&quot;</span><span class="p">,</span> <span class="n">mode</span> <span class="o">=</span> <span class="s1">&#39;a+&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">FID</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="si">{</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2">.</span><span class="se">\t</span><span class="s2">jf = </span><span class="si">{</span><span class="n">jf</span><span class="si">}</span><span class="s2"> [m/s], jg = </span><span class="si">{</span><span class="n">cond</span><span class="o">.</span><span class="n">jgref</span><span class="si">}</span><span class="s2"> [m/s]</span><span class="se">\n\t</span><span class="s2">L/D: </span><span class="si">{</span><span class="n">z</span><span class="o">/</span><span class="n">Dh</span><span class="si">}</span><span class="se">\n\t</span><span class="s2">vfz: </span><span class="si">{</span><span class="n">vfz</span><span class="si">}</span><span class="se">\n\t</span><span class="s2">vgz: </span><span class="si">{</span><span class="n">vgz</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="se">\n\t</span><span class="s2">jg: </span><span class="si">{</span><span class="n">jgloc</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span><span class="n">file</span><span class="o">=</span><span class="n">FID</span><span class="p">)</span>
 
         <span class="c1">########################################################################################################################</span>
         <span class="c1"># Estimate sources &amp; sinks in the Interfacial Area Transport Eqn. (Part 1)</span>
 
         <span class="c1"># Sink due to Wake Entrainment</span>
-        <span class="k">if</span> <span class="n">theta</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">restriction</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">theta</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">geometry</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">SWE</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
         
-        <span class="k">elif</span> <span class="n">restriction</span> <span class="o">==</span> <span class="s1">&#39;elbow&#39;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">geometry</span> <span class="o">==</span> <span class="s1">&#39;elbow&#39;</span><span class="p">:</span>
             <span class="n">SWE</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
             
             <span class="c1"># Yadav calculates vgz differently if solving in elbow region and dissipation length region</span>
@@ -564,10 +561,6 @@
         <span class="n">aiwe</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>       <span class="o">=</span> <span class="n">aiwe</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">z_step</span> <span class="o">*</span> <span class="n">SWE</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">/</span> <span class="n">vgz</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
         <span class="n">aivg</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>       <span class="o">=</span> <span class="n">aivg</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">z_step</span> <span class="o">*</span> <span class="n">SVG</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">/</span> <span class="n">vgz</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
 
-        <span class="k">if</span> <span class="n">debug</span><span class="p">:</span>
-            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;H:\TRSL-H\IATE\AI.txt&quot;</span><span class="p">,</span> <span class="n">mode</span> <span class="o">=</span> <span class="s1">&#39;a+&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">FID</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="si">{</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2">.</span><span class="se">\t</span><span class="s2">jf = </span><span class="si">{</span><span class="n">jf</span><span class="si">}</span><span class="s2"> [m/s], jg = </span><span class="si">{</span><span class="n">cond</span><span class="o">.</span><span class="n">jgref</span><span class="si">}</span><span class="s2"> [m/s]</span><span class="se">\n\t</span><span class="s2">L/D: </span><span class="si">{</span><span class="n">z</span><span class="o">/</span><span class="n">Dh</span><span class="si">}</span><span class="se">\n\t</span><span class="s2">TI: </span><span class="si">{</span><span class="n">aiti</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="se">\n\t</span><span class="s2">RC: </span><span class="si">{</span><span class="n">airc</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="se">\n\t</span><span class="s2">EXP: </span><span class="si">{</span><span class="n">aiexp</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="se">\n\t</span><span class="s2">WE: </span><span class="si">{</span><span class="n">aiwe</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span><span class="n">file</span><span class="o">=</span><span class="n">FID</span><span class="p">)</span>
-
         <span class="c1">########################################################################################################################</span>
         <span class="c1"># Estimate Void Fraction for the next step calculation</span>
         <span class="k">if</span> <span class="n">void_method</span> <span class="o">==</span> <span class="s1">&#39;driftflux&#39;</span><span class="p">:</span>      <span class="c1"># Drift Flux Model</span>
@@ -582,10 +575,6 @@
                 <span class="n">C0</span> <span class="o">=</span> <span class="n">C_inf</span> <span class="o">-</span> <span class="p">(</span><span class="n">C_inf</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">rho_gz</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">/</span><span class="n">rho_f</span><span class="p">)</span>     <span class="c1"># Round tube drift flux distribution parameter</span>
             
             <span class="n">alpha</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">jgloc</span> <span class="o">/</span> <span class="p">(</span><span class="n">C0</span> <span class="o">*</span> <span class="n">j</span> <span class="o">+</span> <span class="n">vgj</span><span class="p">)</span>
-
-            <span class="k">if</span> <span class="n">debug</span><span class="p">:</span>
-                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;H:\TRSL-H\IATE\DF.txt&quot;</span><span class="p">,</span> <span class="n">mode</span> <span class="o">=</span> <span class="s1">&#39;a+&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">FID</span><span class="p">:</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="si">{</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2">.</span><span class="se">\t</span><span class="s2">jf = </span><span class="si">{</span><span class="n">jf</span><span class="si">}</span><span class="s2"> [m/s], jg = </span><span class="si">{</span><span class="n">cond</span><span class="o">.</span><span class="n">jgref</span><span class="si">}</span><span class="s2"> [m/s]</span><span class="se">\n\t</span><span class="s2">L/D: </span><span class="si">{</span><span class="n">z</span><span class="o">/</span><span class="n">Dh</span><span class="si">}</span><span class="se">\n\t</span><span class="s2">C0: </span><span class="si">{</span><span class="n">C0</span><span class="si">}</span><span class="se">\n\t</span><span class="s2">vgj: </span><span class="si">{</span><span class="n">vgj</span><span class="si">}</span><span class="se">\n\t</span><span class="s2">j: </span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="se">\n\t</span><span class="s2">alpha: </span><span class="si">{</span><span class="n">alpha</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span><span class="n">file</span><span class="o">=</span><span class="n">FID</span><span class="p">)</span>
 
         <span class="k">elif</span> <span class="n">void_method</span> <span class="o">==</span> <span class="s1">&#39;continuity&#39;</span><span class="p">:</span>   <span class="c1"># Continuity</span>
             <span class="c1"># Original continuity method</span>
@@ -615,7 +604,10 @@
 
             <span class="n">jgloc</span> <span class="o">=</span> <span class="n">jgatm</span> <span class="o">*</span> <span class="n">p_atm</span> <span class="o">/</span> <span class="n">pz</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
 
-            <span class="n">vgz</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">z_mesh</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">],(</span><span class="n">cond</span><span class="o">.</span><span class="n">LoverD</span><span class="p">,</span> <span class="n">cond2</span><span class="o">.</span><span class="n">LoverD</span><span class="p">),(</span><span class="n">cond</span><span class="o">.</span><span class="n">area_avg</span><span class="p">(</span><span class="s1">&#39;ug1&#39;</span><span class="p">),</span> <span class="n">cond2</span><span class="o">.</span><span class="n">area_avg</span><span class="p">(</span><span class="s1">&#39;ug1&#39;</span><span class="p">)))</span>
+            <span class="n">vgz</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">z_mesh</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">/</span> <span class="n">Dh</span><span class="p">,</span>
+                               <span class="p">(</span><span class="n">cond</span><span class="o">.</span><span class="n">LoverD</span><span class="p">,</span> <span class="n">cond2</span><span class="o">.</span><span class="n">LoverD</span><span class="p">),</span>
+                               <span class="p">(</span><span class="n">cond</span><span class="o">.</span><span class="n">void_area_avg</span><span class="p">(</span><span class="s1">&#39;ug1&#39;</span><span class="p">,</span><span class="n">method</span><span class="o">=</span><span class="n">avg_method</span><span class="p">),</span> <span class="n">cond2</span><span class="o">.</span><span class="n">void_area_avg</span><span class="p">(</span><span class="s1">&#39;ug1&#39;</span><span class="p">,</span><span class="n">method</span><span class="o">=</span><span class="n">avg_method</span><span class="p">))</span>
+                               <span class="p">)</span>
             <span class="n">alpha</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">jgloc</span> <span class="o">/</span> <span class="n">vgz</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
 
         <span class="k">elif</span> <span class="n">void_method</span> <span class="o">==</span> <span class="s1">&#39;pressure_kim&#39;</span><span class="p">:</span>
@@ -626,7 +618,7 @@
 
             <span class="n">rho_x</span> <span class="o">=</span> <span class="n">rho_gz</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">/</span> <span class="n">rho_f</span>
             <span class="n">mu_x</span> <span class="o">=</span> <span class="n">mu_g</span> <span class="o">/</span> <span class="n">mu_f</span>
-            <span class="n">L_x</span> <span class="o">=</span> <span class="n">query</span> <span class="o">-</span> <span class="n">LoverD</span>             <span class="c1"># Restriction length scale, = L/D_restriction</span>
+            <span class="n">L_x</span> <span class="o">=</span> <span class="n">query</span> <span class="o">-</span> <span class="n">LoverD</span>             <span class="c1"># Geometry length scale, = L/D_restriction</span>
             <span class="n">Re_f</span> <span class="o">=</span> <span class="n">rho_f</span> <span class="o">*</span> <span class="n">jf</span> <span class="o">*</span> <span class="n">Dh</span> <span class="o">/</span> <span class="n">mu_f</span>
 
             <span class="n">chiM_inv</span> <span class="o">=</span> <span class="p">(</span><span class="mf">3.165</span> <span class="o">*</span> <span class="n">k_m</span> <span class="o">/</span> <span class="n">L_x</span> <span class="o">*</span> <span class="n">Re_f</span><span class="o">**</span><span class="mf">0.25</span><span class="p">)</span><span class="o">**</span><span class="mf">0.5</span>

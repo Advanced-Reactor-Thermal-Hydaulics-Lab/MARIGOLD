@@ -503,7 +503,7 @@ def calculate_CL_Ryan(jf, jg, theta=0.0, Db = 0.0018, testing = False):
     CL = CL_T * I * f_sharma
     return CL
 
-def write_CCL(mom_source = 'normal_drag_mom_source', ccl_name = 'auto_setup.ccl',
+def write_CCL(mom_source = 'normal_drag_mom_source', mom_source_coeff = 1, ccl_name = 'auto_setup.ccl',
                           inDataFile= '/home/adix/CFD/exp_BCs/in_H_0.csv', 
                           outDataFile = '/home/adix/CFD/exp_BCs/out_H_0.csv', 
                           Db=0.0018, CL = 0.25, CTD = 0.25, theta = 0, mdot = 2.02277,
@@ -1071,7 +1071,7 @@ FLUID: gas \n\
 SOURCES: \n\
 MOMENTUM SOURCE: \n\
 GENERAL MOMENTUM SOURCE: \n\
-Momentum Source Coefficient = 1000000 [kg m^-3 s^-1] \n\
+Momentum Source Coefficient = {mom_source_coeff} [kg m^-3 s^-1] \n\
 Momentum Source X Component = {mom_source_to_write[3]} \n\
 Momentum Source Y Component = {mom_source_to_write[4]} \n\
 Momentum Source Z Component = {mom_source_to_write[5]} \n\
@@ -1084,7 +1084,7 @@ FLUID: liquid \n\
 SOURCES: \n\
 MOMENTUM SOURCE: \n\
 GENERAL MOMENTUM SOURCE: \n\
-Momentum Source Coefficient = 1000000 [kg m^-3 s^-1] \n\
+Momentum Source Coefficient = {mom_source_coeff} [kg m^-3 s^-1] \n\
 Momentum Source X Component = {mom_source_to_write[0]} \n\
 Momentum Source Y Component = {mom_source_to_write[1]} \n\
 Momentum Source Z Component = {mom_source_to_write[2]} \n\

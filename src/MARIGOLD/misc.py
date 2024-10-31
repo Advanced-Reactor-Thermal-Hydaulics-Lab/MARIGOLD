@@ -99,9 +99,10 @@ def comp_cond(cond1:Condition, cond2:Condition, tag = 'run_ID', rmesh_preference
     return compCond
 
 def write_excel(cond):
-    """ Export data from a condition to an excel sheet
-    
-    # TODO
+    """A function to write an Excel sheet based on a condition object
+
+    :param cond: Condition to write Excel sheet for
+    :type cond: MARIGOLD.Condition
     """
 
 
