@@ -196,6 +196,9 @@ def iate_1d_1g(
 
     else:
         if COV_RC == None:
+            # Need to make these into arrays
+            # I had logic that did this before... why did I get rid of that
+            # Something along the lines of if has property "__len__"?
             COV_RC = 1
 
         if COV_TI == None:
