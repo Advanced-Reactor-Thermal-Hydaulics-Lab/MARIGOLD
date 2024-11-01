@@ -8,14 +8,24 @@ from copy import copy
 """
 
 def write_CFX_BC(cond:Condition, save_dir = ".", z_loc = 'LoverD', only_90 = False, interp = False, csv_name = None, ngrid = 100):
-    """ Write a csv file for CFX based on cond
+    """_summary_
 
-    z_loc can be set by the user, or set to "LoverD" to use the cond L/D information
-
-    vf information will be taken from condition, or approximated by approx_vf()
-
-    only_90 option for writing data only down the 90 degree line
-    
+    :param cond: _description_
+    :type cond: Condition
+    :param save_dir: Directory to save the CFX condition, defaults to "."
+    :type save_dir: str, optional
+    :param z_loc: _description_, defaults to 'LoverD'
+    :type z_loc: str, optional
+    :param only_90: _description_, defaults to False
+    :type only_90: bool, optional
+    :param interp: _description_, defaults to False
+    :type interp: bool, optional
+    :param csv_name: _description_, defaults to None
+    :type csv_name: _type_, optional
+    :param ngrid: _description_, defaults to 100
+    :type ngrid: int, optional
+    :return: _description_
+    :rtype: _type_
     """
     try:
         dummy = cond.run_ID
@@ -94,7 +104,7 @@ def write_CFX_BC(cond:Condition, save_dir = ".", z_loc = 'LoverD', only_90 = Fal
                     f.write(f"{r*1000},{z_loc},{phi},{0},{0},{ cond(phi, r/R, 'ug1', interp_method='linear') },{cond(phi, r/R, 'alpha', interp_method='linear')},{0},{0},{cond(phi, r/R, 'vf', interp_method='linear')},\n")
 
     print(cond, "written to CFX BC")
-    return
+    return path_to_csv
 
 def read_CFX_export(csv_path, jf, jgref, theta, port, database, jgloc=None) -> Condition:
     """ Read CFX csv export into a MARIGOLD Condition object
@@ -206,10 +216,10 @@ def read_CFX_export(csv_path, jf, jgref, theta, port, database, jgloc=None) -> C
     return cond
 
 
-def make_ICEM_pipe_mesh(r_divs: int, theta_divs: int, z_divs: int, o_point: float, Lmesh: float, 
-                        case_name: str, turb_model = 'ke', Ref = 20000, growth_ratio = 1.2, L = 1.2,
+def make_ICEM_pipe_mesh(cond:Condition, r_divs: int, theta_divs: int, z_divs: int, o_point: float, Lmesh: float, 
+                        case_name: str, turb_model = 'ke', growth_ratio = 1.2,
                         fluent_translator_path = "/apps/external/apps/ansys/2022r2/ansys_inc/v222/icemcfd/linux64_amd/icemcfd/output-interfaces/fluent6",
-                        cleanup = True):
+                        cleanup = True) -> None:
     """ Function for making an O-grid pipe mesh using ANSYS ICEM
 
     Adjusts first layer based on selected turbulence model, Ref
@@ -221,21 +231,34 @@ def make_ICEM_pipe_mesh(r_divs: int, theta_divs: int, z_divs: int, o_point: floa
     """
 
     # Assuming water
-    rho = 998
-    mu = 0.001
 
-    Uinf = Ref * mu / (rho * L)
-
-    Cf = 0.026 / Ref**(1./7)
-    tau_wall = Cf * rho * Uinf**2 / 2
-    Ufric = (tau_wall / rho)**0.5
+    cond.calc_dpdz()
+    u_tau = np.sqrt(cond.tau_w / cond.rho_f)
 
     if turb_model == 'ke': 
         yplus = 30
     else:
         yplus = 1
 
-    first_layer = yplus*mu / (Ufric * rho)
+    first_layer = yplus * cond.mu_f / (u_tau * cond.rho_f)
+
+
+    # Old method
+    # rho = 998
+    # mu = 0.001
+
+    # Uinf = Ref * mu / (rho * L)
+
+    # Cf = 0.026 / Ref**(1./7)
+    # tau_wall = Cf * rho * Uinf**2 / 2
+    # Ufric = (tau_wall / rho)**0.5
+
+    # if turb_model == 'ke': 
+    #     yplus = 30
+    # else:
+    #     yplus = 1
+
+    # first_layer = yplus*mu / (Ufric * rho)
     
     with open("mesh_replay.rpl", 'w') as fi:
         print(f'\
