@@ -461,6 +461,310 @@ ic_exit\n', file=fi)
     return
 
 
+def make_U_bend_mesh(cond:Condition, L_P1:float, D_pipe:float, RoverD:float, L_VU:float, L_VD:float, dr:int, dt:int, dz:int, o_1:float,
+                        case_name: str, turb_model = 'ke', growth_ratio = 1.2, fudge = 1,
+                        fluent_translator_path = "/apps/external/apps/ansys/2022r2/ansys_inc/v222/icemcfd/linux64_amd/icemcfd/output-interfaces/fluent6",
+                        cleanup = True) -> None:
+    """_summary_
+
+    :param cond: Condition for which this mesh will be used
+    :type cond: Condition
+    :param L_P1: Non-dimensional z location of the inlet port (-)
+    :type L_P1: float
+    :param D_pipe: Pipe diameter (m)
+    :type D_pipe: float
+    :param RoverD: Non-dimensional radius of curvature for U-bend (-)
+    :type RoverD: float
+    :param L_VU: Non-dimensional length of upward leg (-)
+    :type L_VU: float
+    :param L_VD: Non-dimensional length of downward leg (-)
+    :type L_VD: float
+    :param dr: r divisions for mesh (-)
+    :type dr: int
+    :param dt: _description_
+    :type dt: int
+    :param dz: _description_
+    :type dz: int
+    :param o_1: _description_
+    :type o_1: float
+    :param case_name: _description_
+    :type case_name: str
+    :param turb_model: _description_, defaults to 'ke'
+    :type turb_model: str, optional
+    :param growth_ratio: _description_, defaults to 1.2
+    :type growth_ratio: float, optional
+    :param fudge: _description_, defaults to 1
+    :type fudge: int, optional
+    :param fluent_translator_path: _description_, defaults to "/apps/external/apps/ansys/2022r2/ansys_inc/v222/icemcfd/linux64_amd/icemcfd/output-interfaces/fluent6"
+    :type fluent_translator_path: str, optional
+    :param cleanup: _description_, defaults to True
+    :type cleanup: bool, optional
+    """
+
+    # Assuming water
+
+    cond.calc_dpdz()
+    u_tau = np.sqrt(cond.tau_w / cond.rho_f)
+
+    if turb_model == 'ke': 
+        yplus = 30
+    else:
+        yplus = 1
+
+    first_layer = yplus * cond.mu_f / (u_tau * cond.rho_f) * fudge
+
+
+    # Old method
+    # rho = 998
+    # mu = 0.001
+
+    # Uinf = Ref * mu / (rho * L)
+
+    # Cf = 0.026 / Ref**(1./7)
+    # tau_wall = Cf * rho * Uinf**2 / 2
+    # Ufric = (tau_wall / rho)**0.5
+
+    # if turb_model == 'ke': 
+    #     yplus = 30
+    # else:
+    #     yplus = 1
+
+    # first_layer = yplus*mu / (Ufric * rho)
+    
+    with open("mesh_replay.rpl", 'w') as fi:
+        print(f'\
+\
+set casename {case_name}\n\
+set L_P1 {L_P1}\n\
+set D {D_pipe}\n\
+set RoverD {RoverD}\n\
+set L_VU {L_VU}\n\
+set L_VD {L_VD}\n\
+set o_1 {o_1}\n\
+set dr {dr}\n\
+set dt {dt}\n\
+set dz {dz}\n\
+set first_layer {first_layer}\n\
+set growth_ratio {growth_ratio}\n\
+ic_set_global geo_cad 0 toptol_userset\n\
+ic_set_global geo_cad 0.0 toler\n\
+ic_set_meshing_params global 0\n\
+ic_set_global geo_cad 1 toptol_userset\n\
+ic_set_global geo_cad 0 toptol_userset\n\
+ic_set_global geo_cad 0.0 toler\n\
+ic_set_meshing_params global 0 gttol 0.001 gtrel 1\n\
+ic_geo_set_units mm\n\
+ic_set_global geo_cad 0 toptol_userset\n\
+ic_set_global geo_cad 0.0 toler\n\
+ic_geo_new_family GEOM\n\
+ic_boco_set_part_color GEOM\n\
+ic_empty_tetin\n\
+ic_point {{}} GEOM pnt.00 0,0,($L_P1*$D)\n\
+ic_point {{}} GEOM pnt.01 (0.5*$D),0,($L_P1*$D)\n\
+ic_point {{}} GEOM pnt.02 -(0.5*$D),0,($L_P1*$D)\n\
+ic_point {{}} GEOM pnt.03 0,-(0.5*$D),($L_P1*$D)\n\
+ic_point {{}} GEOM pnt.04 0,(0.5*$D),($L_P1*$D)\n\
+ic_point {{}} GEOM pnt.05 (0.5*0.707107*$o_1*$D),(0.5*0.707107*$o_1*$D),($L_P1*$D)\n\
+ic_point {{}} GEOM pnt.06 -(0.5*0.707107*$o_1*$D),(0.5*0.707107*$o_1*$D),($L_P1*$D)\n\
+ic_point {{}} GEOM pnt.07 -(0.5*0.707107*$o_1*$D),-(0.5*0.707107*$o_1*$D),($L_P1*$D)\n\
+ic_point {{}} GEOM pnt.08 (0.5*0.707107*$o_1*$D),-(0.5*0.707107*$o_1*$D),($L_P1*$D)\n\
+ic_set_global geo_cad 0 toptol_userset\n\
+ic_set_global geo_cad 0.02 toler\n\
+ic_curve arc_ctr_rad GEOM crv.00 {{pnt.00 pnt.04 pnt.01 (0.5*$D) 0 360}}\n\
+ic_delete_geometry curve names crv.01 0\n\
+ic_curve point GEOM crv.01 {{pnt.06 pnt.05}}\n\
+ic_delete_geometry curve names crv.02 0\n\
+ic_curve point GEOM crv.02 {{pnt.05 pnt.08}}\n\
+ic_delete_geometry curve names crv.03 0\n\
+ic_curve point GEOM crv.03 {{pnt.08 pnt.07}}\n\
+ic_delete_geometry curve names crv.04 0\n\
+ic_curve point GEOM crv.04 {{pnt.07 pnt.06}}\n\
+ic_curve split GEOM crv.05 {{crv.00 pnt.04}}\n\
+ic_curve split GEOM crv.05 {{crv.00 pnt.01}}\n\
+ic_curve split GEOM crv.06 {{crv.05 pnt.03}}\n\
+ic_curve split GEOM crv.07 {{crv.06 pnt.02}}\n\
+ic_set_global geo_cad 0.02 toler\n\
+ic_point crv_par GEOM pnt.09 {{crv.07 0.5}}\n\
+ic_point crv_par GEOM pnt.10 {{crv.00 0.5}}\n\
+ic_point crv_par GEOM pnt.11 {{crv.05 0.5}}\n\
+ic_point crv_par GEOM pnt.12 {{crv.06 0.5}}\n\
+ic_set_global geo_cad 0.02 toler\n\
+ic_delete_geometry curve names crv.08 0\n\
+ic_curve point GEOM crv.08 {{pnt.06 pnt.09}}\n\
+ic_delete_geometry curve names crv.09 0\n\
+ic_curve point GEOM crv.09 {{pnt.05 pnt.10}}\n\
+ic_delete_geometry curve names crv.10 0\n\
+ic_curve point GEOM crv.10 {{pnt.08 pnt.11}}\n\
+ic_delete_geometry curve names crv.11 0\n\
+ic_curve point GEOM crv.11 {{pnt.07 pnt.12}}\n\
+ic_set_global geo_cad 0.02 toler\n\
+ic_set_global geo_cad 0.02 toler\n\
+ic_curve split GEOM crv.12 {{crv.07 pnt.09}}\n\
+ic_curve split GEOM crv.13 {{crv.00 pnt.10}}\n\
+ic_curve split GEOM crv.14 {{crv.05 pnt.11}}\n\
+ic_curve split GEOM crv.15 {{crv.06 pnt.12}}\n\
+ic_curve concat GEOM crv.16 {{crv.07 crv.15}}\n\
+ic_curve concat GEOM crv.17 {{crv.12 crv.00}}\n\
+ic_curve concat GEOM crv.18 {{crv.13 crv.05}}\n\
+ic_curve concat GEOM crv.19 {{crv.14 crv.06}}\n\
+ic_geo_new_family SOLID\n\
+ic_boco_set_part_color SOLID\n\
+ic_hex_unload_blocking\n\
+ic_hex_initialize_mesh 2d new_numbering new_blocking SOLID\n\
+ic_hex_unblank_blocks\n\
+ic_hex_multi_grid_level 0\n\
+ic_hex_projection_limit 0\n\
+ic_hex_default_bunching_law default 2.0\n\
+ic_hex_floating_grid off\n\
+ic_hex_transfinite_degree 1\n\
+ic_hex_unstruct_face_type one_tri\n\
+ic_hex_set_unstruct_face_method uniform_quad\n\
+ic_hex_set_n_tetra_smoothing_steps 20\n\
+ic_hex_error_messages off_minor\n\
+ic_hex_set_piercing 0\n\
+ic_hex_mark_blocks unmark\n\
+ic_hex_mark_blocks superblock 4\n\
+ic_hex_ogrid 1 m GEOM SOLID -version 50\n\
+ic_hex_mark_blocks unmark\n\
+ic_hex_mark_blocks unmark\n\
+ic_hex_move_node 33 pnt.06\n\
+ic_hex_move_node 35 pnt.05\n\
+ic_hex_move_node 34 pnt.08\n\
+ic_hex_move_node 32 pnt.07\n\
+ic_hex_move_node 13 pnt.09\n\
+ic_hex_move_node 21 pnt.10\n\
+ic_hex_move_node 19 pnt.11\n\
+ic_hex_move_node 11 pnt.12\n\
+ic_hex_find_comp_curve crv.01\n\
+ic_hex_set_edge_projection 33 35 0 1 crv.01\n\
+ic_hex_find_comp_curve crv.02\n\
+ic_hex_set_edge_projection 34 35 0 1 crv.02\n\
+ic_hex_find_comp_curve crv.03\n\
+ic_hex_set_edge_projection 32 34 0 1 crv.03\n\
+ic_hex_find_comp_curve crv.04\n\
+ic_hex_set_edge_projection 32 33 0 1 crv.04\n\
+ic_hex_find_comp_curve crv.16\n\
+ic_hex_set_edge_projection 11 13 0 1 crv.16\n\
+ic_hex_find_comp_curve crv.17\n\
+ic_hex_set_edge_projection 13 21 0 1 crv.17\n\
+ic_hex_find_comp_curve crv.18\n\
+ic_hex_set_edge_projection 19 21 0 1 crv.18\n\
+ic_hex_find_comp_curve crv.19\n\
+ic_hex_set_edge_projection 11 19 0 1 crv.19\n\
+ic_hex_find_comp_curve crv.09\n\
+ic_hex_set_edge_projection 21 35 0 1 crv.09\n\
+ic_hex_find_comp_curve crv.10\n\
+ic_hex_set_edge_projection 19 34 0 1 crv.10\n\
+ic_hex_find_comp_curve crv.11\n\
+ic_hex_set_edge_projection 11 32 0 1 crv.11\n\
+ic_hex_find_comp_curve crv.08\n\
+ic_hex_set_edge_projection 13 33 0 1 crv.08\n\
+ic_hex_set_mesh 33 35 n $dt h1rel 0.0 h2rel 0.0 r1 2 r2 2 lmax 0 default copy_to_parallel unlocked\n\
+ic_hex_set_mesh 33 35 n $dt h1rel 0.0 h2rel 0.0 r1 2 r2 2 lmax 0 default copy_to_parallel unlocked\n\
+ic_hex_set_mesh 34 35 n $dt h1rel 0.0 h2rel 0.0 r1 2 r2 2 lmax 0 default copy_to_parallel unlocked\n\
+ic_hex_set_mesh 34 35 n $dt h1rel 0.0 h2rel 0.0 r1 2 r2 2 lmax 0 default copy_to_parallel unlocked\n\
+ic_hex_set_mesh 21 35 n $dr h1rel $first_layer h2rel 0.0 r1 $growth_ratio r2 2 lmax 0 exp1 copy_to_parallel unlocked\n\
+ic_hex_set_mesh 21 35 n $dr h1 $first_layer h2 0.0 r1 $growth_ratio r2 2 lmax 0 exp1 copy_to_parallel no_scale unlocked\n\
+ic_hex_create_mesh GEOM SOLID proj 2 dim_to_mesh 3\n\
+ic_hex_write_file ./hex.uns GEOM SOLID proj 2 dim_to_mesh 3 no_boco\n\
+ic_uns_load ./hex.uns 3 0 {{}} 1\n\
+ic_uns_update_family_type visible {{GEOM ORFN SOLID}} {{!NODE !LINE_2 QUAD_4}} update 0\n\
+ic_boco_solver\n\
+ic_boco_clear_icons\n\
+ic_set_global geo_cad 0.02 toler\n\
+ic_point {{}} GEOM pnt.13 0,0,($L_VU*$D)\n\
+ic_point {{}} GEOM pnt.14 -(2*$RoverD*$D),0,($L_VU*$D)\n\
+ic_point {{}} GEOM pnt.15 -($RoverD*$D),0,($L_VU*$D+$RoverD*$D)\n\
+ic_point {{}} GEOM pnt.16 -(2*$RoverD*$D),0,($L_VU*$D-$L_VD*$D)\n\
+ic_set_global geo_cad 0.8 toler\n\
+ic_delete_geometry curve names crv.00 0\n\
+ic_curve point GEOM crv.00 {{pnt.00 pnt.13}}\n\
+ic_curve arc GEOM crv.05 {{pnt.13 pnt.15 pnt.14}}\n\
+ic_delete_geometry curve names crv.06 0\n\
+ic_curve point GEOM crv.06 {{pnt.14 pnt.16}}\n\
+ic_set_global geo_cad 0.8 toler\n\
+ic_geo_cre_crv_concat GEOM crv.07 0.0001 {{crv.00 crv.05 crv.06}}\n\
+ic_delete_geometry curve names {{crv.00 crv.05 crv.06}}\n\
+ic_uns_create_selection_subset 0\n\
+ic_uns_create_selection_edgelist 1\n\
+ic_uns_subset_configure uns_sel_0 -draw_nodes 1\n\
+ic_uns_subset_visible uns_sel_0 0\n\
+ic_uns_subset_copy uns_sel_0 all 2\n\
+ic_uns_uniqify uns_sel_0\n\
+ic_uns_subset_visible uns_sel_0 0\n\
+ic_uns_create_selection_edgelist 0\n\
+ic_geo_new_family FLUID\n\
+ic_boco_set_part_color FLUID\n\
+ic_geo_new_family WALLS\n\
+ic_boco_set_part_color WALLS\n\
+ic_geo_new_family OUTLET\n\
+ic_boco_set_part_color OUTLET\n\
+ic_extrude map uns_sel_0 numlayers $dz dir curve_normal space 1 space_func {{}} rpoint {{0 0 0}} rdir {{0 0 0}} rangle 10.0 volf fluid sidef walls topf outlet curve crv.07 curvedir 0 twist 0 del_orig 0 del_covered 0 degen_tol 0.00001 trans_rot_vec {{0 0 0}} spacing_transl_rot 0.0 project 0\n\
+ic_uns_subset_delete uns_sel_0\n\
+ic_delete_empty_parts \n\
+ic_uns_update_family_type visible {{FLUID GEOM OUTLET ORFN WALLS SOLID}} {{!NODE LINE_2 QUAD_4 !HEXA_8}} update 0\n\
+ic_uns_update_family_type visible {{FLUID GEOM OUTLET ORFN WALLS}} {{!NODE LINE_2 QUAD_4 !HEXA_8}} update 0\n\
+ic_uns_update_family_type visible {{FLUID GEOM OUTLET ORFN WALLS SOLID}} {{!NODE LINE_2 QUAD_4 !HEXA_8}} update 0\n\
+ic_geo_rename_family SOLID INLET 0\n\
+ic_geo_rename_family SOLID INLET 1\n\
+ic_boco_solver {{Ansys Fluent}}\n\
+ic_solver_mesh_info {{Ansys Fluent}}\n\
+ic_boco_solver \n\
+ic_boco_solver {{Ansys Fluent}}\n\
+ic_solution_set_solver {{Ansys Fluent}} 1\n\
+ic_boco_save ./ansys.fbc\n\
+ic_boco_save_atr ./ansys.atr\n\
+ic_delete_empty_parts \n\
+ic_save_tetin project1.tin 0 0 {{}} {{}} 0 0 1\n\
+ic_rename project1.uns project1.uns.bak\n\
+ic_uns_check_duplicate_numbers \n\
+ic_uns_renumber_all_elements 1 1\n\
+ic_save_unstruct project1.uns 1 {{}} {{}} {{}}\n\
+ic_uns_set_modified 1\n\
+ic_hex_save_blocking project1.blk\n\
+ic_boco_solver \n\
+ic_boco_solver {{Ansys Fluent}}\n\
+ic_solution_set_solver {{Ansys Fluent}} 1\n\
+ic_boco_save project1.fbc\n\
+ic_boco_save_atr project1.atr\n\
+ic_save_project_file ./project1.prj {{array\ set\ file_name\ \{{ {{    catia_dir .}} {{    parts_dir .}} {{    domain_loaded 0}} {{    cart_file_loaded 0}} {{    cart_file {{}}}} {{    domain_saved project1.uns}} {{    archive {{}}}} {{    med_replay {{}}}} {{    topology_dir .}} {{    ugparts_dir .}} {{    icons {{{{$env(ICEM_ACN)/lib/ai_env/icons}} {{$env(ICEM_ACN)/lib/va/EZCAD/icons}} {{$env(ICEM_ACN)/lib/icons}} {{$env(ICEM_ACN)/lib/va/CABIN/icons}}}}}} {{    tetin project1.tin}} {{    family_boco project1.fbc}} {{    iges_dir .}} {{    solver_params_loaded 0}} {{    attributes_loaded 0}} {{    project_lock {{}}}} {{    attributes project1.atr}} {{    domain project1.uns}} {{    domains_dir .}} {{    settings_loaded 0}} {{    settings project1.prj}} {{    blocking project1.blk}} {{    hexa_replay {{}}}} {{    transfer_dir .}} {{    mesh_dir .}} {{    family_topo {{}}}} {{    gemsparts_dir .}} {{    family_boco_loaded 0}} {{    tetin_loaded 0}} {{    project_dir .}} {{    topo_mulcad_out {{}}}} {{    solver_params {{}}}} \}} array\ set\ options\ \{{ {{    expert 1}} {{    remote_path {{}}}} {{    tree_disp_quad 2}} {{    tree_disp_pyra 0}} {{    evaluate_diagnostic 0}} {{    histo_show_default 1}} {{    select_toggle_corners 0}} {{    remove_all 0}} {{    keep_existing_file_names 0}} {{    record_journal 0}} {{    edit_wait 0}} {{    face_mode 1}} {{    select_mode all}} {{    med_save_emergency_tetin 1}} {{    user_name adix}} {{    diag_which all}} {{    uns_warn_if_display 500000}} {{    bubble_delay 1000}} {{    external_num 1}} {{    tree_disp_tri 2}} {{    apply_all 0}} {{    default_solver {{Ansys Fluent}}}} {{    temporary_directory {{}}}} {{    flood_select_angle 0}} {{    home_after_load 1}} {{    project_active 0}} {{    histo_color_by_quality_default 1}} {{    undo_logging 1}} {{    tree_disp_hexa 0}} {{    histo_solid_default 1}} {{    host_name brown-a016.rcac.purdue.edu}} {{    xhidden_full 1}} {{    replay_internal_editor 1}} {{    editor {{}}}} {{    mouse_color orange}} {{    clear_undo 1}} {{    remote_acn {{}}}} {{    remote_sh csh}} {{    tree_disp_penta 0}} {{    n_processors 1}} {{    remote_host {{}}}} {{    save_to_new 0}} {{    quality_info Quality}} {{    tree_disp_node 0}} {{    med_save_emergency_mesh 1}} {{    redtext_color red}} {{    tree_disp_line 0}} {{    select_edge_mode 0}} {{    use_dlremote 0}} {{    max_mesh_map_size 1024}} {{    show_tris 1}} {{    remote_user {{}}}} {{    enable_idle 0}} {{    auto_save_views 1}} {{    max_cad_map_size 512}} {{    display_origin 0}} {{    uns_warn_user_if_display 1000000}} {{    detail_info 0}} {{    win_java_help 0}} {{    show_factor 1}} {{    boundary_mode all}} {{    clean_up_tmp_files 1}} {{    auto_fix_uncovered_faces 1}} {{    med_save_emergency_blocking 1}} {{    max_binary_tetin 0}} {{    tree_disp_tetra 0}} \}} array\ set\ disp_options\ \{{ {{    uns_dualmesh 0}} {{    uns_warn_if_display 500000}} {{    uns_normals_colored 0}} {{    uns_icons 0}} {{    uns_locked_elements 0}} {{    uns_shrink_npos 0}} {{    uns_node_type None}} {{    uns_icons_normals_vol 0}} {{    uns_bcfield 0}} {{    backup Solid/wire}} {{    uns_nodes 0}} {{    uns_only_edges 0}} {{    uns_surf_bounds 0}} {{    uns_wide_lines 0}} {{    uns_vol_bounds 0}} {{    uns_displ_orient Triad}} {{    uns_orientation 0}} {{    uns_directions 0}} {{    uns_thickness 0}} {{    uns_shell_diagnostic 0}} {{    uns_normals 0}} {{    uns_couplings 0}} {{    uns_periodicity 0}} {{    uns_single_surfaces 0}} {{    uns_midside_nodes 1}} {{    uns_shrink 100}} {{    uns_multiple_surfaces 0}} {{    uns_no_inner 0}} {{    uns_enums 0}} {{    uns_disp Wire}} {{    uns_bcfield_name {{}}}} {{    uns_color_by_quality 0}} {{    uns_changes 0}} {{    uns_cut_delay_count 1000}} \}} {{set icon_size1 24}} {{set icon_size2 35}} {{set thickness_defined 0}} {{set solver_type 1}} {{set solver_setup -1}} array\ set\ prism_values\ \{{ {{    n_triangle_smoothing_steps 5}} {{    min_smoothing_steps 6}} {{    first_layer_smoothing_steps 1}} {{    new_volume {{}}}} {{    height {{}}}} {{    prism_height_limit {{}}}} {{    interpolate_heights 0}} {{    n_tetra_smoothing_steps 10}} {{    do_checks {{}}}} {{    delete_standalone 1}} {{    ortho_weight 0.50}} {{    max_aspect_ratio {{}}}} {{    ratio_max {{}}}} {{    incremental_write 0}} {{    total_height {{}}}} {{    use_prism_v10 0}} {{    intermediate_write 1}} {{    delete_base_triangles {{}}}} {{    ratio_multiplier {{}}}} {{    verbosity_level 1}} {{    refine_prism_boundary 1}} {{    max_size_ratio {{}}}} {{    triangle_quality {{}}}} {{    max_prism_angle 180}} {{    tetra_smooth_limit 0.3}} {{    max_jump_factor 5}} {{    use_existing_quad_layers 0}} {{    layers 3}} {{    fillet 0.10}} {{    into_orphan 0}} {{    init_dir_from_prev {{}}}} {{    blayer_2d 0}} {{    do_not_allow_sticking {{}}}} {{    top_family {{}}}} {{    law exponential}} {{    min_smoothing_val 0.1}} {{    auto_reduction 0}} {{    stop_columns 1}} {{    stair_step 1}} {{    smoothing_steps 12}} {{    side_family {{}}}} {{    min_prism_quality 0.01}} {{    ratio 1.2}} \}} {{set aie_current_flavor {{}}}} array\ set\ vid_options\ \{{ {{    auxiliary 0}} {{    show_name 0}} {{    inherit 1}} {{    default_part GEOM}} {{    new_srf_topo 1}} {{    DelPerFlag 0}} {{    show_item_name 0}} {{    composite_tolerance 1.0}} {{    replace 0}} {{    same_pnt_tol 1e-4}} {{    tdv_axes 1}} {{    vid_mode 0}} {{    DelBlkPerFlag 0}} \}} {{set savedTreeVisibility {{geomNode 1 geom_subsetNode 0 geomPointNode 0 geomCurveNode 0 geomSurfNode 2 meshNode 1 mesh_subsetNode 0 meshLineNode 0 meshShellNode 2 meshQuadNode 2 meshVolumeNode 0 meshHexaNode 0 blockingNode 1 block_subsetNode 2 block_vertNode 0 block_edgeNode 0 block_faceNode 0 block_blockNode 0 block_meshNode 0 topoNode 2 topo-root 2 partNode 2 part-INLET 2 part-OUTLET 2 part-SOLID 2 part-VORFN 0 part-WALLS 2}}}} {{set last_view {{rot {{3.19905930365e-05 0.999933204826 0.00429823005183 0.0107289367044}} scale {{12258.8222189 12258.8222189 12258.8222189}} center {{0 0 1.2700001001400001}} pos {{-93.0 19.0 0}}}}}} array\ set\ cut_info\ \{{ {{    active 0}} {{    whole 1}} \}} array\ set\ hex_option\ \{{ {{    default_bunching_ratio 2.0}} {{    floating_grid 0}} {{    project_to_topo 0}} {{    n_tetra_smoothing_steps 20}} {{    sketching_mode 0}} {{    trfDeg 1}} {{    wr_hexa7 0}} {{    hexa_projection_mode 0}} {{    smooth_ogrid 0}} {{    find_worst 1-3}} {{    hexa_verbose_mode 0}} {{    old_eparams 0}} {{    uns_face_mesh_method uniform_quad}} {{    multigrid_level 0}} {{    uns_face_mesh one_tri}} {{    check_blck 0}} {{    proj_limit 0}} {{    check_inv 0}} {{    project_bspline 0}} {{    hexa_update_mode 1}} {{    default_bunching_law BiGeometric}} {{    worse_criterion Quality}} \}} array\ set\ saved_views\ \{{ {{    views {{}}}} \}}}} {{ICEM CFD}}\n\
+ic_exec {fluent_translator_path} -dom ./hex.uns -b project1.fbc ./{case_name}.msh\n\
+ic_uns_num_couplings \n\
+ic_uns_create_diagnostic_edgelist 1\n\
+ic_uns_diagnostic subset all diag_type uncovered fix_fam FIX_UNCOVERED diag_verb {{Uncovered faces}} fams {{}} busy_off 1 quiet 1\n\
+ic_uns_create_diagnostic_edgelist 0\n\
+ic_uns_min_metric Quality {{}} {{}}\n\
+ic_uns_subset_delete smooth_show_map\n\
+ic_uns_diag_reset_degen_min_max \n\
+ic_uns_subset_create smooth_do_map 0\n\
+ic_uns_subset_create smooth_show_map 1 {{}} 0\n\
+ic_uns_subset_configure smooth_do_map -list_type 1\n\
+ic_uns_subset_configure smooth_show_map -shade flat_wire -color white -dont_change_color_or_shade 1\n\
+ic_uns_update_family_type smooth_do_map {{ORFN GEOM INLET FLUID WALLS OUTLET}} {{HEXA_8 QUAD_4}} update 1\n\
+ic_diagnostic_info \n\
+ic_uns_subset_delete smooth_show_map\n\
+ic_uns_diag_reset_degen_min_max \n\
+ic_uns_subset_create smooth_do_map 0\n\
+ic_uns_update_family_type smooth_do_map {{ORFN GEOM INLET FLUID WALLS OUTLET}} {{HEXA_8 QUAD_4}} update 1\n\
+ic_uns_diag_reset_degen_min_max \n\
+ic_uns_metric smooth_do_map {{Aspect Ratio (Fluent)}} eval_at_node_method 0\n\
+ic_uns_histogram smooth_do_map 1.41421 42.1852 20\n\
+exit', file=fi)
+    try:
+        subprocess.check_call("ml ansys/2024R2", shell=True)
+    except subprocess.CalledProcessError as e:
+        print(e)
+        print("Continuing...")
+    comp_process = subprocess.call('icemcfd -x ./mesh_replay.rpl > auto_cfx_run.log', shell=True)
+    print(comp_process)
+    if cleanup:
+        subprocess.check_call('rm mesh_replay.rpl', shell=True)
+        subprocess.check_call('rm project1.*', shell=True)
+        subprocess.check_call('rm ansys.*', shell=True)
+        subprocess.check_call('rm hex.uns', shell=True)
+    return
+        
+
 def calculate_CL_Ryan(jf, jg, theta=0.0, Db = 0.0018, testing = False):
 
     """ Calculates the lift coefficient based on Ryan et al. (2023) method (i.e. DFM at various angles)
