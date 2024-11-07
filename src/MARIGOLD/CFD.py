@@ -1367,7 +1367,7 @@ CARTESIAN VELOCITY COMPONENTS:\n\
 Option = Automatic with Value\n\
 U = 0 [m s^-1]\n\
 V = 0 [m s^-1]\n\
-W = 3.5 [m s^-1]\n\
+W = {jf} [m s^-1]\n\
 END\n\
 VOLUME FRACTION:\n\
 Option = Automatic\n\
@@ -1381,7 +1381,7 @@ CARTESIAN VELOCITY COMPONENTS:\n\
 Option = Automatic with Value\n\
 U = 0 [m s^-1]\n\
 V = 0 [m s^-1]\n\
-W = 4 [m s^-1]\n\
+W = {jf} [m s^-1]\n\
 END\n\
 TURBULENCE INITIAL CONDITIONS:\n\
 Option = Medium Intensity and Eddy Viscosity Ratio\n\
