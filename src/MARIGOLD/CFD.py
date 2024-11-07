@@ -1346,6 +1346,11 @@ END \n\
 VIRTUAL MASS FORCE: \n\
 Option = None \n\
 END \n\
+WALL LUBRICATION FORCE: \n\
+Lubrication Coefficient C1 = -0.01 \n\
+Lubrication Coefficient C2 = 0.05 \n\
+Option = Antal \n\
+END \n\
 END \n\
 TURBULENCE TRANSFER: \n\
 ENHANCED TURBULENCE PRODUCTION MODEL: \n\
