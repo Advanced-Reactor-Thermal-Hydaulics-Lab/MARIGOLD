@@ -217,7 +217,7 @@ def read_CFX_export(csv_path, jf, jgref, theta, port, database, jgloc=None) -> C
 
 
 def make_ICEM_pipe_mesh(cond:Condition, r_divs: int, theta_divs: int, z_divs: int, o_point: float, Lmesh: float, 
-                        case_name: str, turb_model = 'ke', growth_ratio = 1.2,
+                        case_name: str, turb_model = 'ke', growth_ratio = 1.2, R_pipe = 0.0127,
                         fluent_translator_path = "/apps/external/apps/ansys/2022r2/ansys_inc/v222/icemcfd/linux64_amd/icemcfd/output-interfaces/fluent6",
                         cleanup = True) -> None:
     """ Function for making an O-grid pipe mesh using ANSYS ICEM
@@ -279,7 +279,7 @@ ic_set_global geo_cad 0.001 toler\n\
 ic_set_global geo_cad 0.001 toler\n\
 ic_set_global geo_cad 0.001 toler\n\
 ic_undo_group_begin \n\
-ic_surface cyl GEOM srf.00 {{pnt.00 pnt.01 0.0127 0.0127 1 1}}\n\
+ic_surface cyl GEOM srf.00 {{pnt.00 pnt.01 {R_pipe} {R_pipe} 1 1}}\n\
 ic_set_global geo_cad 0.001 toler\n\
 ic_set_dormant_pickable point 0 {{}}\n\
 ic_set_dormant_pickable curve 0 {{}}\n\
@@ -339,10 +339,10 @@ ic_hex_set_node_location x {-o_point} y {o_point} z 0 -csys global node_numbers 
 ic_hex_set_node_location x {-o_point} y {-o_point} z 0 -csys global node_numbers {{  65  }}\n\
 ic_hex_set_node_location x {o_point} y {-o_point} z 0 -csys global node_numbers {{  73  }}\n\
 \
-ic_hex_set_node_location x {o_point} y {o_point} z 2.54 -csys global node_numbers {{  78  }}\n\
-ic_hex_set_node_location x {-o_point} y {o_point} z 2.54 -csys global node_numbers {{  70  }}\n\
-ic_hex_set_node_location x {-o_point} y {-o_point} z 2.54 -csys global node_numbers {{  66  }}\n\
-ic_hex_set_node_location x {o_point} y {-o_point} z 2.54 -csys global node_numbers {{  74  }}\n\
+ic_hex_set_node_location x {o_point} y {o_point} z {Lmesh} -csys global node_numbers {{  78  }}\n\
+ic_hex_set_node_location x {-o_point} y {o_point} z {Lmesh} -csys global node_numbers {{  70  }}\n\
+ic_hex_set_node_location x {-o_point} y {-o_point} z {Lmesh} -csys global node_numbers {{  66  }}\n\
+ic_hex_set_node_location x {o_point} y {-o_point} z {Lmesh} -csys global node_numbers {{  74  }}\n\
 \
 ic_undo_group_begin \n\
 ic_hex_set_mesh 26 42 n {theta_divs} h1 10000000000.0 h2 10000000000.0 r1 2 r2 2 lmax 1e+10 default unlocked\n\
