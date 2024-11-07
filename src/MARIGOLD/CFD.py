@@ -568,6 +568,8 @@ def write_CCL(mom_source = 'normal_drag_mom_source', mom_source_coeff = 1, ccl_n
         mom_source_to_write = ['FDLx', 'FDLy', 'FDLz', 'FDGx', 'FDGy', 'FDGz']
         Kf = 0
         Kw = 0
+    elif type(mom_source) is list:
+        mom_source_to_write = mom_source
     else:
         mom_source_to_write = ['0 [kg m^-2 s^-2]', '0 [kg m^-2 s^-2]', '0 [kg m^-2 s^-2]', '0 [kg m^-2 s^-2]', '0 [kg m^-2 s^-2]', '0 [kg m^-2 s^-2]']
         CD_CFX = CD
