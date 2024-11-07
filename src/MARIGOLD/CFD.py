@@ -361,7 +361,7 @@ ic_undo_group_begin \n\
 ic_undo_group_end \n\
 ic_undo_group_end \n\
 ic_undo_group_begin \n\
-ic_hex_set_mesh 26 70 n {r_divs} h1rel 0.0 h2rel 0.0 r1 2 r2 2 lmax 0 default copy_to_parallel unlocked\n\
+ic_hex_set_mesh 26 70 n {r_divs} h1rel {first_layer} h2rel 0.0 r1 {growth_ratio} r2 2 lmax 0 default copy_to_parallel unlocked\n\
 ic_undo_group_end \n\
 ic_undo_group_begin \n\
 ic_hex_set_mesh 26 70 n {r_divs} h1rel {first_layer} h2rel 1.31233595801 r1 {growth_ratio} r2 2 lmax 0 default copy_to_parallel unlocked\n\
@@ -531,7 +531,7 @@ def write_CCL(mom_source = 'normal_drag_mom_source', mom_source_coeff = 1, ccl_n
                           outDataFile = '/home/adix/CFD/exp_BCs/out_H_0.csv', 
                           Db=0.0018, CL = 0.25, CTD = 0.25, theta = 0, mdot = 2.02277,
                           Kf = 0.083, Kw = 0.98, CD = 0.44, jf = 4, jg = 0.11, p_out = 20,
-                          num_iter = 10000, resid_target = 1e-6, inlet_coord_type = 'rzt', rhie_chow = False):
+                          num_iter = 10000, resid_target = 1e-6, inlet_coord_type = 'rzt', rhie_chow = False, backup_freq = 100):
     """ Function to write the CCL file that CFX reads
 
     Can use different momentum source terms, current options are
@@ -1135,6 +1135,18 @@ END \n\
 END \n\
 END \n\
 OUTPUT CONTROL: \n\
+BACKUP DATA RETENTION: \n\
+Option = Delete Old Files\n\
+END\n\
+BACKUP RESULTS: backup1\n\
+Extra Output Variables List = Absolute Pressure,Mach Number,Superficial Velocity,gas.Mach Number,gas.Superficial Velocity,liquid.Solver Yplus,liquid.Yplus\n\
+File Compression Level = Default\n\
+Option = Standard\n\
+OUTPUT FREQUENCY: \n\
+Iteration Interval = {backup_freq}\n\
+Option = Iteration Interval\n\
+END\n\
+END\n\
 RESULTS: \n\
 File Compression Level = Default \n\
 Option = Standard \n\
