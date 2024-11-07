@@ -217,7 +217,7 @@ def read_CFX_export(csv_path, jf, jgref, theta, port, database, jgloc=None) -> C
 
 
 def make_ICEM_pipe_mesh(cond:Condition, r_divs: int, theta_divs: int, z_divs: int, o_point: float, Lmesh: float, 
-                        case_name: str, turb_model = 'ke', growth_ratio = 1.2, R_pipe = 0.0127,
+                        case_name: str, turb_model = 'ke', growth_ratio = 1.2, R_pipe = 0.0127, fudge = 1,
                         fluent_translator_path = "/apps/external/apps/ansys/2022r2/ansys_inc/v222/icemcfd/linux64_amd/icemcfd/output-interfaces/fluent6",
                         cleanup = True) -> None:
     """ Function for making an O-grid pipe mesh using ANSYS ICEM
@@ -240,7 +240,7 @@ def make_ICEM_pipe_mesh(cond:Condition, r_divs: int, theta_divs: int, z_divs: in
     else:
         yplus = 1
 
-    first_layer = yplus * cond.mu_f / (u_tau * cond.rho_f)
+    first_layer = yplus * cond.mu_f / (u_tau * cond.rho_f) * fudge
 
 
     # Old method
