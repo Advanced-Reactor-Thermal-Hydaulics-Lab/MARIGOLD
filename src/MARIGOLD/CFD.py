@@ -531,7 +531,7 @@ def write_CCL(mom_source = 'normal_drag_mom_source', mom_source_coeff = 1, ccl_n
                           outDataFile = '/home/adix/CFD/exp_BCs/out_H_0.csv', 
                           Db=0.0018, CL = 0.25, CTD = 0.25, theta = 0, mdot = 2.02277,
                           Kf = 0.083, Kw = 0.98, CD = 0.44, jf = 4, jg = 0.11, p_out = 20,
-                          num_iter = 10000, resid_target = 1e-6):
+                          num_iter = 10000, resid_target = 1e-6, inlet_coord_type = 'rzt', rhie_chow = False):
     """ Function to write the CCL file that CFX reads
 
     Can use different momentum source terms, current options are
@@ -571,6 +571,16 @@ def write_CCL(mom_source = 'normal_drag_mom_source', mom_source_coeff = 1, ccl_n
     else:
         mom_source_to_write = ['0 [kg m^-2 s^-2]', '0 [kg m^-2 s^-2]', '0 [kg m^-2 s^-2]', '0 [kg m^-2 s^-2]', '0 [kg m^-2 s^-2]', '0 [kg m^-2 s^-2]']
         CD_CFX = CD
+
+    if inlet_coord_type == 'rzt':
+        coord_string = "radius, z, phi"
+    elif inlet_coord_type == 'xyz':
+        coord_string = "x, y, z"
+
+    if rhie_chow:
+        rhie_chow_str = "On"
+    else:
+        rhie_chow_str = "Off"
 
     if CL == 'tomiyama':
         lift_string = f"Option = Tomiyama \n"
@@ -621,7 +631,7 @@ FUNCTION: {InletData} \n\
 Argument Units = [mm], [m], [] \n\
 Option = Profile Data \n\
 Reference Coord Frame = Coord 0 \n\
-Spatial Fields = radius, z, phi \n\
+Spatial Fields = {coord_string} \n\
 DATA FIELD: Velocity u g\n\
 Field Name = Velocity u g\n\
 Parameter List = U,Velocity r Component,Wall U,Wall Velocity r Component \n\
@@ -666,7 +676,7 @@ FUNCTION: {OutletData} \n\
 Argument Units = [mm], [m], [] \n\
 Option = Profile Data \n\
 Reference Coord Frame = Coord 0 \n\
-Spatial Fields = radius, z, phi \n\
+Spatial Fields = {coord_string} \n\
 DATA FIELD: Velocity u g\n\
 Field Name = Velocity u g\n\
 Parameter List = U,Velocity r Component,Wall U,Wall Velocity r Component \n\
@@ -841,11 +851,11 @@ VELOCITY: \n\
 Option = Cartesian Velocity Components \n\
 U = 0 [m s^-1] \n\
 V = 0 [m s^-1] \n\
-W = {InletData}.Velocity w g(radius,z,phi) \n\
+W = {InletData}.Velocity w g({coord_string}) \n\
 END \n\
 VOLUME FRACTION: \n\
 Option = Value \n\
-Volume Fraction = {InletData}.Volume Fraction(radius,z,phi) \n\
+Volume Fraction = {InletData}.Volume Fraction({coord_string}) \n\
 END \n\
 END \n\
 END \n\
@@ -860,7 +870,7 @@ Option = Mass Flow Rate \n\
 END \n\
 VOLUME FRACTION: \n\
 Option = Value \n\
-Volume Fraction = 1-{InletData}.Volume Fraction(radius,z,phi) \n\
+Volume Fraction = 1-{InletData}.Volume Fraction({coord_string}) \n\
 END \n\
 END \n\
 END \n\
@@ -1099,6 +1109,8 @@ Momentum Source X Component = {mom_source_to_write[3]} \n\
 Momentum Source Y Component = {mom_source_to_write[4]} \n\
 Momentum Source Z Component = {mom_source_to_write[5]} \n\
 Option = Cartesian Components \n\
+Include Coefficient in Rhie Chow = {rhie_chow_str} \n\
+Redistribute in Rhie Chow = {rhie_chow_str} \n\
 END \n\
 END \n\
 END \n\
@@ -1111,6 +1123,8 @@ Momentum Source Coefficient = {mom_source_coeff} [kg m^-3 s^-1] \n\
 Momentum Source X Component = {mom_source_to_write[0]} \n\
 Momentum Source Y Component = {mom_source_to_write[1]} \n\
 Momentum Source Z Component = {mom_source_to_write[2]} \n\
+Include Coefficient in Rhie Chow = {rhie_chow_str} \n\
+Redistribute in Rhie Chow = {rhie_chow_str} \n\
 Option = Cartesian Components \n\
 END \n\
 END \n\

@@ -1006,7 +1006,7 @@ class Condition:
         
         """
         
-        if not self.check_param(param):
+        if not self.check_param(param, strict=False):
             raise TypeError(f"Invalid parameter {param} selected. Not present at {self.check_param_loc(param)}")
 
 
@@ -1058,7 +1058,7 @@ class Condition:
              
         """
 
-        if not self.check_param(param):
+        if not self.check_param(param, strict=False):
             raise TypeError(f"Invalid parameter {param} selected. Not present at {self.check_param_loc(param)}")
 
 
@@ -1399,15 +1399,29 @@ class Condition:
 
         return avg_param / count
     
-    def check_param(self, param:str) -> bool:
-        """ Checks if a given parameter is present everywhere in midas_dict
-        
-        """
+    def check_param(self, param:str, strict=True) -> bool:
+        """Checks if a parameter is present in condition data
 
-        for angle, r_dict in self.data.items():
-            for rstar, midas_dict in r_dict.items():
-                if param not in midas_dict.keys():
+        :param param: parameter to check
+        :type param: str
+        :param strict: Check each point. Otherwise, one value every angle is acceptable., defaults to True
+        :type strict: bool, optional
+        :return: True if param is present, false if not
+        :rtype: bool
+        """        
+        if strict:
+            for angle, r_dict in self.data.items():
+                param_in_angle = False
+                
+                for rstar, midas_dict in r_dict.items():
+                    if param not in midas_dict.keys() and strict:
+                        return False
+                    else:
+                        param_in_angle = True
+
+                if not param_in_angle:
                     return False
+        
 
         return True
     
