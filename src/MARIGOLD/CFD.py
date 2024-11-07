@@ -364,7 +364,7 @@ ic_undo_group_begin \n\
 ic_hex_set_mesh 26 70 n {r_divs} h1rel {first_layer} h2rel 0.0 r1 {growth_ratio} r2 2 lmax 0 default copy_to_parallel unlocked\n\
 ic_undo_group_end \n\
 ic_undo_group_begin \n\
-ic_hex_set_mesh 26 70 n {r_divs} h1rel {first_layer} h2rel 1.31233595801 r1 {growth_ratio} r2 2 lmax 0 default copy_to_parallel unlocked\n\
+ic_hex_set_mesh 26 70 n {r_divs} h1rel {first_layer} h2rel 0.0 r1 {growth_ratio} r2 2 lmax 0 default copy_to_parallel unlocked\n\
 ic_undo_group_begin \n\
 ic_undo_group_end \n\
 ic_undo_group_end \n\
