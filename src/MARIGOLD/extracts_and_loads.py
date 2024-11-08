@@ -1177,7 +1177,7 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                 
                 ws = wb['1']
                 
-                jglocs = ['O16', 'O17', 'O18', 'O19', 'O20']
+                jglocs = ['O16', 'O17', 'O18', 'O19', 'O20', 'O21', 'O22', 'O23', 'O24', 'O25'] # Experimental Port 1,2,3,4,5A,5C,5B,6A,6,7 --> Now Port 1,2,3,4,5,6,7,8,9,10. Quan 10/28
                 try:
                     jgloc = ws[jglocs[int(re.findall(r'\d+', port)[0])-1]].value
                     #jgloc = ws[jglocs[int(port.strip('P'))]].value
@@ -1205,7 +1205,8 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                 cond.run_ID = ws['B2'].value
 
                 # Local corrected gauge pressure can also be back-calculated from jgloc and jgatm (DHK)
-                cond.jgatm = ws['D6'].value
+               # cond.jgatm = ws['D6'].value  # Recorded experimental jgatm when data was taken, might vary slightly on different days or at different ports due to different temp or other BCs
+                cond.jgatm = ws['D7'].value   # Quan 10/25 U-bend data, fixed jgatm for all the ports to avoid cofusion in later modeling 
 
                 ws = wb['2']
                 
