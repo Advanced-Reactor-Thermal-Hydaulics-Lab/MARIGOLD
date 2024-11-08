@@ -265,43 +265,22 @@ class Condition:
                     print("\t\t", midas_output)
         return
 
-    def mirror(self, sym90 = True, axisym = False, uniform_rmesh = False, force_remirror=False) -> None:
+    def mirror(self, method = 'sym90', sym90 = False, axisym = False, uniform_rmesh = False, force_remirror=False) -> None:
         """ Mirrors data, so we have data for every angle
 
-        First finds all the angles with data, copies anything negative to the 
-        other side (deleting the negative entries in the original). Then goes
-        though each of the angles in _angles (22.5° increments) and makes sure
-        each has data. Either copying, assuming some kind of symmetry (either
-        axisym or sym90) or just filling in zeros. 
+        :param method: method to use for mirroring. Options are 'sym90', 'axisym', and 'avg_axisym'. Defaults to 'sym90'
+        :type method: str, optional
+        :param sym90: overwrites method, for backwards compatibility, defaults to False
+        :type sym90: bool, optional
+        :param axisym: overwrites method, for backwards compatibility, defaults to False
+        :type axisym: bool, optional
+        :param uniform_rmesh: ensure every angle has data for every r/R point. Will linearly interpolate when data on either side is available. This only  considers the +r/R mesh, defaults to False
+        :type uniform_rmesh: bool, optional
+        :param force_remirror: _description_, defaults to False
+        :type force_remirror: bool, optional
 
-        Axisym = True will find the angle with the most data (i.e. the most r/R
-        locations with data available) and copy it to every other angle in _angles
-
-        uniform_rmesh will ensure every angle has data for every r/R point. Will
-        linearly interpolate when data on either side is available. This only 
-        considers the +r/R mesh
-        
-        Force_remirror is untested, no clue if it's safe or not
-        
-        Also saves the original mesh (r, φ) pairs under self.original_mesh
-
-        
-        Quadrant definitions:
-        
-                          phi =  90
-                        , - ~ ~ ~ - ,
-                    , '       |        ' ,
-                  ,           |            ,
-                 ,     II     |    I        ,
-                ,             |             ,
-            180 ,-------------|-------------, 0
-                ,             |             ,
-                 ,    III     |   IV       ,
-                  ,           |           ,
-                    ,         |        , '
-                      ' - , _ _ _ ,  '
-                             270
-
+        Saves:
+         - original_mesh
         """
 
         # Only ever call this function once
@@ -391,7 +370,12 @@ class Condition:
             angles_with_data.append(360)
 
         # Now comes the actual mirroring step. Need data for every angle, incremements of 22.5° (self._angles)
-        if axisym: 
+        if sym90:
+            method == 'sym90'
+        elif axisym:
+            method == 'axisym'
+
+        if method == 'axisym': 
             # axisymmetric
             # Find the reference angle with the most data
             ref_angle = angles_with_data[0] # initial guess
@@ -406,7 +390,33 @@ class Condition:
                 self.data.update({angle: {}})
                 self.data[angle].update( data )
 
-        elif sym90: 
+        elif method.lower() == 'avg_axisym':
+            # print('avg_axisym')
+            # Find a reference angle with a complement, replace all the data with the average of the two
+            ref_angle = angles_with_data[0] # initial guess
+            for angle in angles_with_data:
+                if (angle+180 in angles_with_data) and len(self.data[ref_angle].keys()) < len(self.data[angle].keys()):
+                    ref_angle = angle
+
+            temp_data = deepcopy(self.data[ref_angle])
+            comp_data = deepcopy(self.data[ref_angle+180])
+            avg_data = deepcopy(self.data[ref_angle])
+            # print('comp data', comp_data)
+            for rstar, midas_dict in temp_data.items():
+                avg_data.update({rstar: {} })
+                for param, val in midas_dict.items():
+                    try:
+                        avg_data[rstar][param] = (val + comp_data[rstar][param]) / 2
+                        # print('used avg data')
+                    except:
+                        avg_data[rstar][param] = val
+
+            for angle in self._angles:
+                data = deepcopy(avg_data)
+                self.data.update({angle: {}})
+                self.data[angle].update( data )
+
+        elif method.lower() == 'sym90': 
             # symmetric across the 90 degree line
             for angle in self._angles:
                 if angle not in angles_with_data:
@@ -467,6 +477,7 @@ class Condition:
 
         else:
             # No symmetry being assumed. But we still want data at every angle. If it doesn't exist, must be 0
+            warnings.warn("Filling in all angles without data as 0")
             for angle in self._angles:
                 if angle not in angles_with_data:
                     data = {0.0: deepcopy(zero_data)}
@@ -1421,7 +1432,10 @@ class Condition:
                 
                 for rstar, midas_dict in r_dict.items():
                     if param not in midas_dict.keys() and strict:
-                        return False
+                        if rstar == 1.0:
+                            pass # TODO add extra stuff if it doesn't exist at 1.0, it really shouldn't be a problem
+                        else:
+                            return False
                     else:
                         param_in_angle = True
 
