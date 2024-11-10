@@ -1,4 +1,5 @@
 from .config import *
+import warnings
 
 def iate_1d_1g(
         # Basic inputs
@@ -23,6 +24,8 @@ def iate_1d_1g(
 
         # Void fraction calculation
         C0 = None, C_inf = 1.20,
+
+        verbose = False,
 
         ):
     """ Calculate the area-averaged interfacial area concentration at query location based on the 1D 1G IATE
@@ -185,11 +188,11 @@ def iate_1d_1g(
         if C_WE == None:
            C_WE    = 0.000
         if C_RC == None:
-           C_RC    = 0.000
+           C_RC    = 0.01
         if C_TI == None:
-           C_TI    = 0.000
+           C_TI    = 0.008
 
-        acrit = 1.00
+        acrit = 1.00 
         LM_C = 85
         k_m = 0.20   # Based on U-bend experimental dpdz data, k_m = 0.20
         L_res   = 31.67          # Length of restriction, based on U-bend experimental dpdz data
@@ -202,10 +205,13 @@ def iate_1d_1g(
         if C_WE == None:
             C_WE    = 0.000
         if C_RC == None:
-            C_RC    = 0.04        # 0.04, 1106 
+            C_RC    = 0.004        # 0.04, 1106 
         if C_TI == None:
             C_TI    = 0.085    #0.085, 1106
-        
+
+        theta= -90
+        grav = 9.81*np.sin((theta)*np.pi/180)
+
         acrit = 1.00
         LM_C = 68
 
@@ -219,21 +225,23 @@ def iate_1d_1g(
         if C_TI == None:
             C_TI    = 0.034                    #1105 changed from 0.034 to 0
 
-        acrit = 0.11
+        theta= -90
+        grav = 9.81*np.sin((theta)*np.pi/180)
+
+        acrit = 1.00    # or 0.11?
         LM_C = 68
 
-        We_cr = 6  #1105 (Ishii et al., 2004)
-    
+        We_cr = 6  #1105 (Ishii et al., 2004)    
     
     elif geometry == 'vu':                      
         if C_WE == None:
-            C_WE    = 0.002                     
+            C_WE    = 0.002                    
         if C_RC == None:                        
             C_RC    = 0.004                     
         if C_TI == None:
             C_TI    = 0.085       
 
-        acrit = 0.11
+        acrit = 1.00   # or 0.11?
         LM_C = 34
 
         We_cr = 6  
@@ -353,8 +361,7 @@ def iate_1d_1g(
             ai[0]       = cond.area_avg("ai_G1",method=avg_method)                     # [1/m]
             alpha[0]    = cond.area_avg("alpha_G1",method=avg_method)                  # [-]
             Db[0]       = cond.void_area_avg("Dsm1",method=avg_method) / 1000       # [m]
-            COV_RC[0]   = cond.calc_COV_RC()                        #1105
-            COV_TI[0]   = cond.calc_COV_TI()                        #1105
+            
             vgz[0]      = cond.void_area_avg('ug1')                 #1105
 
         pz[0] = jgatm * p_atm / jgloc [0] # Initial corrected absolute pressure at the start of z_mesh
@@ -378,6 +385,16 @@ def iate_1d_1g(
         jgatm       = io["jgatm"]
         pz[0]       = io ["pz"][-1]
         vgz[0] = io["vgz"][-1]
+    
+    if geometry == 'U-bend Dissipation' or geometry == 'U-bend':
+        COV_RC[0]   = cond.calc_COV_RC()                        #1105
+        COV_TI[0]   = cond.calc_COV_TI()                        #1105
+    else:
+        COV_RC[0] = 1
+        COV_TI[0] = 1
+
+    # print(cond)
+    # print(f"\t{geometry}\t\tCOV_RC[0]: {COV_RC[0]}\tCOV_TI[0]: {COV_TI[0]}")
 
     ########################################################################################################################
     # Pressure drop [Pa/m]
@@ -432,10 +449,14 @@ def iate_1d_1g(
     ############################################################################################################################
     
     # Calculate ai(z) to evaluate the steady state one-dim one-group model
-    print(f"Geometry is set to: {geometry}")
-    print(f"io is set to: {io}")
+    # print(f"Geometry is set to: {geometry}")
+    # print(f"io is set to: {io}")
 
     for i, z in enumerate(z_mesh):
+
+        # if alpha[i] > alpha_max and verbose:
+        #     warnings.warn(f"alpha < alpha_max at step {i} for {cond.jf}, {cond.jgref}")
+
         if (i+1) >= len(z_mesh):
             break
             
@@ -490,6 +511,7 @@ def iate_1d_1g(
         elif cd_method == 'doe':
             # Original DOE_MATLAB_IAC
             ReD = rho_f * ur * Db[i] * (1 - alpha[i]) / mu_f
+            
 
             if ReD > 0:
 
@@ -498,6 +520,10 @@ def iate_1d_1g(
                 CDwe =0
 
             ur = (4 * abs(grav) * Db[i] / 3 / CDwe)**0.5            # Interestingly, Yadav keeps 9.8 instead of changing grav for angle
+
+            if CDwe <= 0 and verbose:
+                  warnings.warn(f" CDwe <= 0  at step {i} for {cond.jf}, {cond.jgref}")
+                  print(rho_f, ur, Db[i], alpha[i], mu_f)
 
         elif cd_method == 'fixed_iter':
             for loop_idx in range(25):
@@ -530,14 +556,15 @@ def iate_1d_1g(
         
         if geometry == 'U-bend':
             
-            if i < 1: 
-                deltah [i] = R_c * np.sin((i+1)*z_step / R_c)  #Quan, 1107
+            if i <= 5.9*Dh /z_step:  # actual L/D length from P3 to inlet of U-bend is 5.9
+                deltah [i]=z_step  #Quan, 1107
 
-            elif i >= np.pi * R_c/z_step:    # Temporary use only, consider additional 3.4 length from P5 (exit of U-bend) to P6
+            elif i >= (np.pi * R_c + 5.9*Dh)/z_step:    # Temporary use only, consider additional 3.4 length from P5 (exit of U-bend) to P6
+                theta= -90
                 deltah [i]=z_step
 
             else:
-                deltah [i] = R_c * np.sin((i+1)*z_step / R_c) -R_c * np.sin(i*z_step / R_c)  #Quan, 1107
+                deltah [i] = R_c * np.sin(((i+1)*z_step -5.9*Dh)/ R_c) -R_c * np.sin((i*z_step-5.9*Dh) / R_c)  #Quan, 1107
 
         else:
              deltah [:] = z_step
@@ -563,6 +590,9 @@ def iate_1d_1g(
         
          pz[i+1] = pz[i] - dpdz[i] * z_step - rho_m[i]*grav*deltah [i]    # local absolute pressure, deltah different across U-bend
          rho_gz[i+1] = rho_g * pz[i+1] / pz[0]
+
+        #  if geometry == 'vd' or geometry == 'U-bend Dissipation':
+        #      print(f"\tgrav: {rho_m[i]*grav*deltah [i]}\t\tfric: {dpdz[i] * z_step}")
 
         # print(f"Step {i}:")
          #print(f"  rho_gz[{i}] = {rho_gz[i]}")
@@ -640,6 +670,10 @@ def iate_1d_1g(
             COV_RC[i+1]=COV_RC [0]*np.exp (1.14819931*beta_diss*delta_z)   #based on dissipation coefficient (P6-P8) in the U-bend dissipation region, P56 data as reference
 
             COV_TI[:] =0.87  
+
+            # if cond.jf > 3.8 and cond.jgref > 0.3:
+            #     print(f"\t{geometry}\tCOV_RC: {COV_RC[i+1]}\tFr_m = {Fr_m}\tbeta_diss = {beta_diss}\tdelta_z = {delta_z}")
+
           #  if i < 5:                                                              # use some linear drop in the future
                #COV_RC[i+1] = COV_RC [0]*np.exp (0.4011-0.128*np.log(delta_z+0.01))                                                                   #1105, model with acrit=1.00, Lnx
             #    COV_RC[i+1] = COV_RC [0]
@@ -715,13 +749,16 @@ def iate_1d_1g(
             COV_RC[i+1]=COV_RC [0]*np.exp (0.1317*c_diss*delta_z)   #1107   # based on P3-P5 data, P3 as reference
             COV_TI[:] =0.92       
 
+            # if cond.jf > 3.8 and cond.jgref > 0.3:
+            #     print(f"\t{geometry}\tCOV_RC: {COV_RC[i+1]}\tFr_m = {Fr_m}\tc_diss = {c_diss}\tdelta_z = {delta_z}")
+
         else:
             SWE[i] = C_WE * CDwe**(1/3) * ur * ai[i]**2 / 3 / np.pi
         
         # Sink due to Random Collisions
         RC1 = u_t * ai[i]**2 / alpha_max**(1/3) / (alpha_max**(1/3) - alpha[i]**(1/3))
-        #RC2 = 1 - np.exp(-C * alpha_max**(1/3) * alpha[i]**(1/3) / (alpha_max**(1/3) - alpha[i]**(1/3)))    #Quan 10/17/2024 question, where does this come from? 1105
-        SRC[i] = COV_RC[i] * C_RC * RC1  / 3 / np.pi
+        RC2 = 1 - np.exp(-C * alpha_max**(1/3) * alpha[i]**(1/3) / (alpha_max**(1/3) - alpha[i]**(1/3)))    #Quan 10/17/2024 question, where does this come from? 1105
+        SRC[i] = COV_RC[i] * C_RC * RC1 *RC2 / 3 / np.pi
         
         # Source due to Turbulent Impact
         TI1 = u_t * ai[i]**2 / alpha[i]
@@ -897,9 +934,9 @@ def iate_1d_1g(
           #  print(f"\t{vgz[i]=}")
           #  print(f"\t{pz[i]=}")
 
-        if geometry == 'vd':
-        
-          print(f"{theta=}")
+        # if geometry == 'U-bend':
+        #     print(f"\tRC: {SRC[i]}\tTI: {STI[i]}")
+        #   print(f"{theta=}")
             #print(f"  rho_m[{i}] = {rho_m[i]}")
             #print(f"  phi_f2[{i}] = {phi_f2[i]}")
            # print(f"  rho_x[{i}] = {rho_x[i]}")
@@ -907,7 +944,9 @@ def iate_1d_1g(
            # print("------------------------------------------------")
 
         # print(f"\t{ai[i]=}")
-
+        # print(f"\t{R_c=}")
+    
+        print(f"\tRC: {SRC[i]}\tTI: {STI[i]}")
 
         # Estimate Sauter mean diameter for the next step calculation
         Db[i+1] = 6 * alpha[i+1] / ai[i+1]
