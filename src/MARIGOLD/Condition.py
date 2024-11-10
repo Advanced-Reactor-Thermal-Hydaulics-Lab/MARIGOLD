@@ -276,7 +276,7 @@ class Condition:
         :type axisym: bool, optional
         :param uniform_rmesh: ensure every angle has data for every r/R point. Will linearly interpolate when data on either side is available. This only  considers the +r/R mesh, defaults to False
         :type uniform_rmesh: bool, optional
-        :param force_remirror: _description_, defaults to False
+        :param force_remirror: Usually can only mirror once. This overrides that restriction, defaults to False
         :type force_remirror: bool, optional
 
         Saves:
