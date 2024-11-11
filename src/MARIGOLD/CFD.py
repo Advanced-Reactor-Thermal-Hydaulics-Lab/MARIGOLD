@@ -972,27 +972,21 @@ ic_uns_load ./hex.uns 3 0 {{}} 1\n\
 ic_uns_update_family_type visible {{GEOM ORFN SOLID}} {{!NODE !LINE_2 QUAD_4}} update 0\n\
 ic_boco_solver\n\
 ic_boco_clear_icons\n\
-ic_set_global geo_cad 0.02 toler\n\
-ic_point {{}} GEOM pnt.13 0,0,($L_VU*$D)\n\
-ic_set_global geo_cad 0.8 toler\n\
-ic_delete_geometry curve names crv.00 0\n\
-ic_curve point GEOM crv.00 {{pnt.00 pnt.13}}\n\
-ic_set_global geo_cad 0.8 toler\n\
 ic_uns_create_selection_subset 0\n\
 ic_uns_create_selection_edgelist 1\n\
 ic_uns_subset_configure uns_sel_0 -draw_nodes 1\n\
-ic_uns_subset_visible uns_sel_0 0\n\
-ic_uns_subset_copy uns_sel_0 all 2\n\
+ic_uns_subset_add_pick_polygon element uns_sel_0 {{-0.019849533945238886 0.01596592947769215 0.590550005436} {-0.019849533945238886 -0.017507042361639268 0.590550005436} {0.019972822975954659 -0.017507042361639268 0.590550005436} {0.019972822975954659 0.01596592947769215 0.590550005436}} {0 0 6.1644515357839325e-05} Selected 0 1\n\
 ic_uns_uniqify uns_sel_0\n\
 ic_uns_subset_visible uns_sel_0 0\n\
 ic_uns_create_selection_edgelist 0\n\
-ic_geo_new_family FLUID\n\
-ic_boco_set_part_color FLUID\n\
+ic_undo_group_begin\n\
+ic_geo_new_family SOLID\n\
+ic_boco_set_part_color SOLID\n\
 ic_geo_new_family WALLS\n\
 ic_boco_set_part_color WALLS\n\
 ic_geo_new_family OUTLET\n\
 ic_boco_set_part_color OUTLET\n\
-ic_extrude map uns_sel_0 numlayers $dz dir curve_normal space 1 space_func {{}} rpoint {{0 0 0}} rdir {{0 0 0}} rangle 10.0 volf solid sidef walls topf outlet curve crv.00 curvedir 0 twist 0 del_orig 0 del_covered 0 degen_tol 0.00001 trans_rot_vec {{0 0 0}} spacing_transl_rot 0.0 project 0\n\
+ic_extrude map uns_sel_0 numlayers 600 dir normal space 0.001863 space_func {} rpoint {0 0 0} rdir {0 0 0} rangle 10.0 volf solid sidef walls topf outlet curve {} curvedir 0 twist 0 del_orig 0 del_covered 0 degen_tol 0.00001 trans_rot_vec {0 0 0} spacing_transl_rot 0.0 project 0\n\
 ic_uns_subset_delete uns_sel_0\n\
 ic_delete_empty_parts \n\
 ic_uns_update_family_type visible {{FLUID GEOM OUTLET ORFN WALLS SOLID}} {{!NODE LINE_2 QUAD_4 !HEXA_8}} update 0\n\
