@@ -48,6 +48,12 @@ class Condition:
         self.port = port
         self.database = database
 
+         # Check if port is one of the specified vertical downward ports after U-bend, set theta to -90 degree if true (Quan 10/25)
+        if self.port in {"P5", "P6", "P7", "P8", "P9", "P10"}:
+           self.theta = int(-90)
+        else:
+            self.theta = int(90)
+
         self.name = f"jf={self.jf}_jgloc={self.jgloc:0.2f}_theta={self.theta}_port={self.port}_{self.database}"
 
         # Data is stored in this phi array. 3 layers of dictionary
@@ -75,17 +81,17 @@ class Condition:
                 self.LoverD = 110
             elif self.port == 'P4':
                 self.LoverD = 130.04
-            elif self.port == 'P5A':
+            elif self.port == 'P5':
                 self.LoverD = 144.17
-            elif self.port == 'P5C':
-                self.LoverD = 147.57
-            elif self.port == 'P5B':
-                self.LoverD = 151.84
-            elif self.port == 'P6A':
-                self.LoverD = 165.57
             elif self.port == 'P6':
-                self.LoverD = 194.07          
+                self.LoverD = 147.57
             elif self.port == 'P7':
+                self.LoverD = 151.84
+            elif self.port == 'P8':
+                self.LoverD = 165.57
+            elif self.port == 'P9':
+                self.LoverD = 194.07          
+            elif self.port == 'P10':
                 self.LoverD = 230.07
             else:
                 self.LoverD = -1
@@ -259,43 +265,22 @@ class Condition:
                     print("\t\t", midas_output)
         return
 
-    def mirror(self, sym90 = True, axisym = False, uniform_rmesh = False, force_remirror=False) -> None:
+    def mirror(self, method = 'sym90', sym90 = False, axisym = False, uniform_rmesh = False, force_remirror=False) -> None:
         """ Mirrors data, so we have data for every angle
 
-        First finds all the angles with data, copies anything negative to the 
-        other side (deleting the negative entries in the original). Then goes
-        though each of the angles in _angles (22.5° increments) and makes sure
-        each has data. Either copying, assuming some kind of symmetry (either
-        axisym or sym90) or just filling in zeros. 
+        :param method: method to use for mirroring. Options are 'sym90', 'axisym', and 'avg_axisym'. Defaults to 'sym90'
+        :type method: str, optional
+        :param sym90: overwrites method, for backwards compatibility, defaults to False
+        :type sym90: bool, optional
+        :param axisym: overwrites method, for backwards compatibility, defaults to False
+        :type axisym: bool, optional
+        :param uniform_rmesh: ensure every angle has data for every r/R point. Will linearly interpolate when data on either side is available. This only  considers the +r/R mesh, defaults to False
+        :type uniform_rmesh: bool, optional
+        :param force_remirror: Usually can only mirror once. This overrides that restriction, defaults to False
+        :type force_remirror: bool, optional
 
-        Axisym = True will find the angle with the most data (i.e. the most r/R
-        locations with data available) and copy it to every other angle in _angles
-
-        uniform_rmesh will ensure every angle has data for every r/R point. Will
-        linearly interpolate when data on either side is available. This only 
-        considers the +r/R mesh
-        
-        Force_remirror is untested, no clue if it's safe or not
-        
-        Also saves the original mesh (r, φ) pairs under self.original_mesh
-
-        
-        Quadrant definitions:
-        
-                          phi =  90
-                        , - ~ ~ ~ - ,
-                    , '       |        ' ,
-                  ,           |            ,
-                 ,     II     |    I        ,
-                ,             |             ,
-            180 ,-------------|-------------, 0
-                ,             |             ,
-                 ,    III     |   IV       ,
-                  ,           |           ,
-                    ,         |        , '
-                      ' - , _ _ _ ,  '
-                             270
-
+        Saves:
+         - original_mesh
         """
 
         # Only ever call this function once
@@ -385,7 +370,12 @@ class Condition:
             angles_with_data.append(360)
 
         # Now comes the actual mirroring step. Need data for every angle, incremements of 22.5° (self._angles)
-        if axisym: 
+        if sym90:
+            method == 'sym90'
+        elif axisym:
+            method == 'axisym'
+
+        if method == 'axisym': 
             # axisymmetric
             # Find the reference angle with the most data
             ref_angle = angles_with_data[0] # initial guess
@@ -400,7 +390,33 @@ class Condition:
                 self.data.update({angle: {}})
                 self.data[angle].update( data )
 
-        elif sym90: 
+        elif method.lower() == 'avg_axisym':
+            # print('avg_axisym')
+            # Find a reference angle with a complement, replace all the data with the average of the two
+            ref_angle = angles_with_data[0] # initial guess
+            for angle in angles_with_data:
+                if (angle+180 in angles_with_data) and len(self.data[ref_angle].keys()) < len(self.data[angle].keys()):
+                    ref_angle = angle
+
+            temp_data = deepcopy(self.data[ref_angle])
+            comp_data = deepcopy(self.data[ref_angle+180])
+            avg_data = deepcopy(self.data[ref_angle])
+            # print('comp data', comp_data)
+            for rstar, midas_dict in temp_data.items():
+                avg_data.update({rstar: {} })
+                for param, val in midas_dict.items():
+                    try:
+                        avg_data[rstar][param] = (val + comp_data[rstar][param]) / 2
+                        # print('used avg data')
+                    except:
+                        avg_data[rstar][param] = val
+
+            for angle in self._angles:
+                data = deepcopy(avg_data)
+                self.data.update({angle: {}})
+                self.data[angle].update( data )
+
+        elif method.lower() == 'sym90': 
             # symmetric across the 90 degree line
             for angle in self._angles:
                 if angle not in angles_with_data:
@@ -461,6 +477,7 @@ class Condition:
 
         else:
             # No symmetry being assumed. But we still want data at every angle. If it doesn't exist, must be 0
+            warnings.warn("Filling in all angles without data as 0")
             for angle in self._angles:
                 if angle not in angles_with_data:
                     data = {0.0: deepcopy(zero_data)}
@@ -1006,8 +1023,8 @@ class Condition:
         
         """
         
-        if not self.check_param(param):
-            raise TypeError(f"Invalid parameter {param} selected. Not present at {self.check_param_loc(param)}")
+        if not self.check_param(param, strict=False):
+            raise KeyError(f"Invalid parameter {param} selected. Not present at {self.check_param_loc(param)}")
 
 
         try: dummy = self.spline_interp
@@ -1058,8 +1075,8 @@ class Condition:
              
         """
 
-        if not self.check_param(param):
-            raise TypeError(f"Invalid parameter {param} selected. Not present at {self.check_param_loc(param)}")
+        if not self.check_param(param, strict=False):
+            raise KeyError(f"Invalid parameter {param} selected. Not present at {self.check_param_loc(param)}")
 
 
         try: dummy = self.linear_interp
@@ -1102,7 +1119,7 @@ class Condition:
         """
 
         if not self.check_param(param):
-            raise TypeError(f"Invalid parameter {param} selected. Not present at {self.check_param_loc(param)}")
+            raise KeyError(f"Invalid parameter {param} selected. Not present at {self.check_param_loc(param)}")
 
         try: dummy = self.linear_xy_interp
         except:
@@ -1399,15 +1416,32 @@ class Condition:
 
         return avg_param / count
     
-    def check_param(self, param:str) -> bool:
-        """ Checks if a given parameter is present everywhere in midas_dict
-        
-        """
+    def check_param(self, param:str, strict=True) -> bool:
+        """Checks if a parameter is present in condition data
 
-        for angle, r_dict in self.data.items():
-            for rstar, midas_dict in r_dict.items():
-                if param not in midas_dict.keys():
+        :param param: parameter to check
+        :type param: str
+        :param strict: Check each point. Otherwise, one value every angle is acceptable., defaults to True
+        :type strict: bool, optional
+        :return: True if param is present, false if not
+        :rtype: bool
+        """        
+        if strict:
+            for angle, r_dict in self.data.items():
+                param_in_angle = False
+                
+                for rstar, midas_dict in r_dict.items():
+                    if param not in midas_dict.keys() and strict:
+                        if rstar == 1.0:
+                            pass # TODO add extra stuff if it doesn't exist at 1.0, it really shouldn't be a problem
+                        else:
+                            return False
+                    else:
+                        param_in_angle = True
+
+                if not param_in_angle:
                     return False
+        
 
         return True
     
@@ -1440,7 +1474,7 @@ class Condition:
 
         # Check that the parameter that the user requested exists
         if not self.check_param(param):
-            raise TypeError(f"Invalid parameter {param} selected. Not present at {self.check_param_loc(param)}")
+            raise KeyError(f"Invalid parameter {param} selected. Not present at {self.check_param_loc(param)}")
         
         if (param in self.area_avgs.keys()) and (not recalc):
             return self.area_avgs[param] # why waste time, if we already calculated this don't do it again
@@ -1636,7 +1670,7 @@ class Condition:
         # Check that the parameter that the user requested exists
         # Check that the parameter that the user requested exists
         if not self.check_param(param):
-            raise TypeError(f"Invalid parameter {param} selected. Not present at {self.check_param_loc(param)}")
+            raise KeyError(f"Invalid parameter {param} selected. Not present at {self.check_param_loc(param)}")
         
         self.mirror()
 
@@ -1697,7 +1731,7 @@ class Condition:
 
         # Check that the parameter that the user requested exists
         if not self.check_param(param):
-            raise TypeError(f"Invalid parameter {param} selected. Not present at {self.check_param_loc(param)}")
+            raise KeyError(f"Invalid parameter {param} selected. Not present at {self.check_param_loc(param)}")
         
         
         self.mirror()
@@ -1768,7 +1802,7 @@ class Condition:
 
 
         if not self.check_param(param):
-            raise TypeError(f"Invalid parameter {param} selected. Not present at {self.check_param_loc(param)}")
+            raise KeyError(f"Invalid parameter {param} selected. Not present at {self.check_param_loc(param)}")
 
         r_for_int = []
         var_for_int = []
@@ -1823,7 +1857,7 @@ class Condition:
 
 
         if not self.check_param(param):
-            raise TypeError(f"Invalid parameter {param} selected. Not present at {self.check_param_loc(param)}")
+            raise KeyError(f"Invalid parameter {param} selected. Not present at {self.check_param_loc(param)}")
 
 
         r_for_int = []
@@ -1870,7 +1904,7 @@ class Condition:
 
         # Check that the parameter that the user requested exists
         if not self.check_param(param):
-            raise TypeError(f"Invalid parameter {param} selected. Not present at {self.check_param_loc(param)}")
+            raise KeyError(f"Invalid parameter {param} selected. Not present at {self.check_param_loc(param)}")
 
 
         if method == 'legacy':
@@ -2241,6 +2275,59 @@ class Condition:
         self.sigma_alpha = I
         return I
     
+    def calc_sigma_alpha1(self):
+        """Calculates the second moment of alpha_G1
+
+        Inputs:
+         - None
+
+        Stores:
+         - "sigma_alpha1" in self
+
+        Returns:
+         - second moment of :math:`alpha_G1`
+
+        Mathematically performing the operation
+
+        .. math:: \\frac{\\langle (\\alpha - \\langle \\alpha \\rangle)^2 \\rangle }{\\langle \\alpha \\rangle^2}
+        
+        """
+
+        I = 0
+        param_r = [] # integrated wrt r
+        angles = []
+        
+        self.mirror()
+
+        alpha_avg = self.area_avg('alpha_G1')
+
+        for angle, r_dict in self.data.items():
+            rs_temp = []
+            vars_temp = []
+            angles.append(angle * np.pi/180) # Convert degrees to radians
+            for rstar, midas_dict in r_dict.items():
+                if rstar >= 0:
+                    rs_temp.append( rstar ) # This is proably equivalent to rs = list(r_dict.keys() ), but I'm paranoid about ordering
+                    vars_temp.append(rstar * (midas_dict['alpha_G1'] - alpha_avg)**2)
+                    if debug: print(angle, midas_dict, file=debugFID)
+            
+            vars = [var for _, var in sorted(zip(rs_temp, vars_temp))]
+            rs = sorted(rs_temp)
+
+            if debug: print("Arrays to integrate", rs, vars, file=debugFID)
+                
+            param_r.append( integrate.simpson(vars, rs) ) # Integrate wrt r
+            if debug: print("calculated integral:", integrate.simpson(vars, rs), file=debugFID)
+                #I = 2 * np.pi
+        if debug: print("Integrated wrt r", param_r, file=debugFID)
+        param_r_int = [var for _, var in sorted(zip(angles, param_r))]
+        angles_int = sorted(angles)
+        I = integrate.simpson(param_r_int, angles_int) / np.pi / alpha_avg**2 # Integrate wrt theta, divide by normalized area
+        if debug: print('Calculated sigma_alpha1: ', I)
+
+        self.sigma_alpha1 = I
+        return I
+    
     def calc_sigma_ug(self):
         """Calculates the second moment of ug1
 
@@ -2406,7 +2493,7 @@ class Condition:
         return I
 
     def calc_dpdz(self, method = 'LM', m = 0.316, n = 0.25, chisholm = 25, k_m = 0.10, L = None, alpha = None, akapower = 0.875):
-        """ Calculates the pressure gradient, dp/dz, according to various methods. Can access later with self.dpdz
+        """ Calculates the frictional pressure gradient, dp/dz, according to various methods. Can access later with self.dpdz
 
         Options:
             - method    : Calculation method
@@ -3142,7 +3229,7 @@ the newly calculated :math:`v_{r}` or not
         return self.area_avg('lambda')
     
 
-    def calc_COV_RC(self, alpha_peak = 0.75, alpha_cr = 0.11, avg_method = 'legacy', reconstruct_flag = True, debug = False):
+    def calc_COV_RC(self, alpha_peak = 0.75, alpha_cr = 1.00, avg_method = 'legacy', reconstruct_flag = False, debug = False):
         """Calculates the experimental Random Collision Covariance based on Talley (2012) method (without modification factor m_RC)
          - Stored in self.COV_RC
          
@@ -3179,16 +3266,16 @@ the newly calculated :math:`v_{r}` or not
         # mu_f            = self.mu_f                                         # Dynamic viscosity of water [Pa-s]
         # sigma           = self.sigma                                        # Surface tension
 
-        rho_f           = 1000
-        rho_g           = 1.22
+        rho_f           = 998                                                # What Quan used
+        rho_g           = 1.226                                              # What Quan used
         mu_f            = 0.001
-        sigma           = 0.07278
+        sigma           = self.sigma
         Dh              = self.Dh                                           # Hydraulic diameter [m]
                 
         rho_m           = (1 - alpha_avg) * rho_f + alpha_avg * rho_g       # Mixture density
         mu_m            = mu_f / (1 - alpha_avg)                            # Mixture viscosity
         v_m             = (rho_f * self.jf + rho_g * self.jgloc) / rho_m    # Mixture velocity
-        # Rem             = rho_m * v_m * Dh / mu_m                           # Mixture Reynolds number, ***CAREFUL*** I have seen some versions of the IATE script that use rho_f instead as an approximation
+        # Rem             = rho_m * v_m * Dh / mu_m                         # Mixture Reynolds number, ***CAREFUL*** I have seen some versions of the IATE script that use rho_f instead as an approximation
         Rem             = rho_m * v_m * Dh / mu_f                           # Mixture Reynolds number, older versions use mu_f as an approximation
         f_TP            = 0.316 * (mu_m / mu_f / Rem)**0.25                 # Two-phase friction factor, Talley (2012) and Worosz (2015), also used in iate_1d_1g
         eps             = f_TP * v_m**3 / 2 / Dh                            # Energy dissipation rate (Wu et al., 1998; Kim, 1999), also used in iate_1d_1g        
@@ -3197,7 +3284,7 @@ the newly calculated :math:`v_{r}` or not
         # Switch away from using data
         alpha_avg       = self.area_avg(alpha_str,method=avg_method)
 
-        Dsm_exp         = 1000 * 6 * alpha_avg / ai_avg
+        Dsm_exp         = 1000 * 6 * alpha_avg / ai_avg             # for void re-construction method only 
         Dsm_exp         = round(Dsm_exp,2) / 1000
 
         if debug:
@@ -3228,13 +3315,15 @@ the newly calculated :math:`v_{r}` or not
                         Db_loc = 0
                 
                 if alpha_loc <= alpha_cr:                                   # Check if local void fraction is less than or equal to alpha_cr
-                    u_t = 1.4 * np.cbrt(eps) * np.cbrt(Db_loc)              # Turbulent velocity (Batchelor, 1951; Rotta, 1972), also used in iate_1d_1g
+                    u_t_loc = 1.4 * np.cbrt(eps) * np.cbrt(Db_loc)              # Turbulent velocity (Batchelor, 1951; Rotta, 1972), also used in iate_1d_1g
                 else:
-                    u_t = 0                                                 # TI and RC are driven by the turbulent fluctuation velocity (u_t)
+                    u_t_loc = 0                                                 # TI and RC are driven by the turbulent fluctuation velocity (u_t)
+
+                midas_dict['u_t_loc'] = u_t_loc     #Quan, 1106
 
                 ########################################################################################################################
                 # Talley 2012, section 3.3.1
-                COV_RC_loc = u_t * ai_loc**2 / (np.cbrt(alpha_peak) * (np.cbrt(alpha_peak) - np.cbrt(alpha_loc)))
+                COV_RC_loc = u_t_loc * ai_loc**2 / (np.cbrt(alpha_peak) * (np.cbrt(alpha_peak) - np.cbrt(alpha_loc)))
                 
                 midas_dict['COV_RC_loc'] = COV_RC_loc
 
@@ -3243,7 +3332,8 @@ the newly calculated :math:`v_{r}` or not
                     pass
                 
         # Talley does not area-average local u_t; instead computes <u_t> with area-averaged parameters
-        u_t_avg = 1.4 * np.cbrt(eps) * np.cbrt(6 * alpha_avg / ai_avg)
+        u_t_avg = 1.4 * np.cbrt(eps) * np.cbrt(6 * alpha_avg / ai_avg)       
+       # u_t_avg = self.area_avg('u_t_loc', method=avg_method)   #Quan, 1106
 
         if u_t_avg > 0:
             COV_RC_avg = u_t_avg * ai_avg**2 / (np.cbrt(alpha_peak) * (np.cbrt(alpha_peak) - np.cbrt(alpha_avg)))
@@ -3260,7 +3350,7 @@ the newly calculated :math:`v_{r}` or not
         return COV_RC
 
 
-    def calc_COV_TI(self, alpha_peak = 0.75, alpha_cr = 0.11, We_cr = 5, avg_method = 'legacy', reconstruct_flag = True, debug = False):
+    def calc_COV_TI(self, alpha_peak = 0.75, alpha_cr = 1.00, We_cr = 6, avg_method = 'legacy', reconstruct_flag = False, debug = False):
 
         if debug:
             print(f"\t_________________________________________________________")
@@ -3286,10 +3376,10 @@ the newly calculated :math:`v_{r}` or not
         # mu_f            = self.mu_f                                         # Dynamic viscosity of water [Pa-s]
         # sigma           = self.sigma                                        # Surface tension
 
-        rho_f           = 1000
-        rho_g           = 1.22
+        rho_f           = 998                                                # What Quan used
+        rho_g           = 1.226                                              # What Quan used
         mu_f            = 0.001
-        sigma           = 0.07278
+        sigma           = self.sigma
         Dh              = self.Dh                                           # Hydraulic diameter [m]
                 
         rho_m           = (1 - alpha_avg) * rho_f + alpha_avg * rho_g       # Mixture density
@@ -3335,32 +3425,49 @@ the newly calculated :math:`v_{r}` or not
                         Db_loc = 0
                 
                 if alpha_loc <= alpha_cr:                                   # Check if local void fraction is less than or equal to alpha_cr
-                    u_t = 1.4 * np.cbrt(eps) * np.cbrt(Db_loc)              # Turbulent velocity (Batchelor, 1951; Rotta, 1972), also used in iate_1d_1g
+                    u_t_loc = 1.4 * np.cbrt(eps) * np.cbrt(Db_loc)              # Turbulent velocity (Batchelor, 1951; Rotta, 1972), also used in iate_1d_1g
                 else:
-                    u_t = 0                                                 # TI and RC are driven by the turbulent fluctuation velocity (u_t)
+                    u_t_loc = 0                                                 # TI and RC are driven by the turbulent fluctuation velocity (u_t)
+
+                midas_dict['u_t_loc'] = u_t_loc     #Quan, 1106
 
                 ########################################################################################################################
-                We = rho_f * u_t**2 * Db_loc / sigma                        # Weber number criterion
+                We = rho_f * u_t_loc**2 * Db_loc / sigma                        # Weber number criterion
 
                 # Talley 2012, section 3.3.1
                 if We >= We_cr:
-                    COV_TI_loc = (u_t * ai_loc**2 / alpha_loc) * np.sqrt(1 - (We_cr / We)) * np.exp(-We_cr / We)
+                    COV_TI_loc = (u_t_loc * ai_loc**2 / alpha_loc) * np.sqrt(1 - (We_cr / We)) * np.exp(-We_cr / We)
                 else:
                     COV_TI_loc = 0
 
                 midas_dict['COV_TI_loc'] = COV_TI_loc
 
                 if debug:
-                    print(f"\t\t\t{angle:2.1f}\t{rstar:.2f}\t|\talpha: {alpha_loc:.4f}\tCOV_TI_loc: {COV_TI_loc:.4f}\tu_t: {u_t}\tWe: {We}")
+                    print(f"\t\t\t{angle:2.1f}\t{rstar:.2f}\t|\talpha: {alpha_loc:.4f}\tCOV_TI_loc: {COV_TI_loc:.4f}\tu_t: {u_t_loc}\tWe: {We}")
                     pass
         
         # Talley does not area-average local u_t; instead computes <u_t> with area-averaged parameters
         u_t_avg = 1.4 * np.cbrt(eps) * np.cbrt(6 * alpha_avg / ai_avg)
+       # u_t_avg = self.area_avg('u_t_loc', method=avg_method)   #Quan, 1106
         We_avg = rho_f * u_t_avg**2 * (6 * alpha_avg / ai_avg) / sigma
 
         if u_t_avg > 0:
-            COV_TI_avg = (u_t_avg * ai_avg**2 / alpha_avg) * np.sqrt(1 - (We_cr / We_avg)) * np.exp(-We_cr / We_avg)
-            COV_TI = self.area_avg('COV_TI_loc',method=avg_method) / COV_TI_avg
+
+            sqrt_term = 1 - (We_cr / We_avg)  #Quan 1107
+            if sqrt_term >= 0:
+                COV_TI_avg = (u_t_avg * ai_avg**2 / alpha_avg) * np.sqrt(sqrt_term) * np.exp(-We_cr / We_avg)
+            else:
+                COV_TI_avg = 0  # or handle it in another way as needed
+
+           # COV_TI_avg = (u_t_avg * ai_avg**2 / alpha_avg) * np.sqrt(1 - (We_cr / We_avg)) * np.exp(-We_cr / We_avg)
+
+            COV_TI_loc_avg = self.area_avg('COV_TI_loc', method=avg_method)  #Quan, 1107
+            if COV_TI_avg != 0 and not np.isnan(COV_TI_avg):
+                COV_TI = COV_TI_loc_avg / COV_TI_avg
+            else:
+                COV_TI = 0  # or handle this case as needed
+
+          #  COV_TI = self.area_avg('COV_TI_loc',method=avg_method) / COV_TI_avg
             
             if debug:
                 print(f"\n\t\tu_t_avg: {u_t_avg}\tWe_avg: {We_avg}")
@@ -4448,7 +4555,7 @@ the newly calculated :math:`v_{r}` or not
         
         if plot_surface_kwargs is None:
             plot_surface_kwargs = {}
-        plt.rcParams.update({'font.size': 12})
+        plt.rcParams.update({'font.size': 16})
         plt.rcParams["font.family"] = "Times New Roman"
         plt.rcParams["mathtext.fontset"] = "cm"
 
