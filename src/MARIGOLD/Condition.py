@@ -1024,7 +1024,7 @@ class Condition:
         """
         
         if not self.check_param(param, strict=False):
-            raise TypeError(f"Invalid parameter {param} selected. Not present at {self.check_param_loc(param)}")
+            raise KeyError(f"Invalid parameter {param} selected. Not present at {self.check_param_loc(param)}")
 
 
         try: dummy = self.spline_interp
@@ -1076,7 +1076,7 @@ class Condition:
         """
 
         if not self.check_param(param, strict=False):
-            raise TypeError(f"Invalid parameter {param} selected. Not present at {self.check_param_loc(param)}")
+            raise KeyError(f"Invalid parameter {param} selected. Not present at {self.check_param_loc(param)}")
 
 
         try: dummy = self.linear_interp
@@ -1119,7 +1119,7 @@ class Condition:
         """
 
         if not self.check_param(param):
-            raise TypeError(f"Invalid parameter {param} selected. Not present at {self.check_param_loc(param)}")
+            raise KeyError(f"Invalid parameter {param} selected. Not present at {self.check_param_loc(param)}")
 
         try: dummy = self.linear_xy_interp
         except:
@@ -1474,7 +1474,7 @@ class Condition:
 
         # Check that the parameter that the user requested exists
         if not self.check_param(param):
-            raise TypeError(f"Invalid parameter {param} selected. Not present at {self.check_param_loc(param)}")
+            raise KeyError(f"Invalid parameter {param} selected. Not present at {self.check_param_loc(param)}")
         
         if (param in self.area_avgs.keys()) and (not recalc):
             return self.area_avgs[param] # why waste time, if we already calculated this don't do it again
@@ -1670,7 +1670,7 @@ class Condition:
         # Check that the parameter that the user requested exists
         # Check that the parameter that the user requested exists
         if not self.check_param(param):
-            raise TypeError(f"Invalid parameter {param} selected. Not present at {self.check_param_loc(param)}")
+            raise KeyError(f"Invalid parameter {param} selected. Not present at {self.check_param_loc(param)}")
         
         self.mirror()
 
@@ -1731,7 +1731,7 @@ class Condition:
 
         # Check that the parameter that the user requested exists
         if not self.check_param(param):
-            raise TypeError(f"Invalid parameter {param} selected. Not present at {self.check_param_loc(param)}")
+            raise KeyError(f"Invalid parameter {param} selected. Not present at {self.check_param_loc(param)}")
         
         
         self.mirror()
@@ -1802,7 +1802,7 @@ class Condition:
 
 
         if not self.check_param(param):
-            raise TypeError(f"Invalid parameter {param} selected. Not present at {self.check_param_loc(param)}")
+            raise KeyError(f"Invalid parameter {param} selected. Not present at {self.check_param_loc(param)}")
 
         r_for_int = []
         var_for_int = []
@@ -1857,7 +1857,7 @@ class Condition:
 
 
         if not self.check_param(param):
-            raise TypeError(f"Invalid parameter {param} selected. Not present at {self.check_param_loc(param)}")
+            raise KeyError(f"Invalid parameter {param} selected. Not present at {self.check_param_loc(param)}")
 
 
         r_for_int = []
@@ -1904,7 +1904,7 @@ class Condition:
 
         # Check that the parameter that the user requested exists
         if not self.check_param(param):
-            raise TypeError(f"Invalid parameter {param} selected. Not present at {self.check_param_loc(param)}")
+            raise KeyError(f"Invalid parameter {param} selected. Not present at {self.check_param_loc(param)}")
 
 
         if method == 'legacy':
