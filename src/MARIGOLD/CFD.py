@@ -398,8 +398,7 @@ ic_undo_group_begin \n\
 ic_undo_group_end \n\
 ic_undo_group_begin \n\
 ic_geo_set_part surface srf.00.S2 OUTLET 1\n\
-ic_uns_update_family_type visible {{GEOM OUTLET ORFN 
-SOLID}} {{!LINE_2 !QUAD_4 !HEXA_8}} update 0\n\
+ic_uns_update_family_type visible {{GEOM OUTLET ORFN SOLID}} {{!LINE_2 !QUAD_4 !HEXA_8}} update 0\n\
 ic_delete_empty_parts \n\
 ic_undo_group_end \n\
 ic_undo_group_begin \n\
