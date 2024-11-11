@@ -973,7 +973,7 @@ ic_uns_update_family_type visible {{GEOM ORFN SOLID}} {{!NODE !LINE_2 QUAD_4}} u
 ic_boco_solver\n\
 ic_boco_clear_icons\n\
 ic_set_global geo_cad 0.02 toler\n\
-ic_point {{}} GEOM pnt.13 0,0,($L*$D)\n\
+ic_point {{}} GEOM pnt.13 0,0,($L_VU*$D)\n\
 ic_set_global geo_cad 0.8 toler\n\
 ic_delete_geometry curve names crv.00 0\n\
 ic_curve point GEOM crv.00 {{pnt.00 pnt.13}}\n\
