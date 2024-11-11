@@ -964,8 +964,8 @@ ic_hex_set_mesh 33 35 n $dt h1rel 0.0 h2rel 0.0 r1 2 r2 2 lmax 0 default copy_to
 ic_hex_set_mesh 33 35 n $dt h1rel 0.0 h2rel 0.0 r1 2 r2 2 lmax 0 default copy_to_parallel unlocked\n\
 ic_hex_set_mesh 34 35 n $dt h1rel 0.0 h2rel 0.0 r1 2 r2 2 lmax 0 default copy_to_parallel unlocked\n\
 ic_hex_set_mesh 34 35 n $dt h1rel 0.0 h2rel 0.0 r1 2 r2 2 lmax 0 default copy_to_parallel unlocked\n\
-ic_hex_set_mesh 21 35 n $dr h1rel $first_layer h2rel 0.0 r1 $growth_ratio r2 2 lmax 0 exp1 copy_to_parallel unlocked\n\
-ic_hex_set_mesh 21 35 n $dr h1 $first_layer h2 0.0 r1 $growth_ratio r2 2 lmax 0 exp1 copy_to_parallel no_scale unlocked\n\
+ic_hex_set_mesh 21 35 n $dr h1rel 0.0 h2rel $first_layer r1 $growth_ratio r2 $growth_ratio lmax 0 exp1 copy_to_parallel unlocked\n\
+ic_hex_set_mesh 21 35 n $dr h1 0.0 h2 $first_layer r1 $growth_ratio r2 $growth_ratio lmax 0 exp1 copy_to_parallel no_scale unlocked\n\
 ic_hex_create_mesh GEOM SOLID proj 2 dim_to_mesh 3\n\
 ic_hex_write_file ./hex.uns GEOM SOLID proj 2 dim_to_mesh 3 no_boco\n\
 ic_uns_load ./hex.uns 3 0 {{}} 1\n\
