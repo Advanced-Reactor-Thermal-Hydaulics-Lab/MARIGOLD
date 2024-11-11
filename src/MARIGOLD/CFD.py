@@ -992,7 +992,7 @@ ic_geo_new_family WALLS\n\
 ic_boco_set_part_color WALLS\n\
 ic_geo_new_family OUTLET\n\
 ic_boco_set_part_color OUTLET\n\
-ic_extrude map uns_sel_0 numlayers $dz dir curve_normal space 1 space_func {{}} rpoint {{0 0 0}} rdir {{0 0 0}} rangle 10.0 volf fluid sidef walls topf outlet curve crv.00 curvedir 0 twist 0 del_orig 0 del_covered 0 degen_tol 0.00001 trans_rot_vec {{0 0 0}} spacing_transl_rot 0.0 project 0\n\
+ic_extrude map uns_sel_0 numlayers $dz dir curve_normal space 1 space_func {{}} rpoint {{0 0 0}} rdir {{0 0 0}} rangle 10.0 volf solid sidef walls topf outlet curve crv.00 curvedir 0 twist 0 del_orig 0 del_covered 0 degen_tol 0.00001 trans_rot_vec {{0 0 0}} spacing_transl_rot 0.0 project 0\n\
 ic_uns_subset_delete uns_sel_0\n\
 ic_delete_empty_parts \n\
 ic_uns_update_family_type visible {{FLUID GEOM OUTLET ORFN WALLS SOLID}} {{!NODE LINE_2 QUAD_4 !HEXA_8}} update 0\n\
@@ -1033,12 +1033,12 @@ ic_uns_subset_create smooth_do_map 0\n\
 ic_uns_subset_create smooth_show_map 1 {{}} 0\n\
 ic_uns_subset_configure smooth_do_map -list_type 1\n\
 ic_uns_subset_configure smooth_show_map -shade flat_wire -color white -dont_change_color_or_shade 1\n\
-ic_uns_update_family_type smooth_do_map {{ORFN GEOM INLET FLUID WALLS OUTLET}} {{HEXA_8 QUAD_4}} update 1\n\
+ic_uns_update_family_type smooth_do_map {{ORFN GEOM INLET SOLID WALLS OUTLET}} {{HEXA_8 QUAD_4}} update 1\n\
 ic_diagnostic_info \n\
 ic_uns_subset_delete smooth_show_map\n\
 ic_uns_diag_reset_degen_min_max \n\
 ic_uns_subset_create smooth_do_map 0\n\
-ic_uns_update_family_type smooth_do_map {{ORFN GEOM INLET FLUID WALLS OUTLET}} {{HEXA_8 QUAD_4}} update 1\n\
+ic_uns_update_family_type smooth_do_map {{ORFN GEOM INLET SOLID WALLS OUTLET}} {{HEXA_8 QUAD_4}} update 1\n\
 ic_uns_diag_reset_degen_min_max \n\
 ic_uns_metric smooth_do_map {{Aspect Ratio (Fluent)}} eval_at_node_method 0\n\
 ic_uns_histogram smooth_do_map 1.41421 42.1852 20\n\
