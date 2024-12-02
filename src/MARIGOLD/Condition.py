@@ -1417,7 +1417,7 @@ class Condition:
         return avg_param / count
     
     def check_param(self, param:str, strict=True) -> bool:
-        """Checks if a parameter is present in condition data
+        """Checks if a parameter is present in condition data. Ignores r/R = 1.0
 
         :param param: parameter to check
         :type param: str
@@ -1426,21 +1426,24 @@ class Condition:
         :return: True if param is present, false if not
         :rtype: bool
         """        
-        if strict:
-            for angle, r_dict in self.data.items():
-                param_in_angle = False
-                
-                for rstar, midas_dict in r_dict.items():
-                    if param not in midas_dict.keys() and strict:
-                        if rstar == 1.0:
+        points_to_add = []
+        for angle, r_dict in self.data.items():
+            param_in_angle = False
+            
+            for rstar, midas_dict in r_dict.items():
+                if param not in midas_dict.keys():
+                    if strict:
+                        if abs(rstar - 1.0) < 0.001:
+                            points_to_add.append( (angle, rstar))
                             pass # TODO add extra stuff if it doesn't exist at 1.0, it really shouldn't be a problem
                         else:
-                            return False
-                    else:
-                        param_in_angle = True
+                            return (False, rstar, angle)
+                
+                else:
+                    param_in_angle = True
 
-                if not param_in_angle:
-                    return False
+            if (not param_in_angle) and (not strict):
+                return (False, rstar, angle)
         
 
         return True
@@ -2494,11 +2497,11 @@ class Condition:
 
     def calc_dpdz(self, method = 'LM', m = 0.316, n = 0.25, chisholm = 25, k_m = 0.10, L = None, alpha = None, akapower = 0.875):
         """ Calculates the frictional pressure gradient, dp/dz, according to various methods. Can access later with self.dpdz
-
+ 
         Options:
             - method    : Calculation method
-              > 'LM'    : Lockhart Martinelli
-              > 'Kim'   : Kim-modified Lockhart Martinelli
+              * 'LM'    : Lockhart Martinelli
+              * 'Kim'   : Kim-modified Lockhart Martinelli
             - rho_f     : Liquid phase density
             - rho_g     : Gas phase density
             - mu_f      : Liquid phase dynamic viscosity
@@ -2983,9 +2986,13 @@ the newly calculated :math:`v_{r}` or not
         if method == 'km1_naive':
             vr = kw * (np.pi/4)**(1/3) * self.area_avg('alpha') * self.jf / (1 - self.area_avg('alpha')) * self.area_avg('cd')**(1./3) *  (2**(-1./3) - Lw**(1/3))/(0.5 - Lw) + kf * self.jf / (1 - self.area_avg('alpha'))
         
-        elif method == 'km1_naive2' or method == 'prelim':
+        elif method == 'km1_naive2' :#or method == 'prelim':
+            self.calc_cd()
             vr = kw * self.area_avg('alpha') * self.jf / (1 - self.area_avg('alpha')) * self.area_avg('cd')**(1./3)  + kf * self.jf / (1 - self.area_avg('alpha'))
 
+        elif method == 'km1_simp' or method == 'prelim':
+            vr = -kw * self.area_avg('alpha') * self.jf / (1 - self.area_avg('alpha')) * self.area_avg('cd')**(1./3) - kf * self.jf / (1 - self.area_avg('alpha'))
+        
         elif method == 'IS_Ctau':
             self.calc_cd()
             self.calc_fric()
@@ -3005,6 +3012,8 @@ the newly calculated :math:`v_{r}` or not
 
             discrim = 4*self.tau_fw/self.Dh + (1-alpha)*self.gz * (self.rho_f - self.rho_g) - 1/alpha * IS_term
             vr = np.sign(discrim) * np.sqrt(8*rb/3 * 1/(CD * self.rho_f) * abs( discrim ))
+        else:
+            raise(ValueError("Invalid calc_aa_vr_model method"))
             
 
         self.vwvgj = (1-self.area_avg('alpha'))*vr

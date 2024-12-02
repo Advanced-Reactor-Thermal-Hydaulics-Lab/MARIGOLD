@@ -7,7 +7,7 @@ from copy import copy
 
 """
 
-def write_CFX_BC(cond:Condition, save_dir = ".", z_loc = 'LoverD', only_90 = False, interp = False, csv_name = None, ngrid = 100):
+def write_CFX_BC(cond:Condition, save_dir = ".", z_loc = 'LoverD', only_90 = False, interp = False, csv_name = None, ngrid = 100, alpha_floor = 0.01, ug1_floor = True):
     """_summary_
 
     :param cond: _description_
@@ -69,7 +69,18 @@ def write_CFX_BC(cond:Condition, save_dir = ".", z_loc = 'LoverD', only_90 = Fal
                         else:
                             r = rstar * 12.7 # r/R * R [mm]
 
-                        f.write(f"{r},{z_loc},{angle * np.pi/180},{0},{0},{midas_output['ug1']},{midas_output['alpha']},{0},{0},{midas_output['vf']},\n")
+
+                        alpha = midas_output['alpha']
+                        ug1   = midas_output['ug1']
+                        vf    = midas_output['vf']
+
+                        if alpha < alpha_floor:
+                            alpha = 0
+                            
+                            if ug1_floor == True:
+                                ug1 = 0
+
+                        f.write(f"{r},{z_loc},{angle * np.pi/180},{0},{0},{ug1},{alpha},{0},{0},{vf},\n")
         elif interp == 'xy':
             f.write("x,y,z,,,,,,,\n")
             f.write("[Data],,,,,,,,,\n")
