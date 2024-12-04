@@ -3908,7 +3908,7 @@ the newly calculated :math:`v_{r}` or not
                 if type(param) == str:
                     vals = [var for _, var in sorted(zip(rs, vals))]
                     rs = sorted(rs)
-                    errs = errorbars * np.asarray(vals)
+                    errs = errorbars * np.abs(np.asarray(vals))
 
                     if x_axis == 'vals':
                         ax.errorbar(vals, rs, xerr = errs, capsize=3, ecolor = "black", label=f'{angle}°', color=next(cs), marker=next(ms), linestyle = '--')
@@ -3923,7 +3923,7 @@ the newly calculated :math:`v_{r}` or not
                     rs = sorted(rs)
 
                     for specific_param, val_list in zip(param, temp):
-                        errs = errorbars * np.asarray(val_list)
+                        errs = errorbars * np.abs(np.asarray(val_list))
                         # print(val_list)
                         if cs == 'infer':
                             cs = color_cycle(set_color = specific_param)
