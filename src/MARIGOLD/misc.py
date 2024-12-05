@@ -214,7 +214,7 @@ def write_pitot_inp(roverR, filename, URV = 5.01, LRV = 1.005, URP = 10, LRP = 0
     with open(os.path.join(directory, inp_name), 'w') as f:
         print(f"\
 *Pitot tube\n\
-file={filename}\n\
+file={filename}.dat\n\
 r/R={roverR}\n\
 frequency=50000\n\
 measuretime={measure_time}\n\
