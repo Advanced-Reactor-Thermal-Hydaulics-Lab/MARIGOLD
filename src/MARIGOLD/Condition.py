@@ -1635,12 +1635,12 @@ class Condition:
                     ValueError( f"rs to integrate over {rs} must be the same length as params {vars}, occured at {angle}" )
                     
                 try:
-                    param_r.append( integrate.simpson(y=vars, x=rs) ) # Integrate wrt r
+                    param_r.append( integrate.simpson(y=vars, x=rs, even = even_opt) ) # Integrate wrt r
                 except Exception as e:
                     if debug:
                         print(e)
                         print(rs, vars)
-                if debug: print("calculated integral:", integrate.simpson(y=vars, x=rs), file=debugFID)
+                if debug: print("calculated integral:", integrate.simpson(y=vars, x=rs, even = even_opt), file=debugFID)
                     #I = 2 * np.pi
             if debug: print("Integrated wrt r", param_r, file=debugFID)
 

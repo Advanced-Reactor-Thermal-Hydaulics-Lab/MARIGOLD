@@ -122,6 +122,8 @@ def write_pdf(cond:Condition, output_tex = None):
     
     if output_tex is None:
         output_tex = "temp.tex"
+    
+    output_tex = output_tex.replace("=", "_").replace(".", "_")
 
     with open(output_tex, 'w') as f:
         print("\
@@ -129,21 +131,24 @@ def write_pdf(cond:Condition, output_tex = None):
 \\nonstopmode\n\
 \\usepackage{array}\n \
 \\usepackage{gensymb}\n\
+\\pagestyle{empty}\n\
 \\begin{document}\n \
 \\begin{center}\n\
-\\section*{$j_{f}$ = %0.1f, $j_{g}$ = %0.3f, Port %s} " % (cond.jf, cond.jgref, cond.port), file = f)
+\\section*{$j_{f}$ = %0.1f m/s, $j_{g,P1}$ = %0.3f m/s, Port %s} " % (cond.jf, cond.jgref, cond.port), file = f)
         for angle, r_dict in cond.data.items():
-            print( "\\begin{tabular}{|m{1.5cm}|m{1.5cm}|m{1.5cm}|m{1.5cm}|m{1.5cm}|m{1.5cm}|}", file = f)
+            print("\\begin{flushleft}", file=f)
+            print( "\\begin{tabular}{|m{1cm}|m{1cm}|m{1.2cm}|m{1.2cm}|m{1.2cm}|m{1.2cm}|m{1.2cm}|m{1.2cm}|m{1.2cm}|}", file = f)
             print( " \\hline", file = f)
-            print( " $\\varphi [\\degree]$ & r/R & $\\alpha [-]$ & $a_{i} [m^{-1}]$ & $v_{g} [m/s]$ & $D_{sm} [mm]$ \\\\", file = f)
+            print( " $\\varphi [\\degree]$ & r/R & $f_{b} [Hz]$ & $\\alpha_{1} [-]$ & $\\alpha_{2} [-]$ & $a_{i1} [m^{-1}]$ & $a_{i2} [m^{-1}]$ & $v_{g1} [m/s]$ & $v_{g2} [m/s]$ \\\\", file = f)
             print( " \\hline\\hline", file = f)
             
             for rstar, midas_dict in r_dict.items():
                 
-                print(f"{angle:1.1f} & {rstar:1.1f} & {midas_dict['alpha']:0.3f} & {midas_dict['ai']:0.1f} & {midas_dict['ug1']:0.2f} & {midas_dict['Dsm1']:0.2f} \\\\", file = f)
+                print(f"{angle:1.1f} & {rstar:1.1f} & {midas_dict['bub_freq']:0.1f} & {midas_dict['alpha_G1']:0.3f} & {midas_dict['alpha_G2']:0.3f} & {midas_dict['ai_G1']:0.1f} & {midas_dict['ai_G2']:0.1f} & {midas_dict['ug1']:0.2f} & {midas_dict['ug2']:0.2f} \\\\", file = f)
             
             print( " \\hline\\hline", file = f)
             print("\\end{tabular}", file=f)
+            print("\\end{flushleft}", file=f)
         
         print("\
 \\end{center}\n \
