@@ -209,8 +209,25 @@ end"
 
     return
 
+def write_pitot_inp(roverR, filename, URV = 5.01, LRV = 1.005, URP = 10, LRP = 0, directory = os.getcwd(), inp_name = 'Input.inp', measure_time = 30):
+
+    with open(os.path.join(directory, inp_name), 'w') as f:
+        print(f"\
+*Pitot tube\n\
+file={filename}\n\
+r/R={roverR}\n\
+frequency=50000\n\
+measuretime={measure_time}\n\
+URV={URV}\n\
+LRV={LRV}\n\
+URP={URP}\n\
+LRP={LRP}", file = f)
+        
+    return
+
+    
 def process_dir(target_dir:str, probe_number:str, r01:float, r02:float, r03:float, r12:float, r13:float, r23:float, roverR = None, measure_time = 30,
-                signal_output=0, detailed_output=0, multiprocess = False, num_cpus = None):
+                signal_output=0, detailed_output=0, multiprocess = False, num_cpus = None, mode = "probe"):
     """ Runs MIDAS for every dat file in a given directory
 
     Makes a new folder, auto_reprocessed_data_TIMESTAMP, where the .tab files will be put.
@@ -220,6 +237,7 @@ def process_dir(target_dir:str, probe_number:str, r01:float, r02:float, r03:floa
      - Probe number, for identification
      - Probe measurements (r01, r02, etc.). In mm. Same as in .inp file
      - signal_output, makes the _MedianSig, _NormSig, etc. files
+     - mode, either "probe" or "pitot"
 
     Outputs:
      - Returns name of directory the reprocessed files are in
@@ -233,10 +251,17 @@ def process_dir(target_dir:str, probe_number:str, r01:float, r02:float, r03:floa
     
     os.makedirs( reprocessed_dir )
 
-    try:
-        copy2(os.path.join(target_dir, "MIDASv1.14d.exe"), reprocessed_dir)
-    except FileNotFoundError:
-        copy2(os.path.join("Z:\TRSL\PITA", "MIDASv1.14d.exe"), reprocessed_dir)
+    if mode == 'probe':
+        try:
+            copy2(os.path.join(target_dir, "MIDASv1.14d.exe"), reprocessed_dir)
+        except FileNotFoundError:
+            copy2(os.path.join("Z:\TRSL\PITA", "MIDASv1.14d.exe"), reprocessed_dir)
+    elif mode == 'pitot':
+        try:
+            copy2(os.path.join(target_dir, "PPv1.exe"), reprocessed_dir)
+        except FileNotFoundError:
+            copy2(os.path.join("Z:\TRSL\PITA", "PPv1.exe"), reprocessed_dir)
+    
 
     os.chdir(reprocessed_dir)
 
@@ -249,10 +274,13 @@ def process_dir(target_dir:str, probe_number:str, r01:float, r02:float, r03:floa
                 if roverR is None:
                     roverR = 0.1 * int(file[1])
                 
-                write_inp(roverR, file.replace('.dat', ''), probe_number = probe_number, r01=r01, r02=r02, r03=r03, r12=r12, r13=r13, r23=r23, 
+                if mode == 'probe':
+                    write_inp(roverR, file.replace('.dat', ''), probe_number = probe_number, r01=r01, r02=r02, r03=r03, r12=r12, r13=r13, r23=r23, 
                           directory=reprocessed_dir, signalOutput=signal_output, detailedOutput=detailed_output, measure_time=measure_time)
-
-                comp_process = run(os.path.join(reprocessed_dir, 'MIDASv1.14d.exe'), cwd = reprocessed_dir, shell=True)
+                    comp_process = run(os.path.join(reprocessed_dir, 'MIDASv1.14d.exe'), cwd = reprocessed_dir, shell=True)
+                elif mode == 'pitot':
+                    write_pitot_inp(roverR, file.replace('.dat', ''), measure_time=measure_time)
+                    comp_process = run(os.path.join(reprocessed_dir, 'PPv1.exe'), cwd = reprocessed_dir, shell=True)
 
                 if comp_process.returncode != 0:
                     print(comp_process)
@@ -273,10 +301,13 @@ def process_dir(target_dir:str, probe_number:str, r01:float, r02:float, r03:floa
             if roverR is None:
                 roverR = 0.1 * int(file[1])
             
-            write_inp(roverR, file.replace('.dat', ''), probe_number = probe_number, r01=r01, r02=r02, r03=r03, r12=r12, r13=r13, r23=r23, 
+            if mode == 'probe':
+                write_inp(roverR, file.replace('.dat', ''), probe_number = probe_number, r01=r01, r02=r02, r03=r03, r12=r12, r13=r13, r23=r23, 
                       directory=reprocessed_dir, signalOutput=signal_output, detailedOutput=detailed_output, inp_name=input_name, measure_time=measure_time)
-
-            p = subprocess.Popen(["MIDASv1.14d.exe", input_name], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                p = subprocess.Popen(["MIDASv1.14d.exe", input_name], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            elif mode == 'pitot':
+                write_pitot_inp(roverR, file.replace('.dat', ''), inp_name=input_name, measure_time=measure_time)
+                p = subprocess.Popen(["PPv1.exe", input_name], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
             out, err = p.communicate()
             return (out, err)
