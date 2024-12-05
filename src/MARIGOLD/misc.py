@@ -248,6 +248,7 @@ def process_dir(target_dir:str, probe_number:str, r01:float, r02:float, r03:floa
 
                 if roverR is None:
                     roverR = 0.1 * int(file[1])
+                
                 write_inp(roverR, file.replace('.dat', ''), probe_number = probe_number, r01=r01, r02=r02, r03=r03, r12=r12, r13=r13, r23=r23, 
                           directory=reprocessed_dir, signalOutput=signal_output, detailedOutput=detailed_output, measure_time=measure_time)
 

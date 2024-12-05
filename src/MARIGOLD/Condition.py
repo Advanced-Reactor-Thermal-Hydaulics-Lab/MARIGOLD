@@ -2981,7 +2981,7 @@ the newly calculated :math:`v_{r}` or not
 
         return self.area_avg('ISxgrad')
     
-    def calc_aa_vr_model(self, method='km1_naive', IS_method = 'power', kw=-0.98, kf=-0.083, Lw = 5, Cavf=1, Ctau=1, n=2, IS_mu = 1.5):
+    def calc_aa_vr_model(self, method='km1_naive', IS_method = 'power', kw=-0.98, kf=-0.083, Lw = 5, Cavf=1, Ctau=1, n=2, IS_mu = 1.5, Cvracd = 1):
 
         if method == 'km1_naive':
             vr = kw * (np.pi/4)**(1/3) * self.area_avg('alpha') * self.jf / (1 - self.area_avg('alpha')) * self.area_avg('cd')**(1./3) *  (2**(-1./3) - Lw**(1/3))/(0.5 - Lw) + kf * self.jf / (1 - self.area_avg('alpha'))
@@ -2992,6 +2992,9 @@ the newly calculated :math:`v_{r}` or not
 
         elif method == 'km1_simp' or method == 'prelim':
             vr = -kw * self.area_avg('alpha') * self.jf / (1 - self.area_avg('alpha')) * self.area_avg('cd')**(1./3) - kf * self.jf / (1 - self.area_avg('alpha'))
+        
+        elif method == 'final':
+            vr = Cvracd * -kw * self.area_avg('alpha') * self.jf / (1 - self.area_avg('alpha')) * self.area_avg('cd')**(1./3) - kf * self.jf / (1 - self.area_avg('alpha'))
         
         elif method == 'IS_Ctau':
             self.calc_cd()

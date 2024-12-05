@@ -7,7 +7,7 @@ from copy import copy
 
 """
 
-def write_CFX_BC(cond:Condition, save_dir = ".", z_loc = 'LoverD', only_90 = False, interp = False, csv_name = None, ngrid = 100, alpha_floor = 0.01, ug1_floor = True):
+def write_CFX_BC(cond:Condition, save_dir = ".", z_loc = 'LoverD', angles_to_include = [], interp = False, csv_name = None, ngrid = 100, alpha_floor = 0.01, ug1_floor = True):
     """_summary_
 
     :param cond: _description_
@@ -33,8 +33,8 @@ def write_CFX_BC(cond:Condition, save_dir = ".", z_loc = 'LoverD', only_90 = Fal
         cond.run_ID = cond.database
 
     if csv_name is None:
-        if only_90:
-            csv_name = f"{cond.run_ID}_{cond.theta}deg_jf{cond.jf:0.1f}_jg{cond.jgref}_{cond.port}_BC_90deg.csv"
+        if angles_to_include:
+            csv_name = f"{cond.run_ID}_{cond.theta}deg_jf{cond.jf:0.1f}_jg{cond.jgref}_{cond.port}_BC_{angles_to_include[0]}.csv"
         else:
             csv_name = f"{cond.run_ID}_{cond.theta}deg_jf{cond.jf:0.1f}_jg{cond.jgref}_{cond.port}_BC.csv"
 
@@ -61,11 +61,12 @@ def write_CFX_BC(cond:Condition, save_dir = ".", z_loc = 'LoverD', only_90 = Fal
 
             for angle, r_dict in cond.data.items():
                     for rstar, midas_output in r_dict.items():
-                        if only_90:
-                            if angle == 90 or angle == 270:
-                                r = rstar * 12.7 * np.sin(angle * np.pi/180) # r/R * R [mm]
-                            else:
-                                continue
+                        if angles_to_include:
+                            for target_angle in angles_to_include:
+                                if angle == target_angle or angle == target_angle+180:
+                                    r = rstar * 12.7 * np.sin(angle * np.pi/180) # r/R * R [mm]
+                                else:
+                                    continue
                         else:
                             r = rstar * 12.7 # r/R * R [mm]
 
