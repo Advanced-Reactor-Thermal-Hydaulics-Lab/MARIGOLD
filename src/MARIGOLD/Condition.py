@@ -199,7 +199,7 @@ class Condition:
             except:
                 # Probably input a single phi instead of an array
                 
-                param_values = self.data[round(phi_in * 180 / np.pi, 2)][float(r_in)][param]
+                param_values = self.data[round(float(phi_in) * 180 / np.pi, 2)][float(r_in)][param]
             return param_values
         
         elif interp_method == 'spline':
@@ -1062,10 +1062,12 @@ class Condition:
         self.spline_interp.update({param: spline_interpolant})
         return
     
-    def fit_linear_interp(self, param: str, suppress=True) -> None:
+    def fit_linear_interp(self, param: str, suppress=True, refit = False) -> None:
         """Makes a LinearNDInterpolator for the given param. 
         
             Access with self.linear_interp[param], phi in radians
+
+            If the requested param does not exist for a given (r, phi), this fills in 0
              
         """
 
@@ -1077,7 +1079,7 @@ class Condition:
         except:
             self.linear_interp = {}
         
-        if param in self.linear_interp.keys():
+        if param in self.linear_interp.keys() and not refit:
             if debug: print(f"{param} already has a linear interpolator")
             return
         
@@ -1092,9 +1094,10 @@ class Condition:
                 rs.append(rstar)
                 phis.append(angle * np.pi/180)
                 try:
-                    vals.append(midas_dict[param])
+                    vals.append(float(midas_dict[param]))
                 except KeyError:
-                    if suppress == False:
+                    
+                    if not suppress:
                         print(self.name, angle, rstar, "has no ", param)
                         raise(KeyError)
                     
@@ -1431,14 +1434,15 @@ class Condition:
                             points_to_add.append( (angle, rstar))
                             pass # TODO add extra stuff if it doesn't exist at 1.0, it really shouldn't be a problem
                         else:
-                            return (False, rstar, angle)
+                            # return (False, rstar, angle)
+                            return False
                 
                 else:
                     param_in_angle = True
 
             if (not param_in_angle) and (not strict):
-                return (False, rstar, angle)
-        
+                # return (False, rstar, angle)
+                return False
 
         return True
     
