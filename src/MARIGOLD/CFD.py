@@ -2066,7 +2066,7 @@ END\n\
     print(comp_process)
     return
 
-def run_CFX_case(case_name, parallel=True, npart = 4, init_fi = None, interactive = False):
+def run_CFX_case(case_name, parallel=True, npart = 4, init_fi = None, interactive = False, tail = False):
     """ Runs CFX case case_name.def
 
     Must be in the same directory, or a full path (without the .def extension) supplied
@@ -2089,6 +2089,9 @@ def run_CFX_case(case_name, parallel=True, npart = 4, init_fi = None, interactiv
         run_string += f" -interactive"
     
     run_string += " > auto_cfx_run.log"
+
+    if tail:
+        run_string += f" & tail -f {case_name}_001.out --retry"
 
     print(f"${run_string}")
     comp_process = subprocess.run(run_string, shell=True)

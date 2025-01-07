@@ -346,7 +346,14 @@ def process_dir(target_dir:str, probe_number:str, r01:float, r02:float, r03:floa
     return reprocessed_dir
             
 
-def tdms_to_dat(infile, outfile = None):
+def tdms_to_dat(infile:str, outfile = None):
+    """_summary_
+
+    :param infile: Input .tdms file to process
+    :type infile: str
+    :param outfile: Name of output .dat file, defaults to "infile".dat
+    :type outfile: str, optional
+    """
     from nptdms import TdmsFile
 
     tdms_file = TdmsFile.read(infile)
