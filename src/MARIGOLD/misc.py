@@ -227,6 +227,32 @@ LRP={LRP}", file = f)
     return
 
     
+def tdms_to_dat(infile:str, outfile = None):
+    """_summary_
+
+    :param infile: Input .tdms file to process
+    :type infile: str
+    :param outfile: Name of output .dat file, defaults to "infile".dat
+    :type outfile: str, optional
+
+    """
+    from nptdms import TdmsFile
+
+    tdms_file = TdmsFile.read(infile)
+    data = []
+    for group in tdms_file.groups():
+        for channel in group.channels():
+            data.append( channel[:] )
+
+    if outfile is None:
+        outfile = infile.strip('tdms') + 'dat'
+    
+    data = np.asarray(data)
+
+    np.savetxt(outfile, data.T)
+
+    return
+
 def process_dir(target_dir:str, probe_number:str, r01:float, r02:float, r03:float, r12:float, r13:float, r23:float, roverR = None, measure_time = 30,
                 signal_output=0, detailed_output=0, multiprocess = False, num_cpus = None, mode = "probe"):
     """ Runs MIDAS for every dat file in a given directory
@@ -358,29 +384,3 @@ def process_dir(target_dir:str, probe_number:str, r01:float, r02:float, r03:floa
 
     return reprocessed_dir
             
-
-def tdms_to_dat(infile:str, outfile = None):
-    """_summary_
-
-    :param infile: Input .tdms file to process
-    :type infile: str
-    :param outfile: Name of output .dat file, defaults to "infile".dat
-    :type outfile: str, optional
-    """
-    from nptdms import TdmsFile
-
-    tdms_file = TdmsFile.read(infile)
-    data = []
-    for group in tdms_file.groups():
-        for channel in group.channels():
-            data.append( channel[:] )
-
-    if outfile is None:
-        outfile = infile.strip('tdms') + 'dat'
-    
-    data = np.asarray(data)
-
-    np.savetxt(outfile, data.T)
-
-    return
-        
