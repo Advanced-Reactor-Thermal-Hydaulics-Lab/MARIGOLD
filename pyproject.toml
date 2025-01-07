@@ -21,5 +21,6 @@ dependencies = [
     "matplotlib", 
     "scipy", 
     "openpyxl",
-    "xlrd"
+    "xlrd",
+    "nptdms"
 ]

@@ -324,6 +324,7 @@ def process_dir(target_dir:str, probe_number:str, r01:float, r02:float, r03:floa
                     copy2(os.path.join(target_dir, file), reprocessed_dir)
                     
                     results.append(pool.apply_async(write_inp_run_midas, (file, roverR) ) )
+                
                 elif mode == 'pitot' and 'pitot' in file:
                     copy2(os.path.join(target_dir, file), reprocessed_dir)
                     
@@ -344,3 +345,20 @@ def process_dir(target_dir:str, probe_number:str, r01:float, r02:float, r03:floa
 
     return reprocessed_dir
             
+
+def tdms_to_dat(infile, outfile = None):
+    from nptdms import TdmsFile
+
+    tdms_file = TdmsFile.read(infile)
+    data = []
+    for group in tdms_file.groups():
+        for channel in group.channels():
+            data.append( channel[:] )
+
+    if outfile is None:
+        outfile = infile.strip('tdms') + 'dat'
+    
+    data = np.asarray(data)
+
+    np.savetxt(outfile, data.T)
+        
