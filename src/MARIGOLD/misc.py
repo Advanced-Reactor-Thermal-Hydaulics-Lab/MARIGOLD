@@ -320,9 +320,14 @@ def process_dir(target_dir:str, probe_number:str, r01:float, r02:float, r03:floa
         for file in os.listdir(target_dir):
             if file.split('.')[-1] == 'dat':
                 # print(file)
-                copy2(os.path.join(target_dir, file), reprocessed_dir)
-                
-                results.append(pool.apply_async(write_inp_run_midas, (file, roverR) ) )
+                if mode == 'probe' and 'pitot' not in file:
+                    copy2(os.path.join(target_dir, file), reprocessed_dir)
+                    
+                    results.append(pool.apply_async(write_inp_run_midas, (file, roverR) ) )
+                elif mode == 'pitot' and 'pitot' in file:
+                    copy2(os.path.join(target_dir, file), reprocessed_dir)
+                    
+                    results.append(pool.apply_async(write_inp_run_midas, (file, roverR) ) )
 
         pool.close()
         pool.join()
