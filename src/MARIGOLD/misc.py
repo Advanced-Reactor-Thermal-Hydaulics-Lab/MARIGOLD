@@ -94,7 +94,7 @@ def comp_cond(cond1:Condition, cond2:Condition, tag = 'run_ID', rmesh_preference
                     compCond.data[angle][rstar].update({label2:val2})
                 except KeyError:
                     
-                    compCond.data[angle][rstar].update({label2:np.NaN})
+                    compCond.data[angle][rstar].update({label2:np.nan})
 
     return compCond
 

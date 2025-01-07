@@ -680,7 +680,7 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                 else:
                     print(f'Nope. Skipping...')
                     continue
-            
+            # print(jf, jgref, port, theta)
             ############################################################################################################################
             #                                                                                                                          #
             #                                                       BETTIS DATA                                                        #
@@ -1193,7 +1193,7 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                 elif jgloc is None:
                     print(f"Warning: jgloc could not be found, setting jgloc = jgref")
                     jgloc = jgref
-
+                # print(theta)
                 newCond = Condition(jgref, jgloc, jf, theta, port, sheet_type.split('_')[0])
 
                 if newCond not in all_conditions:

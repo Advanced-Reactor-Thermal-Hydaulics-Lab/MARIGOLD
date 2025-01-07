@@ -48,12 +48,6 @@ class Condition:
         self.port = port
         self.database = database
 
-         # Check if port is one of the specified vertical downward ports after U-bend, set theta to -90 degree if true (Quan 10/25)
-        if self.port in {"P5", "P6", "P7", "P8", "P9", "P10"}:
-           self.theta = int(-90)
-        else:
-            self.theta = int(90)
-
         self.name = f"jf={self.jf}_jgloc={self.jgloc:0.2f}_theta={self.theta}_port={self.port}_{self.database}"
 
         # Data is stored in this phi array. 3 layers of dictionary
@@ -128,7 +122,7 @@ class Condition:
 
         else:
             print(f"Warning: Could not determine Dh for {self.name}")
-            self.Dh = np.NaN
+            self.Dh = np.nan
             self.marker_type = '$?$'
             self.marker_color = 'yellow'
 

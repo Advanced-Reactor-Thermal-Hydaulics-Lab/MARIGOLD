@@ -175,6 +175,8 @@ def read_CFX_export(csv_path, jf, jgref, theta, port, database, jgloc=None) -> C
             data_dict = {'ug1': vg, 'vf': vf, 'alpha': alpha}
             
             roverR = np.sqrt(x**2 + y**2) / 0.0127
+            if roverR < 0.00001:
+                roverR = 0
             phi_angle = (int(np.arctan2(y,x) * 180/np.pi) +360) % 360
             if (phi_angle < 0):
                 print(x, y, phi_angle)
@@ -223,7 +225,7 @@ def read_CFX_export(csv_path, jf, jgref, theta, port, database, jgloc=None) -> C
 
         cond._angles.sort()
 
-        print(cond._angles)
+        # print(cond._angles)
 
     return cond
 
