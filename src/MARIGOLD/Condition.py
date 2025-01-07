@@ -3809,7 +3809,7 @@ the newly calculated :math:`v_{r}` or not
         """
         # TODO rewrite so it always loops over a list of params. If there's only one, just put it in a list at the begininng 
 
-        plt.rcParams.update({'font.size': 12})
+        plt.rcParams.update({'font.size': 10})
         plt.rcParams["font.family"] = "Times New Roman"
         plt.rcParams["mathtext.fontset"] = "cm"
 
@@ -4105,7 +4105,7 @@ the newly calculated :math:`v_{r}` or not
         """
 
         self.mirror()
-        plt.rcParams.update({'font.size': 12})
+        plt.rcParams.update({'font.size': 10})
         plt.rcParams["font.family"] = "Times New Roman"
         plt.rcParams["mathtext.fontset"] = "cm"
 
@@ -4332,7 +4332,7 @@ the newly calculated :math:`v_{r}` or not
 
         fig, ax = plt.subplots(figsize=(fig_size, fig_size), dpi=300, layout='compressed')
 
-        plt.rcParams.update({'font.size': 12})
+        plt.rcParams.update({'font.size': 10})
         plt.rcParams["font.family"] = "Times New Roman"
         plt.rcParams["mathtext.fontset"] = "cm"
 
@@ -4690,7 +4690,7 @@ the newly calculated :math:`v_{r}` or not
             fig, ax = plt.subplots(figsize=(fig_size, fig_size), dpi=300)
         else:
             fig, ax = plt.subplots(figsize=(fig_size, fig_size), dpi=300, subplot_kw=dict(projection='polar'))
-        plt.rcParams.update({'font.size': 12})
+        plt.rcParams.update({'font.size': 10})
         plt.rcParams["font.family"] = "Times New Roman"
         plt.rcParams["mathtext.fontset"] = "cm"
 
