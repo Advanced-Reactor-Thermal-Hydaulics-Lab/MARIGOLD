@@ -209,8 +209,9 @@ end"
 
     return
 
-def write_pitot_inp(roverR, filename, URV = 5.01, LRV = 1.005, URP = 10, LRP = 0, directory = os.getcwd(), inp_name = 'Input.inp', measure_time = 30):
+def write_pitot_inp(roverR, filename, URV = 5.248, LRV = 1.054, URP = 10, LRP = 0, directory = os.getcwd(), inp_name = 'Input.inp', measure_time = 30):
 
+    # URV = 5.01, LRV = 1.005 reverted to 5.248 and 1.054, respectively, 07JAN25
     with open(os.path.join(directory, inp_name), 'w') as f:
         print(f"\
 *Pitot tube\n\
