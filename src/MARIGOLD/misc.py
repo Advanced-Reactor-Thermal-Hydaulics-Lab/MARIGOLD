@@ -249,8 +249,9 @@ def process_dir(target_dir:str, probe_number:str, r01:float, r02:float, r03:floa
     timestamp = f"{current_time.month}-{current_time.day}-{current_time.year}_{current_time.hour}-{current_time.minute}"
 
     reprocessed_dir = os.path.join(target_dir, 'auto_reprocessed_data_'+ timestamp)
-    
-    os.makedirs( reprocessed_dir )
+
+    if not os.path.isdir( reprocessed_dir ):
+        os.makedirs( reprocessed_dir )
 
     if mode == 'probe':
         try:
