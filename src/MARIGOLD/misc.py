@@ -381,4 +381,6 @@ def tdms_to_dat(infile:str, outfile = None):
     data = np.asarray(data)
 
     np.savetxt(outfile, data.T)
+
+    return
         
