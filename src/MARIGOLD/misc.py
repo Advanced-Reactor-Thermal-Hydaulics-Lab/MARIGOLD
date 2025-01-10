@@ -209,8 +209,9 @@ end"
 
     return
 
-def write_pitot_inp(roverR, filename, URV = 5.01, LRV = 1.005, URP = 10, LRP = 0, directory = os.getcwd(), inp_name = 'Input.inp', measure_time = 30):
+def write_pitot_inp(roverR, filename, URV = 5.248, LRV = 1.054, URP = 10, LRP = 0, directory = os.getcwd(), inp_name = 'Input.inp', measure_time = 30):
 
+    # URV = 5.01, LRV = 1.005 reverted to 5.248 and 1.054, respectively, 07JAN25
     with open(os.path.join(directory, inp_name), 'w') as f:
         print(f"\
 *Pitot tube\n\
@@ -226,6 +227,32 @@ LRP={LRP}", file = f)
     return
 
     
+def tdms_to_dat(infile:str, outfile = None):
+    """_summary_
+
+    :param infile: Input .tdms file to process
+    :type infile: str
+    :param outfile: Name of output .dat file, defaults to "infile".dat
+    :type outfile: str, optional
+
+    """
+    from nptdms import TdmsFile
+
+    tdms_file = TdmsFile.read(infile)
+    data = []
+    for group in tdms_file.groups():
+        for channel in group.channels():
+            data.append( channel[:] )
+
+    if outfile is None:
+        outfile = infile.strip('tdms') + 'dat'
+    
+    data = np.asarray(data)
+
+    np.savetxt(outfile, data.T)
+
+    return
+
 def process_dir(target_dir:str, probe_number:str, r01:float, r02:float, r03:float, r12:float, r13:float, r23:float, roverR = None, measure_time = 30,
                 signal_output=0, detailed_output=0, multiprocess = False, num_cpus = None, mode = "probe"):
     """ Runs MIDAS for every dat file in a given directory
@@ -248,8 +275,9 @@ def process_dir(target_dir:str, probe_number:str, r01:float, r02:float, r03:floa
     timestamp = f"{current_time.month}-{current_time.day}-{current_time.year}_{current_time.hour}-{current_time.minute}"
 
     reprocessed_dir = os.path.join(target_dir, 'auto_reprocessed_data_'+ timestamp)
-    
-    os.makedirs( reprocessed_dir )
+
+    if not os.path.isdir( reprocessed_dir ):
+        os.makedirs( reprocessed_dir )
 
     if mode == 'probe':
         try:
@@ -356,27 +384,3 @@ def process_dir(target_dir:str, probe_number:str, r01:float, r02:float, r03:floa
 
     return reprocessed_dir
             
-
-def tdms_to_dat(infile:str, outfile = None):
-    """_summary_
-
-    :param infile: Input .tdms file to process
-    :type infile: str
-    :param outfile: Name of output .dat file, defaults to "infile".dat
-    :type outfile: str, optional
-    """
-    from nptdms import TdmsFile
-
-    tdms_file = TdmsFile.read(infile)
-    data = []
-    for group in tdms_file.groups():
-        for channel in group.channels():
-            data.append( channel[:] )
-
-    if outfile is None:
-        outfile = infile.strip('tdms') + 'dat'
-    
-    data = np.asarray(data)
-
-    np.savetxt(outfile, data.T)
-        
