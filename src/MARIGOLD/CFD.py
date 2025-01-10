@@ -2247,3 +2247,667 @@ END\n\
 
 
 
+def write_CCL_single_phase(ccl_name = 'auto_setup.ccl',
+                          BCdataFile= '/home/adix/CFD/exp_BCs/in_H_0.csv'):
+    
+    with open(BCdataFile, 'r') as infi:
+        trash = infi.readline()
+        BCdata = infi.readline().split(',')[0] # Name of function in csv
+
+
+    strToWrite = f"\
+# State file created:  2025/01/10 10:16:06\n\
+# Build 22.2 2022-05-16T18:50:29.151482\n\
+\n\
+LIBRARY:\n\
+CEL:\n\
+FUNCTION: {BCdata}\n\
+Argument Units = [mm], [m], []\n\
+Option = Profile Data\n\
+Spatial Fields = radius, z, phi\n\
+DATA FIELD: Velocity u f\n\
+Field Name = Velocity u f\n\
+Result Units = [m s^-1]\n\
+END\n\
+DATA FIELD: Velocity u g\n\
+Field Name = Velocity u g\n\
+Result Units = [m s^-1]\n\
+END\n\
+DATA FIELD: Velocity v f\n\
+Field Name = Velocity v f\n\
+Result Units = [m s^-1]\n\
+END\n\
+DATA FIELD: Velocity v g\n\
+Field Name = Velocity v g\n\
+Result Units = [m s^-1]\n\
+END\n\
+DATA FIELD: Velocity w f\n\
+Field Name = Velocity w f\n\
+Result Units = [m s^-1]\n\
+END\n\
+DATA FIELD: Velocity w g\n\
+Field Name = Velocity w g\n\
+Result Units = [m s^-1]\n\
+END\n\
+DATA FIELD: Volume Fraction\n\
+Field Name = Volume Fraction\n\
+Parameter List = Volume Fraction\n\
+Result Units = []\n\
+END\n\
+DATA SOURCE:\n\
+File Name = {BCdataFile}\n\
+Option = From File\n\
+END\n\
+END\n\
+END\n\
+MATERIAL GROUP: Air Data\n\
+Group Description = Ideal gas and constant property air. Constant \\n\
+properties are for dry air at STP (0 C, 1 atm) and 25 C, 1 atm.\n\
+END\n\
+MATERIAL GROUP: CHT Solids\n\
+Group Description = Pure solid substances that can be used for conjugate \\n\
+heat transfer.\n\
+END\n\
+MATERIAL GROUP: Calorically Perfect Ideal Gases\n\
+Group Description = Ideal gases with constant specific heat capacity. \\n\
+Specific heat is evaluated at STP.\n\
+END\n\
+MATERIAL GROUP: Constant Property Gases\n\
+Group Description = Gaseous substances with constant properties. \\n\
+Properties are calculated at STP (0C and 1 atm). Can be combined with \\n\
+NASA SP-273 materials for combustion modelling.\n\
+END\n\
+MATERIAL GROUP: Constant Property Liquids\n\
+Group Description = Liquid substances with constant properties.\n\
+END\n\
+MATERIAL GROUP: Dry Peng Robinson\n\
+Group Description = Materials with properties specified using the built \\n\
+in Peng Robinson equation of state. Suitable for dry real gas modelling.\n\
+END\n\
+MATERIAL GROUP: Dry Redlich Kwong\n\
+Group Description = Materials with properties specified using the built \\n\
+in Redlich Kwong equation of state. Suitable for dry real gas modelling.\n\
+END\n\
+MATERIAL GROUP: Dry Soave Redlich Kwong\n\
+Group Description = Materials with properties specified using the built \\n\
+in Soave Redlich Kwong equation of state. Suitable for dry real gas \\n\
+modelling.\n\
+END\n\
+MATERIAL GROUP: Dry Steam\n\
+Group Description = Materials with properties specified using the IAPWS \\n\
+equation of state. Suitable for dry steam modelling.\n\
+END\n\
+MATERIAL GROUP: Gas Phase Combustion\n\
+Group Description = Ideal gas materials which can be use for gas phase \\n\
+combustion. Ideal gas specific heat coefficients are specified using \\n\
+the NASA SP-273 format.\n\
+END\n\
+MATERIAL GROUP: IAPWS IF97\n\
+Group Description = Liquid, vapour and binary mixture materials which use \\n\
+the IAPWS IF-97 equation of state. Materials are suitable for \\n\
+compressible liquids, phase change calculations and dry steam flows.\n\
+END\n\
+MATERIAL GROUP: Interphase Mass Transfer\n\
+Group Description = Materials with reference properties suitable for \\n\
+performing either Eulerian or Lagrangian multiphase mass transfer \\n\
+problems. Examples include cavitation, evaporation or condensation.\n\
+END\n\
+MATERIAL GROUP: Liquid Phase Combustion\n\
+Group Description = Liquid and homogenous binary mixture materials which \\n\
+can be included with Gas Phase Combustion materials if combustion \\n\
+modelling also requires phase change (eg: evaporation) for certain \\n\
+components.\n\
+END\n\
+MATERIAL GROUP: Particle Solids\n\
+Group Description = Pure solid substances that can be used for particle \\n\
+tracking\n\
+END\n\
+MATERIAL GROUP: Peng Robinson Dry Hydrocarbons\n\
+Group Description = Common hydrocarbons which use the Peng Robinson \\n\
+equation of state. Suitable for dry real gas models.\n\
+END\n\
+MATERIAL GROUP: Peng Robinson Dry Refrigerants\n\
+Group Description = Common refrigerants which use the Peng Robinson \\n\
+equation of state. Suitable for dry real gas models.\n\
+END\n\
+MATERIAL GROUP: Peng Robinson Dry Steam\n\
+Group Description = Water materials which use the Peng Robinson equation \\n\
+of state. Suitable for dry steam modelling.\n\
+END\n\
+MATERIAL GROUP: Peng Robinson Wet Hydrocarbons\n\
+Group Description = Common hydrocarbons which use the Peng Robinson \\n\
+equation of state. Suitable for condensing real gas models.\n\
+END\n\
+MATERIAL GROUP: Peng Robinson Wet Refrigerants\n\
+Group Description = Common refrigerants which use the Peng Robinson \\n\
+equation of state. Suitable for condensing real gas models.\n\
+END\n\
+MATERIAL GROUP: Peng Robinson Wet Steam\n\
+Group Description = Water materials which use the Peng Robinson equation \\n\
+of state. Suitable for condensing steam modelling.\n\
+END\n\
+MATERIAL GROUP: Real Gas Combustion\n\
+Group Description = Real gas materials which can be use for gas phase \\n\
+combustion. Ideal gas specific heat coefficients are specified using \\n\
+the NASA SP-273 format.\n\
+END\n\
+MATERIAL GROUP: Redlich Kwong Dry Hydrocarbons\n\
+Group Description = Common hydrocarbons which use the Redlich Kwong \\n\
+equation of state. Suitable for dry real gas models.\n\
+END\n\
+MATERIAL GROUP: Redlich Kwong Dry Refrigerants\n\
+Group Description = Common refrigerants which use the Redlich Kwong \\n\
+equation of state. Suitable for dry real gas models.\n\
+END\n\
+MATERIAL GROUP: Redlich Kwong Dry Steam\n\
+Group Description = Water materials which use the Redlich Kwong equation \\n\
+of state. Suitable for dry steam modelling.\n\
+END\n\
+MATERIAL GROUP: Redlich Kwong Wet Hydrocarbons\n\
+Group Description = Common hydrocarbons which use the Redlich Kwong \\n\
+equation of state. Suitable for condensing real gas models.\n\
+END\n\
+MATERIAL GROUP: Redlich Kwong Wet Refrigerants\n\
+Group Description = Common refrigerants which use the Redlich Kwong \\n\
+equation of state. Suitable for condensing real gas models.\n\
+END\n\
+MATERIAL GROUP: Redlich Kwong Wet Steam\n\
+Group Description = Water materials which use the Redlich Kwong equation \\n\
+of state. Suitable for condensing steam modelling.\n\
+END\n\
+MATERIAL GROUP: Soave Redlich Kwong Dry Hydrocarbons\n\
+Group Description = Common hydrocarbons which use the Soave Redlich Kwong \\n\
+equation of state. Suitable for dry real gas models.\n\
+END\n\
+MATERIAL GROUP: Soave Redlich Kwong Dry Refrigerants\n\
+Group Description = Common refrigerants which use the Soave Redlich Kwong \\n\
+equation of state. Suitable for dry real gas models.\n\
+END\n\
+MATERIAL GROUP: Soave Redlich Kwong Dry Steam\n\
+Group Description = Water materials which use the Soave Redlich Kwong \\n\
+equation of state. Suitable for dry steam modelling.\n\
+END\n\
+MATERIAL GROUP: Soave Redlich Kwong Wet Hydrocarbons\n\
+Group Description = Common hydrocarbons which use the Soave Redlich Kwong \\n\
+equation of state. Suitable for condensing real gas models.\n\
+END\n\
+MATERIAL GROUP: Soave Redlich Kwong Wet Refrigerants\n\
+Group Description = Common refrigerants which use the Soave Redlich Kwong \\n\
+equation of state. Suitable for condensing real gas models.\n\
+END\n\
+MATERIAL GROUP: Soave Redlich Kwong Wet Steam\n\
+Group Description = Water materials which use the Soave Redlich Kwong \\n\
+equation of state. Suitable for condensing steam modelling.\n\
+END\n\
+MATERIAL GROUP: Soot\n\
+Group Description = Solid substances that can be used when performing \\n\
+soot modelling\n\
+END\n\
+MATERIAL GROUP: User\n\
+Group Description = Materials that are defined by the user\n\
+END\n\
+MATERIAL GROUP: Water Data\n\
+Group Description = Liquid and vapour water materials with constant \\n\
+properties. Can be combined with NASA SP-273 materials for combustion \\n\
+modelling.\n\
+END\n\
+MATERIAL GROUP: Wet Peng Robinson\n\
+Group Description = Materials with properties specified using the built \\n\
+in Peng Robinson equation of state. Suitable for wet real gas modelling.\n\
+END\n\
+MATERIAL GROUP: Wet Redlich Kwong\n\
+Group Description = Materials with properties specified using the built \\n\
+in Redlich Kwong equation of state. Suitable for wet real gas modelling.\n\
+END\n\
+MATERIAL GROUP: Wet Soave Redlich Kwong\n\
+Group Description = Materials with properties specified using the built \\n\
+in Soave Redlich Kwong equation of state. Suitable for wet real gas \\n\
+modelling.\n\
+END\n\
+MATERIAL GROUP: Wet Steam\n\
+Group Description = Materials with properties specified using the IAPWS \\n\
+equation of state. Suitable for wet steam modelling.\n\
+END\n\
+MATERIAL: Air Ideal Gas\n\
+Material Description = Air Ideal Gas (constant Cp)\n\
+Material Group = Air Data, Calorically Perfect Ideal Gases\n\
+Option = Pure Substance\n\
+Thermodynamic State = Gas\n\
+PROPERTIES:\n\
+Option = General Material\n\
+EQUATION OF STATE:\n\
+Molar Mass = 28.96 [kg kmol^-1]\n\
+Option = Ideal Gas\n\
+END\n\
+SPECIFIC HEAT CAPACITY:\n\
+Option = Value\n\
+Specific Heat Capacity = 1.0044E+03 [J kg^-1 K^-1]\n\
+Specific Heat Type = Constant Pressure\n\
+END\n\
+REFERENCE STATE:\n\
+Option = Specified Point\n\
+Reference Pressure = 1 [atm]\n\
+Reference Specific Enthalpy = 0. [J/kg]\n\
+Reference Specific Entropy = 0. [J/kg/K]\n\
+Reference Temperature = 25 [C]\n\
+END\n\
+DYNAMIC VISCOSITY:\n\
+Dynamic Viscosity = 1.831E-05 [kg m^-1 s^-1]\n\
+Option = Value\n\
+END\n\
+THERMAL CONDUCTIVITY:\n\
+Option = Value\n\
+Thermal Conductivity = 2.61E-2 [W m^-1 K^-1]\n\
+END\n\
+ABSORPTION COEFFICIENT:\n\
+Absorption Coefficient = 0.01 [m^-1]\n\
+Option = Value\n\
+END\n\
+SCATTERING COEFFICIENT:\n\
+Option = Value\n\
+Scattering Coefficient = 0.0 [m^-1]\n\
+END\n\
+REFRACTIVE INDEX:\n\
+Option = Value\n\
+Refractive Index = 1.0 [m m^-1]\n\
+END\n\
+END\n\
+END\n\
+MATERIAL: Air at 25 C\n\
+Material Description = Air at 25 C and 1 atm (dry)\n\
+Material Group = Air Data, Constant Property Gases\n\
+Option = Pure Substance\n\
+Thermodynamic State = Gas\n\
+PROPERTIES:\n\
+Option = General Material\n\
+EQUATION OF STATE:\n\
+Density = 1.185 [kg m^-3]\n\
+Molar Mass = 28.96 [kg kmol^-1]\n\
+Option = Value\n\
+END\n\
+SPECIFIC HEAT CAPACITY:\n\
+Option = Value\n\
+Specific Heat Capacity = 1.0044E+03 [J kg^-1 K^-1]\n\
+Specific Heat Type = Constant Pressure\n\
+END\n\
+REFERENCE STATE:\n\
+Option = Specified Point\n\
+Reference Pressure = 1 [atm]\n\
+Reference Specific Enthalpy = 0. [J/kg]\n\
+Reference Specific Entropy = 0. [J/kg/K]\n\
+Reference Temperature = 25 [C]\n\
+END\n\
+DYNAMIC VISCOSITY:\n\
+Dynamic Viscosity = 1.831E-05 [kg m^-1 s^-1]\n\
+Option = Value\n\
+END\n\
+THERMAL CONDUCTIVITY:\n\
+Option = Value\n\
+Thermal Conductivity = 2.61E-02 [W m^-1 K^-1]\n\
+END\n\
+ABSORPTION COEFFICIENT:\n\
+Absorption Coefficient = 0.01 [m^-1]\n\
+Option = Value\n\
+END\n\
+SCATTERING COEFFICIENT:\n\
+Option = Value\n\
+Scattering Coefficient = 0.0 [m^-1]\n\
+END\n\
+REFRACTIVE INDEX:\n\
+Option = Value\n\
+Refractive Index = 1.0 [m m^-1]\n\
+END\n\
+THERMAL EXPANSIVITY:\n\
+Option = Value\n\
+Thermal Expansivity = 0.003356 [K^-1]\n\
+END\n\
+END\n\
+END\n\
+MATERIAL: Aluminium\n\
+Material Group = CHT Solids, Particle Solids\n\
+Option = Pure Substance\n\
+Thermodynamic State = Solid\n\
+PROPERTIES:\n\
+Option = General Material\n\
+EQUATION OF STATE:\n\
+Density = 2702 [kg m^-3]\n\
+Molar Mass = 26.98 [kg kmol^-1]\n\
+Option = Value\n\
+END\n\
+SPECIFIC HEAT CAPACITY:\n\
+Option = Value\n\
+Specific Heat Capacity = 9.03E+02 [J kg^-1 K^-1]\n\
+END\n\
+REFERENCE STATE:\n\
+Option = Specified Point\n\
+Reference Specific Enthalpy = 0 [J/kg]\n\
+Reference Specific Entropy = 0 [J/kg/K]\n\
+Reference Temperature = 25 [C]\n\
+END\n\
+THERMAL CONDUCTIVITY:\n\
+Option = Value\n\
+Thermal Conductivity = 237 [W m^-1 K^-1]\n\
+END\n\
+END\n\
+END\n\
+MATERIAL: Copper\n\
+Material Group = CHT Solids, Particle Solids\n\
+Option = Pure Substance\n\
+Thermodynamic State = Solid\n\
+PROPERTIES:\n\
+Option = General Material\n\
+EQUATION OF STATE:\n\
+Density = 8933 [kg m^-3]\n\
+Molar Mass = 63.55 [kg kmol^-1]\n\
+Option = Value\n\
+END\n\
+SPECIFIC HEAT CAPACITY:\n\
+Option = Value\n\
+Specific Heat Capacity = 3.85E+02 [J kg^-1 K^-1]\n\
+END\n\
+REFERENCE STATE:\n\
+Option = Specified Point\n\
+Reference Specific Enthalpy = 0 [J/kg]\n\
+Reference Specific Entropy = 0 [J/kg/K]\n\
+Reference Temperature = 25 [C]\n\
+END\n\
+THERMAL CONDUCTIVITY:\n\
+Option = Value\n\
+Thermal Conductivity = 401.0 [W m^-1 K^-1]\n\
+END\n\
+END\n\
+END\n\
+MATERIAL: Soot\n\
+Material Group = Soot\n\
+Option = Pure Substance\n\
+Thermodynamic State = Solid\n\
+PROPERTIES:\n\
+Option = General Material\n\
+EQUATION OF STATE:\n\
+Density = 2000 [kg m^-3]\n\
+Molar Mass = 12 [kg kmol^-1]\n\
+Option = Value\n\
+END\n\
+REFERENCE STATE:\n\
+Option = Automatic\n\
+END\n\
+ABSORPTION COEFFICIENT:\n\
+Absorption Coefficient = 0 [m^-1]\n\
+Option = Value\n\
+END\n\
+END\n\
+END\n\
+MATERIAL: Steel\n\
+Material Group = CHT Solids, Particle Solids\n\
+Option = Pure Substance\n\
+Thermodynamic State = Solid\n\
+PROPERTIES:\n\
+Option = General Material\n\
+EQUATION OF STATE:\n\
+Density = 7854 [kg m^-3]\n\
+Molar Mass = 55.85 [kg kmol^-1]\n\
+Option = Value\n\
+END\n\
+SPECIFIC HEAT CAPACITY:\n\
+Option = Value\n\
+Specific Heat Capacity = 4.34E+02 [J kg^-1 K^-1]\n\
+END\n\
+REFERENCE STATE:\n\
+Option = Specified Point\n\
+Reference Specific Enthalpy = 0 [J/kg]\n\
+Reference Specific Entropy = 0 [J/kg/K]\n\
+Reference Temperature = 25 [C]\n\
+END\n\
+THERMAL CONDUCTIVITY:\n\
+Option = Value\n\
+Thermal Conductivity = 60.5 [W m^-1 K^-1]\n\
+END\n\
+END\n\
+END\n\
+MATERIAL: Water\n\
+Material Description = Water (liquid)\n\
+Material Group = Water Data, Constant Property Liquids\n\
+Option = Pure Substance\n\
+Thermodynamic State = Liquid\n\
+PROPERTIES:\n\
+Option = General Material\n\
+EQUATION OF STATE:\n\
+Density = 997.0 [kg m^-3]\n\
+Molar Mass = 18.02 [kg kmol^-1]\n\
+Option = Value\n\
+END\n\
+SPECIFIC HEAT CAPACITY:\n\
+Option = Value\n\
+Specific Heat Capacity = 4181.7 [J kg^-1 K^-1]\n\
+Specific Heat Type = Constant Pressure\n\
+END\n\
+REFERENCE STATE:\n\
+Option = Specified Point\n\
+Reference Pressure = 1 [atm]\n\
+Reference Specific Enthalpy = 0.0 [J/kg]\n\
+Reference Specific Entropy = 0.0 [J/kg/K]\n\
+Reference Temperature = 25 [C]\n\
+END\n\
+DYNAMIC VISCOSITY:\n\
+Dynamic Viscosity = 8.899E-4 [kg m^-1 s^-1]\n\
+Option = Value\n\
+END\n\
+THERMAL CONDUCTIVITY:\n\
+Option = Value\n\
+Thermal Conductivity = 0.6069 [W m^-1 K^-1]\n\
+END\n\
+ABSORPTION COEFFICIENT:\n\
+Absorption Coefficient = 1.0 [m^-1]\n\
+Option = Value\n\
+END\n\
+SCATTERING COEFFICIENT:\n\
+Option = Value\n\
+Scattering Coefficient = 0.0 [m^-1]\n\
+END\n\
+REFRACTIVE INDEX:\n\
+Option = Value\n\
+Refractive Index = 1.0 [m m^-1]\n\
+END\n\
+THERMAL EXPANSIVITY:\n\
+Option = Value\n\
+Thermal Expansivity = 2.57E-04 [K^-1]\n\
+END\n\
+END\n\
+END\n\
+MATERIAL: Water Ideal Gas\n\
+Material Description = Water Vapour Ideal Gas (100 C and 1 atm)\n\
+Material Group = Calorically Perfect Ideal Gases, Water Data\n\
+Option = Pure Substance\n\
+Thermodynamic State = Gas\n\
+PROPERTIES:\n\
+Option = General Material\n\
+EQUATION OF STATE:\n\
+Molar Mass = 18.02 [kg kmol^-1]\n\
+Option = Ideal Gas\n\
+END\n\
+SPECIFIC HEAT CAPACITY:\n\
+Option = Value\n\
+Specific Heat Capacity = 2080.1 [J kg^-1 K^-1]\n\
+Specific Heat Type = Constant Pressure\n\
+END\n\
+REFERENCE STATE:\n\
+Option = Specified Point\n\
+Reference Pressure = 1.014 [bar]\n\
+Reference Specific Enthalpy = 0. [J/kg]\n\
+Reference Specific Entropy = 0. [J/kg/K]\n\
+Reference Temperature = 100 [C]\n\
+END\n\
+DYNAMIC VISCOSITY:\n\
+Dynamic Viscosity = 9.4E-06 [kg m^-1 s^-1]\n\
+Option = Value\n\
+END\n\
+THERMAL CONDUCTIVITY:\n\
+Option = Value\n\
+Thermal Conductivity = 193E-04 [W m^-1 K^-1]\n\
+END\n\
+ABSORPTION COEFFICIENT:\n\
+Absorption Coefficient = 1.0 [m^-1]\n\
+Option = Value\n\
+END\n\
+SCATTERING COEFFICIENT:\n\
+Option = Value\n\
+Scattering Coefficient = 0.0 [m^-1]\n\
+END\n\
+REFRACTIVE INDEX:\n\
+Option = Value\n\
+Refractive Index = 1.0 [m m^-1]\n\
+END\n\
+END\n\
+END\n\
+END\n\
+FLOW: Flow Analysis 1\n\
+SOLUTION UNITS:\n\
+Angle Units = [rad]\n\
+Length Units = [m]\n\
+Mass Units = [kg]\n\
+Solid Angle Units = [sr]\n\
+Temperature Units = [K]\n\
+Time Units = [s]\n\
+END\n\
+ANALYSIS TYPE:\n\
+Option = Steady State\n\
+EXTERNAL SOLVER COUPLING:\n\
+Option = None\n\
+END\n\
+END\n\
+DOMAIN: Default Domain\n\
+Coord Frame = Coord 0\n\
+Domain Type = Fluid\n\
+Location = FLUID\n\
+BOUNDARY: INLET\n\
+Boundary Type = INLET\n\
+Location = INLET\n\
+Use Profile Data = False\n\
+BOUNDARY CONDITIONS:\n\
+FLOW REGIME:\n\
+Option = Subsonic\n\
+END\n\
+MASS AND MOMENTUM:\n\
+Option = Cartesian Velocity Components\n\
+U = 0 [m s^-1]\n\
+V = 0 [m s^-1]\n\
+W = P3data.Velocity w f(sqrt(x^2+y^2), z, atan2(y,x))\n\
+END\n\
+TURBULENCE:\n\
+Option = Medium Intensity and Eddy Viscosity Ratio\n\
+END\n\
+END\n\
+END\n\
+BOUNDARY: OUTLET\n\
+Boundary Type = OPENING\n\
+Location = OUTLET\n\
+Use Profile Data = False\n\
+BOUNDARY CONDITIONS:\n\
+FLOW DIRECTION:\n\
+Option = Normal to Boundary Condition\n\
+END\n\
+FLOW REGIME:\n\
+Option = Subsonic\n\
+END\n\
+MASS AND MOMENTUM:\n\
+Option = Opening Pressure and Direction\n\
+Relative Pressure = 5 [psi]\n\
+END\n\
+TURBULENCE:\n\
+Option = Medium Intensity and Eddy Viscosity Ratio\n\
+END\n\
+END\n\
+END\n\
+BOUNDARY: WALLS\n\
+Boundary Type = WALL\n\
+Location = WALLS\n\
+Use Profile Data = False\n\
+BOUNDARY CONDITIONS:\n\
+MASS AND MOMENTUM:\n\
+Option = No Slip Wall\n\
+END\n\
+WALL ROUGHNESS:\n\
+Option = Smooth Wall\n\
+END\n\
+END\n\
+END\n\
+DOMAIN MODELS:\n\
+BUOYANCY MODEL:\n\
+Option = Non Buoyant\n\
+END\n\
+DOMAIN MOTION:\n\
+Option = Stationary\n\
+END\n\
+MESH DEFORMATION:\n\
+Option = None\n\
+END\n\
+REFERENCE PRESSURE:\n\
+Reference Pressure = 1 [atm]\n\
+END\n\
+END\n\
+FLUID DEFINITION: Fluid 1\n\
+Material = Water\n\
+Option = Material Library\n\
+MORPHOLOGY:\n\
+Option = Continuous Fluid\n\
+END\n\
+END\n\
+FLUID MODELS:\n\
+COMBUSTION MODEL:\n\
+Option = None\n\
+END\n\
+HEAT TRANSFER MODEL:\n\
+Fluid Temperature = 25 [C]\n\
+Option = Isothermal\n\
+END\n\
+THERMAL RADIATION MODEL:\n\
+Option = None\n\
+END\n\
+TURBULENCE MODEL:\n\
+Option = k epsilon\n\
+END\n\
+TURBULENT WALL FUNCTIONS:\n\
+Option = Scalable\n\
+END\n\
+END\n\
+END\n\
+OUTPUT CONTROL:\n\
+RESULTS:\n\
+File Compression Level = Default\n\
+Option = Standard\n\
+END\n\
+END\n\
+SOLVER CONTROL:\n\
+Turbulence Numerics = First Order\n\
+ADVECTION SCHEME:\n\
+Option = High Resolution\n\
+END\n\
+CONVERGENCE CONTROL:\n\
+Length Scale Option = Conservative\n\
+Maximum Number of Iterations = 100\n\
+Minimum Number of Iterations = 1\n\
+Timescale Control = Auto Timescale\n\
+Timescale Factor = 1.0\n\
+END\n\
+CONVERGENCE CRITERIA:\n\
+Residual Target = 1.E-4\n\
+Residual Type = RMS\n\
+END\n\
+DYNAMIC MODEL CONTROL:\n\
+Global Dynamic Model Control = On\n\
+END\n\
+INTERRUPT CONTROL:\n\
+Option = Any Interrupt\n\
+CONVERGENCE CONDITIONS:\n\
+Option = Default Conditions\n\
+END\n\
+END\n\
+END\n\
+END\n\
+COMMAND FILE:\n\
+Version = 22.2\n\
+END\n\
+    "
+    with open(ccl_name) as fi:
+        print(strToWrite, file = fi)
+    return

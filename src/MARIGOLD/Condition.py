@@ -581,7 +581,7 @@ class Condition:
 
         return 1
     
-    def approx_vf(self, n=7) -> None:
+    def approx_vf(self, n=7, overwrite_vf = False) -> None:
         """Method for approximating vf with power-law relation. 
 
         .. math:: v_{f, approx} = \\frac{(n+1)(2*n+1)}{ (2*n^{2})} * (j_{f} / (1- \\langle \\alpha \\rangle)) * (1 - abs(rstar))**(1/n)
@@ -597,10 +597,11 @@ class Condition:
         for angle, r_dict in self.data.items():
             for rstar, midas_dict in r_dict.items():
                 vf_approx = (n+1)*(2*n+1) / (2*n*n) * (self.jf / (1-self.area_avg('alpha'))) * (1 - abs(rstar))**(1/n)
-                try:
-                    dummy = midas_dict['vf']
+                if 'vf' in midas_dict.keys():
                     if debug: print(f"approx_vf: data found for {angle}\t{rstar}", file=debugFID)
-                except:
+                    if overwrite_vf:
+                        midas_dict.update({'vf': vf_approx})
+                else:
                     midas_dict.update({'vf': vf_approx})
                 
                 midas_dict.update({'vf_approx': vf_approx})
@@ -2757,7 +2758,8 @@ class Condition:
 
         return self.area_avg('cd')
 
-    def calc_vr_model(self, method='km1_simp', kw = -0.98, n=1, Lw = 5, kf = 0.089, iterate_cd = True, quiet = True, recalc_cd = True, custom_f = None, CC = 1):
+    def calc_vr_model(self, method='km1_simp', kw = -0.98, n=1, Lw = 5, kf = 0.089, 
+                      iterate_cd = True, quiet = True, recalc_cd = True, iter_tol = 1e-4, custom_f = None, CC = 1):
         """Method for calculating relative velocity based on models
         
         Inputs:
@@ -2801,15 +2803,17 @@ the newly calculated :math:`v_{r}` or not
                         for angle, r_dict in self.data.items():
                             for rstar, midas_dict in r_dict.items():
                                 midas_dict.update(
-                                    {'vr_model': -10}
+                                    {'vr_model': -0.5}
                                 )
                         initialize_vr = False
 
                     self.calc_cd(vr_cheat=False)
                 else:
                     self.calc_cd(vr_cheat=True)
-
-            old_vr = self.area_avg('vr_model', recalc=True)
+            try:
+                old_vr = self.area_avg('vr_model', recalc=True)
+            except KeyError:
+                old_vr = -0.5 # Initialize?
 
             vr_name = "vr_" + method
 
@@ -2856,12 +2860,19 @@ the newly calculated :math:`v_{r}` or not
                         try:
                             vr = (
                             -kw * midas_dict['alpha'] * midas_dict['vf'] * midas_dict['cd']**(1./3) - kf * midas_dict['vf'] 
-                            + np.sqrt( 8./3 * self.void_area_avg('Dsm1')/midas_dict['cd'] * ( ff/self.Dh * self.jf**2/2 + 
+                            + np.sqrt( 4./3 * self.void_area_avg('Dsm1')*0.001/midas_dict['cd'] * ( ff/self.Dh * self.jf**2/2 + 
                                                                                  (1 - midas_dict['alpha'])*(1-self.rho_g/self.rho_f) * self.gz ) )
                             )
                         except ZeroDivisionError:
                             vr = 0
+
+                        if vr == np.inf and midas_dict['cd'] == 0:
+                            if not quiet: warnings.warn(f"vr nan for {angle, rstar}, setting to 0")
+                            vr = 0
                         
+                        if vr != vr:
+                            if not quiet: warnings.warn(f"vr nan for {angle, rstar}, setting to 0")
+                            vr = 0
                         
 
                     elif method == 'proper_integral':
@@ -2899,13 +2910,21 @@ the newly calculated :math:`v_{r}` or not
 
             iterations += 1
 
+            try:
+                self.area_avg('vr_model', recalc=True)
+            except:
+                print(f"Error calculating vr" )
+
+            if old_vr == np.inf or old_vr != old_vr or vr == np.inf:
+                print(f"Error calculating vr: {self.area_avg('vr_model', recalc=True)}")
+
             if old_vr == 0:
                 if not quiet:
                     print(f"vr_model calculated as 0 after {iterations} iterations")
                     print(old_vr, self.area_avg('vr_model', recalc=True))
                 return
 
-            if abs(old_vr - self.area_avg('vr_model', recalc=True)) / abs(old_vr) < 0.001:
+            if abs(old_vr - self.area_avg('vr_model', recalc=True)) / abs(old_vr) < iter_tol:
                 if not quiet:
                     print(f"vr_model converged in {iterations} iterations")
                     print(old_vr, self.area_avg('vr_model', recalc=True))
