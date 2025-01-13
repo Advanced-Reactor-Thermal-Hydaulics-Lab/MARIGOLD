@@ -230,7 +230,7 @@ def read_CFX_export(csv_path, jf, jgref, theta, port, database, jgloc=None) -> C
     return cond
 
 
-def read_CFX_export_single_phase(csv_path, jf, jgref, theta, database):
+def read_CFX_export_single_phase(csv_path, jf, jgref, theta, port, database, jgloc = None):
     """ Read CFX csv export into a MARIGOLD Condition object
 
     Must supply jf, jgref, theta, port, database, jgloc, etc. for Condition
@@ -256,10 +256,12 @@ def read_CFX_export_single_phase(csv_path, jf, jgref, theta, database):
         
         vf_idx = [idx for idx, s in enumerate(variables) if 'Velocity w [ m s^-1 ]' in s][0]
         yplus_idx = [idx for idx, s in enumerate(variables) if 'Yplus' in s][0]
-        x_idx = [idx for idx, s in enumerate(variables) if 'X [ m ]' in s][0]
+        x_idx = [idx for idx, s in enumerate(variables) if 'Z [ m ]' in s][0]
         y_idx = [idx for idx, s in enumerate(variables) if 'Y [ m ]' in s][0]
 
         doublecheck_angles = []
+
+        single_phase_zero_data = {'vr': 0, 'y+': 0}
 
         while True:
             try:
@@ -287,6 +289,10 @@ def read_CFX_export_single_phase(csv_path, jf, jgref, theta, database):
             roverR = np.sqrt(x**2 + y**2) / 0.0127
             if roverR < 0.00001:
                 roverR = 0
+
+            if roverR > 0.99:
+                roverR = 1
+
             phi_angle = (int(np.arctan2(y,x) * 180/np.pi) +360) % 360
             if (phi_angle < 0):
                 print(x, y, phi_angle)
@@ -305,7 +311,7 @@ def read_CFX_export_single_phase(csv_path, jf, jgref, theta, database):
             except:
                 cond.data.update({phi_angle:{}})
                 cond.data[phi_angle].update({roverR:data_dict})
-                cond.data[phi_angle].update({1.0:zero_data})
+                cond.data[phi_angle].update({1.0:single_phase_zero_data})
 
             try:
                 cond.data[phi_angle].update({0.0:data_at_zero})
@@ -585,7 +591,7 @@ ic_exit\n', file=fi)
 
 
 def make_U_bend_mesh(cond:Condition, L_P1:float, D_pipe:float, RoverD:float, L_VU:float, L_VD:float, dr:int, dt:int, dz:int, o_1:float,
-                        case_name: str, turb_model = 'ke', growth_ratio = 1.2, fudge = 1,
+                        case_name: str, turb_model = 'ke', growth_ratio = 1.2, fudge = 1, first_layer = None,
                         fluent_translator_path = "/apps/external/apps/ansys/2022r2/ansys_inc/v222/icemcfd/linux64_amd/icemcfd/output-interfaces/fluent6",
                         cleanup = True) -> None:
     """_summary_
@@ -634,7 +640,8 @@ def make_U_bend_mesh(cond:Condition, L_P1:float, D_pipe:float, RoverD:float, L_V
     else:
         yplus = 1
 
-    first_layer = yplus * cond.mu_f / (u_tau * cond.rho_f) * fudge
+    if first_layer is None:
+        first_layer = yplus * cond.mu_f / (u_tau * cond.rho_f) * fudge
 
 
     # Old method
