@@ -2080,7 +2080,7 @@ def run_CFX_case(case_name, parallel=True, npart = 4, init_fi = None, interactiv
     run_string = f"cfx5solve -def {case_name}.def -monitor {case_name}_001.out -double"
     
     if parallel:
-        run_string += f" -par -par-local -part {npart}"
+        run_string += f" -par -par-local --start-method 'Open MPI Local Parallel' -part {npart}"
 
     if init_fi:
         run_string += f" -initial-file {init_fi}"
@@ -2091,7 +2091,7 @@ def run_CFX_case(case_name, parallel=True, npart = 4, init_fi = None, interactiv
     run_string += " > auto_cfx_run.log"
 
     if tail:
-        run_string += f" & tail -f {case_name}_001.out --retry"
+        run_string += f" & tail -f {case_name}_001.out --retry | sed '/^This run of the ANSYS CFX Solver has finished.$/ q'"
 
     print(f"${run_string}")
     comp_process = subprocess.run(run_string, shell=True)
