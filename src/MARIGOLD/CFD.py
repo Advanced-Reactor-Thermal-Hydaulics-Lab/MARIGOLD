@@ -641,7 +641,7 @@ def make_U_bend_mesh(L_P1:float, D_pipe:float, RoverD:float, L_VU:float, L_VD:fl
         else:
             yplus = 1
 
-    elif first_layer is not None:
+    elif first_layer != None:
         first_layer = yplus * cond.mu_f / (u_tau * cond.rho_f) * fudge
     
     else:
