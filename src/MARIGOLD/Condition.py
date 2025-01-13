@@ -1,7 +1,6 @@
 from .config import *
 from scipy import interpolate
 from scipy.optimize import minimize
-import warnings
 import re
 
 class Condition:

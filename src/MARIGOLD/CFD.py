@@ -141,7 +141,7 @@ def read_CFX_export(csv_path, jf, jgref, theta, port, database, jgloc=None) -> C
         variables = fi.readline() # variables
 
         variables = variables.split(",")
-
+        
         vg_idx = [idx for idx, s in enumerate(variables) if 'gas.Velocity' in s][0]
         vf_idx = [idx for idx, s in enumerate(variables) if 'liquid.Velocity' in s][0]
         alpha_idx = [idx for idx, s in enumerate(variables) if 'gas.Volume' in s][0]
@@ -229,6 +229,115 @@ def read_CFX_export(csv_path, jf, jgref, theta, port, database, jgloc=None) -> C
 
     return cond
 
+
+def read_CFX_export_single_phase(csv_path, jf, jgref, theta, database):
+    """ Read CFX csv export into a MARIGOLD Condition object
+
+    Must supply jf, jgref, theta, port, database, jgloc, etc. for Condition
+
+    Returns Condition object
+    
+    """
+    if jgloc is None:
+        jgloc = jgref
+    cond = Condition(jgref, jgloc, jf, theta, port, database)
+    cond.run_ID = 'CFD'
+    cond._angles = [0, 360]
+
+    with open(csv_path) as fi:
+        fi.readline()             # 
+        fi.readline()             # [Name]
+        fi.readline()             # port3
+        fi.readline()             # 
+        fi.readline()             # [data]
+        variables = fi.readline() # variables
+
+        variables = variables.split(",")
+        
+        vf_idx = [idx for idx, s in enumerate(variables) if 'Velocity w [ m s^-1 ]' in s][0]
+        yplus_idx = [idx for idx, s in enumerate(variables) if 'Yplus' in s][0]
+        x_idx = [idx for idx, s in enumerate(variables) if 'X [ m ]' in s][0]
+        y_idx = [idx for idx, s in enumerate(variables) if 'Y [ m ]' in s][0]
+
+        doublecheck_angles = []
+
+        while True:
+            try:
+                data = fi.readline().split(",")
+            except IOError:
+                break
+            
+            if data == ['']:
+                break
+
+            try:
+                x = float(data[x_idx])
+                y = float(data[y_idx])
+                vf = float(data[vf_idx])
+                yplus = float(data[yplus_idx])
+            except Exception as e:
+                print(e)
+                print(variables)
+                print("\nProblem data:")
+                print(data)
+                print(x_idx, y_idx, vf_idx, yplus_idx)
+
+            data_dict = {'y+': yplus, 'vf': vf}
+            
+            roverR = np.sqrt(x**2 + y**2) / 0.0127
+            if roverR < 0.00001:
+                roverR = 0
+            phi_angle = (int(np.arctan2(y,x) * 180/np.pi) +360) % 360
+            if (phi_angle < 0):
+                print(x, y, phi_angle)
+
+            if phi_angle not in cond._angles:
+                cond._angles.append(phi_angle)
+
+            if roverR > 1.0 or roverR < 0:
+                continue
+
+            if phi_angle < 0 or phi_angle > 360:
+                continue
+
+            try:
+                cond.data[phi_angle].update({roverR:data_dict})
+            except:
+                cond.data.update({phi_angle:{}})
+                cond.data[phi_angle].update({roverR:data_dict})
+                cond.data[phi_angle].update({1.0:zero_data})
+
+            try:
+                cond.data[phi_angle].update({0.0:data_at_zero})
+            except UnboundLocalError:
+                doublecheck_angles.append(phi_angle)
+                pass
+
+            if roverR == 0:
+                data_at_zero = copy(data_dict)
+
+        
+        for phi_angle in doublecheck_angles:
+            try:
+                cond.data[phi_angle].update({0.0:data_at_zero})
+            except UnboundLocalError:
+                pass
+
+        # for angle in cond._angles:
+        #     if angle < 180:
+        #         if (180 - angle) not in cond._angles:
+        #             cond._angles.append(180 - angle)
+
+        #     elif angle > 180:
+        #         if (360 - angle + 180) not in cond._angles:
+        #             cond._angles.append(360 - angle + 180)
+
+
+        cond._angles.sort()
+
+        # print(cond._angles)
+
+    return cond
 
 def make_ICEM_pipe_mesh(cond:Condition, r_divs: int, theta_divs: int, z_divs: int, o_point: float, Lmesh: float, 
                         case_name: str, turb_model = 'ke', growth_ratio = 1.2, R_pipe = 0.0127, fudge = 1,
