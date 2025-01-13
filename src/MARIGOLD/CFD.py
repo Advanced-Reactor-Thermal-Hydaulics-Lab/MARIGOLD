@@ -590,10 +590,10 @@ ic_exit\n', file=fi)
     return
 
 
-def make_U_bend_mesh(cond:Condition, L_P1:float, D_pipe:float, RoverD:float, L_VU:float, L_VD:float, dr:int, dt:int, dz:int, o_1:float,
-                        case_name: str, turb_model = 'ke', growth_ratio = 1.2, fudge = 1, first_layer = None,
-                        fluent_translator_path = "/apps/external/apps/ansys/2022r2/ansys_inc/v222/icemcfd/linux64_amd/icemcfd/output-interfaces/fluent6",
-                        cleanup = True) -> None:
+def make_U_bend_mesh(L_P1:float, D_pipe:float, RoverD:float, L_VU:float, L_VD:float, dr:int, dt:int, dz:int, o_1:float, case_name: str, 
+                     turb_model = 'ke', growth_ratio = 1.2, fudge = 1, first_layer = None, cond:Condition = None,
+                     fluent_translator_path = "/apps/external/apps/ansys/2022r2/ansys_inc/v222/icemcfd/linux64_amd/icemcfd/output-interfaces/fluent6",
+                     cleanup = True) -> None:
     """_summary_
 
     :param cond: Condition for which this mesh will be used
@@ -632,34 +632,20 @@ def make_U_bend_mesh(cond:Condition, L_P1:float, D_pipe:float, RoverD:float, L_V
 
     # Assuming water
 
-    cond.calc_dpdz()
-    u_tau = np.sqrt(cond.tau_w / cond.rho_f)
+    if cond is not None:
+        cond.calc_dpdz()
+        u_tau = np.sqrt(cond.tau_w / cond.rho_f)
 
-    if turb_model == 'ke': 
-        yplus = 30
-    else:
-        yplus = 1
+        if turb_model == 'ke': 
+            yplus = 30
+        else:
+            yplus = 1
 
-    if first_layer is None:
+    elif first_layer is not None:
         first_layer = yplus * cond.mu_f / (u_tau * cond.rho_f) * fudge
-
-
-    # Old method
-    # rho = 998
-    # mu = 0.001
-
-    # Uinf = Ref * mu / (rho * L)
-
-    # Cf = 0.026 / Ref**(1./7)
-    # tau_wall = Cf * rho * Uinf**2 / 2
-    # Ufric = (tau_wall / rho)**0.5
-
-    # if turb_model == 'ke': 
-    #     yplus = 30
-    # else:
-    #     yplus = 1
-
-    # first_layer = yplus*mu / (Ufric * rho)
+    
+    else:
+        print("Please specify either a Condition or a first layer thickness")
     
     with open("mesh_replay.rpl", 'w') as fi:
         print(f'\
