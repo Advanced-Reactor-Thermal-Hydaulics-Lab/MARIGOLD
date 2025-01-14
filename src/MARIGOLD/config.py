@@ -11,6 +11,7 @@ import matplotlib.tri as tri
 import matplotlib as mpl
 import openpyxl as op
 import warnings
+import re
 
 debug = False
 debugFID = None
