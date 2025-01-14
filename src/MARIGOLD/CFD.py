@@ -3021,56 +3021,6 @@ END\n\
 COMMAND FILE:\n\
   CFX Post Version = 22.2\n\
 END\n\
-DATA READER:\n\
-  Clear All Objects = false\n\
-  Append Results = false\n\
-  Edit Case Names = false\n\
-  Multi Configuration File Load Option = Last Case\n\
-  Open in New View = true\n\
-  Keep Camera Position = true\n\
-  Load Particle Tracks = true\n\
-  Multi Configuration File Load Option = Last Case\n\
-  Construct Variables From Fourier Coefficients = true\n\
-  Open to Compare = false\n\
-  Files to Compare =\n\
-END\n\
-DATA READER:\n\
-  Domains to Load=\n\
-END\n\
->load filename={case_name}_001.res, force_reload=true \n\
-EXPORT:\n\
-  ANSYS Export Data = Element Heat Flux\n\
-  ANSYS File Format = ANSYS\n\
-  ANSYS Reference Temperature = 0.0 [K]\n\
-  ANSYS Specify Reference Temperature = Off\n\
-  ANSYS Supplemental HTC = 0.0 [W m^-2 K^-1]\n\
-  Additional Variable List =BC Profile Type = Inlet Velocity\n\
-  CSV Type = CSV\n\
-  Case Name = Case {case_name}_001\n\
-  Export Connectivity = Off\n\
-  Export Coord Frame = Global\n\
-  Export File = {case_name}_outlet.csv\n\
-  Export Geometry = On\n\
-  Export Location Aliases =\n\
-  Export Node Numbers = Off\n\
-  Export Null Data = On\n\
-  Export Type = Generic\n\
-  Export Units System = Current\n\
-  Export Variable Type = Hybrid\n\
-  External Export Data = None\n\
-  Include File Information = Off\n\
-  Include Header = On\n\
-  Location = INLET\n\
-  Location List = OUTLET\n\
-  Null Token = null\n\
-  Overwrite = On\n\
-  Precision = 8\n\
-  Separator = ", "\n\
-  Spatial Variables = X,Y,Z\n\
-  Variable List = Pressure, Velocity u, Velocity v, Velocity w\n\
-  Vector Brackets = ()\n\
-  Vector Display = Scalar\n\
-END\n\
 >export\n\
 DATA READER:\n\
 Clear All Objects = false\n\
@@ -3101,7 +3051,7 @@ CSV Type = CSV\n\
 Case Name = Case {case_name}_001\n\
 Export Connectivity = Off\n\
 Export Coord Frame = Global\n\
-Export File = {case_name}_outlet.csv\n\
+Export File = {case_name}.csv\n\
 Export Geometry = On\n\
 Export Location Aliases =\n\
 Export Node Numbers = Off\n\
