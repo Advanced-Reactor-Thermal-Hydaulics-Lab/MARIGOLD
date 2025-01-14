@@ -1,5 +1,5 @@
 from .config import *
-from.utils import *
+from .plot_utils import *
 from scipy import interpolate
 from scipy.optimize import minimize
 
