@@ -3021,7 +3021,6 @@ END\n\
 COMMAND FILE:\n\
   CFX Post Version = 22.2\n\
 END\n\
->export\n\
 DATA READER:\n\
 Clear All Objects = false\n\
 Append Results = false\n\
@@ -3039,6 +3038,7 @@ DATA READER:\n\
 Domains to Load=\n\
 END\n\
 >load filename={case_name}_001.res, force_reload=true\n\
+>update\n\
 EXPORT:\n\
 ANSYS Export Data = Element Heat Flux\n\
 ANSYS File Format = ANSYS\n\
@@ -3051,7 +3051,7 @@ CSV Type = CSV\n\
 Case Name = Case {case_name}_001\n\
 Export Connectivity = Off\n\
 Export Coord Frame = Global\n\
-Export File = outlet.csv\n\
+Export File = {case_name}_outlet.csv\n\
 Export Geometry = On\n\
 Export Location Aliases =\n\
 Export Node Numbers = Off\n\
