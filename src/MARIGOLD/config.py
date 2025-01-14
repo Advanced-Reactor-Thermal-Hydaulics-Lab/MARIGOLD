@@ -16,4 +16,4 @@ import re
 debug = False
 debugFID = None
 
-__all__ = ['os', 'np', 'datetime', 'pickle', 'integrate', 'deepcopy', 'cm', 'plt', 'tri', 'op', 'debug', 'warnings','debugFID']
+__all__ = ['os', 'np', 'datetime', 'pickle', 'integrate', 'deepcopy', 'cm', 'plt', 'tri', 'op', 're', 'debug', 'warnings','debugFID']

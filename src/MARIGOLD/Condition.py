@@ -7,11 +7,11 @@ from scipy.optimize import minimize
 class Condition:
     """ Class to handle the local probe data
 
-    Data is stored in the Condition.phi property. It's actually 3 layers of dictionary
-    phi [angle] gives a dictionary with the various r/R
-    phi [angle][r/R] gives a dictionary with the MIDAS output
+    Data is stored in the Condition.data property. It's actually 3 layers of dictionary
+    data [angle] gives a dictionary with the various r/R
+    data [angle][r/R] gives a dictionary with the MIDAS output
     The MIDAS output is itself a dictionary, with the keys listed in the "tab_keys" array
-    So phi[angle][r/R]['alpha'] should give you the void fraction at r/R for phi = angle
+    So data[angle][r/R]['alpha'] should give you the void fraction at r/R for phi = angle
     This structure is initialized with zeros for the MIDAS output at the pipe center and wall
 
     Can also get the data at a local point from calling the condition, syntax
