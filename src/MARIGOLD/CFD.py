@@ -3037,7 +3037,7 @@ END\n\
 DATA READER:\n\
 Domains to Load=\n\
 END\n\
->load filename=./{case_name}_001.res, force_reload=true\n\
+>load filename=/scratch/negishi/adix/CFD/ubend/rd_tests/{case_name}/{case_name}_001.res, force_reload=true\n\
 >update\n\
 EXPORT:\n\
 ANSYS Export Data = Element Heat Flux\n\
