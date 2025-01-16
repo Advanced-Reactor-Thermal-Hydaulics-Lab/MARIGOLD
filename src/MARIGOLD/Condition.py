@@ -2765,7 +2765,8 @@ class Condition:
         return self.area_avg('cd')
 
     def calc_vr_model(self, method='km1_simp', kw = -0.98, n=1, Lw = 5, kf = 0.089, 
-                      iterate_cd = True, quiet = True, recalc_cd = True, iter_tol = 1e-4, custom_f = None, CC = 1):
+                      iterate_cd = True, initial_vr = None, 
+                      quiet = True, recalc_cd = True, iter_tol = 1e-4, custom_f = None, CC = 1):
         """Method for calculating relative velocity based on models
         
         Inputs:
@@ -2796,10 +2797,11 @@ the newly calculated :math:`v_{r}` or not
         iterations = 0
         initialize_vr = True
 
-        try:
-            dummy = self.random_point
-        except:
-            self.random_point = self.original_mesh[np.random.choice(len(self.original_mesh))]
+        if initial_vr is None:
+            if self.theta == 90:
+                initial_vr = 0.5
+            else:
+                initial_vr = -0.5
 
         while True:
             if recalc_cd:
@@ -2809,7 +2811,7 @@ the newly calculated :math:`v_{r}` or not
                         for angle, r_dict in self.data.items():
                             for rstar, midas_dict in r_dict.items():
                                 midas_dict.update(
-                                    {'vr_model': -0.5}
+                                    {'vr_model': initial_vr}
                                 )
                         initialize_vr = False
 
@@ -2819,7 +2821,7 @@ the newly calculated :math:`v_{r}` or not
             try:
                 old_vr = self.area_avg('vr_model', recalc=True)
             except KeyError:
-                old_vr = -0.5 # Initialize?
+                old_vr = initial_vr # Initialize?
 
             vr_name = "vr_" + method
 
@@ -2888,9 +2890,6 @@ the newly calculated :math:`v_{r}` or not
                     elif method == 'proper_integral_alpha':
                         warnings.warn("This method is probably no good, messed up the math")
                         vr = midas_dict['ug1'] / ( (0.5 - Lw) + kw * midas_dict['alpha']**n *midas_dict['cd']**(1./3) *(np.pi/4)**(1/3)* (0.5**(1./3) - Lw**(1/3)))
-
-                        if abs(angle - self.random_point[0] ) < 0.001 and abs(rstar - self.random_point[1] ) < 0.001:
-                            print(self.random_point, (0.5 - Lw), kw * midas_dict['alpha']**n *midas_dict['cd']**(1./3) *(np.pi/4)**(1/3)* (0.5**(1./3) - Lw**(1/3)) )
 
                     elif method.lower() == 'ishii-chawla' or method.lower() == 'ishii' or method.lower() == 'ishii chawla':
                         vr = np.sqrt(2) * (self.sigma * self.g * (self.rho_f - self.rho_g) / (self.rho_f**2))**0.25
