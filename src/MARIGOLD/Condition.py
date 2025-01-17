@@ -265,7 +265,7 @@ class Condition:
                     print("\t\t", midas_output)
         return
 
-    def mirror(self, method = 'sym90', sym90 = False, axisym = False, uniform_rmesh = False, force_remirror=False) -> None:
+    def mirror(self, method = 'sym90', sym90 = False, axisym = False, uniform_rmesh = False, uniform_rmesh_fill = 'interp', force_remirror=False) -> None:
         """ Mirrors data, so we have data for every angle
 
         :param method: method to use for mirroring. Options are 'sym90', 'axisym', and 'avg_axisym'. Defaults to 'sym90'
@@ -535,7 +535,10 @@ class Condition:
                     for param in tab_keys:
                         try:
                             if self.data[phi][r][param] == 0 and r < 1.0:
-                                self.data[phi][r][param] = self(phi*np.pi/180, r, param, interp_method = 'linear')
+                                if (uniform_rmesh_fill) == 0:
+                                    self.data[phi][r][param] = 0
+                                elif uniform_rmesh_fill == 'interp':
+                                    self.data[phi][r][param] = self(phi*np.pi/180, r, param, interp_method = 'linear')
                         except Exception as e:
                             if debug: print("Error interpolating in unifrom rmesh, ", phi, r, e)
                             pass
