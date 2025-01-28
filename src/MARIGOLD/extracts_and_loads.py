@@ -1168,6 +1168,25 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                     Q1_pitot_check = 'CJ'
                     Q2_pitot_check = 'FZ'
 
+                elif sheet_type.lower() == 'neup_template1':
+                    pitot_sheet = True
+                    Q1_ranges = list(zip([90, 67.5, 45, 22.5, 0], [ [i for i in range(8, 31)], [i for i in range(55, 78)], [i for i in range(104, 127)], [i for i in range(151, 174)], [i for i in range(200, 223)] ]))
+                    Q2_ranges = list(zip([112.5, 135, 157.5], [ [i for i in range(55, 78)], [i for i in range(104, 127)], [i for i in range(151, 174)] ]))
+                    Q2_start = 'CR'
+                    Q2_end = 'ET'
+                    Q1_start = 'A'
+                    Q1_end = 'BD'
+                    Q1_pitot_start = 'CF'
+                    Q1_pitot_end = 'CO'
+                    Q2_pitot_start = 'FV'
+                    Q2_pitot_end = 'GE'
+
+                    Q1_check = 'K'
+                    Q2_check = 'DA'
+                    Q1_pitot_check = 'CJ'
+                    Q2_pitot_check = 'FZ'
+
+
                 elif sheet_type == 'custom' or sheet_type == 'Custom':
                     print('Hopefully you specified all the ranges, starts, ends, and checks')
                 

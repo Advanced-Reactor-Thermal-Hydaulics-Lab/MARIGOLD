@@ -617,7 +617,7 @@ class Condition:
 
         return
     
-    def approx_vg(self, n=7) -> None:
+    def approx_vg(self, method = 'vr', n=7) -> None:
         """Method for approximating vg with power-law relation. I don't think this makes sense
 
         .. math:: v_{g, approx} = \\frac{(n+1)(2*n+1)}{ (2*n^{2})} * (j_{g} / \\langle \\alpha \\rangle) * (1 - abs(rstar))**(1/n)
@@ -634,11 +634,17 @@ class Condition:
 
         for angle, r_dict in self.data.items():
             for rstar, midas_dict in r_dict.items():
-                vg_approx = (n+1)*(2*n+1) / (2*n*n) * (self.jgloc / (self.area_avg('alpha'))) * (1 - abs(rstar))**(1/n)
-                try:
-                    dummy = midas_dict['ug1']
+                if method == 'power-law':
+                    vg_approx = (n+1)*(2*n+1) / (2*n*n) * (self.jgloc / (self.area_avg('alpha'))) * (1 - abs(rstar))**(1/n)
+                elif method == 'vrmodel':
+                    if 'vr_model' not in midas_dict.keys():
+                        self.calc_vr_model()
+                    vg_approx = midas_dict['vf_approx'] + midas_dict['vr_model']
+                
+                if 'ug1' in midas_dict.keys():
                     if debug: print(f"approx_vg: data found for {angle}\t{rstar}", file=debugFID)
-                except:
+                    vg_approx = midas_dict['ug1']
+                else:
                     midas_dict.update({'ug1': vg_approx})
                 
                 midas_dict.update({'vg_approx': vg_approx})
@@ -1036,7 +1042,7 @@ class Condition:
             self.spline_interp = {}
         
         if param in self.spline_interp.keys():
-            print(f"{param} already has a fit spline")
+            if debug: print(f"{param} already has a fit spline")
             return
 
         self.mirror(uniform_rmesh=True)
@@ -4396,7 +4402,7 @@ the newly calculated :math:`v_{r}` or not
 
     def plot_contour(self, param:str, save_dir = '.', show=True, set_max = None, set_min = None, fig_size = 4, label_str = None, suppress_colorbar = False,
                      rot_angle = 0, ngridr = 50, ngridphi = 50, colormap = 'hot_r', num_levels = 0, level_step = 0.01, title = False, title_str = '', extra_text = '',
-                     annotate_h = False, cartesian = False, h_star_kwargs = {'method': 'max_dsm', 'min_void': '0.05'}, plot_measured_points = False) -> None:
+                     annotate_h = False, cartesian = False, h_star_kwargs = {'method': 'max_dsm', 'min_void': '0.05'}, plot_measured_points = False, font_size = 16) -> None:
         
         """Method to plot contour of a given param
         
@@ -4417,7 +4423,7 @@ the newly calculated :math:`v_{r}` or not
             fig, ax = plt.subplots(figsize=(fig_size, fig_size), dpi=300)
         else:
             fig, ax = plt.subplots(figsize=(fig_size, fig_size), dpi=300, subplot_kw=dict(projection='polar'))
-        plt.rcParams.update({'font.size': 16})
+        plt.rcParams.update({'font.size': font_size})
         plt.rcParams["font.family"] = "Times New Roman"
         plt.rcParams["mathtext.fontset"] = "cm"
         
