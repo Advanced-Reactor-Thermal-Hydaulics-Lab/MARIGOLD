@@ -102,7 +102,7 @@ class Condition:
 
         self.area_avg_void_sheet = -1
 
-        if database == 'Ryan' or database == 'ryan' or database == 'adix':
+        if database == 'Ryan' or database == 'ryan' or database == 'adix' or database == 'neup':
             self.Dh = 0.0254 # m, for Ryan
             self.marker_type = 'o'
             self.marker_color = 'r'
@@ -745,7 +745,7 @@ class Condition:
 
         return self.area_avg('vf_naive')
     
-    def calc_vr(self, quiet = False) -> None:
+    def calc_vr(self, method = None, quiet = False) -> None:
         """Method for calculating relative velocity. 
         
         Inputs:
@@ -767,7 +767,11 @@ class Condition:
         for angle, r_dict in self.data.items():
             for rstar, midas_dict in r_dict.items():
                 try:
-                    vf = midas_dict['vf']
+                    if method == None:
+                        vf = midas_dict['vf']
+                    elif method == 'approx':
+                        self.approx_vf()
+                        vf = midas_dict['vf_approx']
                 except:
                     if not quiet:
                         print("Warning: Approximating vf in calculating vr, since no data found")
