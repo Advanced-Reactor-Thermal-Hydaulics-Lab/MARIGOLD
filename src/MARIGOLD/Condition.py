@@ -3817,7 +3817,7 @@ the newly calculated :math:`v_{r}` or not
     
     def plot_profiles2(self, param, save_dir = '.', show=True, x_axis='vals', errorbars = 0.0, 
                       const_to_plot = [90, 67.5, 45, 22.5, 0], include_complement = True, 
-                      fig_size=(4,4), title=True, label_str = '', legend_loc = 'best', xlabel_loc = 'center', include_const = False,
+                      fig_size=(4,4), fs = 10, title=True, label_str = '', legend_loc = 'best', xlabel_loc = 'center', include_const = False,
                       set_min = None, set_max = None, show_spines = True, xlabel_loc_coords = None, ylabel_loc_coords = None, cs=None) -> None:
         """ Simplified plot_profiles with no rotation option
 
@@ -3842,7 +3842,7 @@ the newly calculated :math:`v_{r}` or not
         """
         # TODO rewrite so it always loops over a list of params. If there's only one, just put it in a list at the begininng 
 
-        plt.rcParams.update({'font.size': 10})
+        plt.rcParams.update({'font.size': fs})
         plt.rcParams["font.family"] = "Times New Roman"
         plt.rcParams["mathtext.fontset"] = "cm"
 
