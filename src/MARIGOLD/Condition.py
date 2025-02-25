@@ -4406,7 +4406,7 @@ the newly calculated :math:`v_{r}` or not
 
     def plot_contour(self, param:str, save_dir = '.', show=True, set_max = None, set_min = None, fig_size = 4, label_str = None, suppress_colorbar = False,
                      rot_angle = 0, ngridr = 50, ngridphi = 50, colormap = 'hot_r', num_levels = 0, level_step = 0.01, title = False, title_str = '', extra_text = '',
-                     annotate_h = False, cartesian = False, h_star_kwargs = {'method': 'max_dsm', 'min_void': '0.05'}, plot_measured_points = False, font_size = 16) -> None:
+                     annotate_h = False, cartesian = False, h_star_kwargs = {'method': 'max_dsm', 'min_void': '0.05'}, plot_measured_points = False, font_size = 12) -> None:
         
         """Method to plot contour of a given param
         
