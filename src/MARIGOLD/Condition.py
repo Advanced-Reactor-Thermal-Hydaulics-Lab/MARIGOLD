@@ -3821,8 +3821,8 @@ the newly calculated :math:`v_{r}` or not
     
     def plot_profiles2(self, param, save_dir = '.', show=True, x_axis='vals', errorbars = 0.0, 
                       const_to_plot = [90, 67.5, 45, 22.5, 0], include_complement = True, 
-                      fig_size=(4,4), title=True, label_str = '', legend_loc = 'best', xlabel_loc = 'center', include_const = False,
-                      set_min = None, set_max = None, show_spines = True, xlabel_loc_coords = None, ylabel_loc_coords = None, cs=None) -> None:
+                      fig_size=(4,4), fs = 10, title=True, label_str = '', legend_loc = 'best', xlabel_loc = 'center', include_const = False,
+                      set_min = None, set_max = None, show_spines = True, xlabel_loc_coords = None, ylabel_loc_coords = None, cs=None, ms = None, ls = None) -> None:
         """ Simplified plot_profiles with no rotation option
 
         Inputs:
@@ -3846,7 +3846,7 @@ the newly calculated :math:`v_{r}` or not
         """
         # TODO rewrite so it always loops over a list of params. If there's only one, just put it in a list at the begininng 
 
-        plt.rcParams.update({'font.size': 10})
+        plt.rcParams.update({'font.size': fs})
         plt.rcParams["font.family"] = "Times New Roman"
         plt.rcParams["mathtext.fontset"] = "cm"
 
@@ -3862,8 +3862,19 @@ the newly calculated :math:`v_{r}` or not
         if errorbars > 0:
             ax.plot([], [], ' ', label = f"{errorbars*100:0.1f}% error bars") # dummy to just get this text in the legend
 
-        ms = marker_cycle()
-        if cs is None or type(param) == list:
+        if not ms:
+            ms = marker_cycle()
+        else:
+            ms = marker_cycle(marker_list=ms)
+
+        if not ls:
+            ls = marker_cycle()
+        else:
+            ls = marker_cycle(marker_list=ms)
+
+        if type(cs) == list:
+            cs = color_cycle(color_list= cs)
+        elif cs is None or type(param) == list:
             cs = color_cycle()
         elif cs == 'infer' and type(param) == str:
             cs = color_cycle(set_color = param)
@@ -3968,23 +3979,38 @@ the newly calculated :math:`v_{r}` or not
                         
                         
                         legend_str = ''
-                        if 'alpha' in specific_param:
-                            specific_param = specific_param.replace('alpha', r'$\alpha$')
-                        elif 'ai' in specific_param:
-                            specific_param = specific_param.replace('ai', r'$a_{i}$')
-                        elif 'ug' in specific_param:
-                            specific_param = specific_param.replace('ug', r'$v_{g}$')
-                        elif 'vf' in specific_param:
-                            specific_param = specific_param.replace('vf', r'$v_{f}$')
-                        
-                        elif specific_param == 'vr':
-                            legend_str = r'$v_{r, G1}$'
-                        elif specific_param == 'vr2':
-                            legend_str = r'$v_{r, G2}$'
-                        elif specific_param == 'Dsm1':
-                            legend_str = r'$D_{sm1}$'
-                        elif specific_param == 'Dsm2':
-                            legend_str = r'$D_{sm2}$'
+                        if '_' not in specific_param:
+                            if 'alpha' in specific_param:
+                                specific_param = specific_param.replace('alpha', r'$\alpha$')
+                            elif 'ai' in specific_param:
+                                specific_param = specific_param.replace('ai', r'$a_{i}$')
+                            elif 'ug1' in specific_param:
+                                specific_param = specific_param.replace('ug1', r'$v_{g}$')
+                            elif 'vf' in specific_param:
+                                specific_param = specific_param.replace('vf', r'$v_{f}$')
+                            
+                            elif specific_param == 'vr':
+                                legend_str = r'$v_{r, G1}$'
+                            elif specific_param == 'vr2':
+                                legend_str = r'$v_{r, G2}$'
+                            elif specific_param == 'Dsm1':
+                                legend_str = r'$D_{sm1}$'
+                            elif specific_param == 'Dsm2':
+                                legend_str = r'$D_{sm2}$'
+
+                        else:
+                            if 'ug1' in specific_param:
+                                split_param = specific_param.split('_')
+                                legend_str = '$' + 'v' + '_{g, ' + split_param[1] + '}$'
+                            elif 'vf' in specific_param:
+                                split_param = specific_param.split('_')
+                                legend_str = '$' + 'v' + '_{f, ' + split_param[1] + '}$'
+                            elif 'alpha' in specific_param:
+                                split_param = specific_param.split('_')
+                                legend_str = '$' + r'\alpha' + '_{' + split_param[1] + '}$'
+                            else:
+                                split_param = specific_param.split('_')
+                                legend_str = '$' + split_param[0] + '_{' + split_param[1] + '}$'
 
                         if legend_str == '':
                             legend_str = specific_param
