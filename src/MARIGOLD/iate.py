@@ -112,15 +112,15 @@ def iate_1d_1g(
         LM_C = 25
 
     elif preset == 'Quan':
-        theta           = cond.theta                                # Pipe inclination angle [degrees]
-        Dh              = cond.Dh                                   # Hydraulic diameter [m]
-        rho_f           = cond.rho_f                                # Liquid phase density [kg/m**3]
-        rho_g           = 1.226                                    # Gas phase density [kg/m**3] or cond.rho_g 
+        theta           = cond.theta                            # Pipe inclination angle [degrees]
+        Dh              = cond.Dh                               # Hydraulic diameter [m]
+        rho_f           = cond.rho_f                            # Liquid phase density [kg/m**3]
+        rho_g           = 1.226                                 # Gas phase density [kg/m**3] or cond.rho_g 
         mu_f            = 0.001                                 # Dynamic viscosity of water [Pa-s]
-        mu_g            = cond.mu_g                                 # Dynamic viscosity of air [Pa-s]
-        sigma           = cond.sigma                                # Surface tension of air/water [N/m]
-        p_atm           = 101353                                    # Ambient pressure 101325 [Pa] (101353 [Pa] or 14.7 [PSi] used in Quan's U-bend data)
-        grav            = 9.81*np.sin((theta)*np.pi/180)            # Gravity constant =-9.81 for vertical downward flows
+        mu_g            = cond.mu_g                             # Dynamic viscosity of air [Pa-s]
+        sigma           = cond.sigma                            # Surface tension of air/water [N/m]
+        p_atm           = 101353                                # Ambient pressure 101325 [Pa] (101353 [Pa] or 14.7 [PSi] used in Quan's U-bend data)
+        grav            = 9.81*np.sin((theta)*np.pi/180)        # Gravity constant =-9.81 for vertical downward flows
 
      #   if geometry =='U-bend Dissipation ':    #Quan, 1106
       #     void_method = 'continuity'
@@ -374,7 +374,7 @@ def iate_1d_1g(
         aivg[0]     = io["aivg"][-1]
         #COV_RC[0]   = io["COV_RC"][-1]   #1107
         #COV_TI[0]   = io["COV_TI"][-1]   #1107
-       # vgz[0]   = io["COV_RC"][-1]   #1107
+        # vgz[0]   = io["COV_RC"][-1]   #1107
 
         ai[0]       = io["ai"][-1]
         alpha[0]    = io["alpha"][-1]
