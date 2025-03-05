@@ -640,12 +640,13 @@ class Condition:
                     if 'vr_model' not in midas_dict.keys():
                         self.calc_vr_model()
                     vg_approx = midas_dict['vf_approx'] + midas_dict['vr_model']
-                
-                if 'ug1' in midas_dict.keys():
-                    if debug: print(f"approx_vg: data found for {angle}\t{rstar}", file=debugFID)
-                    vg_approx = midas_dict['ug1']
+                elif method == 'vr':
+                    vg_approx = midas_dict['vf'] + midas_dict['vr']
                 else:
-                    midas_dict.update({'ug1': vg_approx})
+                    raise ValueError(f"Unknown method for approximating vg: {method}")
+                
+                # if 'ug1' not in midas_dict.keys():
+                #     midas_dict.update({'ug1': vg_approx})
                 
                 midas_dict.update({'vg_approx': vg_approx})
 
@@ -2688,21 +2689,29 @@ class Condition:
                 if method.lower() == 'ishii':
                     mu_m = self.mu_f * (1 - midas_dict['alpha'] / alpha_peak)**(-2.5*alpha_peak * (self.mu_g + 0.4*self.mu_f) / (self.mu_g + self.mu_f)  )
 
-                elif method.lower() == 'ishii_AA':
+                elif method.lower() == 'ishii_aa':
                     mu_m = self.mu_f * (1 - alpha_avg / alpha_peak)**(-2.5*alpha_peak * (self.mu_g + 0.4*self.mu_f) / (self.mu_g + self.mu_f)  )
                     
                 elif method.lower() == 'avg_void':
                     mu_m = self.mu_f / (1 - alpha_avg)
+                else:
+                    raise(ValueError("Unknown option for calc_mu_eff"))
+
+                if np.real(mu_m) < 0 or np.imag(mu_m) > 0:
+                    warnings.warn(f"Non-zero or imaginary mu_eff: {angle}, {rstar}, {method}, {midas_dict['alpha']}, {mu_m}. Setting to mu_f")
+                    mu_eff = self.mu_f
 
                 mu_eff = mu_m
                 mu_m = mu_eff
 
                 midas_dict.update({'mu_eff': mu_eff})
                 midas_dict.update({'mu_m': mu_m})
+        try:
+            return self.area_avg('mu_eff')
+        except:
+            return 0
 
-        return self.area_avg('mu_eff')
-
-    def calc_cd(self, method='Ishii-Zuber', vr_cheat = False, limit = 0, const_CD = 0.44):
+    def calc_cd(self, method='Ishii-Zuber', vr_cheat = False, limit = 10**-6, const_CD = 0.44):
         """Method for calculating drag coefficient
         
         Inputs:
@@ -2740,6 +2749,16 @@ class Condition:
 
                     Reb = (1 - midas_dict['alpha']) * midas_dict['Dsm1'] * self.rho_f * abs(midas_dict['vr_model']) / midas_dict['mu_m']
 
+                try:
+                    if Reb < 0:
+                        warnings.warn("RuntimeWarning: Reb negative!")
+                        print(Reb, midas_dict['alpha'], midas_dict['Dsm1'], abs(midas_dict['vr_model']), midas_dict['mu_m'])
+                    else:
+                        pass
+                except:
+                    warnings.warn("RuntimeWarning: Reb imaginary!")
+                    print(Reb, midas_dict['alpha'], midas_dict['Dsm1'], abs(midas_dict['vr_model']), midas_dict['mu_m'])
+                
                 midas_dict.update({'Reb': Reb})
 
                 if method == 'Ishii-Zuber' or method == 'IZ' or method == 'Ishii':
@@ -2747,7 +2766,7 @@ class Condition:
                     if Reb > 0:
                         cd = 24/Reb * (1 + 0.1*Reb**0.75)
                     else:
-                        cd = 0
+                        cd = limit
 
                 elif method.lower() == 'schiller-naumann':
                     Reb = (1 - midas_dict['alpha']) * midas_dict['Dsm1'] * self.rho_f * abs(midas_dict['vr_model']) / self.mu_f
@@ -2880,7 +2899,7 @@ the newly calculated :math:`v_{r}` or not
 
                         try:
                             vr = (
-                            -kw * midas_dict['alpha'] * midas_dict['vf'] * midas_dict['cd']**(1./3) - kf * midas_dict['vf'] 
+                            +kw * midas_dict['alpha'] * midas_dict['vf'] * midas_dict['cd']**(1./3) - kf * midas_dict['vf'] 
                             + np.sqrt( 4./3 * self.void_area_avg('Dsm1')*0.001/midas_dict['cd'] * ( ff/self.Dh * self.jf**2/2 + 
                                                                                  (1 - midas_dict['alpha'])*(1-self.rho_g/self.rho_f) * self.gz ) )
                             )
@@ -2921,6 +2940,14 @@ the newly calculated :math:`v_{r}` or not
                     else:
                         print(f"{method} not implemented")
                         return -1
+
+                    if rstar == 1:
+                        vr = 0
+
+                    if vr > 2*self.jf:
+                        vr = 2*self.jf
+                    elif vr < -2*self.jf:
+                        vr = -2*self.jf
             
                     midas_dict[vr_name] = vr
                     midas_dict['vr_model'] = vr

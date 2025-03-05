@@ -497,7 +497,7 @@ def extractProbeData(dump_file = 'database.dat', in_dir = [], require_terms = No
                             continue
                         
                         midas_output = []
-                        for cell in ws[f'CQ{i}':f'ES{i}'][0]:
+                        for cell in ws[f'CP{i}':f'ES{i}'][0]:
                             if cell.value == '---':
                                 midas_output.append(0)
                             elif cell.value is None:
