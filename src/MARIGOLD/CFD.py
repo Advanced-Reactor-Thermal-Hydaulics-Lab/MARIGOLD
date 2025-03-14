@@ -7,7 +7,8 @@ from copy import copy
 
 """
 
-def write_CFX_BC(cond:Condition, save_dir = ".", z_loc = 'LoverD', angles_to_include = [], interp = False, csv_name = None, ngrid = 100, alpha_floor = 0.01, ug1_floor = True):
+def write_CFX_BC(cond:Condition, save_dir = ".", z_loc = 'LoverD', angles_to_include = [], only_90 = False,
+                 interp = False, csv_name = None, ngrid = 100, alpha_floor = 0.01, ug1_floor = True):
     """_summary_
 
     :param cond: _description_
@@ -48,7 +49,7 @@ def write_CFX_BC(cond:Condition, save_dir = ".", z_loc = 'LoverD', angles_to_inc
 
 
     with open(path_to_csv, "w") as f:
-        R = cond.Dh/2
+        R = cond.Dh/2 * 1000
 
         f.write("[Name],,,,,,,,,\n")
         f.write(f"{cond.port}data,,,,,,,,,\n")
@@ -64,11 +65,11 @@ def write_CFX_BC(cond:Condition, save_dir = ".", z_loc = 'LoverD', angles_to_inc
                         if angles_to_include:
                             for target_angle in angles_to_include:
                                 if angle == target_angle or angle == target_angle+180:
-                                    r = rstar * 12.7 * np.sin(angle * np.pi/180) # r/R * R [mm]
+                                    r = rstar * R * np.sin(angle * np.pi/180) # r/R * R [mm]
                                 else:
                                     continue
                         else:
-                            r = rstar * 12.7 # r/R * R [mm]
+                            r = rstar * R # r/R * R [mm]
 
 
                         alpha = midas_output['alpha']
@@ -81,18 +82,21 @@ def write_CFX_BC(cond:Condition, save_dir = ".", z_loc = 'LoverD', angles_to_inc
                             if ug1_floor == True:
                                 ug1 = 0
 
-                        f.write(f"{r},{z_loc},{angle * np.pi/180},{0},{0},{ug1},{alpha},{0},{0},{vf},\n")
+                        if not only_90:
+                            f.write(f"{r},{z_loc},{angle * np.pi/180},{0},{0},{ug1},{alpha},{0},{0},{vf},\n")
+                        else:
+                            if abs(angle - 90) < 0.1:
+                                f.write(f"{r},{z_loc},{angle * np.pi/180},{0},{0},{ug1},{alpha},{0},{0},{vf},\n")
+                            elif abs(angle - 270) < 0.1:
+                                f.write(f"{-r},{z_loc},{angle * np.pi/180},{0},{0},{ug1},{alpha},{0},{0},{vf},\n")
+        
         elif interp == 'xy':
             f.write("x,y,z,,,,,,,\n")
             f.write("[Data],,,,,,,,,\n")
             f.write("x [m],y [m],z [m],Velocity u g [m s^-1],Velocity v g [m s^-1],Velocity w g [m s^-1],Volume Fraction [],Velocity u f [m s^-1],Velocity v f [m s^-1],Velocity w f [m s^-1],\n")
 
             ys = np.linspace(-R, R, ngrid)
-            if only_90:
-                xs = np.zeros(ys.shape)
-            else:
-                xs = np.linspace(-R, R, ngrid)
-
+            xs = np.linspace(-R, R, ngrid)
             
 
             for x in xs:
@@ -118,7 +122,7 @@ def write_CFX_BC(cond:Condition, save_dir = ".", z_loc = 'LoverD', angles_to_inc
     print(cond, "written to CFX BC")
     return path_to_csv
 
-def read_CFX_export(csv_path, jf, jgref, theta, port, database, jgloc=None) -> Condition:
+def read_CFX_export(csv_path, jf, jgref, theta, port, database, Dh = 0.0254, jgloc=None) -> Condition:
     """ Read CFX csv export into a MARIGOLD Condition object
 
     Must supply jf, jgref, theta, port, database, jgloc, etc. for Condition
@@ -174,7 +178,7 @@ def read_CFX_export(csv_path, jf, jgref, theta, port, database, jgloc=None) -> C
 
             data_dict = {'ug1': vg, 'vf': vf, 'alpha': alpha}
             
-            roverR = np.sqrt(x**2 + y**2) / 0.0127
+            roverR = np.sqrt(x**2 + y**2) / (cond.Dh / 2)
             if roverR < 0.00001:
                 roverR = 0
             phi_angle = (int(np.arctan2(y,x) * 180/np.pi) +360) % 360
