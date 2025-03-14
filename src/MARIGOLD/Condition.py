@@ -2795,8 +2795,37 @@ class Condition:
                 midas_dict.update({'cd': cd})
 
         return self.area_avg('cd')
+    
+    def calc_Reb(self):
+        """TODO, function to calculate bubble Reynolds number
 
-    def calc_vr_model(self, method='km1_simp', kw = -0.98, n=1, Lw = 5, kf = 0.089, 
+        Options:
+         - ???
+        """
+        for angle, r_dict in self.data.items():
+            for rstar, midas_dict in r_dict.items():
+                Reb = 0
+                midas_dict.update({'Reb': Reb})
+
+    def calc_cl(self, method='tomiyama', sharma_factor = False):
+        """TODO, function to calculate lift coefficient
+
+        :param method: method to use to calculate lift coefficient, defaults to 'tomiyama'
+        :type method: str, optional
+        :param sharma_factor: Option to use Sharma's exponential Ref, defaults to False
+        :type sharma_factor: bool, optional
+        """
+        for angle, r_dict in self.data.items():
+            for rstar, midas_dict in r_dict.items():
+                
+                if method.lower() == 'tomiyama':
+                    CL = 0
+                elif method.lower() == 'hibiki-ishii' or method.lower() == 'hi':
+                    CL = 0
+
+                midas_dict.update({'CL': CL})
+
+    def calc_vr_model(self, method='km1_simp', kw = 0.654, n=1, Lw = 5, kf = 0.113, 
                       iterate_cd = True, initial_vr = None, 
                       quiet = True, recalc_cd = True, iter_tol = 1e-4, custom_f = None, CC = 1):
         """Method for calculating relative velocity based on models
@@ -3043,7 +3072,7 @@ the newly calculated :math:`v_{r}` or not
 
         return self.area_avg('ISxgrad')
     
-    def calc_aa_vr_model(self, method='km1_naive', IS_method = 'power', kw=-0.98, kf=-0.083, Lw = 5, Cavf=1, Ctau=1, n=2, IS_mu = 1.5, Cvracd = 1):
+    def calc_aa_vr_model(self, method='km1_naive', IS_method = 'power', kw=0.654, kf=0.113, Lw = 5, Cavf=1, Ctau=1, n=2, IS_mu = 1.5, Cvracd = 1):
 
         if method == 'km1_naive':
             vr = kw * (np.pi/4)**(1/3) * self.area_avg('alpha') * self.jf / (1 - self.area_avg('alpha')) * self.area_avg('cd')**(1./3) *  (2**(-1./3) - Lw**(1/3))/(0.5 - Lw) + kf * self.jf / (1 - self.area_avg('alpha'))
@@ -3081,9 +3110,21 @@ the newly calculated :math:`v_{r}` or not
             raise(ValueError("Invalid calc_aa_vr_model method"))
             
 
-        self.vwvgj = (1-self.area_avg('alpha'))*vr
+        self.vwvgj = (1-self.area_avg('alpha'))*vr # Legacy, do not use
         self.aa_vr = vr
         return vr
+    
+    def calc_vw_aa_Vgj_model(self, Kw=0.654, Kf=0.113):
+        self.Cajf = 0.12 * self.jf + 0.43* self.jgloc**-0.1
+        self.Cajc = 61.4 * self.jf**-2.25
+
+        for angle, rdict in self.data.items():
+            for rstar, midas_dict in rdict.items():
+                midas_dict.update({'cd13': midas_dict['cd']**(1./3)})
+
+        self.vw_aa_Vgj_model = -Kf * self.Cajf * self.jf - Kw * (self.Cajc * self.Cajf * self.area_avg('alpha') * self.jf * self.void_area_avg('cd13'))
+        
+        return self.vw_aa_Vgj_model
     
     def calc_errors(self, param1:str, param2:str) -> float:
         """ Calculates the errors, ε, between two parameters (param1 - param2) in midas_dict
@@ -3925,7 +3966,7 @@ the newly calculated :math:`v_{r}` or not
 
             set_max = max(maxs) *1.1
 
-        if x_axis == 'vals' or x_axis == 'r':
+        if x_axis == 'vals' or x_axis == 'rs':
             for angle in const_to_plot:
                 r_dict = self.data[angle]
                 rs = []
@@ -3988,7 +4029,7 @@ the newly calculated :math:`v_{r}` or not
 
                     if x_axis == 'vals':
                         ax.errorbar(vals, rs, xerr = errs, capsize=3, ecolor = "black", label=f'{angle}°', color=next(cs), marker=next(ms), linestyle = '--')
-                    elif x_axis == 'r':
+                    elif x_axis == 'rs':
                         ax.errorbar(rs, vals, yerr = errs, capsize=3, ecolor = "black", label=f'{angle}°', color=next(cs), marker=next(ms), linestyle = '--')
                 
                 elif type(param) == list:
@@ -4039,6 +4080,9 @@ the newly calculated :math:`v_{r}` or not
                                 split_param = specific_param.split('_')
                                 legend_str = '$' + split_param[0] + '_{' + split_param[1] + '}$'
 
+                        if specific_param == 'vg_approx':
+                            legend_str = r'$v_{g, model}$'
+
                         if legend_str == '':
                             legend_str = specific_param
 
@@ -4047,14 +4091,14 @@ the newly calculated :math:`v_{r}` or not
 
                         if x_axis == 'vals':
                             ax.errorbar(val_list, rs, xerr = errs, capsize=3, ecolor = "black", color=next(cs), marker=next(ms), linestyle = '--', label = legend_str)
-                        elif x_axis == 'r':
+                        elif x_axis == 'rs':
                             ax.errorbar(rs, val_list, yerr = errs, capsize=3, ecolor = "black", color=next(cs), marker=next(ms), linestyle = '--', label = legend_str)
                     
             
             if x_axis == 'vals':
                 ax.set_ylim(-1, 1)
                 ax.set_xlim(set_min, set_max)
-            elif x_axis == 'r':
+            elif x_axis == 'rs':
                 ax.set_xlim(-1, 1)
                 ax.set_ylim(set_min, set_max)
             
@@ -4126,7 +4170,7 @@ the newly calculated :math:`v_{r}` or not
                 ax2.get_xaxis().set_visible(False)
 
 
-        elif x_axis == 'r':
+        elif x_axis == 'rs':
             ax.set_ylabel(label_str, loc = xlabel_loc)
             ax.set_xlabel(r'$r/R$ [-]')
             ax.set_xticks(np.arange(-1, 1.01, 0.2))
