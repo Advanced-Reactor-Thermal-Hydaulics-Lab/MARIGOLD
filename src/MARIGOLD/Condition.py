@@ -3072,7 +3072,7 @@ the newly calculated :math:`v_{r}` or not
 
         return self.area_avg('ISxgrad')
     
-    def calc_aa_vr_model(self, method='km1_naive', IS_method = 'power', kw=0.654, kf=0.113, Lw = 5, Cavf=1, Ctau=1, n=2, IS_mu = 1.5, Cvracd = 1):
+    def calc_aa_vr_model(self, method='km1_naive', IS_method = 'power', kw=0.654, kf=0.113, Lw = 5, Cavf=1, Ctau=1, n=2, IS_mu = 1.5, Cvfacd = 1):
 
         if method == 'km1_naive':
             vr = kw * (np.pi/4)**(1/3) * self.area_avg('alpha') * self.jf / (1 - self.area_avg('alpha')) * self.area_avg('cd')**(1./3) *  (2**(-1./3) - Lw**(1/3))/(0.5 - Lw) + kf * self.jf / (1 - self.area_avg('alpha'))
@@ -3085,7 +3085,8 @@ the newly calculated :math:`v_{r}` or not
             vr = -kw * self.area_avg('alpha') * self.jf / (1 - self.area_avg('alpha')) * self.area_avg('cd')**(1./3) - kf * self.jf / (1 - self.area_avg('alpha'))
         
         elif method == 'final':
-            vr = Cvracd * -kw * self.area_avg('alpha') * self.jf / (1 - self.area_avg('alpha')) * self.area_avg('cd')**(1./3) - kf * self.jf / (1 - self.area_avg('alpha'))
+            self.calc_cd()
+            vr = Cvfacd * -kw * self.area_avg('alpha') * self.jf / (1 - self.area_avg('alpha')) * self.area_avg('cd')**(1./3) - kf * self.jf / (1 - self.area_avg('alpha'))
         
         elif method == 'IS_Ctau':
             self.calc_cd()
@@ -3301,6 +3302,46 @@ the newly calculated :math:`v_{r}` or not
            area_avg_sym_error = 0
 
         return area_avg_sym_error
+    
+    def calc_vr_uncertainty(self, sigma_vg=0.1, sigma_alpha=0.05, sigma_dp=0.03, percentage = True):
+
+        for angle, r_dict in self.data.items():
+            for rstar, midas_dict in r_dict.items():
+                alpha = midas_dict['alpha']
+                dp = midas_dict['delta_p']
+
+                try:
+                    dummy = midas_dict['sigma_vg']
+                except:
+                    if percentage:
+                        midas_dict['sigma_vg'] = sigma_vg * midas_dict['ug1']
+                    else:
+                        midas_dict['sigma_vg'] = sigma_vg
+
+                try:
+                    dummy = midas_dict['sigma_dp']
+                except:
+                    if percentage:
+                        midas_dict['sigma_dp'] = sigma_dp * midas_dict['delta_p']
+                    else:
+                        midas_dict['sigma_dp'] = sigma_dp
+
+                try:
+                    dummy = midas_dict['sigma_alpha']
+                except:
+                    if percentage:
+                        midas_dict['sigma_alpha'] = sigma_alpha * midas_dict['alpha']
+                    else:
+                        midas_dict['sigma_alpha'] = sigma_alpha
+                
+                if dp == 0:
+                    midas_dict['sigma_vf'] = 0
+                    midas_dict['sigma_vr'] = 0
+                else:
+                    midas_dict['sigma_vf'] = np.sqrt( 1./(2*self.rho_f) * (sigma_dp**2/((1-alpha)*dp)  + sigma_alpha**2 * dp / (1-alpha)**3) )
+                    midas_dict['sigma_vr'] = np.sqrt( midas_dict['sigma_vf']**2 + midas_dict['sigma_vg']**2)
+
+        return self.area_avg('sigma_vr')
 
 
     def calc_avg_lat_sep(self):
@@ -3888,7 +3929,7 @@ the newly calculated :math:`v_{r}` or not
         return self.area_avg("alpha_reconstructed")
     
     def plot_profiles2(self, param, save_dir = '.', show=True, x_axis='vals', errorbars = 0.0, 
-                      const_to_plot = [90, 67.5, 45, 22.5, 0], include_complement = True, 
+                      const_to_plot = [90, 67.5, 45, 22.5, 0], include_complement = True, skip_1_comp = False,
                       fig_size=(4,4), fs = 10, title=True, label_str = '', legend_loc = 'best', xlabel_loc = 'center', include_const = False,
                       set_min = None, set_max = None, show_spines = True, xlabel_loc_coords = None, ylabel_loc_coords = None, cs=None, ms = None, ls = None) -> None:
         """ Simplified plot_profiles with no rotation option
@@ -3927,7 +3968,7 @@ the newly calculated :math:`v_{r}` or not
         # Tick marks facing in
         ax.tick_params(direction='in',which='both')
 
-        if errorbars > 0:
+        if type(errorbars) is float and errorbars > 0:
             ax.plot([], [], ' ', label = f"{errorbars*100:0.1f}% error bars") # dummy to just get this text in the legend
 
         if not ms:
@@ -3971,6 +4012,7 @@ the newly calculated :math:`v_{r}` or not
                 r_dict = self.data[angle]
                 rs = []
                 vals = []
+                errs = []
                 for r, midas_output in r_dict.items():
                     rs.append(r)
 
@@ -3983,6 +4025,18 @@ the newly calculated :math:`v_{r}` or not
                             else:
                                 vals.append(0.0)
                                 print(f"Could not find {param} for φ = {angle}, r = {r}. Substituting 0")
+                        
+                        if errorbars == 'sigma':
+                            if param == 'vr':
+                                errs.append(midas_output['sigma_vr'])
+                            elif param == 'vf':
+                                errs.append(midas_output['sigma_vf'])
+                            else:
+                                print('issue with sigma, assuming 0 error')
+                                errs.append(0)
+                        elif type(errorbars) is float:
+                                errs.append(midas_output[param]*errorbars)
+
                     elif type(param) == list:
                         for i, specific_param in enumerate(param):
                             vals.append([])
@@ -4001,6 +4055,10 @@ the newly calculated :math:`v_{r}` or not
                     else:
                         r_dict = self.data[angle+180]
                         for r, midas_output in r_dict.items():
+                            if skip_1_comp and r > 0.95:
+                                print('skipping')
+                                continue
+                            
                             rs.append(-r)
                             if type(param) == str:
                                 try:
@@ -4011,6 +4069,18 @@ the newly calculated :math:`v_{r}` or not
                                     else:
                                         vals.append(0.0)
                                         print(f"Could not find {param} for φ = {angle}, r = {r}. Substituting 0")
+
+                                if errorbars == 'sigma':
+                                    if param == 'vr':
+                                        errs.append(midas_output['sigma_vr'])
+                                    elif param == 'vf':
+                                        errs.append(midas_output['sigma_vf'])
+                                    else:
+                                        print('issue with sigma, assuming 0 error')
+                                        errs.append(0)
+                                elif type(errorbars) is float:
+                                    errs.append(midas_output[param]*errorbars)
+                            
                             elif type(param) == list:
                                 for i, specific_param in enumerate(param):
                                     vals.append([])
@@ -4024,8 +4094,10 @@ the newly calculated :math:`v_{r}` or not
                                             print(f"Could not find {specific_param} for φ = {angle}, r = {r}. Substituting 0")
                 if type(param) == str:
                     vals = [var for _, var in sorted(zip(rs, vals))]
+                    errs = [err for _, err in sorted(zip(rs, errs))]
                     rs = sorted(rs)
-                    errs = errorbars * np.abs(np.asarray(vals))
+
+                    # errs = errorbars * np.abs(np.asarray(vals))
 
                     if x_axis == 'vals':
                         ax.errorbar(vals, rs, xerr = errs, capsize=3, ecolor = "black", label=f'{angle}°', color=next(cs), marker=next(ms), linestyle = '--')
