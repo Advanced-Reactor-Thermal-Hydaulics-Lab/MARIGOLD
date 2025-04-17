@@ -3310,29 +3310,20 @@ the newly calculated :math:`v_{r}` or not
                 alpha = midas_dict['alpha']
                 dp = midas_dict['delta_p']
 
-                try:
-                    dummy = midas_dict['sigma_vg']
-                except:
-                    if percentage:
-                        midas_dict['sigma_vg'] = sigma_vg * midas_dict['ug1']
-                    else:
-                        midas_dict['sigma_vg'] = sigma_vg
+                if percentage:
+                    midas_dict['sigma_vg'] = sigma_vg * midas_dict['ug1']
+                else:
+                    midas_dict['sigma_vg'] = sigma_vg
 
-                try:
-                    dummy = midas_dict['sigma_dp']
-                except:
-                    if percentage:
-                        midas_dict['sigma_dp'] = sigma_dp * midas_dict['delta_p']
-                    else:
-                        midas_dict['sigma_dp'] = sigma_dp
+                if percentage:
+                    midas_dict['sigma_dp'] = sigma_dp * midas_dict['delta_p']
+                else:
+                    midas_dict['sigma_dp'] = sigma_dp
 
-                try:
-                    dummy = midas_dict['sigma_alpha']
-                except:
-                    if percentage:
-                        midas_dict['sigma_alpha'] = sigma_alpha * midas_dict['alpha']
-                    else:
-                        midas_dict['sigma_alpha'] = sigma_alpha
+                if percentage:
+                    midas_dict['sigma_alpha'] = sigma_alpha * midas_dict['alpha']
+                else:
+                    midas_dict['sigma_alpha'] = sigma_alpha
                 
                 if dp == 0:
                     midas_dict['sigma_vf'] = 0
@@ -3885,6 +3876,7 @@ the newly calculated :math:`v_{r}` or not
             # TODO
             pass
         elif method.lower() == 'adix':
+            # No fucking idea what this is
             
             def complicated_alpha(params):
                 s, n, sigma = params
