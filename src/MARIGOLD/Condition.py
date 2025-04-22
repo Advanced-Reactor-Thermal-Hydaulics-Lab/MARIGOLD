@@ -4035,7 +4035,7 @@ the newly calculated :math:`v_{r}` or not
                                 print('issue with sigma, assuming 0 error')
                                 errs.append(0)
                         elif type(errorbars) is float:
-                                errs.append(midas_output[param]*errorbars)
+                                errs.append(abs(midas_output[param]*errorbars))
                         else:
                             errs.append(0)
 
@@ -4081,7 +4081,9 @@ the newly calculated :math:`v_{r}` or not
                                         print('issue with sigma, assuming 0 error')
                                         errs.append(0)
                                 elif type(errorbars) is float:
-                                    errs.append(midas_output[param]*errorbars)
+                                    errs.append(abs(midas_output[param]*errorbars))
+                                else:
+                                    errs.append(0)
                             
                             elif type(param) == list:
                                 for i, specific_param in enumerate(param):
