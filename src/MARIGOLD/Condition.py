@@ -2854,7 +2854,7 @@ the newly calculated :math:`v_{r}` or not
 
         """
 
-        MAX_ITERATIONS = 1000
+        MAX_ITERATIONS = 100
         iterations = 0
         initialize_vr = True
 
@@ -2914,7 +2914,7 @@ the newly calculated :math:`v_{r}` or not
                     elif method == 'km1':
                         vr = kw * (np.pi/4)**(1/3) * midas_dict['alpha'] * midas_dict['vf'] * midas_dict['cd']**(1./3) *  (2**(-1./3) - Lw**(1/3))/(0.5 - Lw) + kf * midas_dict['vf']
                     
-                    elif method == 'km1_simp' or method == 'prelim':
+                    elif method == 'km1_simp' or method == 'prelim' or method.lower() == 'final_horizontal':
                         vr = -kw * midas_dict['alpha'] * midas_dict['vf'] * midas_dict['cd']**(1./3) - kf * midas_dict['vf']
 
                     elif method == 'prelim_plus':
@@ -2941,6 +2941,14 @@ the newly calculated :math:`v_{r}` or not
                         
                         if vr != vr:
                             if not quiet: warnings.warn(f"vr nan for {angle, rstar}, setting to 0")
+                            vr = 0
+
+                    elif method == 'final':
+                        try:
+                            vr = (
+                            np.sign(old_vr) * kw * midas_dict['alpha'] * midas_dict['vf'] * midas_dict['cd']**(1./3) - kf * midas_dict['vf'] 
+                            + np.sqrt( 4./3 * self.void_area_avg('Dsm1')*0.001/midas_dict['cd'] * (1 - midas_dict['alpha'])*(1-self.rho_g/self.rho_f) * self.gz ) )
+                        except ZeroDivisionError:
                             vr = 0
                         
 
@@ -3920,7 +3928,7 @@ the newly calculated :math:`v_{r}` or not
 
         return self.area_avg("alpha_reconstructed")
     
-    def plot_profiles2(self, param, save_dir = '.', show=True, x_axis='vals', errorbars = 0.0, 
+    def plot_profiles2(self, param, save_dir = '.', show=True, x_axis='vals', errorbars = False, 
                       const_to_plot = [90, 67.5, 45, 22.5, 0], include_complement = True, skip_1_comp = False,
                       fig_size=(4,4), fs = 10, title=True, label_str = '', legend_loc = 'best', xlabel_loc = 'center', include_const = False,
                       set_min = None, set_max = None, show_spines = True, xlabel_loc_coords = None, ylabel_loc_coords = None, cs=None, ms = None, ls = None) -> None:
@@ -4028,6 +4036,8 @@ the newly calculated :math:`v_{r}` or not
                                 errs.append(0)
                         elif type(errorbars) is float:
                                 errs.append(midas_output[param]*errorbars)
+                        else:
+                            errs.append(0)
 
                     elif type(param) == list:
                         for i, specific_param in enumerate(param):
@@ -4048,7 +4058,7 @@ the newly calculated :math:`v_{r}` or not
                         r_dict = self.data[angle+180]
                         for r, midas_output in r_dict.items():
                             if skip_1_comp and r > 0.95:
-                                print('skipping')
+                                # print('skipping')
                                 continue
                             
                             rs.append(-r)
@@ -4092,9 +4102,15 @@ the newly calculated :math:`v_{r}` or not
                     # errs = errorbars * np.abs(np.asarray(vals))
 
                     if x_axis == 'vals':
-                        ax.errorbar(vals, rs, xerr = errs, capsize=3, ecolor = "black", label=f'{angle}°', color=next(cs), marker=next(ms), linestyle = '--')
+                        if (type(errorbars) == float and errorbars == 0) or errorbars == False:
+                            ax.plot(vals, rs, label=f'{angle}°', color=next(cs), marker=next(ms), linestyle = '--')
+                        else:
+                            ax.errorbar(vals, rs, xerr = errs, capsize=3, ecolor = "black", label=f'{angle}°', color=next(cs), marker=next(ms), linestyle = '--')
                     elif x_axis == 'rs':
-                        ax.errorbar(rs, vals, yerr = errs, capsize=3, ecolor = "black", label=f'{angle}°', color=next(cs), marker=next(ms), linestyle = '--')
+                        if type(errorbars) == float and errorbars == 0 or errorbars == False:
+                            ax.plot(vals, rs, label=f'{angle}°', color=next(cs), marker=next(ms), linestyle = '--')
+                        else:
+                            ax.errorbar(rs, vals, yerr = errs, capsize=3, ecolor = "black", label=f'{angle}°', color=next(cs), marker=next(ms), linestyle = '--')
                 
                 elif type(param) == list:
                     temp = []
