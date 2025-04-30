@@ -1,7 +1,7 @@
 MARIGOLD Documentation
-================
+======================
 
-----------
+----------------------
 
 
 .. automodule:: MARIGOLD.Condition

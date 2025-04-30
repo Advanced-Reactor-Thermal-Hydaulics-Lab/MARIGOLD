@@ -1,7 +1,0 @@
-MARIGOLD
-========
-
-.. toctree::
-   :maxdepth: 4
-
-   MARIGOLD

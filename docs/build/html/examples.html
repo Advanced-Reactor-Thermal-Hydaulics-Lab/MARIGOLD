@@ -7,23 +7,22 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Example Analysis &mdash; MARIGOLD 0.0.1 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
-      <link rel="stylesheet" type="text/css" href="_static/dark_mode_css/general.css?v=c0a7eb24" />
-      <link rel="stylesheet" type="text/css" href="_static/dark_mode_css/dark.css?v=70edf1c7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=470960a4" />
 
   
+    <link rel="shortcut icon" href="_static/favicon.ico"/>
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
       <script src="_static/documentation_options.js?v=d45e8c67"></script>
-      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/doctools.js?v=9a2dae69"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
-      <script src="_static/dark_mode_js/default_dark.js?v=fd565c74"></script>
-      <script src="_static/dark_mode_js/theme_switcher.js?v=358d3910"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="MARIGOLD" href="MARIGOLD.html" />
+    <link rel="next" title="MARIGOLD Documentation" href="MARIGOLD.html" />
     <link rel="prev" title="Getting Started" href="Installation.html" /> 
 </head>
 
@@ -52,7 +51,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#example-analysis-ipynb">example_analysis.ipynb</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="MARIGOLD.html">MARIGOLD</a></li>
+<li class="toctree-l1"><a class="reference internal" href="MARIGOLD.html">MARIGOLD Documentation</a></li>
 </ul>
 
         </div>
@@ -88,18 +87,104 @@
 <p>First thing to note is that this is a interactive python, or Jupytr, notebook. This allows each cell to be run individually. Typically we use VSCode, with the Jupytr notebook extension installed, to run these.</p>
 <p>Lets take a look at the first cell:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Imports and iPython magic setup</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">matplotlib</span> <span class="k">as</span> <span class="nn">mpl</span>
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">MARIGOLD</span> <span class="k">as</span> <span class="nn">mgd</span>
-<span class="kn">from</span> <span class="nn">MARIGOLD</span> <span class="kn">import</span> <span class="n">Condition</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mpl</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">MARIGOLD</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mgd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">MARIGOLD</span><span class="w"> </span><span class="kn">import</span> <span class="n">Condition</span>
 <span class="o">%</span><span class="n">matplotlib</span> <span class="n">widget</span>
 <span class="o">%</span><span class="n">load_ext</span> <span class="n">autoreload</span>
 <span class="o">%</span><span class="n">autoreload</span> <span class="mi">2</span>
 </pre></div>
 </div>
-<p>This cell just imports the important packages, and sets up some iPython settings that are useful. <code class="docutils literal notranslate"><span class="pre">%matplolib</span> <span class="pre">widget</span></code> makes it possible to interact with <code class="docutils literal notranslate"><span class="pre">matplotlib</span></code> figures directly, such as panning the camera, zooming in, etc.</p>
+<p>This cell just imports the important packages, and sets up some iPython settings that are useful. Usually <code class="docutils literal notranslate"><span class="pre">MARIGOLD</span></code> is imported as <code class="docutils literal notranslate"><span class="pre">mgd</span></code> for easy reference later, while the entire <code class="docutils literal notranslate"><span class="pre">Condition</span></code> object is imported for better type hinting. <code class="docutils literal notranslate"><span class="pre">%matplolib</span> <span class="pre">widget</span></code> makes it possible to interact with <code class="docutils literal notranslate"><span class="pre">matplotlib</span></code> figures directly, such as panning the camera, zooming in, etc. <code class="docutils literal notranslate"><span class="pre">load_ext</span> <span class="pre">autoreload</span></code> and <code class="docutils literal notranslate"><span class="pre">autoreload</span> <span class="pre">2</span></code> are useful if you’re changing MARIGOLD functions and running them in iPython, as you don’t need to re-import them after making changes</p>
+<p>The next cell:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Load Data from spreadsheets</span>
+
+<span class="n">cwd</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+<span class="n">dat_name</span> <span class="o">=</span> <span class="s1">&#39;example_database.dat&#39;</span>
+<span class="n">path_to_dump</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cwd</span><span class="p">,</span> <span class="s2">&quot;example_sheets&quot;</span><span class="p">)</span> <span class="c1"># Assumes the &quot;example_sheets&quot; directory is present in the cwd</span>
+
+<span class="c1"># If the .dat file already exists, we could just load it immediatiately by setting this to False</span>
+<span class="n">refetch</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cwd</span><span class="p">,</span> <span class="n">dat_name</span><span class="p">))</span> <span class="ow">or</span> <span class="n">refetch</span><span class="p">:</span>
+    <span class="n">mgd</span><span class="o">.</span><span class="n">extractLocalDataFromDir</span><span class="p">(</span><span class="n">path_to_dump</span><span class="p">,</span> <span class="n">dump_file</span><span class="o">=</span><span class="n">dat_name</span><span class="p">,</span> <span class="n">sheet_type</span><span class="o">=</span><span class="s1">&#39;adix_template4&#39;</span><span class="p">)</span>
+
+<span class="n">database</span> <span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Condition</span><span class="p">]</span> <span class="o">=</span> <span class="n">mgd</span><span class="o">.</span><span class="n">loadData</span><span class="p">(</span><span class="n">dat_name</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This cell is responsible for loading in the experimental data. <code class="docutils literal notranslate"><span class="pre">extractLocalDataFromDir</span></code> is the star of the show here. This function is responsible for looking through a directory and finding any .xlsx files that have probe data. It then saves them to a .dat file, in this example, <code class="docutils literal notranslate"><span class="pre">example_database.dat</span></code>. This allows easy transfer of data, without having to move the .xlsx files around. The .dat file is loaded by the <code class="docutils literal notranslate"><span class="pre">loadData</span></code> function.</p>
+<p>The database is now filled with <code class="docutils literal notranslate"><span class="pre">Condition</span></code> objects. These are the primary way we will be interacting with the data. Data at a specific  <span class="math notranslate nohighlight">\((r, \varphi)\)</span> can be accessed via calling the condition, <code class="docutils literal notranslate"><span class="pre">cond(phi,</span> <span class="pre">r)</span></code> where <span class="math notranslate nohighlight">\(varphi\)</span> is in radians and <span class="math notranslate nohighlight">\(r\)</span> is nondimensional. There are also lots of built in methods for interacting and manipulating the data.</p>
+<p>For instance, a common task in data analysis is looking at area-averaged parameters. The next cell is an example of making a table of these.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">database</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">cond</span><span class="p">:</span> <span class="n">cond</span><span class="o">.</span><span class="n">jgloc</span><span class="o">+</span><span class="n">cond</span><span class="o">.</span><span class="n">jf</span><span class="p">)</span> <span class="c1"># Sort the database by jf and jg, in ascending order</span>
+
+<span class="c1"># This will print out the area averages</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;jf</span><span class="se">\t</span><span class="s2">jgloc</span><span class="se">\t</span><span class="s2">⟨α⟩</span><span class="se">\t</span><span class="s2">⟨α vg⟩</span><span class="se">\t</span><span class="s2">⟨(1-α) vf⟩</span><span class="se">\t</span><span class="s2">ε_jg&quot;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">cond</span> <span class="ow">in</span> <span class="n">database</span><span class="p">:</span>
+    <span class="n">cond</span><span class="o">.</span><span class="n">mirror</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s1">&#39;axisym&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">cond</span><span class="o">.</span><span class="n">jf</span><span class="si">:</span><span class="s2">0.2f</span><span class="si">}</span><span class="se">\t</span><span class="si">{</span><span class="n">cond</span><span class="o">.</span><span class="n">jgloc</span><span class="si">:</span><span class="s2">0.3f</span><span class="si">}</span><span class="se">\t</span><span class="si">{</span><span class="n">cond</span><span class="o">.</span><span class="n">area_avg</span><span class="p">(</span><span class="s1">&#39;alpha&#39;</span><span class="p">)</span><span class="si">:</span><span class="s2">0.3f</span><span class="si">}</span><span class="se">\t</span><span class="si">{</span><span class="n">cond</span><span class="o">.</span><span class="n">area_avg</span><span class="p">(</span><span class="s1">&#39;alpha_ug1&#39;</span><span class="p">)</span><span class="si">:</span><span class="s2">0.3f</span><span class="si">}</span><span class="se">\t</span><span class="si">{</span><span class="n">cond</span><span class="o">.</span><span class="n">area_avg</span><span class="p">(</span><span class="s1">&#39;jf&#39;</span><span class="p">)</span><span class="si">:</span><span class="s2">0.3f</span><span class="si">}</span><span class="se">\t\t</span><span class="si">{</span><span class="w"> </span><span class="p">(</span><span class="n">cond</span><span class="o">.</span><span class="n">area_avg</span><span class="p">(</span><span class="s1">&#39;alpha_ug1&#39;</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">cond</span><span class="o">.</span><span class="n">jgloc</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">cond</span><span class="o">.</span><span class="n">jgloc</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="mi">100</span><span class="w"> </span><span class="si">:</span><span class="s2">0.1f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Before area-averaging, it is critical that each <code class="docutils literal notranslate"><span class="pre">Condition</span></code> object is mirrored. This ensures there is data around the entire cross section. For 90 degree data, the <code class="docutils literal notranslate"><span class="pre">method</span></code> we use is <code class="docutils literal notranslate"><span class="pre">axisym</span></code>, for horizontal it would be <code class="docutils literal notranslate"><span class="pre">sym90</span></code>. The area-averaging is performed by the <code class="docutils literal notranslate"><span class="pre">.area_avg()</span></code> method of the <code class="docutils literal notranslate"><span class="pre">Condition</span></code> object. Any <code class="docutils literal notranslate"><span class="pre">param</span></code> can be area-averaged, such as <code class="docutils literal notranslate"><span class="pre">alpha</span></code>, <code class="docutils literal notranslate"><span class="pre">alpha_ug1</span></code>, etc. A full list of params can be found by calling <code class="docutils literal notranslate"><span class="pre">mgd.print_tab_keys()</span></code>.</p>
+<p>The next cell is an example agreement plot for the gas benchmark.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Gas benchmark</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span> <span class="o">=</span> <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;font.size&#39;</span><span class="p">:</span> <span class="mi">12</span><span class="p">})</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;font.family&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Times New Roman&quot;</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;mathtext.fontset&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;cm&quot;</span>
+<span class="k">for</span> <span class="n">cond</span> <span class="ow">in</span> <span class="n">database</span><span class="p">:</span>
+
+    <span class="c1"># mpbl = ax.scatter(cond.jgloc, cond.area_avg(&#39;alpha_ug1&#39;), marker=cond.marker_type, color = cond.marker_color)</span>
+    <span class="n">mpbl</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">cond</span><span class="o">.</span><span class="n">jgloc</span><span class="p">,</span> <span class="n">cond</span><span class="o">.</span><span class="n">area_avg</span><span class="p">(</span><span class="s1">&#39;alpha_ug1&#39;</span><span class="p">),</span> <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">color</span> <span class="o">=</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">edgecolors</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xscale</span><span class="p">(</span><span class="s1">&#39;log&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_yscale</span><span class="p">(</span><span class="s1">&#39;log&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mi">11</span><span class="p">,</span> <span class="mi">11</span><span class="p">],</span> <span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;grey&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mi">9</span><span class="p">,</span> <span class="mi">9</span><span class="p">],</span> <span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;grey&#39;</span><span class="p">,</span> <span class="n">label</span> <span class="o">=</span> <span class="s2">&quot;± 10%&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;dotted&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">)</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">([</span><span class="o">-</span><span class="mi">10</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mi">10</span><span class="p">],</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;None&#39;</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">color</span> <span class="o">=</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">label</span> <span class="o">=</span> <span class="s2">&quot;Data&quot;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="mf">0.075</span><span class="p">,</span> <span class="mf">0.35</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="mf">0.075</span><span class="p">,</span> <span class="mf">0.35</span><span class="p">)</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">([</span><span class="mf">0.075</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">])</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">([</span><span class="mf">0.075</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">])</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">get_xaxis</span><span class="p">()</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span><span class="n">mpl</span><span class="o">.</span><span class="n">ticker</span><span class="o">.</span><span class="n">ScalarFormatter</span><span class="p">())</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">get_yaxis</span><span class="p">()</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span><span class="n">mpl</span><span class="o">.</span><span class="n">ticker</span><span class="o">.</span><span class="n">ScalarFormatter</span><span class="p">())</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s1">&#39;equal&#39;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\langle j_</span><span class="si">{g}</span><span class="s1"> \rangle _</span><span class="si">{rotameters}</span><span class="s1">\ m/s$&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\langle \alpha v_</span><span class="si">{g}</span><span class="s1"> \rangle_</span><span class="si">{probe}</span><span class="s1">\  m/s$&#39;</span><span class="p">)</span>
+
+<span class="c1"># plt.colorbar(mpbl, label=r&#39;$\langle j_{g} \rangle \ m/s$&#39;, ticks=np.arange(0, 0.51, 0.1), boundaries = np.arange(0, 0.51, 0.01), values = np.arange(0, 0.5, 0.01))</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;.\gas_benchmark.png&quot;</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">500</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>This is honestly more <code class="docutils literal notranslate"><span class="pre">matplotlib</span></code> stuff than MARIGOLD, so no additional comments will be made.</p>
+<p>Plotting is an important feature in MARIGOLD. Below is an example of how to do line plots. Again, this is a method on a <code class="docutils literal notranslate"><span class="pre">Condition</span></code> object, so it has some similarities with <code class="docutils literal notranslate"><span class="pre">.avea_avg()</span></code>.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">cond</span> <span class="ow">in</span> <span class="n">database</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;alpha&#39;</span><span class="p">,</span> <span class="s1">&#39;ai&#39;</span><span class="p">,</span> <span class="s1">&#39;ug1&#39;</span><span class="p">,</span> <span class="s1">&#39;Dsm1&#39;</span><span class="p">,</span> <span class="s1">&#39;vf&#39;</span><span class="p">,</span> <span class="s1">&#39;vr&#39;</span><span class="p">]:</span>
+        <span class="c1"># Usually the minimum of the graph is set by the minimum of the param value. But for Dsm, the diameter doesn&#39;t</span>
+        <span class="c1"># exactly go to zero at the wall, so when we plot it makes more sense to not go to 0</span>
+        <span class="k">if</span> <span class="n">param</span> <span class="o">==</span> <span class="s1">&#39;Dsm1&#39;</span><span class="p">:</span>
+            <span class="n">set_min</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">cond</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="s1">&#39;Dsm1&#39;</span><span class="p">,</span> <span class="n">nonzero</span> <span class="o">=</span> <span class="kc">True</span><span class="p">))</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">set_min</span> <span class="o">=</span> <span class="n">cond</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">param</span><span class="p">)</span>
+
+        <span class="c1"># This function will plot the data down the 90° line, with the r data plotted on the x axis.</span>
+        <span class="c1"># The colors are set by the function based on the param type. Black for void, red for vg, etc.</span>
+        <span class="c1"># 6.35 x 3 is the best size to fit 4 graphs all on the same ppt slide</span>
+        <span class="n">cond</span><span class="o">.</span><span class="n">plot_profiles2</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="n">x_axis</span> <span class="o">=</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">const_to_plot</span> <span class="o">=</span> <span class="p">[</span><span class="mi">90</span><span class="p">],</span> <span class="n">title</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">fig_size</span> <span class="o">=</span> <span class="p">(</span><span class="mf">6.35</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">show</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">cs</span> <span class="o">=</span> <span class="s1">&#39;infer&#39;</span><span class="p">,</span> <span class="n">set_min</span> <span class="o">=</span> <span class="n">set_min</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Hopefully this gave you a start on performing two-phase flow analysis with MARIGOLD. Some things that weren’t covered in this tutorial include contour plotting with <code class="docutils literal notranslate"><span class="pre">plot_contour</span></code> and interpolation.</p>
 </section>
 </section>
 
@@ -108,7 +193,7 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="Installation.html" class="btn btn-neutral float-left" title="Getting Started" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="MARIGOLD.html" class="btn btn-neutral float-right" title="MARIGOLD" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="MARIGOLD.html" class="btn btn-neutral float-right" title="MARIGOLD Documentation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
@@ -131,7 +216,22 @@
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>  
+
+  <style>
+    /* Sidebar header (and topbar for mobile) */
+    .wy-side-nav-search, .wy-nav-top {
+      background: #daaa00;
+    }
+    /* Sidebar */
+    .wy-body-for-nav, .wy-nav-side, .wy-grid-for-nav, .wy-nav-shift {
+        background: #555960;
+    }
+    .wy-nav-content {
+        background: #c4bfc0;
+    }
+  </style>
+
 
 </body>
 </html>
