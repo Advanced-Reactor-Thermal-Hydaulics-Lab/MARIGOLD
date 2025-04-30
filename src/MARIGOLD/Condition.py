@@ -617,7 +617,7 @@ class Condition:
 
         return
     
-    def approx_vg(self, method = 'vr', n=7) -> None:
+    def approx_vg(self, method = 'vr', n=7, update_ug1 = False) -> None:
         """Method for approximating vg with power-law relation. I don't think this makes sense
 
         .. math:: v_{g, approx} = \\frac{(n+1)(2*n+1)}{ (2*n^{2})} * (j_{g} / \\langle \\alpha \\rangle) * (1 - abs(rstar))**(1/n)
@@ -642,11 +642,13 @@ class Condition:
                     vg_approx = midas_dict['vf_approx'] + midas_dict['vr_model']
                 elif method == 'vr':
                     vg_approx = midas_dict['vf'] + midas_dict['vr']
+                elif type(method) is float:
+                    vg_approx = method
                 else:
                     raise ValueError(f"Unknown method for approximating vg: {method}")
                 
-                # if 'ug1' not in midas_dict.keys():
-                #     midas_dict.update({'ug1': vg_approx})
+                if update_ug1 and 'ug1' not in midas_dict.keys():
+                    midas_dict.update({'ug1': vg_approx})
                 
                 midas_dict.update({'vg_approx': vg_approx})
 
@@ -4172,9 +4174,15 @@ the newly calculated :math:`v_{r}` or not
                             legend_str += f", {angle}°"
 
                         if x_axis == 'vals':
-                            ax.errorbar(val_list, rs, xerr = errs, capsize=3, ecolor = "black", color=next(cs), marker=next(ms), linestyle = '--', label = legend_str)
+                            if type(errorbars) == float and errorbars == 0 or errorbars == False:
+                                ax.plot(val_list, rs, color=next(cs), marker=next(ms), linestyle = '--', label = legend_str)
+                            else:
+                                ax.errorbar(val_list, rs, xerr = errs, capsize=3, ecolor = "black", color=next(cs), marker=next(ms), linestyle = '--', label = legend_str)
                         elif x_axis == 'rs':
-                            ax.errorbar(rs, val_list, yerr = errs, capsize=3, ecolor = "black", color=next(cs), marker=next(ms), linestyle = '--', label = legend_str)
+                            if type(errorbars) == float and errorbars == 0 or errorbars == False:
+                                ax.plot(rs, val_list, color=next(cs), marker=next(ms), linestyle = '--', label = legend_str)
+                            else:
+                                ax.errorbar(rs, val_list, yerr = errs, capsize=3, ecolor = "black", color=next(cs), marker=next(ms), linestyle = '--', label = legend_str)
                     
             
             if x_axis == 'vals':
