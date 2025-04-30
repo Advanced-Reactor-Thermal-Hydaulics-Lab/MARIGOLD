@@ -640,12 +640,13 @@ class Condition:
                     if 'vr_model' not in midas_dict.keys():
                         self.calc_vr_model()
                     vg_approx = midas_dict['vf_approx'] + midas_dict['vr_model']
-                
-                if 'ug1' in midas_dict.keys():
-                    if debug: print(f"approx_vg: data found for {angle}\t{rstar}", file=debugFID)
-                    vg_approx = midas_dict['ug1']
+                elif method == 'vr':
+                    vg_approx = midas_dict['vf'] + midas_dict['vr']
                 else:
-                    midas_dict.update({'ug1': vg_approx})
+                    raise ValueError(f"Unknown method for approximating vg: {method}")
+                
+                # if 'ug1' not in midas_dict.keys():
+                #     midas_dict.update({'ug1': vg_approx})
                 
                 midas_dict.update({'vg_approx': vg_approx})
 
@@ -2688,21 +2689,29 @@ class Condition:
                 if method.lower() == 'ishii':
                     mu_m = self.mu_f * (1 - midas_dict['alpha'] / alpha_peak)**(-2.5*alpha_peak * (self.mu_g + 0.4*self.mu_f) / (self.mu_g + self.mu_f)  )
 
-                elif method.lower() == 'ishii_AA':
+                elif method.lower() == 'ishii_aa':
                     mu_m = self.mu_f * (1 - alpha_avg / alpha_peak)**(-2.5*alpha_peak * (self.mu_g + 0.4*self.mu_f) / (self.mu_g + self.mu_f)  )
                     
                 elif method.lower() == 'avg_void':
                     mu_m = self.mu_f / (1 - alpha_avg)
+                else:
+                    raise(ValueError("Unknown option for calc_mu_eff"))
+
+                if np.real(mu_m) < 0 or np.imag(mu_m) > 0:
+                    warnings.warn(f"Non-zero or imaginary mu_eff: {angle}, {rstar}, {method}, {midas_dict['alpha']}, {mu_m}. Setting to mu_f")
+                    mu_eff = self.mu_f
 
                 mu_eff = mu_m
                 mu_m = mu_eff
 
                 midas_dict.update({'mu_eff': mu_eff})
                 midas_dict.update({'mu_m': mu_m})
+        try:
+            return self.area_avg('mu_eff')
+        except:
+            return 0
 
-        return self.area_avg('mu_eff')
-
-    def calc_cd(self, method='Ishii-Zuber', vr_cheat = False, limit = 0, const_CD = 0.44):
+    def calc_cd(self, method='Ishii-Zuber', vr_cheat = False, limit = 10**-6, const_CD = 0.44):
         """Method for calculating drag coefficient
         
         Inputs:
@@ -2740,6 +2749,16 @@ class Condition:
 
                     Reb = (1 - midas_dict['alpha']) * midas_dict['Dsm1'] * self.rho_f * abs(midas_dict['vr_model']) / midas_dict['mu_m']
 
+                try:
+                    if Reb < 0:
+                        warnings.warn("RuntimeWarning: Reb negative!")
+                        print(Reb, midas_dict['alpha'], midas_dict['Dsm1'], abs(midas_dict['vr_model']), midas_dict['mu_m'])
+                    else:
+                        pass
+                except:
+                    warnings.warn("RuntimeWarning: Reb imaginary!")
+                    print(Reb, midas_dict['alpha'], midas_dict['Dsm1'], abs(midas_dict['vr_model']), midas_dict['mu_m'])
+                
                 midas_dict.update({'Reb': Reb})
 
                 if method == 'Ishii-Zuber' or method == 'IZ' or method == 'Ishii':
@@ -2747,7 +2766,7 @@ class Condition:
                     if Reb > 0:
                         cd = 24/Reb * (1 + 0.1*Reb**0.75)
                     else:
-                        cd = 0
+                        cd = limit
 
                 elif method.lower() == 'schiller-naumann':
                     Reb = (1 - midas_dict['alpha']) * midas_dict['Dsm1'] * self.rho_f * abs(midas_dict['vr_model']) / self.mu_f
@@ -2776,8 +2795,37 @@ class Condition:
                 midas_dict.update({'cd': cd})
 
         return self.area_avg('cd')
+    
+    def calc_Reb(self):
+        """TODO, function to calculate bubble Reynolds number
 
-    def calc_vr_model(self, method='km1_simp', kw = -0.98, n=1, Lw = 5, kf = 0.089, 
+        Options:
+         - ???
+        """
+        for angle, r_dict in self.data.items():
+            for rstar, midas_dict in r_dict.items():
+                Reb = 0
+                midas_dict.update({'Reb': Reb})
+
+    def calc_cl(self, method='tomiyama', sharma_factor = False):
+        """TODO, function to calculate lift coefficient
+
+        :param method: method to use to calculate lift coefficient, defaults to 'tomiyama'
+        :type method: str, optional
+        :param sharma_factor: Option to use Sharma's exponential Ref, defaults to False
+        :type sharma_factor: bool, optional
+        """
+        for angle, r_dict in self.data.items():
+            for rstar, midas_dict in r_dict.items():
+                
+                if method.lower() == 'tomiyama':
+                    CL = 0
+                elif method.lower() == 'hibiki-ishii' or method.lower() == 'hi':
+                    CL = 0
+
+                midas_dict.update({'CL': CL})
+
+    def calc_vr_model(self, method='km1_simp', kw = 0.654, n=1, Lw = 5, kf = 0.113, 
                       iterate_cd = True, initial_vr = None, 
                       quiet = True, recalc_cd = True, iter_tol = 1e-4, custom_f = None, CC = 1):
         """Method for calculating relative velocity based on models
@@ -2806,7 +2854,7 @@ the newly calculated :math:`v_{r}` or not
 
         """
 
-        MAX_ITERATIONS = 1000
+        MAX_ITERATIONS = 100
         iterations = 0
         initialize_vr = True
 
@@ -2866,7 +2914,7 @@ the newly calculated :math:`v_{r}` or not
                     elif method == 'km1':
                         vr = kw * (np.pi/4)**(1/3) * midas_dict['alpha'] * midas_dict['vf'] * midas_dict['cd']**(1./3) *  (2**(-1./3) - Lw**(1/3))/(0.5 - Lw) + kf * midas_dict['vf']
                     
-                    elif method == 'km1_simp' or method == 'prelim':
+                    elif method == 'km1_simp' or method == 'prelim' or method.lower() == 'final_horizontal':
                         vr = -kw * midas_dict['alpha'] * midas_dict['vf'] * midas_dict['cd']**(1./3) - kf * midas_dict['vf']
 
                     elif method == 'prelim_plus':
@@ -2880,7 +2928,7 @@ the newly calculated :math:`v_{r}` or not
 
                         try:
                             vr = (
-                            -kw * midas_dict['alpha'] * midas_dict['vf'] * midas_dict['cd']**(1./3) - kf * midas_dict['vf'] 
+                            +kw * midas_dict['alpha'] * midas_dict['vf'] * midas_dict['cd']**(1./3) - kf * midas_dict['vf'] 
                             + np.sqrt( 4./3 * self.void_area_avg('Dsm1')*0.001/midas_dict['cd'] * ( ff/self.Dh * self.jf**2/2 + 
                                                                                  (1 - midas_dict['alpha'])*(1-self.rho_g/self.rho_f) * self.gz ) )
                             )
@@ -2893,6 +2941,14 @@ the newly calculated :math:`v_{r}` or not
                         
                         if vr != vr:
                             if not quiet: warnings.warn(f"vr nan for {angle, rstar}, setting to 0")
+                            vr = 0
+
+                    elif method == 'final':
+                        try:
+                            vr = (
+                            np.sign(old_vr) * kw * midas_dict['alpha'] * midas_dict['vf'] * midas_dict['cd']**(1./3) - kf * midas_dict['vf'] 
+                            + np.sqrt( 4./3 * self.void_area_avg('Dsm1')*0.001/midas_dict['cd'] * (1 - midas_dict['alpha'])*(1-self.rho_g/self.rho_f) * self.gz ) )
+                        except ZeroDivisionError:
                             vr = 0
                         
 
@@ -2921,6 +2977,14 @@ the newly calculated :math:`v_{r}` or not
                     else:
                         print(f"{method} not implemented")
                         return -1
+
+                    if rstar == 1:
+                        vr = 0
+
+                    if vr > 2*self.jf:
+                        vr = 2*self.jf
+                    elif vr < -2*self.jf:
+                        vr = -2*self.jf
             
                     midas_dict[vr_name] = vr
                     midas_dict['vr_model'] = vr
@@ -3016,7 +3080,7 @@ the newly calculated :math:`v_{r}` or not
 
         return self.area_avg('ISxgrad')
     
-    def calc_aa_vr_model(self, method='km1_naive', IS_method = 'power', kw=-0.98, kf=-0.083, Lw = 5, Cavf=1, Ctau=1, n=2, IS_mu = 1.5, Cvracd = 1):
+    def calc_aa_vr_model(self, method='km1_naive', IS_method = 'power', kw=0.654, kf=0.113, Lw = 5, Cavf=1, Ctau=1, n=2, IS_mu = 1.5, Cvfacd = 1):
 
         if method == 'km1_naive':
             vr = kw * (np.pi/4)**(1/3) * self.area_avg('alpha') * self.jf / (1 - self.area_avg('alpha')) * self.area_avg('cd')**(1./3) *  (2**(-1./3) - Lw**(1/3))/(0.5 - Lw) + kf * self.jf / (1 - self.area_avg('alpha'))
@@ -3029,7 +3093,8 @@ the newly calculated :math:`v_{r}` or not
             vr = -kw * self.area_avg('alpha') * self.jf / (1 - self.area_avg('alpha')) * self.area_avg('cd')**(1./3) - kf * self.jf / (1 - self.area_avg('alpha'))
         
         elif method == 'final':
-            vr = Cvracd * -kw * self.area_avg('alpha') * self.jf / (1 - self.area_avg('alpha')) * self.area_avg('cd')**(1./3) - kf * self.jf / (1 - self.area_avg('alpha'))
+            self.calc_cd()
+            vr = Cvfacd * -kw * self.area_avg('alpha') * self.jf / (1 - self.area_avg('alpha')) * self.area_avg('cd')**(1./3) - kf * self.jf / (1 - self.area_avg('alpha'))
         
         elif method == 'IS_Ctau':
             self.calc_cd()
@@ -3054,9 +3119,21 @@ the newly calculated :math:`v_{r}` or not
             raise(ValueError("Invalid calc_aa_vr_model method"))
             
 
-        self.vwvgj = (1-self.area_avg('alpha'))*vr
+        self.vwvgj = (1-self.area_avg('alpha'))*vr # Legacy, do not use
         self.aa_vr = vr
         return vr
+    
+    def calc_vw_aa_Vgj_model(self, Kw=0.654, Kf=0.113):
+        self.Cajf = 0.12 * self.jf + 0.43* self.jgloc**-0.1
+        self.Cajc = 61.4 * self.jf**-2.25
+
+        for angle, rdict in self.data.items():
+            for rstar, midas_dict in rdict.items():
+                midas_dict.update({'cd13': midas_dict['cd']**(1./3)})
+
+        self.vw_aa_Vgj_model = -Kf * self.Cajf * self.jf - Kw * (self.Cajc * self.Cajf * self.area_avg('alpha') * self.jf * self.void_area_avg('cd13'))
+        
+        return self.vw_aa_Vgj_model
     
     def calc_errors(self, param1:str, param2:str) -> float:
         """ Calculates the errors, ε, between two parameters (param1 - param2) in midas_dict
@@ -3233,6 +3310,37 @@ the newly calculated :math:`v_{r}` or not
            area_avg_sym_error = 0
 
         return area_avg_sym_error
+    
+    def calc_vr_uncertainty(self, sigma_vg=0.1, sigma_alpha=0.05, sigma_dp=0.03, percentage = True):
+
+        for angle, r_dict in self.data.items():
+            for rstar, midas_dict in r_dict.items():
+                alpha = midas_dict['alpha']
+                dp = midas_dict['delta_p']
+
+                if percentage:
+                    midas_dict['sigma_vg'] = sigma_vg * midas_dict['ug1']
+                else:
+                    midas_dict['sigma_vg'] = sigma_vg
+
+                if percentage:
+                    midas_dict['sigma_dp'] = sigma_dp * midas_dict['delta_p']
+                else:
+                    midas_dict['sigma_dp'] = sigma_dp
+
+                if percentage:
+                    midas_dict['sigma_alpha'] = sigma_alpha * midas_dict['alpha']
+                else:
+                    midas_dict['sigma_alpha'] = sigma_alpha
+                
+                if dp == 0:
+                    midas_dict['sigma_vf'] = 0
+                    midas_dict['sigma_vr'] = 0
+                else:
+                    midas_dict['sigma_vf'] = np.sqrt( 1./(2*self.rho_f) * (sigma_dp**2/((1-alpha)*dp)  + sigma_alpha**2 * dp / (1-alpha)**3) )
+                    midas_dict['sigma_vr'] = np.sqrt( midas_dict['sigma_vf']**2 + midas_dict['sigma_vg']**2)
+
+        return self.area_avg('sigma_vr')
 
 
     def calc_avg_lat_sep(self):
@@ -3776,6 +3884,7 @@ the newly calculated :math:`v_{r}` or not
             # TODO
             pass
         elif method.lower() == 'adix':
+            # No fucking idea what this is
             
             def complicated_alpha(params):
                 s, n, sigma = params
@@ -3819,8 +3928,8 @@ the newly calculated :math:`v_{r}` or not
 
         return self.area_avg("alpha_reconstructed")
     
-    def plot_profiles2(self, param, save_dir = '.', show=True, x_axis='vals', errorbars = 0.0, 
-                      const_to_plot = [90, 67.5, 45, 22.5, 0], include_complement = True, 
+    def plot_profiles2(self, param, save_dir = '.', show=True, x_axis='vals', errorbars = False, 
+                      const_to_plot = [90, 67.5, 45, 22.5, 0], include_complement = True, skip_1_comp = False,
                       fig_size=(4,4), fs = 10, title=True, label_str = '', legend_loc = 'best', xlabel_loc = 'center', include_const = False,
                       set_min = None, set_max = None, show_spines = True, xlabel_loc_coords = None, ylabel_loc_coords = None, cs=None, ms = None, ls = None) -> None:
         """ Simplified plot_profiles with no rotation option
@@ -3859,7 +3968,7 @@ the newly calculated :math:`v_{r}` or not
         # Tick marks facing in
         ax.tick_params(direction='in',which='both')
 
-        if errorbars > 0:
+        if type(errorbars) is float and errorbars > 0:
             ax.plot([], [], ' ', label = f"{errorbars*100:0.1f}% error bars") # dummy to just get this text in the legend
 
         if not ms:
@@ -3898,11 +4007,12 @@ the newly calculated :math:`v_{r}` or not
 
             set_max = max(maxs) *1.1
 
-        if x_axis == 'vals' or x_axis == 'r':
+        if x_axis == 'vals' or x_axis == 'rs':
             for angle in const_to_plot:
                 r_dict = self.data[angle]
                 rs = []
                 vals = []
+                errs = []
                 for r, midas_output in r_dict.items():
                     rs.append(r)
 
@@ -3915,6 +4025,20 @@ the newly calculated :math:`v_{r}` or not
                             else:
                                 vals.append(0.0)
                                 print(f"Could not find {param} for φ = {angle}, r = {r}. Substituting 0")
+                        
+                        if errorbars == 'sigma':
+                            if param == 'vr':
+                                errs.append(midas_output['sigma_vr'])
+                            elif param == 'vf':
+                                errs.append(midas_output['sigma_vf'])
+                            else:
+                                print('issue with sigma, assuming 0 error')
+                                errs.append(0)
+                        elif type(errorbars) is float:
+                                errs.append(abs(midas_output[param]*errorbars))
+                        else:
+                            errs.append(0)
+
                     elif type(param) == list:
                         for i, specific_param in enumerate(param):
                             vals.append([])
@@ -3933,6 +4057,10 @@ the newly calculated :math:`v_{r}` or not
                     else:
                         r_dict = self.data[angle+180]
                         for r, midas_output in r_dict.items():
+                            if skip_1_comp and r > 0.95:
+                                # print('skipping')
+                                continue
+                            
                             rs.append(-r)
                             if type(param) == str:
                                 try:
@@ -3943,6 +4071,20 @@ the newly calculated :math:`v_{r}` or not
                                     else:
                                         vals.append(0.0)
                                         print(f"Could not find {param} for φ = {angle}, r = {r}. Substituting 0")
+
+                                if errorbars == 'sigma':
+                                    if param == 'vr':
+                                        errs.append(midas_output['sigma_vr'])
+                                    elif param == 'vf':
+                                        errs.append(midas_output['sigma_vf'])
+                                    else:
+                                        print('issue with sigma, assuming 0 error')
+                                        errs.append(0)
+                                elif type(errorbars) is float:
+                                    errs.append(abs(midas_output[param]*errorbars))
+                                else:
+                                    errs.append(0)
+                            
                             elif type(param) == list:
                                 for i, specific_param in enumerate(param):
                                     vals.append([])
@@ -3956,13 +4098,21 @@ the newly calculated :math:`v_{r}` or not
                                             print(f"Could not find {specific_param} for φ = {angle}, r = {r}. Substituting 0")
                 if type(param) == str:
                     vals = [var for _, var in sorted(zip(rs, vals))]
+                    errs = [err for _, err in sorted(zip(rs, errs))]
                     rs = sorted(rs)
-                    errs = errorbars * np.abs(np.asarray(vals))
+
+                    # errs = errorbars * np.abs(np.asarray(vals))
 
                     if x_axis == 'vals':
-                        ax.errorbar(vals, rs, xerr = errs, capsize=3, ecolor = "black", label=f'{angle}°', color=next(cs), marker=next(ms), linestyle = '--')
-                    elif x_axis == 'r':
-                        ax.errorbar(rs, vals, yerr = errs, capsize=3, ecolor = "black", label=f'{angle}°', color=next(cs), marker=next(ms), linestyle = '--')
+                        if (type(errorbars) == float and errorbars == 0) or errorbars == False:
+                            ax.plot(vals, rs, label=f'{angle}°', color=next(cs), marker=next(ms), linestyle = '--')
+                        else:
+                            ax.errorbar(vals, rs, xerr = errs, capsize=3, ecolor = "black", label=f'{angle}°', color=next(cs), marker=next(ms), linestyle = '--')
+                    elif x_axis == 'rs':
+                        if type(errorbars) == float and errorbars == 0 or errorbars == False:
+                            ax.plot(vals, rs, label=f'{angle}°', color=next(cs), marker=next(ms), linestyle = '--')
+                        else:
+                            ax.errorbar(rs, vals, yerr = errs, capsize=3, ecolor = "black", label=f'{angle}°', color=next(cs), marker=next(ms), linestyle = '--')
                 
                 elif type(param) == list:
                     temp = []
@@ -4012,6 +4162,9 @@ the newly calculated :math:`v_{r}` or not
                                 split_param = specific_param.split('_')
                                 legend_str = '$' + split_param[0] + '_{' + split_param[1] + '}$'
 
+                        if specific_param == 'vg_approx':
+                            legend_str = r'$v_{g, model}$'
+
                         if legend_str == '':
                             legend_str = specific_param
 
@@ -4020,14 +4173,14 @@ the newly calculated :math:`v_{r}` or not
 
                         if x_axis == 'vals':
                             ax.errorbar(val_list, rs, xerr = errs, capsize=3, ecolor = "black", color=next(cs), marker=next(ms), linestyle = '--', label = legend_str)
-                        elif x_axis == 'r':
+                        elif x_axis == 'rs':
                             ax.errorbar(rs, val_list, yerr = errs, capsize=3, ecolor = "black", color=next(cs), marker=next(ms), linestyle = '--', label = legend_str)
                     
             
             if x_axis == 'vals':
                 ax.set_ylim(-1, 1)
                 ax.set_xlim(set_min, set_max)
-            elif x_axis == 'r':
+            elif x_axis == 'rs':
                 ax.set_xlim(-1, 1)
                 ax.set_ylim(set_min, set_max)
             
@@ -4099,7 +4252,7 @@ the newly calculated :math:`v_{r}` or not
                 ax2.get_xaxis().set_visible(False)
 
 
-        elif x_axis == 'r':
+        elif x_axis == 'rs':
             ax.set_ylabel(label_str, loc = xlabel_loc)
             ax.set_xlabel(r'$r/R$ [-]')
             ax.set_xticks(np.arange(-1, 1.01, 0.2))

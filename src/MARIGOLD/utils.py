@@ -162,14 +162,25 @@ def write_pdf(cond:Condition, output_tex = None):
     run(f"pdflatex {output_tex} -interaction=nonstopmode")
     return 1
 
-def write_csv(cond:Condition, output_name = None):
+def write_csv(cond:Condition, output_name = None, param_list = ['alpha', 'ai', 'ug1', 'Dsm1']):
     if output_name is None:
         output_name = cond.name + ".csv"
     
     with open(output_name, 'w') as f:
-        print(f"phi, r/R, alpha, ai, ug1, Dsm1 ", file = f)
+        print('angle, rstar', end = '', file = f)
+        for param in param_list:
+            print(', ', end='', file=f)
+            print(param, end = '', file = f)
+        print('', file = f)
         for angle, r_dict in cond.data.items():
             for rstar, midas_dict in r_dict.items(): 
-                print(f"{angle}, {rstar}, {midas_dict['alpha']}, {midas_dict['ai']}, {midas_dict['ug1']}, {midas_dict['Dsm1']} ", file = f)
+                print(f"{angle}, {rstar}", file = f, end = '')
+
+                for param in param_list:
+                    print(', ', end='', file=f)
+                    print(f"{midas_dict[param]:0.3f}", end = '', file = f)
+                
+                print('', file=f)
+
 
     return 1
