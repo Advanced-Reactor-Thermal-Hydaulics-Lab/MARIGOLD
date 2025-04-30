@@ -631,21 +631,35 @@ def make_U_bend_mesh(L_P1:float, D_pipe:float, RoverD:float, L_VU:float, L_VD:fl
     """
 
     # Assuming water
+    if first_layer == None:
+        if cond is not None:
+            cond.calc_dpdz()
+            u_tau = np.sqrt(cond.tau_w / cond.rho_f)
 
-    if cond is not None:
-        cond.calc_dpdz()
-        u_tau = np.sqrt(cond.tau_w / cond.rho_f)
-
-        if turb_model == 'ke': 
-            yplus = 30
+            if turb_model == 'ke': 
+                yplus = 30
+            else:
+                yplus = 1
+            
+            first_layer = yplus * cond.mu_f / (u_tau * cond.rho_f) * fudge
+        
         else:
-            yplus = 1
+            print("Please specify either a Condition or a first layer thickness")
 
-    elif first_layer != None:
-        first_layer = yplus * cond.mu_f / (u_tau * cond.rho_f) * fudge
+    # if cond is not None:
+    #     cond.calc_dpdz()
+    #     u_tau = np.sqrt(cond.tau_w / cond.rho_f)
+
+    #     if turb_model == 'ke': 
+    #         yplus = 30
+    #     else:
+    #         yplus = 1
+
+    # elif first_layer != None:
+    #     first_layer = yplus * cond.mu_f / (u_tau * cond.rho_f) * fudge
     
-    else:
-        print("Please specify either a Condition or a first layer thickness")
+    # else:
+    #     print("Please specify either a Condition or a first layer thickness")
     
     with open("mesh_replay.rpl", 'w') as fi:
         print(f'\
@@ -3018,7 +3032,7 @@ END\n\
         print(strToWrite, file = fi)
     return
 
-def export_outlet(case_name):
+def export_outlet(case_name,wd='adix/CFD/ubend/rd_tests'):
 	str_to_write = f'COMMAND FILE: \n \
 CFX Post Version = 22.2\n\
 END\n\
@@ -3041,7 +3055,7 @@ END\n\
 DATA READER:\n\
 Domains to Load=\n\
 END\n\
->load filename=/scratch/negishi/adix/CFD/ubend/rd_tests/{case_name}/{case_name}_001.res, force_reload=true\n\
+>load filename=/scratch/negishi/{wd}/{case_name}/{case_name}_001.res, force_reload=true\n\
 >update\n\
 EXPORT:\n\
 ANSYS Export Data = Element Heat Flux\n\
@@ -3085,3 +3099,84 @@ END\n\
 	print(comp_process)
 	
 	return
+
+def export_surface(case_name,surface_name,wd='adix/CFD/ubend/rd_tests'):
+    rd_prefix = case_name.split('_')[0]
+    state_file = f'{rd_prefix}_modded.cst'      # Kind of specific to my use -- rename as needed, or fix logic to be more general in the future
+    if 'apex' in surface_name:
+        surface_label = 'apex'
+    elif 'exit' in surface_name:
+        surface_label = 'exit'
+    elif 'inlet' in surface_name:
+        surface_label = 'inlet'
+    elif 'outlet' in surface_name:
+        surface_label = 'outlet'
+
+    str_to_write = f'COMMAND FILE: \n \
+CFX Post Version = 22.2\n\
+END\n\
+COMMAND FILE:\n\
+  CFX Post Version = 22.2\n\
+END\n\
+DATA READER:\n\
+Clear All Objects = false\n\
+Append Results = false\n\
+Edit Case Names = false\n\
+Multi Configuration File Load Option = Last Case\n\
+Open in New View = true\n\
+Keep Camera Position = true\n\
+Load Particle Tracks = true\n\
+Multi Configuration File Load Option = Last Case\n\
+Construct Variables From Fourier Coefficients = true\n\
+Open to Compare = false\n\
+Files to Compare =\n\
+END\n\
+DATA READER:\n\
+Domains to Load=\n\
+END\n\
+>load filename=/scratch/negishi/{wd}/{case_name}/{case_name}_001.res, force_reload=true\n\
+>readstate mode=append, filename=/scratch/negishi/{wd}/{state_file}, load=false\n\
+>update\n\
+EXPORT:\n\
+ANSYS Export Data = Element Heat Flux\n\
+ANSYS File Format = ANSYS\n\
+ANSYS Reference Temperature = 0.0 [K]\n\
+ANSYS Specify Reference Temperature = Off\n\
+ANSYS Supplemental HTC = 0.0 [W m^-2 K^-1]\n\
+Additional Variable List =\n\
+BC Profile Type = Inlet Velocity\n\
+CSV Type = CSV\n\
+Case Name = Case {case_name}_001\n\
+Export Connectivity = Off\n\
+Export Coord Frame = Global\n\
+Export File = {case_name}_{surface_label}.csv\n\
+Export Geometry = On\n\
+Export Location Aliases =\n\
+Export Node Numbers = Off\n\
+Export Null Data = On\n\
+Export Type = Generic\n\
+Export Units System = Current\n\
+Export Variable Type = Hybrid\n\
+External Export Data = None\n\
+Include File Information = Off\n\
+Include Header = On\n\
+Location = INLET\n\
+Location List = {surface_name}\n\
+Null Token = null\n\
+Overwrite = On\n\
+Precision = 8\n\
+Separator = ", "\n\
+Spatial Variables = X,Y,Z\n\
+Variable List = Pressure, Velocity u, Velocity v, Velocity w, Yplus\n\
+Vector Brackets = ()\n\
+Vector Display = Scalar\n\
+END\n\
+>export\n\
+>quit'
+    with open("CFXPost_Commands.cse", 'w') as f:
+        print(str_to_write, file = f)
+
+    comp_process = subprocess.run(f'cfx5post -play CFXPost_Commands.cse -line > auto_cfx_run.log', shell=True)
+    print(comp_process)
+	
+    return

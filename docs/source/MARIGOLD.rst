@@ -35,10 +35,27 @@ extracts\_and\_loads
    :undoc-members:
    :show-inheritance:
 
-misc
+utils
 --------------------
 
-.. automodule:: MARIGOLD.misc
+.. automodule:: MARIGOLD.utils
    :members:
    :undoc-members:
    :show-inheritance:
+
+plot_utils
+--------------------
+
+.. automodule:: MARIGOLD.plot_utils
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+processing
+--------------------
+
+.. automodule:: MARIGOLD.processing
+   :members:
+   :undoc-members:
+   :show-inheritance:
+

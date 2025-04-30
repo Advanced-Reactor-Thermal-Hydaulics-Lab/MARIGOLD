@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="./">
 <head>
@@ -5,23 +7,20 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Welcome to MARIGOLD’s documentation! &mdash; MARIGOLD 0.0.1 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="_static/dark_mode_css/general.css?v=c0a7eb24" />
       <link rel="stylesheet" type="text/css" href="_static/dark_mode_css/dark.css?v=70edf1c7" />
 
   
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="_static/jquery.js?v=5d32c60e"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=d45e8c67"></script>
-        <script src="_static/doctools.js?v=888ff710"></script>
-        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
-        <script src="_static/dark_mode_js/default_dark.js?v=fd565c74"></script>
-        <script src="_static/dark_mode_js/theme_switcher.js?v=358d3910"></script>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=d45e8c67"></script>
+      <script src="_static/doctools.js?v=9a2dae69"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      <script src="_static/dark_mode_js/default_dark.js?v=fd565c74"></script>
+      <script src="_static/dark_mode_js/theme_switcher.js?v=358d3910"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -105,6 +104,7 @@
 <li class="toctree-l4"><a class="reference internal" href="MARIGOLD.html#MARIGOLD.Condition.Condition.calc_mu3_alpha"><code class="docutils literal notranslate"><span class="pre">Condition.calc_mu3_alpha()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="MARIGOLD.html#MARIGOLD.Condition.Condition.calc_mu_eff"><code class="docutils literal notranslate"><span class="pre">Condition.calc_mu_eff()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="MARIGOLD.html#MARIGOLD.Condition.Condition.calc_sigma_alpha"><code class="docutils literal notranslate"><span class="pre">Condition.calc_sigma_alpha()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="MARIGOLD.html#MARIGOLD.Condition.Condition.calc_sigma_alpha1"><code class="docutils literal notranslate"><span class="pre">Condition.calc_sigma_alpha1()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="MARIGOLD.html#MARIGOLD.Condition.Condition.calc_sigma_ug"><code class="docutils literal notranslate"><span class="pre">Condition.calc_sigma_ug()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="MARIGOLD.html#MARIGOLD.Condition.Condition.calc_symmetry"><code class="docutils literal notranslate"><span class="pre">Condition.calc_symmetry()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="MARIGOLD.html#MARIGOLD.Condition.Condition.calc_symmetry_area_avg"><code class="docutils literal notranslate"><span class="pre">Condition.calc_symmetry_area_avg()</span></code></a></li>
@@ -153,8 +153,6 @@
 <li class="toctree-l4"><a class="reference internal" href="MARIGOLD.html#MARIGOLD.Condition.Condition.void_area_avg"><code class="docutils literal notranslate"><span class="pre">Condition.void_area_avg()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="MARIGOLD.html#MARIGOLD.Condition.color_cycle"><code class="docutils literal notranslate"><span class="pre">color_cycle()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="MARIGOLD.html#MARIGOLD.Condition.marker_cycle"><code class="docutils literal notranslate"><span class="pre">marker_cycle()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="MARIGOLD.html#MARIGOLD.Condition.print_tab_keys"><code class="docutils literal notranslate"><span class="pre">print_tab_keys()</span></code></a></li>
 </ul>
 </li>
@@ -164,12 +162,19 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="MARIGOLD.html#module-MARIGOLD.CFD">CFD Functions</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="MARIGOLD.html#MARIGOLD.CFD.calculate_CL_Ryan"><code class="docutils literal notranslate"><span class="pre">calculate_CL_Ryan()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="MARIGOLD.html#MARIGOLD.CFD.export_outlet"><code class="docutils literal notranslate"><span class="pre">export_outlet()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="MARIGOLD.html#MARIGOLD.CFD.export_surface"><code class="docutils literal notranslate"><span class="pre">export_surface()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="MARIGOLD.html#MARIGOLD.CFD.make_CFX_case"><code class="docutils literal notranslate"><span class="pre">make_CFX_case()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="MARIGOLD.html#MARIGOLD.CFD.make_ICEM_pipe_mesh"><code class="docutils literal notranslate"><span class="pre">make_ICEM_pipe_mesh()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="MARIGOLD.html#MARIGOLD.CFD.make_ICEM_pipe_mesh2"><code class="docutils literal notranslate"><span class="pre">make_ICEM_pipe_mesh2()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="MARIGOLD.html#MARIGOLD.CFD.make_U_bend_mesh"><code class="docutils literal notranslate"><span class="pre">make_U_bend_mesh()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="MARIGOLD.html#MARIGOLD.CFD.old_make_ICEM_pipe_mesh"><code class="docutils literal notranslate"><span class="pre">old_make_ICEM_pipe_mesh()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="MARIGOLD.html#MARIGOLD.CFD.post_process_CFX_case"><code class="docutils literal notranslate"><span class="pre">post_process_CFX_case()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="MARIGOLD.html#MARIGOLD.CFD.read_CFX_export"><code class="docutils literal notranslate"><span class="pre">read_CFX_export()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="MARIGOLD.html#MARIGOLD.CFD.read_CFX_export_single_phase"><code class="docutils literal notranslate"><span class="pre">read_CFX_export_single_phase()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="MARIGOLD.html#MARIGOLD.CFD.run_CFX_case"><code class="docutils literal notranslate"><span class="pre">run_CFX_case()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="MARIGOLD.html#MARIGOLD.CFD.write_CCL"><code class="docutils literal notranslate"><span class="pre">write_CCL()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="MARIGOLD.html#MARIGOLD.CFD.write_CCL_single_phase"><code class="docutils literal notranslate"><span class="pre">write_CCL_single_phase()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="MARIGOLD.html#MARIGOLD.CFD.write_CFX_BC"><code class="docutils literal notranslate"><span class="pre">write_CFX_BC()</span></code></a></li>
 </ul>
 </li>
@@ -188,13 +193,25 @@
 <li class="toctree-l3"><a class="reference internal" href="MARIGOLD.html#MARIGOLD.extracts_and_loads.loadYangData"><code class="docutils literal notranslate"><span class="pre">loadYangData()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="MARIGOLD.html#module-MARIGOLD.misc">misc</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="MARIGOLD.html#MARIGOLD.misc.comp_cond"><code class="docutils literal notranslate"><span class="pre">comp_cond()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="MARIGOLD.html#MARIGOLD.misc.process_dir"><code class="docutils literal notranslate"><span class="pre">process_dir()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="MARIGOLD.html#MARIGOLD.misc.write_csv"><code class="docutils literal notranslate"><span class="pre">write_csv()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="MARIGOLD.html#MARIGOLD.misc.write_excel"><code class="docutils literal notranslate"><span class="pre">write_excel()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="MARIGOLD.html#MARIGOLD.misc.write_inp"><code class="docutils literal notranslate"><span class="pre">write_inp()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="MARIGOLD.html#MARIGOLD.misc.write_pdf"><code class="docutils literal notranslate"><span class="pre">write_pdf()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="MARIGOLD.html#module-MARIGOLD.utils">utils</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="MARIGOLD.html#MARIGOLD.utils.comp_cond"><code class="docutils literal notranslate"><span class="pre">comp_cond()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="MARIGOLD.html#MARIGOLD.utils.listdir_abs"><code class="docutils literal notranslate"><span class="pre">listdir_abs()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="MARIGOLD.html#MARIGOLD.utils.write_csv"><code class="docutils literal notranslate"><span class="pre">write_csv()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="MARIGOLD.html#MARIGOLD.utils.write_excel"><code class="docutils literal notranslate"><span class="pre">write_excel()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="MARIGOLD.html#MARIGOLD.utils.write_pdf"><code class="docutils literal notranslate"><span class="pre">write_pdf()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="MARIGOLD.html#module-MARIGOLD.plot_utils">plot_utils</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="MARIGOLD.html#MARIGOLD.plot_utils.color_cycle"><code class="docutils literal notranslate"><span class="pre">color_cycle()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="MARIGOLD.html#MARIGOLD.plot_utils.line_cycle"><code class="docutils literal notranslate"><span class="pre">line_cycle()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="MARIGOLD.html#MARIGOLD.plot_utils.marker_cycle"><code class="docutils literal notranslate"><span class="pre">marker_cycle()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="MARIGOLD.html#module-MARIGOLD.processing">processing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="MARIGOLD.html#MARIGOLD.processing.process_dir"><code class="docutils literal notranslate"><span class="pre">process_dir()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="MARIGOLD.html#MARIGOLD.processing.tdms_to_dat"><code class="docutils literal notranslate"><span class="pre">tdms_to_dat()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="MARIGOLD.html#MARIGOLD.processing.write_inp"><code class="docutils literal notranslate"><span class="pre">write_inp()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="MARIGOLD.html#MARIGOLD.processing.write_pitot_inp"><code class="docutils literal notranslate"><span class="pre">write_pitot_inp()</span></code></a></li>
 </ul>
 </li>
 </ul>

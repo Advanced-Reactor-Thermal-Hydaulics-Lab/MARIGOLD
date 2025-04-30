@@ -1,4 +1,4 @@
-Metadata-Version: 2.1
+Metadata-Version: 2.4
 Name: MARIGOLD
 Version: 0.0.1
 Summary: Library for handling Two-phase flow data
@@ -14,6 +14,8 @@ Requires-Dist: matplotlib
 Requires-Dist: scipy
 Requires-Dist: openpyxl
 Requires-Dist: xlrd
+Requires-Dist: nptdms
+Dynamic: license-file
 
 # MARIGOLD
 

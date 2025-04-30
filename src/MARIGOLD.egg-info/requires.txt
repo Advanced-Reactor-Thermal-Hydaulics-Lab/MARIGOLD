@@ -3,3 +3,4 @@ matplotlib
 scipy
 openpyxl
 xlrd
+nptdms

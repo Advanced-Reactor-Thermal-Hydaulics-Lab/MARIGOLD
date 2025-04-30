@@ -12,16 +12,18 @@ def color_cycle(set_color = None, color_list = []):
     
     if not color_list:
         if set_color == None:
-            color_list = ['#0000FF',
-                        '#FF0000',
-                        '#00FF00',
-                        '#00FFFF',
-                        '#7F00FF',
-                        '#7FFF7F',
-                        '#007F7F',
-                        '#7F007F',
-                        '#7F7F7F',
-                        '#000000']
+            color_list = ['#FF0000',    # Red
+                        '#0000FF',      # Blue
+                        '#00FF00',      # Green
+                        '#FF00FF',      # Magenta
+                        '#00FFFF',      # Cyan
+                        '#FFA500',      # Orange
+                        '#000000',      # Black
+                        '#7F00FF',      # Violet
+                        '#007F7F',      # Teal
+                        '#7F7F7F',      # Gray
+                        '#008000',      # Dark Green
+                        '#7FFF7F']      # Light Green
         elif re.search(r'^#(?:[0-9a-fA-F]{3}){1,2}$', set_color):
             color_list = [set_color]
         # I want these to be able to override each other

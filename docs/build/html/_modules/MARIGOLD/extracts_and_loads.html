@@ -1,26 +1,24 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MARIGOLD.extracts_and_loads &mdash; MARIGOLD 0.0.1 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
-      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../_static/dark_mode_css/general.css?v=c0a7eb24" />
       <link rel="stylesheet" type="text/css" href="../../_static/dark_mode_css/dark.css?v=70edf1c7" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="../../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../_static/documentation_options.js?v=d45e8c67"></script>
-        <script src="../../_static/doctools.js?v=888ff710"></script>
-        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
-        <script src="../../_static/dark_mode_js/default_dark.js?v=fd565c74"></script>
-        <script src="../../_static/dark_mode_js/theme_switcher.js?v=358d3910"></script>
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=d45e8c67"></script>
+      <script src="../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/dark_mode_js/default_dark.js?v=fd565c74"></script>
+      <script src="../../_static/dark_mode_js/theme_switcher.js?v=358d3910"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -75,17 +73,17 @@
              
   <h1>Source code for MARIGOLD.extracts_and_loads</h1><div class="highlight"><pre>
 <span></span>
-<span class="kn">from</span> <span class="nn">.config</span> <span class="kn">import</span> <span class="o">*</span>
-<span class="kn">from</span> <span class="nn">.Condition</span> <span class="kn">import</span> <span class="n">Condition</span>
-<span class="kn">from</span> <span class="nn">.Iskandrani_Condition</span> <span class="kn">import</span> <span class="n">Iskandrani_Condition</span>
-<span class="kn">from</span> <span class="nn">.Yang_Condition</span> <span class="kn">import</span> <span class="n">Yang_Condition</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.config</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.Condition</span><span class="w"> </span><span class="kn">import</span> <span class="n">Condition</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.Iskandrani_Condition</span><span class="w"> </span><span class="kn">import</span> <span class="n">Iskandrani_Condition</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.Yang_Condition</span><span class="w"> </span><span class="kn">import</span> <span class="n">Yang_Condition</span>
 
-<span class="kn">import</span> <span class="nn">re</span>
-<span class="kn">import</span> <span class="nn">xlrd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">xlrd</span>
 
 <div class="viewcode-block" id="extractProbeData">
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.extracts_and_loads.extractProbeData">[docs]</a>
-<span class="k">def</span> <span class="nf">extractProbeData</span><span class="p">(</span><span class="n">dump_file</span> <span class="o">=</span> <span class="s1">&#39;database.dat&#39;</span><span class="p">,</span> <span class="n">in_dir</span> <span class="o">=</span> <span class="p">[],</span> <span class="n">require_terms</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">skip_terms</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;CFD&#39;</span><span class="p">,</span> <span class="s1">&#39;Copy&#39;</span><span class="p">],</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">extractProbeData</span><span class="p">(</span><span class="n">dump_file</span> <span class="o">=</span> <span class="s1">&#39;database.dat&#39;</span><span class="p">,</span> <span class="n">in_dir</span> <span class="o">=</span> <span class="p">[],</span> <span class="n">require_terms</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">skip_terms</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;CFD&#39;</span><span class="p">,</span> <span class="s1">&#39;Copy&#39;</span><span class="p">],</span>
                      <span class="n">extract_Ryan</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">Ryan_path</span> <span class="o">=</span> <span class="s1">&#39;Z:</span><span class="se">\\</span><span class="s1">TRSL</span><span class="se">\\</span><span class="s1">PITA</span><span class="se">\\</span><span class="s1">Data</span><span class="se">\\</span><span class="s1">LocalData</span><span class="se">\\</span><span class="s1">spreadsheets</span><span class="se">\\</span><span class="s1">PITA&#39;</span><span class="p">,</span>
                      <span class="n">extract_Kong</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">Kong_path</span> <span class="o">=</span> <span class="s1">&#39;Z:</span><span class="se">\\</span><span class="s1">TRSL</span><span class="se">\\</span><span class="s1">PITA</span><span class="se">\\</span><span class="s1">Data</span><span class="se">\\</span><span class="s1">LocalData</span><span class="se">\\</span><span class="s1">spreadsheets</span><span class="se">\\</span><span class="s1">101.6mm&#39;</span><span class="p">,</span>
                      <span class="n">extract_Talley</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">Talley_path</span> <span class="o">=</span> <span class="s1">&#39;Z:</span><span class="se">\\</span><span class="s1">TRSL</span><span class="se">\\</span><span class="s1">PITA</span><span class="se">\\</span><span class="s1">Data</span><span class="se">\\</span><span class="s1">LocalData</span><span class="se">\\</span><span class="s1">spreadsheets</span><span class="se">\\</span><span class="s1">38.1mm&#39;</span><span class="p">,</span>
@@ -613,7 +611,7 @@
 
 <div class="viewcode-block" id="extractLocalDataFromDir">
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.extracts_and_loads.extractLocalDataFromDir">[docs]</a>
-<span class="k">def</span> <span class="nf">extractLocalDataFromDir</span><span class="p">(</span><span class="n">path</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">dump_file</span> <span class="o">=</span> <span class="s1">&#39;database.dat&#39;</span><span class="p">,</span> <span class="n">in_dir</span> <span class="o">=</span> <span class="p">[],</span> <span class="n">require_terms</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;jf&#39;</span><span class="p">],</span> 
+<span class="k">def</span><span class="w"> </span><span class="nf">extractLocalDataFromDir</span><span class="p">(</span><span class="n">path</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">dump_file</span> <span class="o">=</span> <span class="s1">&#39;database.dat&#39;</span><span class="p">,</span> <span class="n">in_dir</span> <span class="o">=</span> <span class="p">[],</span> <span class="n">require_terms</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;jf&#39;</span><span class="p">],</span> 
                             <span class="n">skip_terms</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;CFD&#39;</span><span class="p">,</span> <span class="s1">&#39;Copy&#39;</span><span class="p">],</span> <span class="n">sheet_type</span> <span class="o">=</span> <span class="s1">&#39;adix_template&#39;</span><span class="p">,</span> <span class="n">append_to_json</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                             <span class="n">pitot_sheet</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">print_sheets</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                             <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -761,7 +759,7 @@
                 <span class="k">else</span><span class="p">:</span>
                     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Nope. Skipping...&#39;</span><span class="p">)</span>
                     <span class="k">continue</span>
-            
+            <span class="c1"># print(jf, jgref, port, theta)</span>
             <span class="c1">############################################################################################################################</span>
             <span class="c1">#                                                                                                                          #</span>
             <span class="c1">#                                                       BETTIS DATA                                                        #</span>
@@ -1248,6 +1246,43 @@
                     <span class="n">Q2_check</span> <span class="o">=</span> <span class="s1">&#39;DA&#39;</span>
                     <span class="n">Q1_pitot_check</span> <span class="o">=</span> <span class="s1">&#39;CJ&#39;</span>
                     <span class="n">Q2_pitot_check</span> <span class="o">=</span> <span class="s1">&#39;FZ&#39;</span>
+                
+                <span class="k">elif</span> <span class="n">sheet_type</span> <span class="o">==</span> <span class="s1">&#39;neup_template&#39;</span><span class="p">:</span>
+                    <span class="n">pitot_sheet</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="n">Q1_ranges</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">([</span><span class="mi">90</span><span class="p">,</span> <span class="mf">67.5</span><span class="p">,</span> <span class="mi">45</span><span class="p">,</span> <span class="mf">22.5</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">31</span><span class="p">)],</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">55</span><span class="p">,</span> <span class="mi">78</span><span class="p">)],</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">104</span><span class="p">,</span> <span class="mi">127</span><span class="p">)],</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">151</span><span class="p">,</span> <span class="mi">174</span><span class="p">)],</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="mi">223</span><span class="p">)]</span> <span class="p">]))</span>
+                    <span class="n">Q2_ranges</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">([</span><span class="mf">112.5</span><span class="p">,</span> <span class="mi">135</span><span class="p">,</span> <span class="mf">157.5</span><span class="p">],</span> <span class="p">[</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">55</span><span class="p">,</span> <span class="mi">78</span><span class="p">)],</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">104</span><span class="p">,</span> <span class="mi">127</span><span class="p">)],</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">151</span><span class="p">,</span> <span class="mi">174</span><span class="p">)]</span> <span class="p">]))</span>
+                    <span class="n">Q2_start</span> <span class="o">=</span> <span class="s1">&#39;CR&#39;</span>
+                    <span class="n">Q2_end</span> <span class="o">=</span> <span class="s1">&#39;ET&#39;</span>
+                    <span class="n">Q1_start</span> <span class="o">=</span> <span class="s1">&#39;A&#39;</span>
+                    <span class="n">Q1_end</span> <span class="o">=</span> <span class="s1">&#39;BD&#39;</span>
+                    <span class="n">Q1_pitot_start</span> <span class="o">=</span> <span class="s1">&#39;CF&#39;</span>
+                    <span class="n">Q1_pitot_end</span> <span class="o">=</span> <span class="s1">&#39;CO&#39;</span>
+                    <span class="n">Q2_pitot_start</span> <span class="o">=</span> <span class="s1">&#39;FV&#39;</span>
+                    <span class="n">Q2_pitot_end</span> <span class="o">=</span> <span class="s1">&#39;GE&#39;</span>
+
+                    <span class="n">Q1_check</span> <span class="o">=</span> <span class="s1">&#39;K&#39;</span>
+                    <span class="n">Q2_check</span> <span class="o">=</span> <span class="s1">&#39;DA&#39;</span>
+                    <span class="n">Q1_pitot_check</span> <span class="o">=</span> <span class="s1">&#39;CJ&#39;</span>
+                    <span class="n">Q2_pitot_check</span> <span class="o">=</span> <span class="s1">&#39;FZ&#39;</span>
+
+                <span class="k">elif</span> <span class="n">sheet_type</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;neup_template1&#39;</span><span class="p">:</span>
+                    <span class="n">pitot_sheet</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="n">Q1_ranges</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">([</span><span class="mi">90</span><span class="p">,</span> <span class="mf">67.5</span><span class="p">,</span> <span class="mi">45</span><span class="p">,</span> <span class="mf">22.5</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">31</span><span class="p">)],</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">55</span><span class="p">,</span> <span class="mi">78</span><span class="p">)],</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">104</span><span class="p">,</span> <span class="mi">127</span><span class="p">)],</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">151</span><span class="p">,</span> <span class="mi">174</span><span class="p">)],</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="mi">223</span><span class="p">)]</span> <span class="p">]))</span>
+                    <span class="n">Q2_ranges</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">([</span><span class="mf">112.5</span><span class="p">,</span> <span class="mi">135</span><span class="p">,</span> <span class="mf">157.5</span><span class="p">],</span> <span class="p">[</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">55</span><span class="p">,</span> <span class="mi">78</span><span class="p">)],</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">104</span><span class="p">,</span> <span class="mi">127</span><span class="p">)],</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">151</span><span class="p">,</span> <span class="mi">174</span><span class="p">)]</span> <span class="p">]))</span>
+                    <span class="n">Q2_start</span> <span class="o">=</span> <span class="s1">&#39;CR&#39;</span>
+                    <span class="n">Q2_end</span> <span class="o">=</span> <span class="s1">&#39;ET&#39;</span>
+                    <span class="n">Q1_start</span> <span class="o">=</span> <span class="s1">&#39;A&#39;</span>
+                    <span class="n">Q1_end</span> <span class="o">=</span> <span class="s1">&#39;BD&#39;</span>
+                    <span class="n">Q1_pitot_start</span> <span class="o">=</span> <span class="s1">&#39;CF&#39;</span>
+                    <span class="n">Q1_pitot_end</span> <span class="o">=</span> <span class="s1">&#39;CO&#39;</span>
+                    <span class="n">Q2_pitot_start</span> <span class="o">=</span> <span class="s1">&#39;FV&#39;</span>
+                    <span class="n">Q2_pitot_end</span> <span class="o">=</span> <span class="s1">&#39;GE&#39;</span>
+
+                    <span class="n">Q1_check</span> <span class="o">=</span> <span class="s1">&#39;K&#39;</span>
+                    <span class="n">Q2_check</span> <span class="o">=</span> <span class="s1">&#39;DA&#39;</span>
+                    <span class="n">Q1_pitot_check</span> <span class="o">=</span> <span class="s1">&#39;CJ&#39;</span>
+                    <span class="n">Q2_pitot_check</span> <span class="o">=</span> <span class="s1">&#39;FZ&#39;</span>
+
 
                 <span class="k">elif</span> <span class="n">sheet_type</span> <span class="o">==</span> <span class="s1">&#39;custom&#39;</span> <span class="ow">or</span> <span class="n">sheet_type</span> <span class="o">==</span> <span class="s1">&#39;Custom&#39;</span><span class="p">:</span>
                     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Hopefully you specified all the ranges, starts, ends, and checks&#39;</span><span class="p">)</span>
@@ -1258,7 +1293,7 @@
                 
                 <span class="n">ws</span> <span class="o">=</span> <span class="n">wb</span><span class="p">[</span><span class="s1">&#39;1&#39;</span><span class="p">]</span>
                 
-                <span class="n">jglocs</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;O16&#39;</span><span class="p">,</span> <span class="s1">&#39;O17&#39;</span><span class="p">,</span> <span class="s1">&#39;O18&#39;</span><span class="p">,</span> <span class="s1">&#39;O19&#39;</span><span class="p">,</span> <span class="s1">&#39;O20&#39;</span><span class="p">]</span>
+                <span class="n">jglocs</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;O16&#39;</span><span class="p">,</span> <span class="s1">&#39;O17&#39;</span><span class="p">,</span> <span class="s1">&#39;O18&#39;</span><span class="p">,</span> <span class="s1">&#39;O19&#39;</span><span class="p">,</span> <span class="s1">&#39;O20&#39;</span><span class="p">,</span> <span class="s1">&#39;O21&#39;</span><span class="p">,</span> <span class="s1">&#39;O22&#39;</span><span class="p">,</span> <span class="s1">&#39;O23&#39;</span><span class="p">,</span> <span class="s1">&#39;O24&#39;</span><span class="p">,</span> <span class="s1">&#39;O25&#39;</span><span class="p">]</span> <span class="c1"># Experimental Port 1,2,3,4,5A,5C,5B,6A,6,7 --&gt; Now Port 1,2,3,4,5,6,7,8,9,10. Quan 10/28</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="n">jgloc</span> <span class="o">=</span> <span class="n">ws</span><span class="p">[</span><span class="n">jglocs</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\d+&#39;</span><span class="p">,</span> <span class="n">port</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span><span class="o">.</span><span class="n">value</span>
                     <span class="c1">#jgloc = ws[jglocs[int(port.strip(&#39;P&#39;))]].value</span>
@@ -1274,7 +1309,7 @@
                 <span class="k">elif</span> <span class="n">jgloc</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Warning: jgloc could not be found, setting jgloc = jgref&quot;</span><span class="p">)</span>
                     <span class="n">jgloc</span> <span class="o">=</span> <span class="n">jgref</span>
-
+                <span class="c1"># print(theta)</span>
                 <span class="n">newCond</span> <span class="o">=</span> <span class="n">Condition</span><span class="p">(</span><span class="n">jgref</span><span class="p">,</span> <span class="n">jgloc</span><span class="p">,</span> <span class="n">jf</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">sheet_type</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
 
                 <span class="k">if</span> <span class="n">newCond</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">all_conditions</span><span class="p">:</span>
@@ -1286,7 +1321,8 @@
                 <span class="n">cond</span><span class="o">.</span><span class="n">run_ID</span> <span class="o">=</span> <span class="n">ws</span><span class="p">[</span><span class="s1">&#39;B2&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
 
                 <span class="c1"># Local corrected gauge pressure can also be back-calculated from jgloc and jgatm (DHK)</span>
-                <span class="n">cond</span><span class="o">.</span><span class="n">jgatm</span> <span class="o">=</span> <span class="n">ws</span><span class="p">[</span><span class="s1">&#39;D6&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+                <span class="c1"># cond.jgatm = ws[&#39;D6&#39;].value  # Recorded experimental jgatm when data was taken, might vary slightly on different days or at different ports due to different temp or other BCs</span>
+                <span class="n">cond</span><span class="o">.</span><span class="n">jgatm</span> <span class="o">=</span> <span class="n">ws</span><span class="p">[</span><span class="s1">&#39;D7&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>   <span class="c1"># Quan 10/25 U-bend data, fixed jgatm for all the ports to avoid cofusion in later modeling </span>
 
                 <span class="n">ws</span> <span class="o">=</span> <span class="n">wb</span><span class="p">[</span><span class="s1">&#39;2&#39;</span><span class="p">]</span>
                 
@@ -1440,7 +1476,7 @@
 
 <div class="viewcode-block" id="dump_data_from_tabs">
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.extracts_and_loads.dump_data_from_tabs">[docs]</a>
-<span class="k">def</span> <span class="nf">dump_data_from_tabs</span><span class="p">(</span><span class="n">dump_file</span> <span class="o">=</span> <span class="s1">&#39;PITA_Database.dat&#39;</span><span class="p">,</span> <span class="n">skip_dir</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">dump_data_from_tabs</span><span class="p">(</span><span class="n">dump_file</span> <span class="o">=</span> <span class="s1">&#39;PITA_Database.dat&#39;</span><span class="p">,</span> <span class="n">skip_dir</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
     <span class="n">all_conditions</span> <span class="o">=</span> <span class="p">[]</span>
     
     <span class="k">for</span> <span class="n">path</span><span class="p">,</span> <span class="n">directories</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">):</span>
@@ -1516,7 +1552,7 @@
 
 <div class="viewcode-block" id="loadData">
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.extracts_and_loads.loadData">[docs]</a>
-<span class="k">def</span> <span class="nf">loadData</span><span class="p">(</span><span class="n">data_file</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">loadData</span><span class="p">(</span><span class="n">data_file</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">data_file</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">g</span><span class="p">:</span> <span class="c1"># pickle works with binary data, hence rb</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">g</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">data</span></div>
@@ -1524,7 +1560,7 @@
 
 <div class="viewcode-block" id="loadProbeData">
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.extracts_and_loads.loadProbeData">[docs]</a>
-<span class="k">def</span> <span class="nf">loadProbeData</span><span class="p">(</span><span class="n">data_file</span> <span class="o">=</span> <span class="s1">&#39;PITA_Database.dat&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">loadProbeData</span><span class="p">(</span><span class="n">data_file</span> <span class="o">=</span> <span class="s1">&#39;PITA_Database.dat&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">data_file</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">g</span><span class="p">:</span> <span class="c1"># pickle works with binary data, hence rb</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">g</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">data</span></div>
@@ -1532,7 +1568,7 @@
 
 <div class="viewcode-block" id="dumpData">
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.extracts_and_loads.dumpData">[docs]</a>
-<span class="k">def</span> <span class="nf">dumpData</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">dump_file</span> <span class="o">=</span> <span class="s2">&quot;database.dat&quot;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">dumpData</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">dump_file</span> <span class="o">=</span> <span class="s2">&quot;database.dat&quot;</span><span class="p">):</span>
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">dump_file</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">g</span><span class="p">:</span>
         <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">g</span><span class="p">)</span>
     <span class="k">return</span></div>
@@ -1540,7 +1576,7 @@
 
 <div class="viewcode-block" id="extractPitotData">
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.extracts_and_loads.extractPitotData">[docs]</a>
-<span class="k">def</span> <span class="nf">extractPitotData</span><span class="p">(</span><span class="n">dump_file</span> <span class="o">=</span> <span class="s1">&#39;Pitot_Database.dat&#39;</span><span class="p">,</span> <span class="n">in_dir</span> <span class="o">=</span> <span class="p">[],</span> <span class="n">require_terms</span> <span class="o">=</span> <span class="p">[],</span> <span class="n">skip_terms</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;CFD&#39;</span><span class="p">,</span> <span class="s1">&#39;Copy&#39;</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">extractPitotData</span><span class="p">(</span><span class="n">dump_file</span> <span class="o">=</span> <span class="s1">&#39;Pitot_Database.dat&#39;</span><span class="p">,</span> <span class="n">in_dir</span> <span class="o">=</span> <span class="p">[],</span> <span class="n">require_terms</span> <span class="o">=</span> <span class="p">[],</span> <span class="n">skip_terms</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;CFD&#39;</span><span class="p">,</span> <span class="s1">&#39;Copy&#39;</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
     <span class="n">Q1_ranges</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">([</span><span class="mi">90</span><span class="p">,</span> <span class="mf">67.5</span><span class="p">,</span> <span class="mi">45</span><span class="p">,</span> <span class="mf">22.5</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">33</span><span class="p">)],</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">57</span><span class="p">,</span> <span class="mi">82</span><span class="p">)],</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">108</span><span class="p">,</span> <span class="mi">133</span><span class="p">)],</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">157</span><span class="p">,</span> <span class="mi">182</span><span class="p">)],</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">208</span><span class="p">,</span> <span class="mi">233</span><span class="p">)]</span> <span class="p">]))</span>
 
     <span class="n">path</span> <span class="o">=</span> <span class="s2">&quot;Z:</span><span class="se">\\</span><span class="s2">TRSL</span><span class="se">\\</span><span class="s2">PITA</span><span class="se">\\</span><span class="s2">Data</span><span class="se">\\</span><span class="s2">PitotData&quot;</span>
@@ -1632,7 +1668,7 @@
 
 <div class="viewcode-block" id="loadPitotData">
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.extracts_and_loads.loadPitotData">[docs]</a>
-<span class="k">def</span> <span class="nf">loadPitotData</span><span class="p">(</span><span class="n">data_file</span> <span class="o">=</span> <span class="s1">&#39;Pitot_Database.dat&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">loadPitotData</span><span class="p">(</span><span class="n">data_file</span> <span class="o">=</span> <span class="s1">&#39;Pitot_Database.dat&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">data_file</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">g</span><span class="p">:</span> <span class="c1"># pickle works with binary data, hence rb</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">g</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">data</span></div>
@@ -1640,7 +1676,7 @@
 
 <div class="viewcode-block" id="extractIskandraniData">
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.extracts_and_loads.extractIskandraniData">[docs]</a>
-<span class="k">def</span> <span class="nf">extractIskandraniData</span><span class="p">(</span><span class="n">dump_file</span><span class="o">=</span><span class="s1">&#39;Iskandrani_Database.dat&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">extractIskandraniData</span><span class="p">(</span><span class="n">dump_file</span><span class="o">=</span><span class="s1">&#39;Iskandrani_Database.dat&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">wb</span> <span class="o">=</span> <span class="n">op</span><span class="o">.</span><span class="n">load_workbook</span><span class="p">(</span><span class="s2">&quot;Z:</span><span class="se">\\</span><span class="s2">TRSL</span><span class="se">\\</span><span class="s2">PITA\Data</span><span class="se">\\</span><span class="s2">LocalData</span><span class="se">\\</span><span class="s2">Iskandrani</span><span class="se">\\</span><span class="s2">Iskandrani_Local_Velocity.xlsx&quot;</span><span class="p">)</span>
     <span class="k">except</span> <span class="ne">IOError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
@@ -1672,7 +1708,7 @@
 
 <div class="viewcode-block" id="loadIskandraniData">
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.extracts_and_loads.loadIskandraniData">[docs]</a>
-<span class="k">def</span> <span class="nf">loadIskandraniData</span><span class="p">(</span><span class="n">data_file</span> <span class="o">=</span> <span class="s1">&#39;Iskandrani_Database.dat&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">loadIskandraniData</span><span class="p">(</span><span class="n">data_file</span> <span class="o">=</span> <span class="s1">&#39;Iskandrani_Database.dat&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">data_file</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">g</span><span class="p">:</span> <span class="c1"># pickle works with binary data, hence rb</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">g</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">data</span></div>
@@ -1680,7 +1716,7 @@
 
 <div class="viewcode-block" id="extractYangData">
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.extracts_and_loads.extractYangData">[docs]</a>
-<span class="k">def</span> <span class="nf">extractYangData</span><span class="p">(</span><span class="n">dump_file</span><span class="o">=</span><span class="s1">&#39;Yang_Database.dat&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">extractYangData</span><span class="p">(</span><span class="n">dump_file</span><span class="o">=</span><span class="s1">&#39;Yang_Database.dat&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
 
     <span class="k">try</span><span class="p">:</span>
         <span class="n">wb</span> <span class="o">=</span> <span class="n">op</span><span class="o">.</span><span class="n">load_workbook</span><span class="p">(</span><span class="s2">&quot;Z:</span><span class="se">\\</span><span class="s2">TRSL</span><span class="se">\\</span><span class="s2">PITA\Data</span><span class="se">\\</span><span class="s2">LocalData</span><span class="se">\\</span><span class="s2">Yang_et_al_mean_velocity_profiles.xlsx&quot;</span><span class="p">)</span>
@@ -1722,7 +1758,7 @@
 
 <div class="viewcode-block" id="loadYangData">
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.extracts_and_loads.loadYangData">[docs]</a>
-<span class="k">def</span> <span class="nf">loadYangData</span><span class="p">(</span><span class="n">data_file</span> <span class="o">=</span> <span class="s1">&#39;Yang_Database.dat&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">loadYangData</span><span class="p">(</span><span class="n">data_file</span> <span class="o">=</span> <span class="s1">&#39;Yang_Database.dat&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">data_file</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">g</span><span class="p">:</span> <span class="c1"># pickle works with binary data, hence rb</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">g</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">data</span></div>
