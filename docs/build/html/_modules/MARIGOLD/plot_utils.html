@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MARIGOLD.plot_utils &mdash; MARIGOLD 0.0.1 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../_static/dark_mode_css/general.css?v=c0a7eb24" />
       <link rel="stylesheet" type="text/css" href="../../_static/dark_mode_css/dark.css?v=70edf1c7" />
@@ -15,7 +15,7 @@
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
       <script src="../../_static/documentation_options.js?v=d45e8c67"></script>
-      <script src="../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../_static/dark_mode_js/default_dark.js?v=fd565c74"></script>
       <script src="../../_static/dark_mode_js/theme_switcher.js?v=358d3910"></script>
@@ -44,6 +44,8 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../Installation.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples.html">Example Analysis</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../MARIGOLD.html">MARIGOLD</a></li>
 </ul>
 
@@ -72,17 +74,18 @@
            <div itemprop="articleBody">
              
   <h1>Source code for MARIGOLD.plot_utils</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">.config</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span></span><span class="kn">from</span> <span class="nn">.config</span> <span class="kn">import</span> <span class="o">*</span>
 
 <div class="viewcode-block" id="color_cycle">
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.plot_utils.color_cycle">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">color_cycle</span><span class="p">(</span><span class="n">set_color</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">color_list</span> <span class="o">=</span> <span class="p">[]):</span>
+<span class="k">def</span> <span class="nf">color_cycle</span><span class="p">(</span><span class="n">set_color</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">color_list</span> <span class="o">=</span> <span class="p">[]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Custom generator for colors</span>
-<span class="sd">    set_color can be </span>
-<span class="sd">     * None, for a basic cycle of blue, red, green, etc.</span>
-<span class="sd">     * A single hexcolor code (&#39;#000000&#39; for black, etc)</span>
-<span class="sd">     * &#39;alpha&#39;, &#39;ai&#39;, &#39;ug1&#39;, &#39;Dsm1&#39; or &#39;vr&#39;, which have default built in colors</span>
-<span class="sd">     * Otherwise, it assumes set_color is a list of colors to yield</span>
+<span class="sd">    </span>
+<span class="sd">    set_color can be:</span>
+<span class="sd">     - None, for a basic cycle of blue, red, green, etc.</span>
+<span class="sd">     - A single hexcolor code (&#39;#000000&#39; for black, etc)</span>
+<span class="sd">     - &#39;alpha&#39;, &#39;ai&#39;, &#39;ug1&#39;, &#39;Dsm1&#39; or &#39;vr&#39;, which have default built in colors</span>
+<span class="sd">     - Otherwise, it assumes set_color is a list of colors to yield</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
     
@@ -143,8 +146,9 @@
 
 <div class="viewcode-block" id="marker_cycle">
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.plot_utils.marker_cycle">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">marker_cycle</span><span class="p">(</span><span class="n">marker_list</span> <span class="o">=</span> <span class="p">[]):</span>
+<span class="k">def</span> <span class="nf">marker_cycle</span><span class="p">(</span><span class="n">marker_list</span> <span class="o">=</span> <span class="p">[]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Custom generator for markers</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">marker_list</span><span class="p">:</span>
         <span class="n">marker_list</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="s1">&#39;^&#39;</span><span class="p">,</span> <span class="s1">&#39;s&#39;</span><span class="p">,</span> <span class="s1">&#39;v&#39;</span><span class="p">,</span> <span class="s1">&#39;D&#39;</span><span class="p">]</span>
@@ -156,8 +160,9 @@
 
 <div class="viewcode-block" id="line_cycle">
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.plot_utils.line_cycle">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">line_cycle</span><span class="p">(</span><span class="n">line_list</span> <span class="o">=</span> <span class="p">[]):</span>
+<span class="k">def</span> <span class="nf">line_cycle</span><span class="p">(</span><span class="n">line_list</span> <span class="o">=</span> <span class="p">[]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Custom generator for linestyles</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">line_list</span><span class="p">:</span>

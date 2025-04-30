@@ -20,7 +20,6 @@ class Condition:
     Also has an option for interpolation, 'interp_method' 
 
 """
-
     debugFID = None
     def __init__(self, jgref:float, jgloc:float, jf:float, theta:int, port:str, database:str, fluids = 'air-water', g = 9.81) -> None:
         """ Initialize Condition object
@@ -2640,9 +2639,9 @@ class Condition:
          - Tuple of f_f, f_g
         
         Stores
-         -self.ff
-         -self.fg
-         -self.tau_fw
+         - self.ff
+         - self.fg
+         - self.tau_fw
         
         """
         
