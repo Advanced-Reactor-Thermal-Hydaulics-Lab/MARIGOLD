@@ -43,3 +43,5 @@ For Contributors
    .. code-block:: bash
 
     python -m pip install -e .
+
+To verify that it installed correctly, try running ``example_analysis.ipynb`` in your iPython interpreter of choice
