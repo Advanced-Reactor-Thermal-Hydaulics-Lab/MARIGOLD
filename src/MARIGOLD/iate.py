@@ -41,7 +41,7 @@ def iate_1d_1g(
      - C_RC:            Random collision coefficient
      - C_TI:            Turbulent impact coefficient
      - alpha_max:       Maximum void fraction based on HCP bubble distribution, used for random collision calculation
-     - C:               C
+     - C:               Additional factor accounting for the range of eddy size capable of transporting bubbles. Value assumed to be 3, but no justification for this selection is made
      - We_cr:           Weber number criterion, used for turbulent impact calculation
      - acrit_flag:      Enable/disable shutting off turbulence-based mechanisms beyond a critical void fraction
      - acrit:           Critical void fraction for shutting off turbulence-based mechanisms
