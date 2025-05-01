@@ -11,6 +11,8 @@ Welcome to MARIGOLD's documentation!
 .. toctree::
    :maxdepth: 4
 
+   Installation
+   examples
    MARIGOLD
 
 

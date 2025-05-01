@@ -2,11 +2,12 @@ from .config import *
 
 def color_cycle(set_color = None, color_list = []):
     """Custom generator for colors
-    set_color can be 
-     * None, for a basic cycle of blue, red, green, etc.
-     * A single hexcolor code ('#000000' for black, etc)
-     * 'alpha', 'ai', 'ug1', 'Dsm1' or 'vr', which have default built in colors
-     * Otherwise, it assumes set_color is a list of colors to yield
+    
+    set_color can be:
+     - None, for a basic cycle of blue, red, green, etc.
+     - A single hexcolor code ('#000000' for black, etc)
+     - 'alpha', 'ai', 'ug1', 'Dsm1' or 'vr', which have default built in colors
+     - Otherwise, it assumes set_color is a list of colors to yield
 
     """
     
@@ -66,6 +67,7 @@ def color_cycle(set_color = None, color_list = []):
 
 def marker_cycle(marker_list = []):
     """Custom generator for markers
+
     """
     if not marker_list:
         marker_list = ['o', '^', 's', 'v', 'D']
@@ -76,6 +78,7 @@ def marker_cycle(marker_list = []):
 
 def line_cycle(line_list = []):
     """Custom generator for linestyles
+
     """
 
     if not line_list:

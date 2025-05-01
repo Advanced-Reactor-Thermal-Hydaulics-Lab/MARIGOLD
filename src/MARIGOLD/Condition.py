@@ -8,8 +8,11 @@ class Condition:
     """ Class to handle the local probe data
 
     Data is stored in the Condition.data property. It's actually 3 layers of dictionary
-    data [angle] gives a dictionary with the various r/R
-    data [angle][r/R] gives a dictionary with the MIDAS output
+
+    ``cond.data[angle]`` gives a dictionary with the various r/R
+
+    ``cond.data[angle][r/R]`` gives a dictionary with the MIDAS output (``midas_dict``)
+
     The MIDAS output is itself a dictionary, with the keys listed in the "tab_keys" array
     So data[angle][r/R]['alpha'] should give you the void fraction at r/R for phi = angle
     This structure is initialized with zeros for the MIDAS output at the pipe center and wall
@@ -20,27 +23,29 @@ class Condition:
     Also has an option for interpolation, 'interp_method' 
 
 """
-
     debugFID = None
     def __init__(self, jgref:float, jgloc:float, jf:float, theta:int, port:str, database:str, fluids = 'air-water', g = 9.81) -> None:
-        """ Initialize Condition object
+        """Initialize Condition object
 
-        Inputs:
-        - jgref, reference superficial gas velocity
-        - jgloc, local superficial gas velocity
-        - jf, superficial liquid velocity
-        - theta, angle of inclination of flow direction (0° is horizontal, 90° is vertical upwards)
-        - port, string to denote the port
-        - database, string to associate what database this data is from
-
-        Optional inputs:
-        - fluids, what fluid pair to use as the gas and liquid
-        - g, gravitational acceleration. In case you're on Mars. MARIGOLD multiplies by sin(θ)
-
-        Implemented Fluids:
-        - air-water, uses properties at atmospheric conditions
-        
+        :param jgref: reference superficial gas velocity
+        :type jgref: float
+        :param jgloc: local superficial gas velocity
+        :type jgloc: float
+        :param jf: superficial liquid velocity
+        :type jf: float
+        :param theta: angle of inclination of flow direction (0° is horizontal, 90° is vertical upwards)
+        :type theta: int
+        :param port: string to denote the port
+        :type port: str
+        :param database: string to associate what database this data is from
+        :type database: str
+        :param fluids: what fluid pair to use as the gas and liquid, defaults to 'air-water'
+        :type fluids: str, optional
+        :param g: gravitational acceleration. In case you're on Mars. MARIGOLD multiplies by sin(θ), defaults to 9.81
+        :type g: float, optional
+        :raises NotImplementedError: If unknown fluid pair is specified. 
         """
+
         self.jgref = jgref
         self.jf = jf
         self.jgloc =jgloc
@@ -172,13 +177,18 @@ class Condition:
 
     def __call__(self, phi_in:np.ndarray, r_in:np.ndarray, param:str, interp_method='None') -> np.ndarray:
         """Returns the value of param at (phi, r). Phi is in radians, r nondimensional
-         
-        Interp method:
-         - 'None', will try to fetch raw data at this location
-         - 'linear', linear interpolation
-         - 'spline', spline interpolation
-         - 'linear_xy', cartesian interpolation, phi -> x, r -> y
-           
+
+        :param phi_in: Array of :math:`\\varphi` points
+        :type phi_in: np.ndarray
+        :param r_in: _description_
+        :type r_in: np.ndarray
+        :param param: _description_
+        :type param: str
+        :param interp_method: _description_, defaults to 'None'
+        :type interp_method: str, optional
+        :raises NameError: _description_
+        :return: _description_
+        :rtype: np.ndarray
         """
         if type(phi_in) != np.ndarray:
             if debug: warnings.warn("Converting phi_in to np.ndarray")
@@ -561,11 +571,14 @@ class Condition:
     def add_mesh_points(self, r_points:list, suppress=False):
         """Method for adding additional r/R points
 
-        Data linearly interpolated based on surrounding data (specifically using __call__ at the (angle, r) location in question)
-        
-        Inputs:
-         - r_points, points to add
-        
+        Data linearly interpolated based on surrounding data (specifically using ``__call__`` at the ``(angle, r)`` location in question)
+
+        :param r_points: List of r locations to add
+        :type r_points: list
+        :param suppress: _description_, defaults to False
+        :type suppress: bool, optional
+        :return: 1
+        :rtype: _type_
         """
 
         for angle in self.data.keys():
@@ -591,13 +604,16 @@ class Condition:
         return 1
     
     def approx_vf(self, n=7, overwrite_vf = False) -> None:
-        """Method for approximating vf with power-law relation. 
+        """Method for approximating :math:`v_{f}` with power-law relation. 
 
-        .. math:: v_{f, approx} = \\frac{(n+1)(2*n+1)}{ (2*n^{2})} * (j_{f} / (1- \\langle \\alpha \\rangle)) * (1 - abs(rstar))**(1/n)
-
+        .. math:: v_{f, approx} = \\frac{(n+1)(2n+1)}{ (2n^{2})}  (j_{f} / (1- \\langle \\alpha \\rangle))  (1 - |r^{*}|)^{1/n}
+        
         Stores:
-         - "vf_approx" in midas_dict
-         - "vf", if it does not alread exist in midas_dict
+         - ``'vf_approx'`` in midas_dict
+         - ``'vf'``, if it does not alread exist in midas_dict
+
+        Returns:
+         - Area-averaged ``'vf_approx'``
 
         """
 
@@ -615,16 +631,23 @@ class Condition:
                 
                 midas_dict.update({'vf_approx': vf_approx})
 
-        return
+        return self.area_avg('vf_approx')
     
     def approx_vg(self, method = 'vr', n=7, update_ug1 = False) -> None:
-        """Method for approximating vg with power-law relation. I don't think this makes sense
+        """Method for approximating :math:`v_{g}` with power-law relation. I don't think this makes sense
 
-        .. math:: v_{g, approx} = \\frac{(n+1)(2*n+1)}{ (2*n^{2})} * (j_{g} / \\langle \\alpha \\rangle) * (1 - abs(rstar))**(1/n)
+        .. math:: v_{g, approx} = \\frac{(n+1)(2n+1)}{ (2n^{2})}  (j_{g} / \\langle \\alpha \\rangle)  (1 - |r^{*}|)^{1/n}
+
+        Methods:
+         - power-law
+         - vrmodel, 
 
         Stores:
-         - "vg_approx" in midas_dict
-         - "ug1", if it does not alread exist in midas_dict
+         - ``'vg_approx'`` in midas_dict
+         - ``'ug1'``, if it does not alread exist in midas_dict
+
+        Returns:
+         - Area-averaged ``'vg_approx'``
 
         If you have a lot of group II bubbles this functions' no good
 
@@ -652,10 +675,10 @@ class Condition:
                 
                 midas_dict.update({'vg_approx': vg_approx})
 
-        return
+        return self.area_avg('vg_approx')
     
     def approx_vf_Kong(self, n=7) -> None:
-        """Method for approximating vf from Kong. TODO 
+        """Method for approximating :math:`v_{f}` from Kong. TODO 
 
         Not currently implemented
 
@@ -671,20 +694,20 @@ class Condition:
         return
     
     def calc_vf_lee(self, K=1):
-        """ Calculate vf, jf, vr based on Lee et al. (2002) equation
+        """ Calculate :math:`v_{f}`, :math:`j_{f}`, :math:`v_{r}` based on Lee et al. (2002) equation
 
         Inputs:
          - None
 
         Stores:
-         - "vf_lee" in midas_dict
-         - "jf_lee" in midas_dict
-         - "vr_lee" in midas_dict
+         - ``'vf_lee'`` in midas_dict
+         - ``'jf_lee'`` in midas_dict
+         - ``'vr_lee'`` in midas_dict
 
         Returns:
          - Area-average vf_lee
 
-        Really a model proposed by Bosio and Malnes
+        Really a model proposed by Bosio and Malnes (1968)
 
         .. math:: v_{f} = \\frac{ 1 }{ \\sqrt{1 - \\alpha^{2} / 2} } * \\sqrt{ \\frac{ 2 \\Delta p }{K \\rho_{f}} } 
         
@@ -714,19 +737,20 @@ class Condition:
         return self.area_avg('vf_lee')
     
     def calc_vf_naive(self):
-        """ Calculate vf, jf, vr based on single-phase equation
+        """ Calculate :math:`v_{f}`, :math:`j_{f}`, :math:`v_{r}` based on single-phase Pitot-tube equation
 
         Inputs:
          - None
 
         Stores:
-         - "vf_naive" in midas_dict
-         - "jf_naive" in midas_dict
-         - "vr_naive" in midas_dict
+         - ``'vf_naive'`` in midas_dict
+         - ``'jf_naive'`` in midas_dict
+         - ``'vr_naive'`` in midas_dict
 
         Returns:
-         - Area-average vf_naive
+         - Area-average ``'vf_naive'``
 
+        Mathematically performing the operation 
         .. math::  v_{f} = \\sqrt{ \\frac{ 2 \\Delta p }{ \\rho_{f}} } 
         
         """
@@ -764,10 +788,12 @@ class Condition:
          - warn_approx, flag for warning if :math`v_r` is not found and function is approximating
 
         Note that if vg = 0, then this method says vr = 0. This will happen when no data is present,
-        such as in the bottom of the pipe in horizontal, when this is not necessarily true
+        such as in the bottom of the pipe in horizontal, when this is not necessarily true.
+
+        This method also assumes vg = ug1, so if group II bubbles are present this may not be accurate
 
         Stores:
-         - 'vr' in midas_dict
+         - ``'vr'`` in midas_dict
 
         Returns:
          - Area-average vr
@@ -822,7 +848,7 @@ class Condition:
         such as in the bottom of the pipe in horizontal, when this is not necessarily true
 
         Stores:
-         - 'vr2' in midas_dict
+         - ``'vr2'`` in midas_dict
 
         Returns:
          - Area-average vr2
@@ -862,15 +888,15 @@ class Condition:
         return self.area_avg('vr2')
 
     def calc_vgj(self, warn_approx = True) -> None:
-        """Method for calculating Vgj
+        """Method for calculating :math:`V_{gj}`
 
         Inputs:
-         - warn_approx, flag for warning if :math`V_{gj}` is not found and function is approximating
+         - warn_approx, flag for warning if :math:`V_{gj}` is not found and function is approximating
 
         Stores:
-         - "vgj" in midas_dict
-         - "j" in midas_dict
-         - "alpha_j" in midas_dict
+         - ``'vgj'`` in ``midas_dict``
+         - ``'j'`` in ``midas_dict``
+         - ``'alpha_j'`` in ``midas_dict``
 
         Returns:
          - Void-weighted area-averaged Vgj
@@ -1174,7 +1200,7 @@ class Condition:
         """ Adds all values of param
         
         Inputs:
-         - param, string of local parameter to sum
+         - ``param``, string of local parameter to sum
 
         Returns:
          - sum of the value of parameter at every point
@@ -2256,7 +2282,7 @@ class Condition:
          - "sigma_alpha" in self
 
         Returns:
-         - second moment of :math:`alpha`
+         - second moment of :math:`\\alpha`
 
         Mathematically performing the operation
 
@@ -2309,11 +2335,11 @@ class Condition:
          - "sigma_alpha1" in self
 
         Returns:
-         - second moment of :math:`alpha_G1`
+         - second moment of :math:`\\alpha_{G1}`
 
         Mathematically performing the operation
 
-        .. math:: \\frac{\\langle (\\alpha - \\langle \\alpha \\rangle)^2 \\rangle }{\\langle \\alpha \\rangle^2}
+        .. math:: \\frac{\\langle (\\alpha_{G1} - \\langle \\alpha_{G1} \\rangle)^2 \\rangle }{\\langle \\alpha_{G1} \\rangle^2}
         
         """
 
@@ -2362,11 +2388,11 @@ class Condition:
          - "sigma_ug" in self
 
         Returns:
-         - second moment of :math:`alpha`
+         - sigma_ug
 
         Mathematically performing the operation
 
-        .. math:: \\frac{\\langle (\\ug - \\langle \\ug \\rangle)^2 \\rangle }{\\langle \\ug \\rangle^2}
+        .. math:: \\frac{\\langle (u_{g,1} - \\langle u_{g,1} \\rangle)^2 \\rangle }{\\langle u_{g,1} \\rangle^2}
         
         """
 
@@ -2416,7 +2442,7 @@ class Condition:
          - "mu3_alpha" in self
 
         Returns:
-         - Third moment of :math:`alpha`
+         - Third moment of :math:`\\alpha`
 
         Mathematically performing the operation
 
@@ -2640,9 +2666,9 @@ class Condition:
          - Tuple of f_f, f_g
         
         Stores
-         -self.ff
-         -self.fg
-         -self.tau_fw
+         - self.ff
+         - self.fg
+         - self.tau_fw
         
         """
         
@@ -4599,7 +4625,7 @@ the newly calculated :math:`v_{r}` or not
         
         Generates a contour plot of any parameter in midas_dict, e.g. 'alpha', 'ai', etc. By default, just shows the figure,
         but if a save_dir is specified, it will save it there instead. label_str can adjust the label of the colorbar. Can accept Latex format, e.g.
-        r"$\alpha$ [-]"
+        r"$\\alpha$ [-]"
 
         set_max and set_min set the bounds of the contour plot, and the colormap option allows for any colors that matplotlib supports. ngridr, ngridphi,
         num_levels, all adjust how fine the contour plot is generated.

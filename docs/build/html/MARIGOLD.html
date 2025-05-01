@@ -6,25 +6,23 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MARIGOLD &mdash; MARIGOLD 0.0.1 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+  <title>MARIGOLD Documentation &mdash; MARIGOLD 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
-      <link rel="stylesheet" type="text/css" href="_static/dark_mode_css/general.css?v=c0a7eb24" />
-      <link rel="stylesheet" type="text/css" href="_static/dark_mode_css/dark.css?v=70edf1c7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=470960a4" />
 
   
+    <link rel="shortcut icon" href="_static/favicon.ico"/>
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
       <script src="_static/documentation_options.js?v=d45e8c67"></script>
-      <script src="_static/doctools.js?v=9a2dae69"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
       <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-      <script src="_static/dark_mode_js/default_dark.js?v=fd565c74"></script>
-      <script src="_static/dark_mode_js/theme_switcher.js?v=358d3910"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="prev" title="Welcome to MARIGOLD’s documentation!" href="index.html" /> 
+    <link rel="prev" title="Example Analysis" href="examples.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -47,141 +45,126 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">MARIGOLD</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#module-MARIGOLD.Condition">Condition object</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.Condition.Condition"><code class="docutils literal notranslate"><span class="pre">Condition</span></code></a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#MARIGOLD.Condition.Condition.TD_FR_ID"><code class="docutils literal notranslate"><span class="pre">Condition.TD_FR_ID()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#MARIGOLD.Condition.Condition.add_mesh_points"><code class="docutils literal notranslate"><span class="pre">Condition.add_mesh_points()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#MARIGOLD.Condition.Condition.approx_vf"><code class="docutils literal notranslate"><span class="pre">Condition.approx_vf()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#MARIGOLD.Condition.Condition.approx_vf_Kong"><code class="docutils literal notranslate"><span class="pre">Condition.approx_vf_Kong()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#MARIGOLD.Condition.Condition.approx_vg"><code class="docutils literal notranslate"><span class="pre">Condition.approx_vg()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#MARIGOLD.Condition.Condition.area_avg"><code class="docutils literal notranslate"><span class="pre">Condition.area_avg()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#MARIGOLD.Condition.Condition.avg"><code class="docutils literal notranslate"><span class="pre">Condition.avg()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#MARIGOLD.Condition.Condition.calc_AA_error"><code class="docutils literal notranslate"><span class="pre">Condition.calc_AA_error()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#MARIGOLD.Condition.Condition.calc_COV_RC"><code class="docutils literal notranslate"><span class="pre">Condition.calc_COV_RC()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#MARIGOLD.Condition.Condition.calc_COV_TI"><code class="docutils literal notranslate"><span class="pre">Condition.calc_COV_TI()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#MARIGOLD.Condition.Condition.calc_IS_term"><code class="docutils literal notranslate"><span class="pre">Condition.calc_IS_term()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#MARIGOLD.Condition.Condition.calc_W"><code class="docutils literal notranslate"><span class="pre">Condition.calc_W()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#MARIGOLD.Condition.Condition.calc_aa_vr_model"><code class="docutils literal notranslate"><span class="pre">Condition.calc_aa_vr_model()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#MARIGOLD.Condition.Condition.calc_avg_lat_sep"><code class="docutils literal notranslate"><span class="pre">Condition.calc_avg_lat_sep()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#MARIGOLD.Condition.Condition.calc_cd"><code class="docutils literal notranslate"><span class="pre">Condition.calc_cd()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#MARIGOLD.Condition.Condition.calc_dpdz"><code class="docutils literal notranslate"><span class="pre">Condition.calc_dpdz()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#MARIGOLD.Condition.Condition.calc_errors"><code class="docutils literal notranslate"><span class="pre">Condition.calc_errors()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#MARIGOLD.Condition.Condition.calc_fric"><code class="docutils literal notranslate"><span class="pre">Condition.calc_fric()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#MARIGOLD.Condition.Condition.calc_grad"><code class="docutils literal notranslate"><span class="pre">Condition.calc_grad()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#MARIGOLD.Condition.Condition.calc_mu3_alpha"><code class="docutils literal notranslate"><span class="pre">Condition.calc_mu3_alpha()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#MARIGOLD.Condition.Condition.calc_mu_eff"><code class="docutils literal notranslate"><span class="pre">Condition.calc_mu_eff()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#MARIGOLD.Condition.Condition.calc_sigma_alpha"><code class="docutils literal notranslate"><span class="pre">Condition.calc_sigma_alpha()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#MARIGOLD.Condition.Condition.calc_sigma_alpha1"><code class="docutils literal notranslate"><span class="pre">Condition.calc_sigma_alpha1()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#MARIGOLD.Condition.Condition.calc_sigma_ug"><code class="docutils literal notranslate"><span class="pre">Condition.calc_sigma_ug()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#MARIGOLD.Condition.Condition.calc_symmetry"><code class="docutils literal notranslate"><span class="pre">Condition.calc_symmetry()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#MARIGOLD.Condition.Condition.calc_symmetry_area_avg"><code class="docutils literal notranslate"><span class="pre">Condition.calc_symmetry_area_avg()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#MARIGOLD.Condition.Condition.calc_vf_lee"><code class="docutils literal notranslate"><span class="pre">Condition.calc_vf_lee()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#MARIGOLD.Condition.Condition.calc_vf_naive"><code class="docutils literal notranslate"><span class="pre">Condition.calc_vf_naive()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#MARIGOLD.Condition.Condition.calc_vgj"><code class="docutils literal notranslate"><span class="pre">Condition.calc_vgj()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#MARIGOLD.Condition.Condition.calc_vgj_model"><code class="docutils literal notranslate"><span class="pre">Condition.calc_vgj_model()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#MARIGOLD.Condition.Condition.calc_void_cov"><code class="docutils literal notranslate"><span class="pre">Condition.calc_void_cov()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#MARIGOLD.Condition.Condition.calc_vr"><code class="docutils literal notranslate"><span class="pre">Condition.calc_vr()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#MARIGOLD.Condition.Condition.calc_vr2"><code class="docutils literal notranslate"><span class="pre">Condition.calc_vr2()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#MARIGOLD.Condition.Condition.calc_vr_model"><code class="docutils literal notranslate"><span class="pre">Condition.calc_vr_model()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#MARIGOLD.Condition.Condition.calc_vwvg"><code class="docutils literal notranslate"><span class="pre">Condition.calc_vwvg()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#MARIGOLD.Condition.Condition.check_param"><code class="docutils literal notranslate"><span class="pre">Condition.check_param()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#MARIGOLD.Condition.Condition.check_param_loc"><code class="docutils literal notranslate"><span class="pre">Condition.check_param_loc()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#MARIGOLD.Condition.Condition.circ_segment_area_avg"><code class="docutils literal notranslate"><span class="pre">Condition.circ_segment_area_avg()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#MARIGOLD.Condition.Condition.circ_segment_void_area_avg"><code class="docutils literal notranslate"><span class="pre">Condition.circ_segment_void_area_avg()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#MARIGOLD.Condition.Condition.debugFID"><code class="docutils literal notranslate"><span class="pre">Condition.debugFID</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#MARIGOLD.Condition.Condition.find_hstar_pos"><code class="docutils literal notranslate"><span class="pre">Condition.find_hstar_pos()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#MARIGOLD.Condition.Condition.fit_linear_interp"><code class="docutils literal notranslate"><span class="pre">Condition.fit_linear_interp()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#MARIGOLD.Condition.Condition.fit_linear_xy_interp"><code class="docutils literal notranslate"><span class="pre">Condition.fit_linear_xy_interp()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#MARIGOLD.Condition.Condition.fit_spline"><code class="docutils literal notranslate"><span class="pre">Condition.fit_spline()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#MARIGOLD.Condition.Condition.interp_area_avg"><code class="docutils literal notranslate"><span class="pre">Condition.interp_area_avg()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#MARIGOLD.Condition.Condition.interp_void_area_avg"><code class="docutils literal notranslate"><span class="pre">Condition.interp_void_area_avg()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#MARIGOLD.Condition.Condition.line_avg"><code class="docutils literal notranslate"><span class="pre">Condition.line_avg()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#MARIGOLD.Condition.Condition.line_avg_dev"><code class="docutils literal notranslate"><span class="pre">Condition.line_avg_dev()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#MARIGOLD.Condition.Condition.max"><code class="docutils literal notranslate"><span class="pre">Condition.max()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#MARIGOLD.Condition.Condition.max_line"><code class="docutils literal notranslate"><span class="pre">Condition.max_line()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#MARIGOLD.Condition.Condition.max_line_loc"><code class="docutils literal notranslate"><span class="pre">Condition.max_line_loc()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#MARIGOLD.Condition.Condition.max_loc"><code class="docutils literal notranslate"><span class="pre">Condition.max_loc()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#MARIGOLD.Condition.Condition.min"><code class="docutils literal notranslate"><span class="pre">Condition.min()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#MARIGOLD.Condition.Condition.min_loc"><code class="docutils literal notranslate"><span class="pre">Condition.min_loc()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#MARIGOLD.Condition.Condition.mirror"><code class="docutils literal notranslate"><span class="pre">Condition.mirror()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#MARIGOLD.Condition.Condition.plot_contour"><code class="docutils literal notranslate"><span class="pre">Condition.plot_contour()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#MARIGOLD.Condition.Condition.plot_isoline"><code class="docutils literal notranslate"><span class="pre">Condition.plot_isoline()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#MARIGOLD.Condition.Condition.plot_profiles"><code class="docutils literal notranslate"><span class="pre">Condition.plot_profiles()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#MARIGOLD.Condition.Condition.plot_profiles2"><code class="docutils literal notranslate"><span class="pre">Condition.plot_profiles2()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#MARIGOLD.Condition.Condition.plot_spline_contour"><code class="docutils literal notranslate"><span class="pre">Condition.plot_spline_contour()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#MARIGOLD.Condition.Condition.plot_surface"><code class="docutils literal notranslate"><span class="pre">Condition.plot_surface()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#MARIGOLD.Condition.Condition.pretty_print"><code class="docutils literal notranslate"><span class="pre">Condition.pretty_print()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#MARIGOLD.Condition.Condition.reconstruct_void"><code class="docutils literal notranslate"><span class="pre">Condition.reconstruct_void()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#MARIGOLD.Condition.Condition.rough_FR_ID"><code class="docutils literal notranslate"><span class="pre">Condition.rough_FR_ID()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#MARIGOLD.Condition.Condition.spline_circ_seg_area_avg"><code class="docutils literal notranslate"><span class="pre">Condition.spline_circ_seg_area_avg()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#MARIGOLD.Condition.Condition.spline_void_area_avg"><code class="docutils literal notranslate"><span class="pre">Condition.spline_void_area_avg()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#MARIGOLD.Condition.Condition.sum"><code class="docutils literal notranslate"><span class="pre">Condition.sum()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#MARIGOLD.Condition.Condition.top_bottom"><code class="docutils literal notranslate"><span class="pre">Condition.top_bottom()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#MARIGOLD.Condition.Condition.void_area_avg"><code class="docutils literal notranslate"><span class="pre">Condition.void_area_avg()</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="Installation.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Example Analysis</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">MARIGOLD Documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#MARIGOLD.Condition.Condition"><code class="docutils literal notranslate"><span class="pre">Condition</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.Condition.Condition.TD_FR_ID"><code class="docutils literal notranslate"><span class="pre">Condition.TD_FR_ID()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.Condition.Condition.add_mesh_points"><code class="docutils literal notranslate"><span class="pre">Condition.add_mesh_points()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.Condition.Condition.approx_vf"><code class="docutils literal notranslate"><span class="pre">Condition.approx_vf()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.Condition.Condition.approx_vf_Kong"><code class="docutils literal notranslate"><span class="pre">Condition.approx_vf_Kong()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.Condition.Condition.approx_vg"><code class="docutils literal notranslate"><span class="pre">Condition.approx_vg()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.Condition.Condition.area_avg"><code class="docutils literal notranslate"><span class="pre">Condition.area_avg()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.Condition.Condition.avg"><code class="docutils literal notranslate"><span class="pre">Condition.avg()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.Condition.Condition.calc_AA_error"><code class="docutils literal notranslate"><span class="pre">Condition.calc_AA_error()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.Condition.Condition.calc_COV_RC"><code class="docutils literal notranslate"><span class="pre">Condition.calc_COV_RC()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.Condition.Condition.calc_COV_TI"><code class="docutils literal notranslate"><span class="pre">Condition.calc_COV_TI()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.Condition.Condition.calc_IS_term"><code class="docutils literal notranslate"><span class="pre">Condition.calc_IS_term()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.Condition.Condition.calc_Reb"><code class="docutils literal notranslate"><span class="pre">Condition.calc_Reb()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.Condition.Condition.calc_W"><code class="docutils literal notranslate"><span class="pre">Condition.calc_W()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.Condition.Condition.calc_aa_vr_model"><code class="docutils literal notranslate"><span class="pre">Condition.calc_aa_vr_model()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.Condition.Condition.calc_avg_lat_sep"><code class="docutils literal notranslate"><span class="pre">Condition.calc_avg_lat_sep()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.Condition.Condition.calc_cd"><code class="docutils literal notranslate"><span class="pre">Condition.calc_cd()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.Condition.Condition.calc_cl"><code class="docutils literal notranslate"><span class="pre">Condition.calc_cl()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.Condition.Condition.calc_dpdz"><code class="docutils literal notranslate"><span class="pre">Condition.calc_dpdz()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.Condition.Condition.calc_errors"><code class="docutils literal notranslate"><span class="pre">Condition.calc_errors()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.Condition.Condition.calc_fric"><code class="docutils literal notranslate"><span class="pre">Condition.calc_fric()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.Condition.Condition.calc_grad"><code class="docutils literal notranslate"><span class="pre">Condition.calc_grad()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.Condition.Condition.calc_mu3_alpha"><code class="docutils literal notranslate"><span class="pre">Condition.calc_mu3_alpha()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.Condition.Condition.calc_mu_eff"><code class="docutils literal notranslate"><span class="pre">Condition.calc_mu_eff()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.Condition.Condition.calc_sigma_alpha"><code class="docutils literal notranslate"><span class="pre">Condition.calc_sigma_alpha()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.Condition.Condition.calc_sigma_alpha1"><code class="docutils literal notranslate"><span class="pre">Condition.calc_sigma_alpha1()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.Condition.Condition.calc_sigma_ug"><code class="docutils literal notranslate"><span class="pre">Condition.calc_sigma_ug()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.Condition.Condition.calc_symmetry"><code class="docutils literal notranslate"><span class="pre">Condition.calc_symmetry()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.Condition.Condition.calc_symmetry_area_avg"><code class="docutils literal notranslate"><span class="pre">Condition.calc_symmetry_area_avg()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.Condition.Condition.calc_vf_lee"><code class="docutils literal notranslate"><span class="pre">Condition.calc_vf_lee()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.Condition.Condition.calc_vf_naive"><code class="docutils literal notranslate"><span class="pre">Condition.calc_vf_naive()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.Condition.Condition.calc_vgj"><code class="docutils literal notranslate"><span class="pre">Condition.calc_vgj()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.Condition.Condition.calc_vgj_model"><code class="docutils literal notranslate"><span class="pre">Condition.calc_vgj_model()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.Condition.Condition.calc_void_cov"><code class="docutils literal notranslate"><span class="pre">Condition.calc_void_cov()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.Condition.Condition.calc_vr"><code class="docutils literal notranslate"><span class="pre">Condition.calc_vr()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.Condition.Condition.calc_vr2"><code class="docutils literal notranslate"><span class="pre">Condition.calc_vr2()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.Condition.Condition.calc_vr_model"><code class="docutils literal notranslate"><span class="pre">Condition.calc_vr_model()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.Condition.Condition.calc_vr_uncertainty"><code class="docutils literal notranslate"><span class="pre">Condition.calc_vr_uncertainty()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.Condition.Condition.calc_vw_aa_Vgj_model"><code class="docutils literal notranslate"><span class="pre">Condition.calc_vw_aa_Vgj_model()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.Condition.Condition.calc_vwvg"><code class="docutils literal notranslate"><span class="pre">Condition.calc_vwvg()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.Condition.Condition.check_param"><code class="docutils literal notranslate"><span class="pre">Condition.check_param()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.Condition.Condition.check_param_loc"><code class="docutils literal notranslate"><span class="pre">Condition.check_param_loc()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.Condition.Condition.circ_segment_area_avg"><code class="docutils literal notranslate"><span class="pre">Condition.circ_segment_area_avg()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.Condition.Condition.circ_segment_void_area_avg"><code class="docutils literal notranslate"><span class="pre">Condition.circ_segment_void_area_avg()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.Condition.Condition.debugFID"><code class="docutils literal notranslate"><span class="pre">Condition.debugFID</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.Condition.Condition.find_hstar_pos"><code class="docutils literal notranslate"><span class="pre">Condition.find_hstar_pos()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.Condition.Condition.fit_linear_interp"><code class="docutils literal notranslate"><span class="pre">Condition.fit_linear_interp()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.Condition.Condition.fit_linear_xy_interp"><code class="docutils literal notranslate"><span class="pre">Condition.fit_linear_xy_interp()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.Condition.Condition.fit_spline"><code class="docutils literal notranslate"><span class="pre">Condition.fit_spline()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.Condition.Condition.interp_area_avg"><code class="docutils literal notranslate"><span class="pre">Condition.interp_area_avg()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.Condition.Condition.interp_void_area_avg"><code class="docutils literal notranslate"><span class="pre">Condition.interp_void_area_avg()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.Condition.Condition.line_avg"><code class="docutils literal notranslate"><span class="pre">Condition.line_avg()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.Condition.Condition.line_avg_dev"><code class="docutils literal notranslate"><span class="pre">Condition.line_avg_dev()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.Condition.Condition.max"><code class="docutils literal notranslate"><span class="pre">Condition.max()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.Condition.Condition.max_line"><code class="docutils literal notranslate"><span class="pre">Condition.max_line()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.Condition.Condition.max_line_loc"><code class="docutils literal notranslate"><span class="pre">Condition.max_line_loc()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.Condition.Condition.max_loc"><code class="docutils literal notranslate"><span class="pre">Condition.max_loc()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.Condition.Condition.min"><code class="docutils literal notranslate"><span class="pre">Condition.min()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.Condition.Condition.min_loc"><code class="docutils literal notranslate"><span class="pre">Condition.min_loc()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.Condition.Condition.mirror"><code class="docutils literal notranslate"><span class="pre">Condition.mirror()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.Condition.Condition.plot_contour"><code class="docutils literal notranslate"><span class="pre">Condition.plot_contour()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.Condition.Condition.plot_isoline"><code class="docutils literal notranslate"><span class="pre">Condition.plot_isoline()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.Condition.Condition.plot_profiles"><code class="docutils literal notranslate"><span class="pre">Condition.plot_profiles()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.Condition.Condition.plot_profiles2"><code class="docutils literal notranslate"><span class="pre">Condition.plot_profiles2()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.Condition.Condition.plot_spline_contour"><code class="docutils literal notranslate"><span class="pre">Condition.plot_spline_contour()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.Condition.Condition.plot_surface"><code class="docutils literal notranslate"><span class="pre">Condition.plot_surface()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.Condition.Condition.pretty_print"><code class="docutils literal notranslate"><span class="pre">Condition.pretty_print()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.Condition.Condition.reconstruct_void"><code class="docutils literal notranslate"><span class="pre">Condition.reconstruct_void()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.Condition.Condition.rough_FR_ID"><code class="docutils literal notranslate"><span class="pre">Condition.rough_FR_ID()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.Condition.Condition.spline_circ_seg_area_avg"><code class="docutils literal notranslate"><span class="pre">Condition.spline_circ_seg_area_avg()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.Condition.Condition.spline_void_area_avg"><code class="docutils literal notranslate"><span class="pre">Condition.spline_void_area_avg()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.Condition.Condition.sum"><code class="docutils literal notranslate"><span class="pre">Condition.sum()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.Condition.Condition.top_bottom"><code class="docutils literal notranslate"><span class="pre">Condition.top_bottom()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.Condition.Condition.void_area_avg"><code class="docutils literal notranslate"><span class="pre">Condition.void_area_avg()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.Condition.print_tab_keys"><code class="docutils literal notranslate"><span class="pre">print_tab_keys()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#module-MARIGOLD.iate">iate</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.iate.iate_1d_1g"><code class="docutils literal notranslate"><span class="pre">iate_1d_1g()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#module-MARIGOLD.CFD">CFD Functions</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.CFD.calculate_CL_Ryan"><code class="docutils literal notranslate"><span class="pre">calculate_CL_Ryan()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.CFD.export_outlet"><code class="docutils literal notranslate"><span class="pre">export_outlet()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.CFD.export_surface"><code class="docutils literal notranslate"><span class="pre">export_surface()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.CFD.make_CFX_case"><code class="docutils literal notranslate"><span class="pre">make_CFX_case()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.CFD.make_ICEM_pipe_mesh"><code class="docutils literal notranslate"><span class="pre">make_ICEM_pipe_mesh()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.CFD.make_ICEM_pipe_mesh2"><code class="docutils literal notranslate"><span class="pre">make_ICEM_pipe_mesh2()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.CFD.make_U_bend_mesh"><code class="docutils literal notranslate"><span class="pre">make_U_bend_mesh()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.CFD.old_make_ICEM_pipe_mesh"><code class="docutils literal notranslate"><span class="pre">old_make_ICEM_pipe_mesh()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.CFD.post_process_CFX_case"><code class="docutils literal notranslate"><span class="pre">post_process_CFX_case()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.CFD.read_CFX_export"><code class="docutils literal notranslate"><span class="pre">read_CFX_export()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.CFD.read_CFX_export_single_phase"><code class="docutils literal notranslate"><span class="pre">read_CFX_export_single_phase()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.CFD.run_CFX_case"><code class="docutils literal notranslate"><span class="pre">run_CFX_case()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.CFD.write_CCL"><code class="docutils literal notranslate"><span class="pre">write_CCL()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.CFD.write_CCL_single_phase"><code class="docutils literal notranslate"><span class="pre">write_CCL_single_phase()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.CFD.write_CFX_BC"><code class="docutils literal notranslate"><span class="pre">write_CFX_BC()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#module-MARIGOLD.extracts_and_loads">extracts_and_loads</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.extracts_and_loads.dumpData"><code class="docutils literal notranslate"><span class="pre">dumpData()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.extracts_and_loads.dump_data_from_tabs"><code class="docutils literal notranslate"><span class="pre">dump_data_from_tabs()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.extracts_and_loads.extractIskandraniData"><code class="docutils literal notranslate"><span class="pre">extractIskandraniData()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.extracts_and_loads.extractLocalDataFromDir"><code class="docutils literal notranslate"><span class="pre">extractLocalDataFromDir()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.extracts_and_loads.extractPitotData"><code class="docutils literal notranslate"><span class="pre">extractPitotData()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.extracts_and_loads.extractProbeData"><code class="docutils literal notranslate"><span class="pre">extractProbeData()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.extracts_and_loads.extractYangData"><code class="docutils literal notranslate"><span class="pre">extractYangData()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.extracts_and_loads.loadData"><code class="docutils literal notranslate"><span class="pre">loadData()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.extracts_and_loads.loadIskandraniData"><code class="docutils literal notranslate"><span class="pre">loadIskandraniData()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.extracts_and_loads.loadPitotData"><code class="docutils literal notranslate"><span class="pre">loadPitotData()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.extracts_and_loads.loadProbeData"><code class="docutils literal notranslate"><span class="pre">loadProbeData()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.extracts_and_loads.loadYangData"><code class="docutils literal notranslate"><span class="pre">loadYangData()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#module-MARIGOLD.utils">utils</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.utils.comp_cond"><code class="docutils literal notranslate"><span class="pre">comp_cond()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.utils.listdir_abs"><code class="docutils literal notranslate"><span class="pre">listdir_abs()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.utils.write_csv"><code class="docutils literal notranslate"><span class="pre">write_csv()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.utils.write_excel"><code class="docutils literal notranslate"><span class="pre">write_excel()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.utils.write_pdf"><code class="docutils literal notranslate"><span class="pre">write_pdf()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#module-MARIGOLD.plot_utils">plot_utils</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.plot_utils.color_cycle"><code class="docutils literal notranslate"><span class="pre">color_cycle()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.plot_utils.line_cycle"><code class="docutils literal notranslate"><span class="pre">line_cycle()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.plot_utils.marker_cycle"><code class="docutils literal notranslate"><span class="pre">marker_cycle()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#module-MARIGOLD.processing">processing</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.processing.process_dir"><code class="docutils literal notranslate"><span class="pre">process_dir()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.processing.tdms_to_dat"><code class="docutils literal notranslate"><span class="pre">tdms_to_dat()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.processing.write_inp"><code class="docutils literal notranslate"><span class="pre">write_inp()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.processing.write_pitot_inp"><code class="docutils literal notranslate"><span class="pre">write_pitot_inp()</span></code></a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="#MARIGOLD.Condition.print_tab_keys"><code class="docutils literal notranslate"><span class="pre">print_tab_keys()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#MARIGOLD.iate.iate_1d_1g"><code class="docutils literal notranslate"><span class="pre">iate_1d_1g()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#MARIGOLD.CFD.calculate_CL_Ryan"><code class="docutils literal notranslate"><span class="pre">calculate_CL_Ryan()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#MARIGOLD.CFD.export_outlet"><code class="docutils literal notranslate"><span class="pre">export_outlet()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#MARIGOLD.CFD.export_surface"><code class="docutils literal notranslate"><span class="pre">export_surface()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#MARIGOLD.CFD.make_CFX_case"><code class="docutils literal notranslate"><span class="pre">make_CFX_case()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#MARIGOLD.CFD.make_ICEM_pipe_mesh"><code class="docutils literal notranslate"><span class="pre">make_ICEM_pipe_mesh()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#MARIGOLD.CFD.make_ICEM_pipe_mesh2"><code class="docutils literal notranslate"><span class="pre">make_ICEM_pipe_mesh2()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#MARIGOLD.CFD.make_U_bend_mesh"><code class="docutils literal notranslate"><span class="pre">make_U_bend_mesh()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#MARIGOLD.CFD.old_make_ICEM_pipe_mesh"><code class="docutils literal notranslate"><span class="pre">old_make_ICEM_pipe_mesh()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#MARIGOLD.CFD.post_process_CFX_case"><code class="docutils literal notranslate"><span class="pre">post_process_CFX_case()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#MARIGOLD.CFD.read_CFX_export"><code class="docutils literal notranslate"><span class="pre">read_CFX_export()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#MARIGOLD.CFD.read_CFX_export_single_phase"><code class="docutils literal notranslate"><span class="pre">read_CFX_export_single_phase()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#MARIGOLD.CFD.run_CFX_case"><code class="docutils literal notranslate"><span class="pre">run_CFX_case()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#MARIGOLD.CFD.write_CCL"><code class="docutils literal notranslate"><span class="pre">write_CCL()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#MARIGOLD.CFD.write_CCL_single_phase"><code class="docutils literal notranslate"><span class="pre">write_CCL_single_phase()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#MARIGOLD.CFD.write_CFX_BC"><code class="docutils literal notranslate"><span class="pre">write_CFX_BC()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#MARIGOLD.extracts_and_loads.dumpData"><code class="docutils literal notranslate"><span class="pre">dumpData()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#MARIGOLD.extracts_and_loads.dump_data_from_tabs"><code class="docutils literal notranslate"><span class="pre">dump_data_from_tabs()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#MARIGOLD.extracts_and_loads.extractIskandraniData"><code class="docutils literal notranslate"><span class="pre">extractIskandraniData()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#MARIGOLD.extracts_and_loads.extractLocalDataFromDir"><code class="docutils literal notranslate"><span class="pre">extractLocalDataFromDir()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#MARIGOLD.extracts_and_loads.extractPitotData"><code class="docutils literal notranslate"><span class="pre">extractPitotData()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#MARIGOLD.extracts_and_loads.extractProbeData"><code class="docutils literal notranslate"><span class="pre">extractProbeData()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#MARIGOLD.extracts_and_loads.extractYangData"><code class="docutils literal notranslate"><span class="pre">extractYangData()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#MARIGOLD.extracts_and_loads.loadData"><code class="docutils literal notranslate"><span class="pre">loadData()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#MARIGOLD.extracts_and_loads.loadIskandraniData"><code class="docutils literal notranslate"><span class="pre">loadIskandraniData()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#MARIGOLD.extracts_and_loads.loadPitotData"><code class="docutils literal notranslate"><span class="pre">loadPitotData()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#MARIGOLD.extracts_and_loads.loadProbeData"><code class="docutils literal notranslate"><span class="pre">loadProbeData()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#MARIGOLD.extracts_and_loads.loadYangData"><code class="docutils literal notranslate"><span class="pre">loadYangData()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#MARIGOLD.utils.comp_cond"><code class="docutils literal notranslate"><span class="pre">comp_cond()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#MARIGOLD.utils.listdir_abs"><code class="docutils literal notranslate"><span class="pre">listdir_abs()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#MARIGOLD.utils.write_csv"><code class="docutils literal notranslate"><span class="pre">write_csv()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#MARIGOLD.utils.write_excel"><code class="docutils literal notranslate"><span class="pre">write_excel()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#MARIGOLD.utils.write_pdf"><code class="docutils literal notranslate"><span class="pre">write_pdf()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#MARIGOLD.plot_utils.color_cycle"><code class="docutils literal notranslate"><span class="pre">color_cycle()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#MARIGOLD.plot_utils.line_cycle"><code class="docutils literal notranslate"><span class="pre">line_cycle()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#MARIGOLD.plot_utils.marker_cycle"><code class="docutils literal notranslate"><span class="pre">marker_cycle()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#MARIGOLD.processing.process_dir"><code class="docutils literal notranslate"><span class="pre">process_dir()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#MARIGOLD.processing.tdms_to_dat"><code class="docutils literal notranslate"><span class="pre">tdms_to_dat()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#MARIGOLD.processing.write_inp"><code class="docutils literal notranslate"><span class="pre">write_inp()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#MARIGOLD.processing.write_pitot_inp"><code class="docutils literal notranslate"><span class="pre">write_pitot_inp()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -200,7 +183,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">MARIGOLD</li>
+      <li class="breadcrumb-item active">MARIGOLD Documentation</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/MARIGOLD.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -210,20 +193,18 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="marigold">
-<h1>MARIGOLD<a class="headerlink" href="#marigold" title="Link to this heading"></a></h1>
+  <section id="marigold-documentation">
+<h1>MARIGOLD Documentation<a class="headerlink" href="#marigold-documentation" title="Link to this heading"></a></h1>
 <hr class="docutils" />
-<section id="module-MARIGOLD.Condition">
-<span id="condition-object"></span><h2>Condition object<a class="headerlink" href="#module-MARIGOLD.Condition" title="Link to this heading"></a></h2>
-<dl class="py class">
+<dl class="py class" id="module-MARIGOLD.Condition">
 <dt class="sig sig-object py" id="MARIGOLD.Condition.Condition">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">MARIGOLD.Condition.</span></span><span class="sig-name descname"><span class="pre">Condition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">jgref</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jgloc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">database</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fluids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'air-water'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">g</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">9.81</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Class to handle the local probe data</p>
-<p>Data is stored in the Condition.data property. It’s actually 3 layers of dictionary
-data [angle] gives a dictionary with the various r/R
-data [angle][r/R] gives a dictionary with the MIDAS output
-The MIDAS output is itself a dictionary, with the keys listed in the “tab_keys” array
+<p>Data is stored in the Condition.data property. It’s actually 3 layers of dictionary</p>
+<p><code class="docutils literal notranslate"><span class="pre">cond.data[angle]</span></code> gives a dictionary with the various r/R</p>
+<p><code class="docutils literal notranslate"><span class="pre">cond.data[angle][r/R]</span></code> gives a dictionary with the MIDAS output (<code class="docutils literal notranslate"><span class="pre">midas_dict</span></code>)</p>
+<p>The MIDAS output is itself a dictionary, with the keys listed in the “tab_keys” array
 So data[angle][r/R][‘alpha’] should give you the void fraction at r/R for phi = angle
 This structure is initialized with zeros for the MIDAS output at the pipe center and wall</p>
 <p>Can also get the data at a local point from calling the condition, syntax</p>
@@ -240,11 +221,19 @@ Also has an option for interpolation, ‘interp_method’</p>
 <dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.add_mesh_points">
 <span class="sig-name descname"><span class="pre">add_mesh_points</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">r_points</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">suppress</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.add_mesh_points"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.add_mesh_points" title="Link to this definition"></a></dt>
 <dd><p>Method for adding additional r/R points</p>
-<p>Data linearly interpolated based on surrounding data (specifically using __call__ at the (angle, r) location in question)</p>
-<dl class="simple">
-<dt>Inputs:</dt><dd><ul class="simple">
-<li><p>r_points, points to add</p></li>
+<p>Data linearly interpolated based on surrounding data (specifically using <code class="docutils literal notranslate"><span class="pre">__call__</span></code> at the <code class="docutils literal notranslate"><span class="pre">(angle,</span> <span class="pre">r)</span></code> location in question)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>r_points</strong> (<em>list</em>) – List of r locations to add</p></li>
+<li><p><strong>suppress</strong> (<em>bool</em><em>, </em><em>optional</em>) – _description_, defaults to False</p></li>
 </ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>1</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>_type_</p>
 </dd>
 </dl>
 </dd></dl>
@@ -252,13 +241,17 @@ Also has an option for interpolation, ‘interp_method’</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.approx_vf">
 <span class="sig-name descname"><span class="pre">approx_vf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">7</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite_vf</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.approx_vf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.approx_vf" title="Link to this definition"></a></dt>
-<dd><p>Method for approximating vf with power-law relation.</p>
+<dd><p>Method for approximating <span class="math notranslate nohighlight">\(v_{f}\)</span> with power-law relation.</p>
 <div class="math notranslate nohighlight">
-\[v_{f, approx} = \frac{(n+1)(2*n+1)}{ (2*n^{2})} * (j_{f} / (1- \langle \alpha \rangle)) * (1 - abs(rstar))**(1/n)\]</div>
+\[v_{f, approx} = \frac{(n+1)(2n+1)}{ (2n^{2})}  (j_{f} / (1- \langle \alpha \rangle))  (1 - |r^{*}|)^{1/n}\]</div>
 <dl class="simple">
 <dt>Stores:</dt><dd><ul class="simple">
-<li><p>“vf_approx” in midas_dict</p></li>
-<li><p>“vf”, if it does not alread exist in midas_dict</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'vf_approx'</span></code> in midas_dict</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'vf'</span></code>, if it does not alread exist in midas_dict</p></li>
+</ul>
+</dd>
+<dt>Returns:</dt><dd><ul class="simple">
+<li><p>Area-averaged <code class="docutils literal notranslate"><span class="pre">'vf_approx'</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -267,20 +260,29 @@ Also has an option for interpolation, ‘interp_method’</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.approx_vf_Kong">
 <span class="sig-name descname"><span class="pre">approx_vf_Kong</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">7</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.approx_vf_Kong"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.approx_vf_Kong" title="Link to this definition"></a></dt>
-<dd><p>Method for approximating vf from Kong. TODO</p>
+<dd><p>Method for approximating <span class="math notranslate nohighlight">\(v_{f}\)</span> from Kong. TODO</p>
 <p>Not currently implemented</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.approx_vg">
-<span class="sig-name descname"><span class="pre">approx_vg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'vr'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">7</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.approx_vg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.approx_vg" title="Link to this definition"></a></dt>
-<dd><p>Method for approximating vg with power-law relation. I don’t think this makes sense</p>
+<span class="sig-name descname"><span class="pre">approx_vg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'vr'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">7</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">update_ug1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.approx_vg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.approx_vg" title="Link to this definition"></a></dt>
+<dd><p>Method for approximating <span class="math notranslate nohighlight">\(v_{g}\)</span> with power-law relation. I don’t think this makes sense</p>
 <div class="math notranslate nohighlight">
-\[v_{g, approx} = \frac{(n+1)(2*n+1)}{ (2*n^{2})} * (j_{g} / \langle \alpha \rangle) * (1 - abs(rstar))**(1/n)\]</div>
+\[v_{g, approx} = \frac{(n+1)(2n+1)}{ (2n^{2})}  (j_{g} / \langle \alpha \rangle)  (1 - |r^{*}|)^{1/n}\]</div>
 <dl class="simple">
+<dt>Methods:</dt><dd><ul class="simple">
+<li><p>power-law</p></li>
+<li><p>vrmodel,</p></li>
+</ul>
+</dd>
 <dt>Stores:</dt><dd><ul class="simple">
-<li><p>“vg_approx” in midas_dict</p></li>
-<li><p>“ug1”, if it does not alread exist in midas_dict</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'vg_approx'</span></code> in midas_dict</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'ug1'</span></code>, if it does not alread exist in midas_dict</p></li>
+</ul>
+</dd>
+<dt>Returns:</dt><dd><ul class="simple">
+<li><p>Area-averaged <code class="docutils literal notranslate"><span class="pre">'vg_approx'</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -360,6 +362,18 @@ Also has an option for interpolation, ‘interp_method’</p>
 <dd></dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.calc_Reb">
+<span class="sig-name descname"><span class="pre">calc_Reb</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.calc_Reb"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.calc_Reb" title="Link to this definition"></a></dt>
+<dd><p>TODO, function to calculate bubble Reynolds number</p>
+<dl class="simple">
+<dt>Options:</dt><dd><ul class="simple">
+<li><p>???</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.calc_W">
 <span class="sig-name descname"><span class="pre">calc_W</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.calc_W"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.calc_W" title="Link to this definition"></a></dt>
 <dd><p>Calculates the third moment of alpha</p>
@@ -384,7 +398,7 @@ Also has an option for interpolation, ‘interp_method’</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.calc_aa_vr_model">
-<span class="sig-name descname"><span class="pre">calc_aa_vr_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'km1_naive'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">IS_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'power'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kw</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-0.98</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kf</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-0.083</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Lw</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Cavf</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ctau</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">IS_mu</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Cvracd</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.calc_aa_vr_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.calc_aa_vr_model" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">calc_aa_vr_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'km1_naive'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">IS_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'power'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kw</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.654</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kf</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.113</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Lw</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Cavf</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ctau</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">IS_mu</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Cvfacd</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.calc_aa_vr_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.calc_aa_vr_model" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -417,7 +431,7 @@ Also has an option for interpolation, ‘interp_method’</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.calc_cd">
-<span class="sig-name descname"><span class="pre">calc_cd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Ishii-Zuber'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vr_cheat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">const_CD</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.44</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.calc_cd"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.calc_cd" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">calc_cd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Ishii-Zuber'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vr_cheat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-06</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">const_CD</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.44</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.calc_cd"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.calc_cd" title="Link to this definition"></a></dt>
 <dd><p>Method for calculating drag coefficient</p>
 <blockquote>
 <div><dl class="simple">
@@ -452,6 +466,20 @@ Also has an option for interpolation, ‘interp_method’</p>
 </ul>
 </dd>
 </dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.calc_cl">
+<span class="sig-name descname"><span class="pre">calc_cl</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'tomiyama'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sharma_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.calc_cl"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.calc_cl" title="Link to this definition"></a></dt>
+<dd><p>TODO, function to calculate lift coefficient</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>method</strong> (<em>str</em><em>, </em><em>optional</em>) – method to use to calculate lift coefficient, defaults to ‘tomiyama’</p></li>
+<li><p><strong>sharma_factor</strong> (<em>bool</em><em>, </em><em>optional</em>) – Option to use Sharma’s exponential Ref, defaults to False</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
@@ -516,9 +544,11 @@ Also has an option for interpolation, ‘interp_method’</p>
 <li><p>Tuple of f_f, f_g</p></li>
 </ul>
 </dd>
-<dt>Stores</dt><dd><p>-self.ff
--self.fg
--self.tau_fw</p>
+<dt>Stores</dt><dd><ul class="simple">
+<li><p>self.ff</p></li>
+<li><p>self.fg</p></li>
+<li><p>self.tau_fw</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
@@ -562,7 +592,7 @@ Also has an option for interpolation, ‘interp_method’</p>
 </ul>
 </dd>
 <dt>Returns:</dt><dd><ul class="simple">
-<li><p>Third moment of <span class="math notranslate nohighlight">\(alpha\)</span></p></li>
+<li><p>Third moment of <span class="math notranslate nohighlight">\(\alpha\)</span></p></li>
 </ul>
 </dd>
 </dl>
@@ -612,7 +642,7 @@ Also has an option for interpolation, ‘interp_method’</p>
 </ul>
 </dd>
 <dt>Returns:</dt><dd><ul class="simple">
-<li><p>second moment of <span class="math notranslate nohighlight">\(alpha\)</span></p></li>
+<li><p>second moment of <span class="math notranslate nohighlight">\(\alpha\)</span></p></li>
 </ul>
 </dd>
 </dl>
@@ -635,13 +665,13 @@ Also has an option for interpolation, ‘interp_method’</p>
 </ul>
 </dd>
 <dt>Returns:</dt><dd><ul class="simple">
-<li><p>second moment of <span class="math notranslate nohighlight">\(alpha_G1\)</span></p></li>
+<li><p>second moment of <span class="math notranslate nohighlight">\(\alpha_{G1}\)</span></p></li>
 </ul>
 </dd>
 </dl>
 <p>Mathematically performing the operation</p>
 <div class="math notranslate nohighlight">
-\[\frac{\langle (\alpha - \langle \alpha \rangle)^2 \rangle }{\langle \alpha \rangle^2}\]</div>
+\[\frac{\langle (\alpha_{G1} - \langle \alpha_{G1} \rangle)^2 \rangle }{\langle \alpha_{G1} \rangle^2}\]</div>
 </dd></dl>
 
 <dl class="py method">
@@ -658,13 +688,13 @@ Also has an option for interpolation, ‘interp_method’</p>
 </ul>
 </dd>
 <dt>Returns:</dt><dd><ul class="simple">
-<li><p>second moment of <span class="math notranslate nohighlight">\(alpha\)</span></p></li>
+<li><p>sigma_ug</p></li>
 </ul>
 </dd>
 </dl>
 <p>Mathematically performing the operation</p>
 <div class="math notranslate nohighlight">
-\[\frac{\langle (\ug - \langle \ug \rangle)^2 \rangle }{\langle \ug \rangle^2}\]</div>
+\[\frac{\langle (u_{g,1} - \langle u_{g,1} \rangle)^2 \rangle }{\langle u_{g,1} \rangle^2}\]</div>
 </dd></dl>
 
 <dl class="py method">
@@ -720,16 +750,16 @@ Returns:</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.calc_vf_lee">
 <span class="sig-name descname"><span class="pre">calc_vf_lee</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">K</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.calc_vf_lee"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.calc_vf_lee" title="Link to this definition"></a></dt>
-<dd><p>Calculate vf, jf, vr based on Lee et al. (2002) equation</p>
+<dd><p>Calculate <span class="math notranslate nohighlight">\(v_{f}\)</span>, <span class="math notranslate nohighlight">\(j_{f}\)</span>, <span class="math notranslate nohighlight">\(v_{r}\)</span> based on Lee et al. (2002) equation</p>
 <dl class="simple">
 <dt>Inputs:</dt><dd><ul class="simple">
 <li><p>None</p></li>
 </ul>
 </dd>
 <dt>Stores:</dt><dd><ul class="simple">
-<li><p>“vf_lee” in midas_dict</p></li>
-<li><p>“jf_lee” in midas_dict</p></li>
-<li><p>“vr_lee” in midas_dict</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'vf_lee'</span></code> in midas_dict</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'jf_lee'</span></code> in midas_dict</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'vr_lee'</span></code> in midas_dict</p></li>
 </ul>
 </dd>
 <dt>Returns:</dt><dd><ul class="simple">
@@ -737,7 +767,7 @@ Returns:</p>
 </ul>
 </dd>
 </dl>
-<p>Really a model proposed by Bosio and Malnes</p>
+<p>Really a model proposed by Bosio and Malnes (1968)</p>
 <div class="math notranslate nohighlight">
 \[v_{f} = \frac{ 1 }{ \sqrt{1 - \alpha^{2} / 2} } * \sqrt{ \frac{ 2 \Delta p }{K \rho_{f}} }\]</div>
 </dd></dl>
@@ -745,40 +775,40 @@ Returns:</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.calc_vf_naive">
 <span class="sig-name descname"><span class="pre">calc_vf_naive</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.calc_vf_naive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.calc_vf_naive" title="Link to this definition"></a></dt>
-<dd><p>Calculate vf, jf, vr based on single-phase equation</p>
+<dd><p>Calculate <span class="math notranslate nohighlight">\(v_{f}\)</span>, <span class="math notranslate nohighlight">\(j_{f}\)</span>, <span class="math notranslate nohighlight">\(v_{r}\)</span> based on single-phase Pitot-tube equation</p>
 <dl class="simple">
 <dt>Inputs:</dt><dd><ul class="simple">
 <li><p>None</p></li>
 </ul>
 </dd>
 <dt>Stores:</dt><dd><ul class="simple">
-<li><p>“vf_naive” in midas_dict</p></li>
-<li><p>“jf_naive” in midas_dict</p></li>
-<li><p>“vr_naive” in midas_dict</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'vf_naive'</span></code> in midas_dict</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'jf_naive'</span></code> in midas_dict</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'vr_naive'</span></code> in midas_dict</p></li>
 </ul>
 </dd>
 <dt>Returns:</dt><dd><ul class="simple">
-<li><p>Area-average vf_naive</p></li>
+<li><p>Area-average <code class="docutils literal notranslate"><span class="pre">'vf_naive'</span></code></p></li>
 </ul>
 </dd>
 </dl>
-<div class="math notranslate nohighlight">
-\[v_{f} = \sqrt{ \frac{ 2 \Delta p }{ \rho_{f}} }\]</div>
+<p>Mathematically performing the operation
+.. math::  v_{f} = sqrt{ frac{ 2 Delta p }{ rho_{f}} }</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.calc_vgj">
 <span class="sig-name descname"><span class="pre">calc_vgj</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">warn_approx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.calc_vgj"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.calc_vgj" title="Link to this definition"></a></dt>
-<dd><p>Method for calculating Vgj</p>
+<dd><p>Method for calculating <span class="math notranslate nohighlight">\(V_{gj}\)</span></p>
 <dl class="simple">
 <dt>Inputs:</dt><dd><ul class="simple">
-<li><p>warn_approx, flag for warning if :math`V_{gj}` is not found and function is approximating</p></li>
+<li><p>warn_approx, flag for warning if <span class="math notranslate nohighlight">\(V_{gj}\)</span> is not found and function is approximating</p></li>
 </ul>
 </dd>
 <dt>Stores:</dt><dd><ul class="simple">
-<li><p>“vgj” in midas_dict</p></li>
-<li><p>“j” in midas_dict</p></li>
-<li><p>“alpha_j” in midas_dict</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'vgj'</span></code> in <code class="docutils literal notranslate"><span class="pre">midas_dict</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'j'</span></code> in <code class="docutils literal notranslate"><span class="pre">midas_dict</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'alpha_j'</span></code> in <code class="docutils literal notranslate"><span class="pre">midas_dict</span></code></p></li>
 </ul>
 </dd>
 <dt>Returns:</dt><dd><ul class="simple">
@@ -829,10 +859,11 @@ Returns:</p>
 </dd>
 </dl>
 <p>Note that if vg = 0, then this method says vr = 0. This will happen when no data is present,
-such as in the bottom of the pipe in horizontal, when this is not necessarily true</p>
+such as in the bottom of the pipe in horizontal, when this is not necessarily true.</p>
+<p>This method also assumes vg = ug1, so if group II bubbles are present this may not be accurate</p>
 <dl class="simple">
 <dt>Stores:</dt><dd><ul class="simple">
-<li><p>‘vr’ in midas_dict</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'vr'</span></code> in midas_dict</p></li>
 </ul>
 </dd>
 <dt>Returns:</dt><dd><ul class="simple">
@@ -856,7 +887,7 @@ such as in the bottom of the pipe in horizontal, when this is not necessarily tr
 such as in the bottom of the pipe in horizontal, when this is not necessarily true</p>
 <dl class="simple">
 <dt>Stores:</dt><dd><ul class="simple">
-<li><p>‘vr2’ in midas_dict</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'vr2'</span></code> in midas_dict</p></li>
 </ul>
 </dd>
 <dt>Returns:</dt><dd><ul class="simple">
@@ -868,7 +899,7 @@ such as in the bottom of the pipe in horizontal, when this is not necessarily tr
 
 <dl class="py method">
 <dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.calc_vr_model">
-<span class="sig-name descname"><span class="pre">calc_vr_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'km1_simp'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kw</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-0.98</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Lw</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kf</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.089</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iterate_cd</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_vr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quiet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recalc_cd</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iter_tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">custom_f</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">CC</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.calc_vr_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.calc_vr_model" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">calc_vr_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'km1_simp'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kw</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.654</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Lw</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kf</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.113</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iterate_cd</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_vr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quiet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recalc_cd</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iter_tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">custom_f</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">CC</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.calc_vr_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.calc_vr_model" title="Link to this definition"></a></dt>
 <dd><p>Method for calculating relative velocity based on models</p>
 <dl class="simple">
 <dt>Inputs:</dt><dd><ul class="simple">
@@ -898,6 +929,16 @@ such as in the bottom of the pipe in horizontal, when this is not necessarily tr
 </dd>
 </dl>
 </dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.calc_vr_uncertainty">
+<span class="sig-name descname"><span class="pre">calc_vr_uncertainty</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sigma_vg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma_alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma_dp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.03</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">percentage</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.calc_vr_uncertainty"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.calc_vr_uncertainty" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.calc_vw_aa_Vgj_model">
+<span class="sig-name descname"><span class="pre">calc_vw_aa_Vgj_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Kw</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.654</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Kf</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.113</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.calc_vw_aa_Vgj_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.calc_vw_aa_Vgj_model" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.calc_vwvg">
@@ -1265,7 +1306,7 @@ stops. h_star_kwargs and cartesian are optinos related to this.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.plot_profiles2">
-<span class="sig-name descname"><span class="pre">plot_profiles2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">param</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'vals'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">errorbars</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">const_to_plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[90,</span> <span class="pre">67.5,</span> <span class="pre">45,</span> <span class="pre">22.5,</span> <span class="pre">0]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_complement</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(4,</span> <span class="pre">4)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_str</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">legend_loc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'best'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xlabel_loc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'center'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_const</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">set_min</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">set_max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_spines</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xlabel_loc_coords</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ylabel_loc_coords</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ls</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.plot_profiles2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.plot_profiles2" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">plot_profiles2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">param</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'vals'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">errorbars</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">const_to_plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[90,</span> <span class="pre">67.5,</span> <span class="pre">45,</span> <span class="pre">22.5,</span> <span class="pre">0]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_complement</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_1_comp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(4,</span> <span class="pre">4)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_str</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">legend_loc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'best'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xlabel_loc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'center'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_const</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">set_min</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">set_max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_spines</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xlabel_loc_coords</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ylabel_loc_coords</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ls</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.plot_profiles2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.plot_profiles2" title="Link to this definition"></a></dt>
 <dd><p>Simplified plot_profiles with no rotation option</p>
 <dl class="simple">
 <dt>Inputs:</dt><dd><ul class="simple">
@@ -1446,10 +1487,7 @@ a good way of doing so.</p>
 <dd><p>Convenience function in case you forget a tab key</p>
 </dd></dl>
 
-</section>
-<section id="module-MARIGOLD.iate">
-<span id="iate"></span><h2>iate<a class="headerlink" href="#module-MARIGOLD.iate" title="Link to this heading"></a></h2>
-<dl class="py function">
+<dl class="py function" id="module-MARIGOLD.iate">
 <dt class="sig sig-object py" id="MARIGOLD.iate.iate_1d_1g">
 <span class="sig-prename descclassname"><span class="pre">MARIGOLD.iate.</span></span><span class="sig-name descname"><span class="pre">iate_1d_1g</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cond</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">query</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z_step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">R_c</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">9</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">io</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">geometry</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cond2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">C_WE</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">C_RC</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">C_TI</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha_max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.75</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">C</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">We_cr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">acrit_flag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">acrit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">preset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Quan'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">avg_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cov_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'fixed'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rf</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cd_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'doe'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dpdz_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'LM'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">void_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">LM_C</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k_m</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">L_res</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">COV_RC</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">COV_TI</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.316</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.25</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">C0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">C_inf</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/MARIGOLD/iate.html#iate_1d_1g"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.iate.iate_1d_1g" title="Link to this definition"></a></dt>
 <dd><p>Calculate the area-averaged interfacial area concentration at query location based on the 1D 1G IATE</p>
@@ -1494,10 +1532,7 @@ a good way of doing so.</p>
 </dl>
 </dd></dl>
 
-</section>
-<section id="module-MARIGOLD.CFD">
-<span id="cfd-functions"></span><h2>CFD Functions<a class="headerlink" href="#module-MARIGOLD.CFD" title="Link to this heading"></a></h2>
-<dl class="py function">
+<dl class="py function" id="module-MARIGOLD.CFD">
 <dt class="sig sig-object py" id="MARIGOLD.CFD.calculate_CL_Ryan">
 <span class="sig-prename descclassname"><span class="pre">MARIGOLD.CFD.</span></span><span class="sig-name descname"><span class="pre">calculate_CL_Ryan</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">jf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Db</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0018</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">testing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/MARIGOLD/CFD.html#calculate_CL_Ryan"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.CFD.calculate_CL_Ryan" title="Link to this definition"></a></dt>
 <dd><p>Calculates the lift coefficient based on Ryan et al. (2023) method (i.e. DFM at various angles)</p>
@@ -1602,7 +1637,7 @@ a good way of doing so.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="MARIGOLD.CFD.read_CFX_export">
-<span class="sig-prename descclassname"><span class="pre">MARIGOLD.CFD.</span></span><span class="sig-name descname"><span class="pre">read_CFX_export</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">csv_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jgref</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">database</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jgloc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#MARIGOLD.Condition.Condition" title="MARIGOLD.Condition.Condition"><span class="pre">Condition</span></a></span></span><a class="reference internal" href="_modules/MARIGOLD/CFD.html#read_CFX_export"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.CFD.read_CFX_export" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">MARIGOLD.CFD.</span></span><span class="sig-name descname"><span class="pre">read_CFX_export</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">csv_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jgref</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">database</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Dh</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0254</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jgloc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#MARIGOLD.Condition.Condition" title="MARIGOLD.Condition.Condition"><span class="pre">Condition</span></a></span></span><a class="reference internal" href="_modules/MARIGOLD/CFD.html#read_CFX_export"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.CFD.read_CFX_export" title="Link to this definition"></a></dt>
 <dd><p>Read CFX csv export into a MARIGOLD Condition object</p>
 <p>Must supply jf, jgref, theta, port, database, jgloc, etc. for Condition</p>
 <p>Returns Condition object</p>
@@ -1651,7 +1686,7 @@ a good way of doing so.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="MARIGOLD.CFD.write_CFX_BC">
-<span class="sig-prename descclassname"><span class="pre">MARIGOLD.CFD.</span></span><span class="sig-name descname"><span class="pre">write_CFX_BC</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cond</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#MARIGOLD.Condition.Condition" title="MARIGOLD.Condition.Condition"><span class="pre">Condition</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z_loc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'LoverD'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">angles_to_include</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">csv_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ngrid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha_floor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ug1_floor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/MARIGOLD/CFD.html#write_CFX_BC"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.CFD.write_CFX_BC" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">MARIGOLD.CFD.</span></span><span class="sig-name descname"><span class="pre">write_CFX_BC</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cond</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#MARIGOLD.Condition.Condition" title="MARIGOLD.Condition.Condition"><span class="pre">Condition</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z_loc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'LoverD'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">angles_to_include</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">only_90</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">csv_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ngrid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha_floor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ug1_floor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/MARIGOLD/CFD.html#write_CFX_BC"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.CFD.write_CFX_BC" title="Link to this definition"></a></dt>
 <dd><p>_summary_</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1674,10 +1709,7 @@ a good way of doing so.</p>
 </dl>
 </dd></dl>
 
-</section>
-<section id="module-MARIGOLD.extracts_and_loads">
-<span id="extracts-and-loads"></span><h2>extracts_and_loads<a class="headerlink" href="#module-MARIGOLD.extracts_and_loads" title="Link to this heading"></a></h2>
-<dl class="py function">
+<dl class="py function" id="module-MARIGOLD.extracts_and_loads">
 <dt class="sig sig-object py" id="MARIGOLD.extracts_and_loads.dumpData">
 <span class="sig-prename descclassname"><span class="pre">MARIGOLD.extracts_and_loads.</span></span><span class="sig-name descname"><span class="pre">dumpData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dump_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'database.dat'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/MARIGOLD/extracts_and_loads.html#dumpData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.extracts_and_loads.dumpData" title="Link to this definition"></a></dt>
 <dd></dd></dl>
@@ -1761,10 +1793,7 @@ must be specified as a list of lists</p>
 <span class="sig-prename descclassname"><span class="pre">MARIGOLD.extracts_and_loads.</span></span><span class="sig-name descname"><span class="pre">loadYangData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Yang_Database.dat'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="_modules/MARIGOLD/extracts_and_loads.html#loadYangData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.extracts_and_loads.loadYangData" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
-</section>
-<section id="module-MARIGOLD.utils">
-<span id="utils"></span><h2>utils<a class="headerlink" href="#module-MARIGOLD.utils" title="Link to this heading"></a></h2>
-<dl class="py function">
+<dl class="py function" id="module-MARIGOLD.utils">
 <dt class="sig sig-object py" id="MARIGOLD.utils.comp_cond">
 <span class="sig-prename descclassname"><span class="pre">MARIGOLD.utils.</span></span><span class="sig-name descname"><span class="pre">comp_cond</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cond1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#MARIGOLD.Condition.Condition" title="MARIGOLD.Condition.Condition"><span class="pre">Condition</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">cond2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#MARIGOLD.Condition.Condition" title="MARIGOLD.Condition.Condition"><span class="pre">Condition</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">tag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'run_ID'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rmesh_preference</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'1'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#MARIGOLD.Condition.Condition" title="MARIGOLD.Condition.Condition"><span class="pre">Condition</span></a></span></span><a class="reference internal" href="_modules/MARIGOLD/utils.html#comp_cond"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.utils.comp_cond" title="Link to this definition"></a></dt>
 <dd><p>Collate data from cond1 and cond2 into a single condition</p>
@@ -1795,7 +1824,7 @@ it will be linearly interpolated.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="MARIGOLD.utils.write_csv">
-<span class="sig-prename descclassname"><span class="pre">MARIGOLD.utils.</span></span><span class="sig-name descname"><span class="pre">write_csv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cond</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#MARIGOLD.Condition.Condition" title="MARIGOLD.Condition.Condition"><span class="pre">Condition</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/MARIGOLD/utils.html#write_csv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.utils.write_csv" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">MARIGOLD.utils.</span></span><span class="sig-name descname"><span class="pre">write_csv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cond</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#MARIGOLD.Condition.Condition" title="MARIGOLD.Condition.Condition"><span class="pre">Condition</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">['alpha',</span> <span class="pre">'ai',</span> <span class="pre">'ug1',</span> <span class="pre">'Dsm1']</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/MARIGOLD/utils.html#write_csv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.utils.write_csv" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
@@ -1816,22 +1845,19 @@ it will be linearly interpolated.</p>
 <p>calls pdflatex, so that must be installed for this to work properly</p>
 </dd></dl>
 
-</section>
-<section id="module-MARIGOLD.plot_utils">
-<span id="plot-utils"></span><h2>plot_utils<a class="headerlink" href="#module-MARIGOLD.plot_utils" title="Link to this heading"></a></h2>
-<dl class="py function">
+<dl class="py function" id="module-MARIGOLD.plot_utils">
 <dt class="sig sig-object py" id="MARIGOLD.plot_utils.color_cycle">
 <span class="sig-prename descclassname"><span class="pre">MARIGOLD.plot_utils.</span></span><span class="sig-name descname"><span class="pre">color_cycle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">set_color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/MARIGOLD/plot_utils.html#color_cycle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.plot_utils.color_cycle" title="Link to this definition"></a></dt>
-<dd><p>Custom generator for colors
-set_color can be</p>
-<blockquote>
-<div><ul class="simple">
+<dd><p>Custom generator for colors</p>
+<dl class="simple">
+<dt>set_color can be:</dt><dd><ul class="simple">
 <li><p>None, for a basic cycle of blue, red, green, etc.</p></li>
 <li><p>A single hexcolor code (‘#000000’ for black, etc)</p></li>
 <li><p>‘alpha’, ‘ai’, ‘ug1’, ‘Dsm1’ or ‘vr’, which have default built in colors</p></li>
 <li><p>Otherwise, it assumes set_color is a list of colors to yield</p></li>
 </ul>
-</div></blockquote>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -1846,10 +1872,7 @@ set_color can be</p>
 <dd><p>Custom generator for markers</p>
 </dd></dl>
 
-</section>
-<section id="module-MARIGOLD.processing">
-<span id="processing"></span><h2>processing<a class="headerlink" href="#module-MARIGOLD.processing" title="Link to this heading"></a></h2>
-<dl class="py function">
+<dl class="py function" id="module-MARIGOLD.processing">
 <dt class="sig sig-object py" id="MARIGOLD.processing.process_dir">
 <span class="sig-prename descclassname"><span class="pre">MARIGOLD.processing.</span></span><span class="sig-name descname"><span class="pre">process_dir</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">probe_number</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r01</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r02</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r03</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r12</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r13</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r23</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">roverR</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">measure_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">signal_output</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">detailed_output</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">multiprocess</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_cpus</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'probe'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/MARIGOLD/processing.html#process_dir"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.processing.process_dir" title="Link to this definition"></a></dt>
 <dd><p>Runs MIDAS for every dat file in a given directory</p>
@@ -1886,23 +1909,22 @@ set_color can be</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="MARIGOLD.processing.write_inp">
-<span class="sig-prename descclassname"><span class="pre">MARIGOLD.processing.</span></span><span class="sig-name descname"><span class="pre">write_inp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">roverR</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">probe_number</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'AM4-5'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r01</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.408</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r02</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.593</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r03</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.597</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r12</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.57</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r13</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.755</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r23</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.343</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">directory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/home/helios/a/kang284/TRSL-H/Python_Modules/MARIGOLD/docs'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">detailedOutput</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">signalOutput</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inp_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Input.inp'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">measure_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/MARIGOLD/processing.html#write_inp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.processing.write_inp" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">MARIGOLD.processing.</span></span><span class="sig-name descname"><span class="pre">write_inp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">roverR</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">probe_number</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'AM4-5'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r01</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.408</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r02</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.593</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r03</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.597</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r12</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.57</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r13</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.755</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r23</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.343</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">directory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Z:\\TRSL\\python_modules\\MARIGOLD\\docs'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">detailedOutput</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">signalOutput</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inp_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Input.inp'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">measure_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/MARIGOLD/processing.html#write_inp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.processing.write_inp" title="Link to this definition"></a></dt>
 <dd><p>Write an .inp file for MIDAS</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="MARIGOLD.processing.write_pitot_inp">
-<span class="sig-prename descclassname"><span class="pre">MARIGOLD.processing.</span></span><span class="sig-name descname"><span class="pre">write_pitot_inp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">roverR</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">URV</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5.248</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">LRV</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.054</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">URP</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">LRP</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">directory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/home/helios/a/kang284/TRSL-H/Python_Modules/MARIGOLD/docs'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inp_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Input.inp'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">measure_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/MARIGOLD/processing.html#write_pitot_inp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.processing.write_pitot_inp" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">MARIGOLD.processing.</span></span><span class="sig-name descname"><span class="pre">write_pitot_inp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">roverR</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">URV</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5.248</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">LRV</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.054</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">URP</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">LRP</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">directory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Z:\\TRSL\\python_modules\\MARIGOLD\\docs'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inp_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Input.inp'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">measure_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/MARIGOLD/processing.html#write_pitot_inp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.processing.write_pitot_inp" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
-</section>
 </section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="index.html" class="btn btn-neutral float-left" title="Welcome to MARIGOLD’s documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="examples.html" class="btn btn-neutral float-left" title="Example Analysis" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>
@@ -1925,7 +1947,22 @@ set_color can be</p>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>  
+
+  <style>
+    /* Sidebar header (and topbar for mobile) */
+    .wy-side-nav-search, .wy-nav-top {
+      background: #EAA221;
+    }
+    /* Sidebar */
+    .wy-body-for-nav, .wy-nav-side, .wy-grid-for-nav, .wy-nav-shift {
+        background: #555960;
+    }
+    .wy-nav-content {
+        background: #c4bfc0;
+    }
+  </style>
+
 
 </body>
 </html>
