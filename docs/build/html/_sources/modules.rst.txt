@@ -1,0 +1,6 @@
+MARIGOLD
+========
+
+.. toctree::
+   :maxdepth: 4
+

@@ -1323,7 +1323,7 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Adds all values of param</span>
 <span class="sd">        </span>
 <span class="sd">        Inputs:</span>
-<span class="sd">         - param, string of local parameter to sum</span>
+<span class="sd">         - ``param``, string of local parameter to sum</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">         - sum of the value of parameter at every point</span>
@@ -1448,7 +1448,7 @@
 <span class="sd">         - angle, angle to search along</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">         - r/R location of the maximum value of param when φ=angle</span>
+<span class="sd">         - r/R location of the maximum value of param when :math:`\\varphi`=angle</span>
 <span class="sd">                          </span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">max</span> <span class="o">=</span> <span class="mi">0</span>
@@ -3516,16 +3516,20 @@
 <div class="viewcode-block" id="Condition.calc_symmetry_area_avg">
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.calc_symmetry_area_avg">[docs]</a>
     <span class="k">def</span> <span class="nf">calc_symmetry_area_avg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">sym_type</span><span class="o">=</span><span class="s1">&#39;sym_half&#39;</span><span class="p">,</span> <span class="n">rel_error</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">even_opt</span><span class="o">=</span><span class="s1">&#39;first&#39;</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; Function for checking the area-averaged symmetry of a condition between the left and right half.</span>
-<span class="sd">    </span>
-<span class="sd">        Inputs:</span>
-<span class="sd">        - param: The parameter for which to calculate the symmetry</span>
-<span class="sd">        - sym_type: &#39;sym_half&#39; to compare left half (0-180) and right half (180-360)</span>
-<span class="sd">        - rel_error: If true, the error will be relative to the parameter at the left half angles</span>
-<span class="sd">        - even_opt: Option for integration method in simpson&#39;s rule (as used in area_avg)</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;_summary_</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">         - ``param``: ``midas_dict`` parameter to plot. See :func:`~MARIGOLD.Condition.print_params` for options</span>
+<span class="sd">         - ``sym_type``: _description_. Defaults to &#39;sym_half&#39;.</span>
+<span class="sd">         - ``rel_error``: _description_. Defaults to True.</span>
+<span class="sd">         - ``even_opt``: _description_. Defaults to &#39;first&#39;.</span>
+<span class="sd">        </span>
+<span class="sd">        Raises:</span>
+<span class="sd">         - ``ValueError``: _description_</span>
+<span class="sd">        </span>
 <span class="sd">        Returns:</span>
-<span class="sd">       - Area-averaged symmetry error across all radial and angular positions</span>
-<span class="sd">       &quot;&quot;&quot;</span>
+<span class="sd">         - _description_</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         
         <span class="k">if</span> <span class="n">sym_type</span> <span class="o">!=</span> <span class="s1">&#39;sym_half&#39;</span><span class="p">:</span>
            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;This function is only designed for &#39;sym_half&#39; symmetry type.&quot;</span><span class="p">)</span>
@@ -3595,6 +3599,17 @@
 <div class="viewcode-block" id="Condition.calc_vr_uncertainty">
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.calc_vr_uncertainty">[docs]</a>
     <span class="k">def</span> <span class="nf">calc_vr_uncertainty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sigma_vg</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">sigma_alpha</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">sigma_dp</span><span class="o">=</span><span class="mf">0.03</span><span class="p">,</span> <span class="n">percentage</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Function to calculate the uncertainty in pitot-tube measurements</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">         - ``sigma_vg``: _description_. Defaults to 0.1.</span>
+<span class="sd">         - ``sigma_alpha``: _description_. Defaults to 0.05.</span>
+<span class="sd">         - ``sigma_dp``: _description_. Defaults to 0.03.</span>
+<span class="sd">         - ``percentage``: are the preceeding . Defaults to True.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">         - _description_</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">for</span> <span class="n">angle</span><span class="p">,</span> <span class="n">r_dict</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">for</span> <span class="n">rstar</span><span class="p">,</span> <span class="n">midas_dict</span> <span class="ow">in</span> <span class="n">r_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
@@ -3931,16 +3946,18 @@
 <div class="viewcode-block" id="Condition.reconstruct_void">
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.reconstruct_void">[docs]</a>
     <span class="k">def</span> <span class="nf">reconstruct_void</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;talley&#39;</span><span class="p">,</span> <span class="n">avg_method</span> <span class="o">=</span> <span class="s1">&#39;legacy&#39;</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; Reconstruct the void profile based on various methods</span>
-
-<span class="sd">        Saves:</span>
-<span class="sd">         * &#39;alpha_reconstructed&#39; in midas_dict</span>
-<span class="sd">         * self.roverRend</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Method to reconstruct the void fraction profile by various means. </span>
 <span class="sd">        </span>
-<span class="sd">        Methods:</span>
-<span class="sd">         * talley</span>
-<span class="sd">         * double_linear (not_talley). Something I accidently invented while trying to implement Talley&#39;s method</span>
+<span class="sd">        Args:</span>
+<span class="sd">         - ``method``: method to use to reconstruct void. Defaults to ``&#39;talley&#39;``. Options include:</span>
+<span class="sd">             - ``&#39;talley&#39;``</span>
+<span class="sd">             - ``&#39;not_talley&#39;``</span>
+<span class="sd">             - ``&#39;ryan&#39;`` TODO, not implemented</span>
+<span class="sd">             - ``&#39;adix&#39;``, TODO, not implemented</span>
+<span class="sd">         - ``avg_method``: option passed to :func:`~MARIGOLD.Condition.Condition.area_avg`. Defaults to ``&#39;legacy&#39;``.</span>
 <span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">         - area-averaged reconstructed void </span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">debug</span> <span class="o">=</span> <span class="kc">False</span>
@@ -4230,27 +4247,34 @@
                       <span class="n">const_to_plot</span> <span class="o">=</span> <span class="p">[</span><span class="mi">90</span><span class="p">,</span> <span class="mf">67.5</span><span class="p">,</span> <span class="mi">45</span><span class="p">,</span> <span class="mf">22.5</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">include_complement</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">skip_1_comp</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                       <span class="n">fig_size</span><span class="o">=</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="mi">4</span><span class="p">),</span> <span class="n">fs</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">label_str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">legend_loc</span> <span class="o">=</span> <span class="s1">&#39;best&#39;</span><span class="p">,</span> <span class="n">xlabel_loc</span> <span class="o">=</span> <span class="s1">&#39;center&#39;</span><span class="p">,</span> <span class="n">include_const</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                       <span class="n">set_min</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">set_max</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">show_spines</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">xlabel_loc_coords</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">ylabel_loc_coords</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">cs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ms</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">ls</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; Simplified plot_profiles with no rotation option</span>
-
-<span class="sd">        Inputs:</span>
-<span class="sd">         - param, any parameter string in midas_dict, e.g. &#39;alpha&#39;, &#39;ai&#39;, etc., or a list of parameter strings [&#39;alpha_G1&#39;, &#39;alpha_G2&#39;]</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;_summary_</span>
 <span class="sd">        </span>
-<span class="sd">        Options:</span>
-<span class="sd">         - save_dir, directory in which to save the .png file. Will not save the file unless show = False</span>
-<span class="sd">         - show, display the figure (in an iPython notebook or have it pop up)</span>
-<span class="sd">         - x_axis, the variable to put on the x-axis. Usually for vertical flow this is &#39;rs&#39;, for horizontal &#39;vals&#39;. Also can be &#39;phis&#39;</span>
-<span class="sd">         - const_to_plot, a list of angles (if x-axis is &#39;vals&#39; or &#39;rs&#39;) or rs (if x-axis is &#39;phis&#39;)</span>
-<span class="sd">         - include_complement, includes the complementary angle of the const_to_plot (i.e. 270 with 90)</span>
-<span class="sd">         - fig_size, a tuple of the figure size, in inches</span>
-<span class="sd">         - title, puts a title above the figure</span>
-<span class="sd">         - label_str, a string that will replace the default title</span>
-<span class="sd">         - legend_loc, passed to ax.legend</span>
-<span class="sd">         - xlable_loc, passed to ax.xaxis.set_label_coords</span>
-<span class="sd">         - xlable_loc_coords, passed to ax.xaxis.set_label_coords</span>
-<span class="sd">         - errorbars, value of errorbars to put on the data</span>
-<span class="sd">         </span>
-<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">         - ``param``: ``midas_dict`` parameter to plot. See :func:`~MARIGOLD.Condition.print_params` for options</span>
+<span class="sd">         - ``save_dir``: directory in which to save the .png file. Will not save the file unless show = False. Defaults to &#39;.&#39;.</span>
+<span class="sd">         - ``show``: display the figure (in an iPython notebook or have it pop up). Defaults to True.</span>
+<span class="sd">         - ``x_axis``: the variable to put on the x-axis. Usually for vertical flow this is ``&#39;rs&#39;``, for horizontal, ``&#39;vals&#39;``. Also can be &#39;phis&#39;. Defaults to &#39;vals&#39;.</span>
+<span class="sd">         - ``errorbars``: percentage errorbars to include. Can also specify ``&#39;sigma&#39;`` if you know what you&#39;re doing. Defaults to False.</span>
+<span class="sd">         - ``const_to_plot``: a list of angles (if x-axis is &#39;vals&#39; or &#39;rs&#39;) or rs (if x-axis is &#39;phis&#39;). Defaults to [90, 67.5, 45, 22.5, 0].</span>
+<span class="sd">         - ``include_complement``: includes the complementary angle of the const_to_plot (i.e. 270 with 90). Defaults to True.</span>
+<span class="sd">         - ``skip_1_comp``: skip the r/R=1.0 value for the complementary angle. Useful for not having an ugly line interpolated down to 0 for r/R=1 if the data actually stops at something like r/R=-0.2. Defaults to False.</span>
+<span class="sd">         - ``fig_size``: figure size tuple, in inches. Defaults to (4,4).</span>
+<span class="sd">         - ``fs``: font size. Defaults to 10.</span>
+<span class="sd">         - ``title``: option to display title. Defaults to True.</span>
+<span class="sd">         - ``label_str``: param-axis label. Defaults to param name.</span>
+<span class="sd">         - ``legend_loc``: option passed to ``plt.legend``. Defaults to &#39;best&#39;.</span>
+<span class="sd">         - ``xlabel_loc``: option passed to ``plt.legend``. Defaults to &#39;center&#39;.</span>
+<span class="sd">         - ``include_const``: Includes the constant angle in the plot legend. Defaults to False.</span>
+<span class="sd">         - ``set_min``: minimum value for plot. If not specified, based on the data.</span>
+<span class="sd">         - ``set_max``: maximum value for plot. If not specified, based on the data.</span>
+<span class="sd">         - ``show_spines``: draw a box around the plot. Defaults to True.</span>
+<span class="sd">         - ``xlabel_loc_coords``: coordinates to move the xlabel to. Defaults to None.</span>
+<span class="sd">         - ``ylabel_loc_coords``: coordinates to move the ylabel to. Defaults to None.</span>
+<span class="sd">         - ``cs``: colors to passed to ``plt.plot``. Can be a single value or list. If a list, will cycle through. Defaults to None.</span>
+<span class="sd">         - ``ms``: marker style to passed to ``plt.plot``. Can be a single value or list. If a list, will cycle through. Defaults to None.</span>
+<span class="sd">         - ``ls``: line style to passed to ``plt.plot``. Can be a single value or list. If a list, will cycle through. Defaults to None.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="c1"># TODO rewrite so it always loops over a list of params. If there&#39;s only one, just put it in a list at the begininng </span>
 
         <span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;font.size&#39;</span><span class="p">:</span> <span class="n">fs</span><span class="p">})</span>
@@ -4275,9 +4299,9 @@
             <span class="n">ms</span> <span class="o">=</span> <span class="n">marker_cycle</span><span class="p">(</span><span class="n">marker_list</span><span class="o">=</span><span class="n">ms</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">ls</span><span class="p">:</span>
-            <span class="n">ls</span> <span class="o">=</span> <span class="n">marker_cycle</span><span class="p">()</span>
+            <span class="n">ls</span> <span class="o">=</span> <span class="n">line_cycle</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">ls</span> <span class="o">=</span> <span class="n">marker_cycle</span><span class="p">(</span><span class="n">marker_list</span><span class="o">=</span><span class="n">ms</span><span class="p">)</span>
+            <span class="n">ls</span> <span class="o">=</span> <span class="n">line_cycle</span><span class="p">(</span><span class="n">line_list</span><span class="o">=</span><span class="n">ls</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">cs</span><span class="p">)</span> <span class="o">==</span> <span class="nb">list</span><span class="p">:</span>
             <span class="n">cs</span> <span class="o">=</span> <span class="n">color_cycle</span><span class="p">(</span><span class="n">color_list</span><span class="o">=</span> <span class="n">cs</span><span class="p">)</span>
@@ -4619,12 +4643,27 @@
                       <span class="n">const_to_plot</span> <span class="o">=</span> <span class="p">[</span><span class="mi">90</span><span class="p">,</span> <span class="mf">67.5</span><span class="p">,</span> <span class="mi">45</span><span class="p">,</span> <span class="mf">22.5</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">include_complement</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> 
                       <span class="n">rotate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">fig_size</span><span class="o">=</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="mi">4</span><span class="p">),</span> <span class="n">title</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">label_str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">legend_loc</span> <span class="o">=</span> <span class="s1">&#39;best&#39;</span><span class="p">,</span> <span class="n">xlabel_loc</span> <span class="o">=</span> <span class="s1">&#39;center&#39;</span><span class="p">,</span>
                       <span class="n">set_min</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">set_max</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">show_spines</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">force_RH_y_axis</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">xlabel_loc_coords</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">cs</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; Plot profiles of param over x_axis, for const_to_plot, i.e. α over r/R for φ = [90, 67.5 ... 0]. </span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;_summary_</span>
 <span class="sd">        </span>
-<span class="sd">        Include_complement will continue with the negative side if x_axis = &#39;r&#39; </span>
-
-<span class="sd">        Also has an option to rotate the graph based on self.theta, but it&#39;s a little sketchy</span>
-<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">         - ``param``: ``midas_dict`` parameter to plot. See :func:`~MARIGOLD.Condition.print_params` for options</span>
+<span class="sd">         - ``save_dir``: _description_. Defaults to &#39;.&#39;.</span>
+<span class="sd">         - ``show``: _description_. Defaults to True.</span>
+<span class="sd">         - ``x_axis``: _description_. Defaults to &#39;vals&#39;.</span>
+<span class="sd">         - ``const_to_plot``: _description_. Defaults to [90, 67.5, 45, 22.5, 0].</span>
+<span class="sd">         - ``include_complement``: _description_. Defaults to True.</span>
+<span class="sd">         - ``rotate``: _description_. Defaults to False.</span>
+<span class="sd">         - ``fig_size``: _description_. Defaults to (4,4).</span>
+<span class="sd">         - ``title``: _description_. Defaults to True.</span>
+<span class="sd">         - ``label_str``: _description_. Defaults to &#39;&#39;.</span>
+<span class="sd">         - ``legend_loc``: _description_. Defaults to &#39;best&#39;.</span>
+<span class="sd">         - ``xlabel_loc``: _description_. Defaults to &#39;center&#39;.</span>
+<span class="sd">         - ``set_min``: _description_. Defaults to None.</span>
+<span class="sd">         - ``set_max``: _description_. Defaults to None.</span>
+<span class="sd">         - ``show_spines``: _description_. Defaults to True.</span>
+<span class="sd">         - ``force_RH_y_axis``: _description_. Defaults to False.</span>
+<span class="sd">         - ``xlabel_loc_coords``: _description_. Defaults to None.</span>
+<span class="sd">         - ``cs``: _description_. Defaults to None.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">mirror</span><span class="p">()</span>
@@ -4850,10 +4889,17 @@
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.plot_isoline">[docs]</a>
     <span class="k">def</span> <span class="nf">plot_isoline</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">iso_axis</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">iso_val</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">fig_size</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">plot_res</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> 
                      <span class="n">save_dir</span> <span class="o">=</span> <span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">extra_text</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; Plot profiles of param over iso_axis at iso_val </span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;_summary_</span>
 <span class="sd">        </span>
-<span class="sd">        Based on interpolation, so plot_res changes the resolution</span>
-<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">         - ``param``: ``midas_dict`` parameter to plot. See :func:`~MARIGOLD.Condition.print_params` for options</span>
+<span class="sd">         - ``iso_axis``: _description_</span>
+<span class="sd">         - ``iso_val``: _description_</span>
+<span class="sd">         - ``fig_size``: _description_. Defaults to 4.</span>
+<span class="sd">         - ``plot_res``: _description_. Defaults to 100.</span>
+<span class="sd">         - ``save_dir``: _description_. Defaults to &#39;.&#39;.</span>
+<span class="sd">         - ``show``: _description_. Defaults to True.</span>
+<span class="sd">         - ``extra_text``: _description_. Defaults to &#39;&#39;.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="n">fig_size</span><span class="p">,</span> <span class="n">fig_size</span><span class="p">),</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span> <span class="n">layout</span><span class="o">=</span><span class="s1">&#39;compressed&#39;</span><span class="p">)</span>
@@ -4896,25 +4942,39 @@
 
 <div class="viewcode-block" id="Condition.plot_contour">
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.plot_contour">[docs]</a>
-    <span class="k">def</span> <span class="nf">plot_contour</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">save_dir</span> <span class="o">=</span> <span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">set_max</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">set_min</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">fig_size</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span> <span class="n">label_str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">suppress_colorbar</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                     <span class="n">rot_angle</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">ngridr</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span> <span class="n">ngridphi</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span> <span class="n">colormap</span> <span class="o">=</span> <span class="s1">&#39;hot_r&#39;</span><span class="p">,</span> <span class="n">num_levels</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">level_step</span> <span class="o">=</span> <span class="mf">0.01</span><span class="p">,</span> <span class="n">title</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">title_str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">extra_text</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+    <span class="k">def</span> <span class="nf">plot_contour</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">save_dir</span> <span class="o">=</span> <span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">set_max</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">set_min</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">fig_size</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span> <span class="n">colorbar_label</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">suppress_colorbar</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                     <span class="n">rot_angle</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">ngridr</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span> <span class="n">ngridphi</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span> <span class="n">colormap</span> <span class="o">=</span> <span class="s1">&#39;hot_r&#39;</span><span class="p">,</span> <span class="n">num_levels</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">level_step</span> <span class="o">=</span> <span class="mf">0.01</span><span class="p">,</span> <span class="n">title</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">title_str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">extra_save_text</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
                      <span class="n">annotate_h</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">cartesian</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">h_star_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;method&#39;</span><span class="p">:</span> <span class="s1">&#39;max_dsm&#39;</span><span class="p">,</span> <span class="s1">&#39;min_void&#39;</span><span class="p">:</span> <span class="s1">&#39;0.05&#39;</span><span class="p">},</span> <span class="n">plot_measured_points</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">font_size</span> <span class="o">=</span> <span class="mi">12</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Method to plot contour of a given param</span>
-<span class="sd">        </span>
-<span class="sd">        Generates a contour plot of any parameter in midas_dict, e.g. &#39;alpha&#39;, &#39;ai&#39;, etc. By default, just shows the figure,</span>
-<span class="sd">        but if a save_dir is specified, it will save it there instead. label_str can adjust the label of the colorbar. Can accept Latex format, e.g.</span>
-<span class="sd">        r&quot;$\alpha$ [-]&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Function to create a contour plot of a given param</span>
 
-<span class="sd">        set_max and set_min set the bounds of the contour plot, and the colormap option allows for any colors that matplotlib supports. ngridr, ngridphi,</span>
-<span class="sd">        num_levels, all adjust how fine the contour plot is generated.</span>
+<span class="sd">        Args:</span>
+<span class="sd">         - ``param``: ``midas_dict`` parameter to plot. See :func:`~MARIGOLD.Condition.print_params` for options</span>
+<span class="sd">         - ``save_dir``: directory to save contour plot to. Defaults to &#39;.&#39;.</span>
+<span class="sd">         - ``show``: whether or not to show the contour plot. Defaults to True.</span>
+<span class="sd">         - ``set_max``: to specify the maximum value of the contour plot. If None, will caclulate based on data. Defaults to None.</span>
+<span class="sd">         - ``set_min``: to specify the minimum value of the contour plot. If None, will caclulate based on data. Defaults to None.</span>
+<span class="sd">         - ``fig_size``: size, in inches to make to figure square. Defaults to 4.</span>
+<span class="sd">         - ``colorbar_label``: label to apply to the colorbar. Will default to the parameter name, with some common ones prettied up with LaTeX formatting. Defaults to None.</span>
+<span class="sd">         - ``suppress_colorbar``: Don&#39;t include colorbar. Defaults to False.</span>
+<span class="sd">         - ``rot_angle``: Rotate the contour plot by a specific angle (in degrees). Defaults to 0.</span>
+<span class="sd">         - ``ngridr``: the number of interpolation points in the :math:`r` direction. Defaults to 50.</span>
+<span class="sd">         - ``ngridphi``: the number of interpolation points in the :math:`\\varphi` direction. Defaults to 50.</span>
+<span class="sd">         - ``colormap``: colormap to use for the contour plot. Defaults to &#39;hot_r&#39;.</span>
+<span class="sd">         - ``num_levels``: number of levels for the contours. Defaults to 0.</span>
+<span class="sd">         - ``level_step``: steps to define the number of contours. Not used if ``num_levels`` specified. Defaults to 0.01.</span>
+<span class="sd">         - ``title``: title for the top of the plot. Default title is ``self.name``. Defaults to False.</span>
+<span class="sd">         - ``title_str``: string to use as the title, if specified title will be set to True. Defaults to &#39;&#39;.</span>
+<span class="sd">         - ``extra_save_text``: extra text to include while saving. Defaults to &#39;&#39;.</span>
+<span class="sd">         - ``annotate_h``: draw a line where :math:`h` is calculated to be. Set ``cartestian=True`` for best results. Defaults to False.</span>
+<span class="sd">         - ``cartesian``: plot in Cartesian coordinates. Defaults to False.</span>
+<span class="sd">         - ``h_star_kwargs``: for annotate_h. Defaults to {&#39;method&#39;: &#39;max_dsm&#39;, &#39;min_void&#39;: &#39;0.05&#39;}.</span>
+<span class="sd">         - ``plot_measured_points``: to plot red circles where the original data was measured (before mirroring). Defaults to False.</span>
+<span class="sd">         - ``font_size``: font size. Defaults to 12.</span>
 
-<span class="sd">        annotate_h is an option to draw a horizontal line at some given position. This was implemented when investigating where the bubble layer typically</span>
-<span class="sd">        stops. h_star_kwargs and cartesian are optinos related to this.</span>
+<span class="sd">        Returns:</span>
+<span class="sd">         - ``ax``, the matplotlib axis the contour plot was made with</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
-<span class="sd">        plot_measured points is neat, it plots circles where original data was detected (determined prior to mirroring)</span>
-<span class="sd">        </span>
-<span class="sd">        &quot;&quot;&quot;</span> 
         <span class="k">if</span> <span class="n">cartesian</span><span class="p">:</span>
             <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="n">fig_size</span><span class="p">,</span> <span class="n">fig_size</span><span class="p">),</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
@@ -5052,14 +5112,22 @@
 
         <span class="c1">#plt.clim(vmin=set_min, vmax=set_max)</span>
         
-        <span class="k">if</span> <span class="n">label_str</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">label_str</span> <span class="o">=</span> <span class="n">param</span>
+        <span class="k">if</span> <span class="n">colorbar_label</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">colorbar_label</span> <span class="o">=</span> <span class="n">param</span>
+            <span class="k">if</span> <span class="n">param</span> <span class="o">==</span> <span class="s1">&#39;alpha&#39;</span><span class="p">:</span>
+                <span class="n">colorbar_label</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;$\alpha \ [-]$&quot;</span>
+            <span class="k">elif</span> <span class="n">param</span> <span class="o">==</span> <span class="s1">&#39;ai&#39;</span><span class="p">:</span>
+                <span class="n">colorbar_label</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;$a_</span><span class="si">{i}</span><span class="s2"> \ [m^{-1}]$&quot;</span>
+            <span class="k">elif</span> <span class="n">param</span> <span class="o">==</span> <span class="s1">&#39;Dsm1&#39;</span><span class="p">:</span>
+                <span class="n">colorbar_label</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;$D_{sm,1} \ [mm]$&quot;</span>
+            <span class="k">elif</span> <span class="n">param</span> <span class="o">==</span> <span class="s1">&#39;ug1&#39;</span><span class="p">:</span>
+                <span class="n">colorbar_label</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;$v_</span><span class="si">{g}</span><span class="s2"> \ [m/s]$&quot;</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">suppress_colorbar</span><span class="p">:</span>
             <span class="n">tx_step</span> <span class="o">=</span> <span class="nb">round</span><span class="p">((</span><span class="n">set_max</span> <span class="o">-</span> <span class="n">set_min</span><span class="p">)</span><span class="o">/</span><span class="mi">5</span><span class="p">,</span><span class="o">-</span><span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">((</span><span class="n">set_max</span> <span class="o">-</span> <span class="n">set_min</span><span class="p">)</span><span class="o">/</span><span class="mi">10</span><span class="p">))))</span>
             <span class="n">tx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">set_min</span><span class="p">,</span><span class="n">set_max</span><span class="p">,</span><span class="n">tx_step</span><span class="p">)</span>
 
-            <span class="n">fig</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">mpbl</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label_str</span><span class="p">,</span> <span class="n">ticks</span><span class="o">=</span><span class="n">tx</span><span class="p">)</span>
+            <span class="n">fig</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">mpbl</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">colorbar_label</span><span class="p">,</span> <span class="n">ticks</span><span class="o">=</span><span class="n">tx</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">title_str</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
             <span class="n">title</span> <span class="o">=</span> <span class="kc">True</span>
@@ -5077,7 +5145,7 @@
         <span class="k">if</span> <span class="n">show</span><span class="p">:</span>
             <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">save_dir</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">param</span><span class="si">}</span><span class="s2">_contours_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">extra_text</span><span class="si">}</span><span class="s2">.png&quot;</span><span class="p">)</span> <span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">save_dir</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">param</span><span class="si">}</span><span class="s2">_contours_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">extra_save_text</span><span class="si">}</span><span class="s2">.png&quot;</span><span class="p">)</span> <span class="p">)</span>
             <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">ax</span></div>
 
@@ -5086,18 +5154,29 @@
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.plot_surface">[docs]</a>
     <span class="k">def</span> <span class="nf">plot_surface</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">save_dir</span> <span class="o">=</span> <span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">set_max</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">set_min</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">rotate_gif</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">elev_angle</span> <span class="o">=</span> <span class="mi">145</span><span class="p">,</span> 
                      <span class="n">azim_angle</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">roll_angle</span> <span class="o">=</span> <span class="mi">180</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">ngridr</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span> <span class="n">ngridphi</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span> 
-                     <span class="n">plot_surface_kwargs</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">solid_color</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">label_str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">title_str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Method to plot a surface of a given param</span>
+                     <span class="n">plot_surface_kwargs</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">solid_color</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">label_str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">title_str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">colormap</span> <span class="o">=</span> <span class="s1">&#39;viridis&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Function to create a 3 dimensional surface plot of a given parameter</span>
 <span class="sd">        </span>
-<span class="sd">        Can save a static image or rotating gif, starting at elev_angle, azim_angle, roll_angle. These angles also </span>
-<span class="sd">        the viewing angle for the static image.</span>
+<span class="sd">        Args:</span>
+<span class="sd">         - ``param``: ``midas_dict`` parameter to plot. See :func:`~MARIGOLD.Condition.print_params` for options</span>
+<span class="sd">         - ``save_dir``: directory to save surface plot image to. Defaults to &#39;.&#39;.</span>
+<span class="sd">         - ``show``: option to show surface plot. Defaults to True.</span>
+<span class="sd">         - ``set_max``: option to set the maximum value of the surface plot. Defaults to None.</span>
+<span class="sd">         - ``set_min``: option to set the minimum value of the surface plot. Defaults to None.</span>
+<span class="sd">         - ``rotate_gif``: option to produce a .gif file where the surface plot rotates around. Defaults to False.</span>
+<span class="sd">         - ``elev_angle``: elevation angle to rotate image of surface plot. Defaults to 145.</span>
+<span class="sd">         - ``azim_angle``: azimuthal angle to rotate image of surface plot. Defaults to 0.</span>
+<span class="sd">         - ``roll_angle``: roll angle to rotate image of surface plot. Defaults to 180.</span>
+<span class="sd">         - ``title``: title of plot, if ``title_str`` is not set, will use. Defaults to True.</span>
+<span class="sd">         - ``ngridr``: the number of interpolation points in the :math:`r` direction. Defaults to 50.</span>
+<span class="sd">         - ``ngridphi``: the number of interpolation points in the :math:`\\varphi` direction. Defaults to 50.</span>
+<span class="sd">         - ``plot_surface_kwargs``: dictionary to pass additional parameters to ``plot_surface``. Defaults to None.</span>
+<span class="sd">         - ``solid_color``: use a solid color instead of a colormap. Defaults to False.</span>
+<span class="sd">         - ``label_str``: custom label for z-axis. Defaults to None.</span>
+<span class="sd">         - ``title_str``: title of surface plot. Defaults to &#39;&#39;.</span>
+<span class="sd">         - ``colormap``: colormap to use for surface plot. Defaults to &#39;viridis&#39;.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
-<span class="sd">        Can specify a label or title str.</span>
-
-<span class="sd">        Plot_surface_kwargs is how to specify vmin, vmax, colormap, etc.</span>
-<span class="sd">        </span>
-<span class="sd">        &quot;&quot;&quot;</span> 
-        
         <span class="k">if</span> <span class="n">plot_surface_kwargs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">plot_surface_kwargs</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;font.size&#39;</span><span class="p">:</span> <span class="mi">16</span><span class="p">})</span>
@@ -5146,7 +5225,7 @@
             <span class="n">plot_surface_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;vmax&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">param</span><span class="p">)})</span>
 
         <span class="k">if</span> <span class="s1">&#39;cmap&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">plot_surface_kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">solid_color</span><span class="p">:</span> 
-            <span class="n">plot_surface_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;cmap&#39;</span><span class="p">:</span> <span class="s1">&#39;viridis&#39;</span><span class="p">})</span>
+            <span class="n">plot_surface_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;cmap&#39;</span><span class="p">:</span> <span class="n">colormap</span><span class="p">})</span>
 
         <span class="n">surf</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">plot_surface</span><span class="p">(</span><span class="n">Xi</span><span class="p">,</span> <span class="n">Yi</span><span class="p">,</span> <span class="n">parami</span><span class="p">,</span> <span class="o">**</span><span class="n">plot_surface_kwargs</span><span class="p">)</span>
         
@@ -5311,7 +5390,7 @@
 <span class="sd">         - None</span>
 
 <span class="sd">        Stores:</span>
-<span class="sd">         - &quot;FR&quot; in self</span>
+<span class="sd">         - ``FR`` in self</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">         - FR</span>
@@ -5921,12 +6000,83 @@
 
 
 
-
-
 <div class="viewcode-block" id="print_tab_keys">
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.print_tab_keys">[docs]</a>
 <span class="k">def</span> <span class="nf">print_tab_keys</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convenience function in case you forget a tab key</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Alias of print_params()</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">print_params</span><span class="p">()</span>
+    <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="print_params">
+<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.print_params">[docs]</a>
+<span class="k">def</span> <span class="nf">print_params</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convenience function in case you forget a parameter</span>
+<span class="sd">     </span>
+<span class="sd">    Generally, the available the available parameters are:</span>
+
+<span class="sd">     - ``&#39;roverR&#39;``, nondimensional radial location</span>
+<span class="sd">     - ``&#39;time&#39;``, measurement time</span>
+<span class="sd">     - ``&#39;frequency&#39;``, data acquisition frequency</span>
+<span class="sd">     - ``&#39;num_spherical&#39;``, number of spherical bubbles observed</span>
+<span class="sd">     - ``&#39;num_distorted&#39;``, number of distorted bubbles observed</span>
+<span class="sd">     - ``&#39;num_cap&#39;``, number of cap bubbles observed</span>
+<span class="sd">     - ``&#39;num_slug&#39;``, number of slug bubbles observed</span>
+<span class="sd">     - ``&#39;num_G1&#39;``, number of Group I bubbles observed</span>
+<span class="sd">     - ``&#39;num_G2&#39;``, number of Group II bubbles observed</span>
+<span class="sd">     - ``&#39;num_total&#39;``, total number of bubbles observed</span>
+<span class="sd">     - ``&#39;obs_0&#39;``, number of bubbles observed at sensor 0</span>
+<span class="sd">     - ``&#39;obs_1&#39;``, number of bubbles observed at sensor 1</span>
+<span class="sd">     - ``&#39;obs_2&#39;``, number of bubbles observed at sensor 2</span>
+<span class="sd">     - ``&#39;obs_3&#39;``, number of bubbles observed at sensor 3</span>
+<span class="sd">     - ``&#39;bub_freq&#39;``, bubble freqency</span>
+<span class="sd">     - ``&#39;pair_spherical&#39;``, number of spherical bubble signals paired</span>
+<span class="sd">     - ``&#39;pair_distorted&#39;``, number of distorted bubble signals paired</span>
+<span class="sd">     - ``&#39;pair_cap&#39;``, number of cap bubble signals paired</span>
+<span class="sd">     - ``&#39;pair_slug&#39;``, number of slug bubble signals paired</span>
+<span class="sd">     - ``&#39;total_paired&#39;``, total number bubble signals paired</span>
+<span class="sd">     - ``&#39;percent_paired&#39;``, percentage of observed signals that were paired</span>
+<span class="sd">     - ``&#39;alpha_spherical&#39;``, void fraction contribution from spherical bubbles</span>
+<span class="sd">     - ``&#39;alpha_distorted&#39;``, void fraction contribution from distorted bubbles</span>
+<span class="sd">     - ``&#39;alpha_cap&#39;``, void fraction contribution from cap bubbles</span>
+<span class="sd">     - ``&#39;alpha_slug&#39;``, void fraction contribution from slug bubbles</span>
+<span class="sd">     - ``&#39;alpha_G1&#39;``, void fraction contribution from Group I bubbles</span>
+<span class="sd">     - ``&#39;alpha_G2&#39;``, void fraction contribution from Group II bubbles</span>
+<span class="sd">     - ``&#39;alpha&#39;``, total void fraction </span>
+<span class="sd">     - ``&#39;ai_spherical&#39;``, interfacial area concentration contribution from spherical bubbles</span>
+<span class="sd">     - ``&#39;ai_distorted&#39;``, interfacial area concentration contribution from distorted bubbles</span>
+<span class="sd">     - ``&#39;ai_cap&#39;``, interfacial area concentration contribution from cap bubbles</span>
+<span class="sd">     - ``&#39;ai_slug&#39;``, interfacial area concentration contribution from slug bubbles</span>
+<span class="sd">     - ``&#39;ai_G1&#39;``, interfacial area concentration contribution from Group I bubbles</span>
+<span class="sd">     - ``&#39;ai_G2&#39;``, interfacial area concentration contribution from Group II bubbles</span>
+<span class="sd">     - ``&#39;ai&#39;``, total interfacial area concentration :math:`[m^{-1}]`</span>
+<span class="sd">     - ``&#39;Dsm1&#39;``, Sauter-mean diameter from Group I bubbles :math:`[mm]`</span>
+<span class="sd">     - ``&#39;Lcl1&#39;``, chord length from Group I bubbles :math:`[mm]`</span>
+<span class="sd">     - ``&#39;Dsm2&#39;``, Sauter-mean diameter from Group II bubbles :math:`[mm]`</span>
+<span class="sd">     - ``&#39;Lcl2&#39;``, chord length from Group II bubbles :math:`[mm]`</span>
+<span class="sd">     - ``&#39;ug1&#39;``, Average interface velocity from Group I bubbles :math:`[m/s]`</span>
+<span class="sd">     - ``&#39;ug2&#39;``, Average interface velocity from Group II bubbles :math:`[m/s]`</span>
+<span class="sd">     - ``&#39;sigma_ug1&#39;``, standard deviation of Group I bubble velocities (?) :math:`[m/s]`</span>
+<span class="sd">     - ``&#39;sigma_ug2&#39;``, standard deviation of Group II bubble velocities (?) :math:`[m/s]`</span>
+<span class="sd">     - ``&#39;fluctuation&#39;`` :math:`[m/s]`</span>
+<span class="sd">     - ``&#39;alpha_ug1&#39;``, Local :math:`j_{g}`&#39; calculated by :math:`\\alpha` and Group I bubble velocity :math:`[m/s]`</span>
+<span class="sd">     - ``&#39;alpha_ug2&#39;``, Local :math:`j_{g}`&#39; calculated by :math:`\\alpha` and Group II bubble velocity :math:`[m/s]`</span>
+<span class="sd">     - ``&#39;alpha_ug&#39;``, Total local :math:`j_{g}&#39; :math:`[m/s]`</span>
+<span class="sd">     - ``&#39;alpha_Dsm1&#39;``, Product of alpha and :math:`D_{sm,1}` :math:`[mm]`</span>
+<span class="sd">     - ``&#39;alpha_Dsm2&#39;``, Product of alpha and :math:`D_{sm,2}` :math:`[mm]`</span>
+<span class="sd">     - ``&#39;r01&#39;``, distance between sensor 0 and 1 :math:`[mm]`</span>
+<span class="sd">     - ``&#39;r02&#39;``, distance between sensor 0 and 2 :math:`[mm]`</span>
+<span class="sd">     - ``&#39;r03&#39;``, distance between sensor 0 and 3 :math:`[mm]`</span>
+<span class="sd">     - ``&#39;r12&#39;``, distance between sensor 1 and 2 :math:`[mm]`</span>
+<span class="sd">     - ``&#39;r13&#39;``, distance between sensor 1 and 3 :math:`[mm]`</span>
+<span class="sd">     - ``&#39;r23&#39;``, distance between sensor 2 and 3 :math:`[mm]`</span>
+<span class="sd">     - ``&#39;vf&#39;``, liquid velocity :math:`[m/s]`</span>
+<span class="sd">     - ``&#39;jf_loc&#39;``, local superficial liquid velocity :math:`[m/s]`</span>
+<span class="sd">     - ``&#39;jf&#39;``, superficial liquid veloicty :math:`[m/s]`</span>
+<span class="sd">     - ``&#39;delta_p&#39;``, pressure difference measured by Pitot-static probe :math:`[psi]`</span>
+<span class="sd">     - ``&#39;sigma_delta_p&#39;``, standard deviation of pressure difference measured by Pitot-static probe :math:`[psi]`</span>
+<span class="sd">     - ``&#39;vr&#39;``, relative velocity :math:`[m/s]`</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="nb">print</span><span class="p">(</span><span class="n">tab_keys</span><span class="p">)</span>

@@ -124,6 +124,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#MARIGOLD.Condition.Condition.void_area_avg"><code class="docutils literal notranslate"><span class="pre">Condition.void_area_avg()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#MARIGOLD.Condition.print_params"><code class="docutils literal notranslate"><span class="pre">print_params()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#MARIGOLD.Condition.print_tab_keys"><code class="docutils literal notranslate"><span class="pre">print_tab_keys()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#MARIGOLD.iate.iate_1d_1g"><code class="docutils literal notranslate"><span class="pre">iate_1d_1g()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#MARIGOLD.CFD.calculate_CL_Ryan"><code class="docutils literal notranslate"><span class="pre">calculate_CL_Ryan()</span></code></a></li>
@@ -733,18 +734,24 @@ Also has an option for interpolation, ‘interp_method’</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.calc_symmetry_area_avg">
 <span class="sig-name descname"><span class="pre">calc_symmetry_area_avg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">param</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sym_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'sym_half'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rel_error</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">even_opt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'first'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.calc_symmetry_area_avg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.calc_symmetry_area_avg" title="Link to this definition"></a></dt>
-<dd><p>Function for checking the area-averaged symmetry of a condition between the left and right half.</p>
-<blockquote>
-<div><p>Inputs:
-- param: The parameter for which to calculate the symmetry
-- sym_type: ‘sym_half’ to compare left half (0-180) and right half (180-360)
-- rel_error: If true, the error will be relative to the parameter at the left half angles
-- even_opt: Option for integration method in simpson’s rule (as used in area_avg)
-Returns:</p>
-</div></blockquote>
-<ul class="simple">
-<li><p>Area-averaged symmetry error across all radial and angular positions</p></li>
+<dd><p>_summary_</p>
+<dl class="simple">
+<dt>Args:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">param</span></code>: <code class="docutils literal notranslate"><span class="pre">midas_dict</span></code> parameter to plot. See <a class="reference internal" href="#MARIGOLD.Condition.print_params" title="MARIGOLD.Condition.print_params"><code class="xref py py-func docutils literal notranslate"><span class="pre">print_params()</span></code></a> for options</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sym_type</span></code>: _description_. Defaults to ‘sym_half’.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">rel_error</span></code>: _description_. Defaults to True.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">even_opt</span></code>: _description_. Defaults to ‘first’.</p></li>
 </ul>
+</dd>
+<dt>Raises:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ValueError</span></code>: _description_</p></li>
+</ul>
+</dd>
+<dt>Returns:</dt><dd><ul class="simple">
+<li><p>_description_</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -933,7 +940,21 @@ such as in the bottom of the pipe in horizontal, when this is not necessarily tr
 <dl class="py method">
 <dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.calc_vr_uncertainty">
 <span class="sig-name descname"><span class="pre">calc_vr_uncertainty</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sigma_vg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma_alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma_dp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.03</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">percentage</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.calc_vr_uncertainty"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.calc_vr_uncertainty" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Function to calculate the uncertainty in pitot-tube measurements</p>
+<dl class="simple">
+<dt>Args:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">sigma_vg</span></code>: _description_. Defaults to 0.1.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sigma_alpha</span></code>: _description_. Defaults to 0.05.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sigma_dp</span></code>: _description_. Defaults to 0.03.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">percentage</span></code>: are the preceeding . Defaults to True.</p></li>
+</ul>
+</dd>
+<dt>Returns:</dt><dd><ul class="simple">
+<li><p>_description_</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.calc_vw_aa_Vgj_model">
@@ -1196,7 +1217,7 @@ such as in the bottom of the pipe in horizontal, when this is not necessarily tr
 </ul>
 </dd>
 <dt>Returns:</dt><dd><ul class="simple">
-<li><p>r/R location of the maximum value of param when φ=angle</p></li>
+<li><p>r/R location of the maximum value of param when :math:<a href="#id1"><span class="problematic" id="id2">`</span></a>varphi`=angle</p></li>
 </ul>
 </dd>
 </dl>
@@ -1277,55 +1298,118 @@ such as in the bottom of the pipe in horizontal, when this is not necessarily tr
 
 <dl class="py method">
 <dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.plot_contour">
-<span class="sig-name descname"><span class="pre">plot_contour</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">param</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">set_max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">set_min</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_str</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">suppress_colorbar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rot_angle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ngridr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ngridphi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colormap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'hot_r'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_levels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level_step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title_str</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extra_text</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotate_h</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cartesian</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">h_star_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{'method':</span> <span class="pre">'max_dsm',</span> <span class="pre">'min_void':</span> <span class="pre">'0.05'}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_measured_points</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">font_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">12</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.plot_contour"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.plot_contour" title="Link to this definition"></a></dt>
-<dd><p>Method to plot contour of a given param</p>
-<p>Generates a contour plot of any parameter in midas_dict, e.g. ‘alpha’, ‘ai’, etc. By default, just shows the figure,
-but if a save_dir is specified, it will save it there instead. label_str can adjust the label of the colorbar. Can accept Latex format, e.g.
-r”$lpha$ [-]”</p>
-<p>set_max and set_min set the bounds of the contour plot, and the colormap option allows for any colors that matplotlib supports. ngridr, ngridphi,
-num_levels, all adjust how fine the contour plot is generated.</p>
-<p>annotate_h is an option to draw a horizontal line at some given position. This was implemented when investigating where the bubble layer typically
-stops. h_star_kwargs and cartesian are optinos related to this.</p>
-<p>plot_measured points is neat, it plots circles where original data was detected (determined prior to mirroring)</p>
+<span class="sig-name descname"><span class="pre">plot_contour</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">param</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">set_max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">set_min</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colorbar_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">suppress_colorbar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rot_angle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ngridr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ngridphi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colormap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'hot_r'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_levels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level_step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title_str</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extra_save_text</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotate_h</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cartesian</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">h_star_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{'method':</span> <span class="pre">'max_dsm',</span> <span class="pre">'min_void':</span> <span class="pre">'0.05'}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_measured_points</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">font_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">12</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.plot_contour"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.plot_contour" title="Link to this definition"></a></dt>
+<dd><p>Function to create a contour plot of a given param</p>
+<dl class="simple">
+<dt>Args:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">param</span></code>: <code class="docutils literal notranslate"><span class="pre">midas_dict</span></code> parameter to plot. See <a class="reference internal" href="#MARIGOLD.Condition.print_params" title="MARIGOLD.Condition.print_params"><code class="xref py py-func docutils literal notranslate"><span class="pre">print_params()</span></code></a> for options</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">save_dir</span></code>: directory to save contour plot to. Defaults to ‘.’.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">show</span></code>: whether or not to show the contour plot. Defaults to True.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">set_max</span></code>: to specify the maximum value of the contour plot. If None, will caclulate based on data. Defaults to None.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">set_min</span></code>: to specify the minimum value of the contour plot. If None, will caclulate based on data. Defaults to None.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">fig_size</span></code>: size, in inches to make to figure square. Defaults to 4.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">colorbar_label</span></code>: label to apply to the colorbar. Will default to the parameter name, with some common ones prettied up with LaTeX formatting. Defaults to None.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">suppress_colorbar</span></code>: Don’t include colorbar. Defaults to False.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">rot_angle</span></code>: Rotate the contour plot by a specific angle (in degrees). Defaults to 0.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ngridr</span></code>: the number of interpolation points in the <span class="math notranslate nohighlight">\(r\)</span> direction. Defaults to 50.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ngridphi</span></code>: the number of interpolation points in the <span class="math notranslate nohighlight">\(\varphi\)</span> direction. Defaults to 50.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">colormap</span></code>: colormap to use for the contour plot. Defaults to ‘hot_r’.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">num_levels</span></code>: number of levels for the contours. Defaults to 0.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">level_step</span></code>: steps to define the number of contours. Not used if <code class="docutils literal notranslate"><span class="pre">num_levels</span></code> specified. Defaults to 0.01.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">title</span></code>: title for the top of the plot. Default title is <code class="docutils literal notranslate"><span class="pre">self.name</span></code>. Defaults to False.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">title_str</span></code>: string to use as the title, if specified title will be set to True. Defaults to ‘’.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">extra_save_text</span></code>: extra text to include while saving. Defaults to ‘’.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">annotate_h</span></code>: draw a line where <span class="math notranslate nohighlight">\(h\)</span> is calculated to be. Set <code class="docutils literal notranslate"><span class="pre">cartestian=True</span></code> for best results. Defaults to False.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cartesian</span></code>: plot in Cartesian coordinates. Defaults to False.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">h_star_kwargs</span></code>: for annotate_h. Defaults to {‘method’: ‘max_dsm’, ‘min_void’: ‘0.05’}.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">plot_measured_points</span></code>: to plot red circles where the original data was measured (before mirroring). Defaults to False.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">font_size</span></code>: font size. Defaults to 12.</p></li>
+</ul>
+</dd>
+<dt>Returns:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ax</span></code>, the matplotlib axis the contour plot was made with</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.plot_isoline">
 <span class="sig-name descname"><span class="pre">plot_isoline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">param</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iso_axis</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iso_val</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_res</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extra_text</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.plot_isoline"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.plot_isoline" title="Link to this definition"></a></dt>
-<dd><p>Plot profiles of param over iso_axis at iso_val</p>
-<p>Based on interpolation, so plot_res changes the resolution</p>
+<dd><p>_summary_</p>
+<dl class="simple">
+<dt>Args:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">param</span></code>: <code class="docutils literal notranslate"><span class="pre">midas_dict</span></code> parameter to plot. See <a class="reference internal" href="#MARIGOLD.Condition.print_params" title="MARIGOLD.Condition.print_params"><code class="xref py py-func docutils literal notranslate"><span class="pre">print_params()</span></code></a> for options</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">iso_axis</span></code>: _description_</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">iso_val</span></code>: _description_</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">fig_size</span></code>: _description_. Defaults to 4.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">plot_res</span></code>: _description_. Defaults to 100.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">save_dir</span></code>: _description_. Defaults to ‘.’.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">show</span></code>: _description_. Defaults to True.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">extra_text</span></code>: _description_. Defaults to ‘’.</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.plot_profiles">
 <span class="sig-name descname"><span class="pre">plot_profiles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">param</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'vals'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">const_to_plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[90,</span> <span class="pre">67.5,</span> <span class="pre">45,</span> <span class="pre">22.5,</span> <span class="pre">0]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_complement</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rotate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(4,</span> <span class="pre">4)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_str</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">legend_loc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'best'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xlabel_loc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'center'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">set_min</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">set_max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_spines</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force_RH_y_axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xlabel_loc_coords</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.plot_profiles"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.plot_profiles" title="Link to this definition"></a></dt>
-<dd><p>Plot profiles of param over x_axis, for const_to_plot, i.e. α over r/R for φ = [90, 67.5 … 0].</p>
-<p>Include_complement will continue with the negative side if x_axis = ‘r’</p>
-<p>Also has an option to rotate the graph based on self.theta, but it’s a little sketchy</p>
+<dd><p>_summary_</p>
+<dl class="simple">
+<dt>Args:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">param</span></code>: <code class="docutils literal notranslate"><span class="pre">midas_dict</span></code> parameter to plot. See <a class="reference internal" href="#MARIGOLD.Condition.print_params" title="MARIGOLD.Condition.print_params"><code class="xref py py-func docutils literal notranslate"><span class="pre">print_params()</span></code></a> for options</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">save_dir</span></code>: _description_. Defaults to ‘.’.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">show</span></code>: _description_. Defaults to True.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">x_axis</span></code>: _description_. Defaults to ‘vals’.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">const_to_plot</span></code>: _description_. Defaults to [90, 67.5, 45, 22.5, 0].</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">include_complement</span></code>: _description_. Defaults to True.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">rotate</span></code>: _description_. Defaults to False.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">fig_size</span></code>: _description_. Defaults to (4,4).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">title</span></code>: _description_. Defaults to True.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">label_str</span></code>: _description_. Defaults to ‘’.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">legend_loc</span></code>: _description_. Defaults to ‘best’.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">xlabel_loc</span></code>: _description_. Defaults to ‘center’.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">set_min</span></code>: _description_. Defaults to None.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">set_max</span></code>: _description_. Defaults to None.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">show_spines</span></code>: _description_. Defaults to True.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">force_RH_y_axis</span></code>: _description_. Defaults to False.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">xlabel_loc_coords</span></code>: _description_. Defaults to None.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cs</span></code>: _description_. Defaults to None.</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.plot_profiles2">
 <span class="sig-name descname"><span class="pre">plot_profiles2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">param</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'vals'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">errorbars</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">const_to_plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[90,</span> <span class="pre">67.5,</span> <span class="pre">45,</span> <span class="pre">22.5,</span> <span class="pre">0]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_complement</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_1_comp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(4,</span> <span class="pre">4)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_str</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">legend_loc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'best'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xlabel_loc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'center'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_const</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">set_min</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">set_max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_spines</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xlabel_loc_coords</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ylabel_loc_coords</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ls</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.plot_profiles2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.plot_profiles2" title="Link to this definition"></a></dt>
-<dd><p>Simplified plot_profiles with no rotation option</p>
+<dd><p>_summary_</p>
 <dl class="simple">
-<dt>Inputs:</dt><dd><ul class="simple">
-<li><p>param, any parameter string in midas_dict, e.g. ‘alpha’, ‘ai’, etc., or a list of parameter strings [‘alpha_G1’, ‘alpha_G2’]</p></li>
-</ul>
-</dd>
-<dt>Options:</dt><dd><ul class="simple">
-<li><p>save_dir, directory in which to save the .png file. Will not save the file unless show = False</p></li>
-<li><p>show, display the figure (in an iPython notebook or have it pop up)</p></li>
-<li><p>x_axis, the variable to put on the x-axis. Usually for vertical flow this is ‘rs’, for horizontal ‘vals’. Also can be ‘phis’</p></li>
-<li><p>const_to_plot, a list of angles (if x-axis is ‘vals’ or ‘rs’) or rs (if x-axis is ‘phis’)</p></li>
-<li><p>include_complement, includes the complementary angle of the const_to_plot (i.e. 270 with 90)</p></li>
-<li><p>fig_size, a tuple of the figure size, in inches</p></li>
-<li><p>title, puts a title above the figure</p></li>
-<li><p>label_str, a string that will replace the default title</p></li>
-<li><p>legend_loc, passed to ax.legend</p></li>
-<li><p>xlable_loc, passed to ax.xaxis.set_label_coords</p></li>
-<li><p>xlable_loc_coords, passed to ax.xaxis.set_label_coords</p></li>
-<li><p>errorbars, value of errorbars to put on the data</p></li>
+<dt>Args:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">param</span></code>: <code class="docutils literal notranslate"><span class="pre">midas_dict</span></code> parameter to plot. See <a class="reference internal" href="#MARIGOLD.Condition.print_params" title="MARIGOLD.Condition.print_params"><code class="xref py py-func docutils literal notranslate"><span class="pre">print_params()</span></code></a> for options</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">save_dir</span></code>: directory in which to save the .png file. Will not save the file unless show = False. Defaults to ‘.’.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">show</span></code>: display the figure (in an iPython notebook or have it pop up). Defaults to True.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">x_axis</span></code>: the variable to put on the x-axis. Usually for vertical flow this is <code class="docutils literal notranslate"><span class="pre">'rs'</span></code>, for horizontal, <code class="docutils literal notranslate"><span class="pre">'vals'</span></code>. Also can be ‘phis’. Defaults to ‘vals’.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">errorbars</span></code>: percentage errorbars to include. Can also specify <code class="docutils literal notranslate"><span class="pre">'sigma'</span></code> if you know what you’re doing. Defaults to False.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">const_to_plot</span></code>: a list of angles (if x-axis is ‘vals’ or ‘rs’) or rs (if x-axis is ‘phis’). Defaults to [90, 67.5, 45, 22.5, 0].</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">include_complement</span></code>: includes the complementary angle of the const_to_plot (i.e. 270 with 90). Defaults to True.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">skip_1_comp</span></code>: skip the r/R=1.0 value for the complementary angle. Useful for not having an ugly line interpolated down to 0 for r/R=1 if the data actually stops at something like r/R=-0.2. Defaults to False.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">fig_size</span></code>: figure size tuple, in inches. Defaults to (4,4).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">fs</span></code>: font size. Defaults to 10.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">title</span></code>: option to display title. Defaults to True.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">label_str</span></code>: param-axis label. Defaults to param name.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">legend_loc</span></code>: option passed to <code class="docutils literal notranslate"><span class="pre">plt.legend</span></code>. Defaults to ‘best’.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">xlabel_loc</span></code>: option passed to <code class="docutils literal notranslate"><span class="pre">plt.legend</span></code>. Defaults to ‘center’.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">include_const</span></code>: Includes the constant angle in the plot legend. Defaults to False.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">set_min</span></code>: minimum value for plot. If not specified, based on the data.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">set_max</span></code>: maximum value for plot. If not specified, based on the data.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">show_spines</span></code>: draw a box around the plot. Defaults to True.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">xlabel_loc_coords</span></code>: coordinates to move the xlabel to. Defaults to None.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ylabel_loc_coords</span></code>: coordinates to move the ylabel to. Defaults to None.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cs</span></code>: colors to passed to <code class="docutils literal notranslate"><span class="pre">plt.plot</span></code>. Can be a single value or list. If a list, will cycle through. Defaults to None.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ms</span></code>: marker style to passed to <code class="docutils literal notranslate"><span class="pre">plt.plot</span></code>. Can be a single value or list. If a list, will cycle through. Defaults to None.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ls</span></code>: line style to passed to <code class="docutils literal notranslate"><span class="pre">plt.plot</span></code>. Can be a single value or list. If a list, will cycle through. Defaults to None.</p></li>
 </ul>
 </dd>
 </dl>
@@ -1340,12 +1424,30 @@ stops. h_star_kwargs and cartesian are optinos related to this.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.plot_surface">
-<span class="sig-name descname"><span class="pre">plot_surface</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">param</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">set_max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">set_min</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rotate_gif</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elev_angle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">145</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">azim_angle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">roll_angle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">180</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ngridr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ngridphi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_surface_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">solid_color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_str</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title_str</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.plot_surface"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.plot_surface" title="Link to this definition"></a></dt>
-<dd><p>Method to plot a surface of a given param</p>
-<p>Can save a static image or rotating gif, starting at elev_angle, azim_angle, roll_angle. These angles also
-the viewing angle for the static image.</p>
-<p>Can specify a label or title str.</p>
-<p>Plot_surface_kwargs is how to specify vmin, vmax, colormap, etc.</p>
+<span class="sig-name descname"><span class="pre">plot_surface</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">param</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">set_max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">set_min</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rotate_gif</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elev_angle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">145</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">azim_angle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">roll_angle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">180</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ngridr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ngridphi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_surface_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">solid_color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_str</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title_str</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colormap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'viridis'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.plot_surface"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.plot_surface" title="Link to this definition"></a></dt>
+<dd><p>Function to create a 3 dimensional surface plot of a given parameter</p>
+<dl class="simple">
+<dt>Args:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">param</span></code>: <code class="docutils literal notranslate"><span class="pre">midas_dict</span></code> parameter to plot. See <a class="reference internal" href="#MARIGOLD.Condition.print_params" title="MARIGOLD.Condition.print_params"><code class="xref py py-func docutils literal notranslate"><span class="pre">print_params()</span></code></a> for options</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">save_dir</span></code>: directory to save surface plot image to. Defaults to ‘.’.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">show</span></code>: option to show surface plot. Defaults to True.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">set_max</span></code>: option to set the maximum value of the surface plot. Defaults to None.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">set_min</span></code>: option to set the minimum value of the surface plot. Defaults to None.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">rotate_gif</span></code>: option to produce a .gif file where the surface plot rotates around. Defaults to False.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">elev_angle</span></code>: elevation angle to rotate image of surface plot. Defaults to 145.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">azim_angle</span></code>: azimuthal angle to rotate image of surface plot. Defaults to 0.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">roll_angle</span></code>: roll angle to rotate image of surface plot. Defaults to 180.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">title</span></code>: title of plot, if <code class="docutils literal notranslate"><span class="pre">title_str</span></code> is not set, will use. Defaults to True.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ngridr</span></code>: the number of interpolation points in the <span class="math notranslate nohighlight">\(r\)</span> direction. Defaults to 50.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ngridphi</span></code>: the number of interpolation points in the <span class="math notranslate nohighlight">\(\varphi\)</span> direction. Defaults to 50.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">plot_surface_kwargs</span></code>: dictionary to pass additional parameters to <code class="docutils literal notranslate"><span class="pre">plot_surface</span></code>. Defaults to None.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">solid_color</span></code>: use a solid color instead of a colormap. Defaults to False.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">label_str</span></code>: custom label for z-axis. Defaults to None.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">title_str</span></code>: title of surface plot. Defaults to ‘’.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">colormap</span></code>: colormap to use for surface plot. Defaults to ‘viridis’.</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -1361,16 +1463,24 @@ data, if that hasn’t already been done</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.reconstruct_void">
 <span class="sig-name descname"><span class="pre">reconstruct_void</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'talley'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">avg_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'legacy'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.reconstruct_void"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.reconstruct_void" title="Link to this definition"></a></dt>
-<dd><p>Reconstruct the void profile based on various methods</p>
+<dd><p>Method to reconstruct the void fraction profile by various means.</p>
 <dl class="simple">
-<dt>Saves:</dt><dd><ul class="simple">
-<li><p>‘alpha_reconstructed’ in midas_dict</p></li>
-<li><p>self.roverRend</p></li>
+<dt>Args:</dt><dd><ul class="simple">
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">method</span></code>: method to use to reconstruct void. Defaults to <code class="docutils literal notranslate"><span class="pre">'talley'</span></code>. Options include:</dt><dd><ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">'talley'</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'not_talley'</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'ryan'</span></code> TODO, not implemented</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'adix'</span></code>, TODO, not implemented</p></li>
 </ul>
 </dd>
-<dt>Methods:</dt><dd><ul class="simple">
-<li><p>talley</p></li>
-<li><p>double_linear (not_talley). Something I accidently invented while trying to implement Talley’s method</p></li>
+</dl>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">avg_method</span></code>: option passed to <a class="reference internal" href="#MARIGOLD.Condition.Condition.area_avg" title="MARIGOLD.Condition.Condition.area_avg"><code class="xref py py-func docutils literal notranslate"><span class="pre">area_avg()</span></code></a>. Defaults to <code class="docutils literal notranslate"><span class="pre">'legacy'</span></code>.</p></li>
+</ul>
+</dd>
+<dt>Returns:</dt><dd><ul class="simple">
+<li><p>area-averaged reconstructed void</p></li>
 </ul>
 </dd>
 </dl>
@@ -1386,7 +1496,7 @@ data, if that hasn’t already been done</p>
 </ul>
 </dd>
 <dt>Stores:</dt><dd><ul class="simple">
-<li><p>“FR” in self</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">FR</span></code> in self</p></li>
 </ul>
 </dd>
 <dt>Returns:</dt><dd><ul class="simple">
@@ -1442,7 +1552,7 @@ clustering algorithm results</p>
 <dd><p>Adds all values of param</p>
 <dl class="simple">
 <dt>Inputs:</dt><dd><ul class="simple">
-<li><p>param, string of local parameter to sum</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">param</span></code>, string of local parameter to sum</p></li>
 </ul>
 </dd>
 <dt>Returns:</dt><dd><ul class="simple">
@@ -1482,9 +1592,81 @@ a good way of doing so.</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="MARIGOLD.Condition.print_params">
+<span class="sig-prename descclassname"><span class="pre">MARIGOLD.Condition.</span></span><span class="sig-name descname"><span class="pre">print_params</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#print_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.print_params" title="Link to this definition"></a></dt>
+<dd><p>Convenience function in case you forget a parameter</p>
+<p>Generally, the available the available parameters are:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">'roverR'</span></code>, nondimensional radial location</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'time'</span></code>, measurement time</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'frequency'</span></code>, data acquisition frequency</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'num_spherical'</span></code>, number of spherical bubbles observed</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'num_distorted'</span></code>, number of distorted bubbles observed</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'num_cap'</span></code>, number of cap bubbles observed</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'num_slug'</span></code>, number of slug bubbles observed</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'num_G1'</span></code>, number of Group I bubbles observed</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'num_G2'</span></code>, number of Group II bubbles observed</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'num_total'</span></code>, total number of bubbles observed</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'obs_0'</span></code>, number of bubbles observed at sensor 0</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'obs_1'</span></code>, number of bubbles observed at sensor 1</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'obs_2'</span></code>, number of bubbles observed at sensor 2</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'obs_3'</span></code>, number of bubbles observed at sensor 3</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'bub_freq'</span></code>, bubble freqency</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'pair_spherical'</span></code>, number of spherical bubble signals paired</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'pair_distorted'</span></code>, number of distorted bubble signals paired</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'pair_cap'</span></code>, number of cap bubble signals paired</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'pair_slug'</span></code>, number of slug bubble signals paired</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'total_paired'</span></code>, total number bubble signals paired</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'percent_paired'</span></code>, percentage of observed signals that were paired</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'alpha_spherical'</span></code>, void fraction contribution from spherical bubbles</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'alpha_distorted'</span></code>, void fraction contribution from distorted bubbles</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'alpha_cap'</span></code>, void fraction contribution from cap bubbles</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'alpha_slug'</span></code>, void fraction contribution from slug bubbles</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'alpha_G1'</span></code>, void fraction contribution from Group I bubbles</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'alpha_G2'</span></code>, void fraction contribution from Group II bubbles</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'alpha'</span></code>, total void fraction</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'ai_spherical'</span></code>, interfacial area concentration contribution from spherical bubbles</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'ai_distorted'</span></code>, interfacial area concentration contribution from distorted bubbles</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'ai_cap'</span></code>, interfacial area concentration contribution from cap bubbles</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'ai_slug'</span></code>, interfacial area concentration contribution from slug bubbles</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'ai_G1'</span></code>, interfacial area concentration contribution from Group I bubbles</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'ai_G2'</span></code>, interfacial area concentration contribution from Group II bubbles</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'ai'</span></code>, total interfacial area concentration <span class="math notranslate nohighlight">\([m^{-1}]\)</span></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'Dsm1'</span></code>, Sauter-mean diameter from Group I bubbles <span class="math notranslate nohighlight">\([mm]\)</span></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'Lcl1'</span></code>, chord length from Group I bubbles <span class="math notranslate nohighlight">\([mm]\)</span></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'Dsm2'</span></code>, Sauter-mean diameter from Group II bubbles <span class="math notranslate nohighlight">\([mm]\)</span></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'Lcl2'</span></code>, chord length from Group II bubbles <span class="math notranslate nohighlight">\([mm]\)</span></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'ug1'</span></code>, Average interface velocity from Group I bubbles <span class="math notranslate nohighlight">\([m/s]\)</span></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'ug2'</span></code>, Average interface velocity from Group II bubbles <span class="math notranslate nohighlight">\([m/s]\)</span></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'sigma_ug1'</span></code>, standard deviation of Group I bubble velocities (?) <span class="math notranslate nohighlight">\([m/s]\)</span></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'sigma_ug2'</span></code>, standard deviation of Group II bubble velocities (?) <span class="math notranslate nohighlight">\([m/s]\)</span></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'fluctuation'</span></code> <span class="math notranslate nohighlight">\([m/s]\)</span></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'alpha_ug1'</span></code>, Local <span class="math notranslate nohighlight">\(j_{g}\)</span>’ calculated by <span class="math notranslate nohighlight">\(\alpha\)</span> and Group I bubble velocity <span class="math notranslate nohighlight">\([m/s]\)</span></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'alpha_ug2'</span></code>, Local <span class="math notranslate nohighlight">\(j_{g}\)</span>’ calculated by <span class="math notranslate nohighlight">\(\alpha\)</span> and Group II bubble velocity <span class="math notranslate nohighlight">\([m/s]\)</span></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'alpha_ug'</span></code>, Total local <span class="math notranslate nohighlight">\(j_{g}' :math:`[m/s]\)</span></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'alpha_Dsm1'</span></code>, Product of alpha and <span class="math notranslate nohighlight">\(D_{sm,1}\)</span> <span class="math notranslate nohighlight">\([mm]\)</span></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'alpha_Dsm2'</span></code>, Product of alpha and <span class="math notranslate nohighlight">\(D_{sm,2}\)</span> <span class="math notranslate nohighlight">\([mm]\)</span></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'r01'</span></code>, distance between sensor 0 and 1 <span class="math notranslate nohighlight">\([mm]\)</span></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'r02'</span></code>, distance between sensor 0 and 2 <span class="math notranslate nohighlight">\([mm]\)</span></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'r03'</span></code>, distance between sensor 0 and 3 <span class="math notranslate nohighlight">\([mm]\)</span></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'r12'</span></code>, distance between sensor 1 and 2 <span class="math notranslate nohighlight">\([mm]\)</span></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'r13'</span></code>, distance between sensor 1 and 3 <span class="math notranslate nohighlight">\([mm]\)</span></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'r23'</span></code>, distance between sensor 2 and 3 <span class="math notranslate nohighlight">\([mm]\)</span></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'vf'</span></code>, liquid velocity <span class="math notranslate nohighlight">\([m/s]\)</span></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'jf_loc'</span></code>, local superficial liquid velocity <span class="math notranslate nohighlight">\([m/s]\)</span></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'jf'</span></code>, superficial liquid veloicty <span class="math notranslate nohighlight">\([m/s]\)</span></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'delta_p'</span></code>, pressure difference measured by Pitot-static probe <span class="math notranslate nohighlight">\([psi]\)</span></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'sigma_delta_p'</span></code>, standard deviation of pressure difference measured by Pitot-static probe <span class="math notranslate nohighlight">\([psi]\)</span></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'vr'</span></code>, relative velocity <span class="math notranslate nohighlight">\([m/s]\)</span></p></li>
+</ul>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="MARIGOLD.Condition.print_tab_keys">
 <span class="sig-prename descclassname"><span class="pre">MARIGOLD.Condition.</span></span><span class="sig-name descname"><span class="pre">print_tab_keys</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#print_tab_keys"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.print_tab_keys" title="Link to this definition"></a></dt>
-<dd><p>Convenience function in case you forget a tab key</p>
+<dd><p>Alias of print_params()</p>
 </dd></dl>
 
 <dl class="py function" id="module-MARIGOLD.iate">
