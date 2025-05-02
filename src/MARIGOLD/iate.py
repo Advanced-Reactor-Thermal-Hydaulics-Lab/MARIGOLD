@@ -9,7 +9,7 @@ def iate_1d_1g(
         C_WE = None, C_RC = None, C_TI = None, alpha_max = 0.75, C = 3, We_cr = 6, acrit_flag = 0, acrit = None,      #1105 changed We_cr to 6, acrit = 1.00
 
         # Method arguments
-        preset = 'Quan', avg_method = None, cov_method = 'fixed', rf = False, cd_method = 'doe', dpdz_method = 'LM', void_method = None, LM_C = None, k_m=None, L_res= None,
+        preset = None, avg_method = None, cov_method = 'fixed', rf = False, cd_method = 'doe', dpdz_method = 'LM', void_method = None, LM_C = None, k_m=None, L_res= None,
 
         # Covariance calculation
         COV_RC = None, COV_TI = None,
@@ -28,43 +28,53 @@ def iate_1d_1g(
         verbose = False,
 
         ):
-    """ Calculate the area-averaged interfacial area concentration at query location based on the 1D 1G IATE
+    """_summary_
     
-    Inputs:
-     - cond:            Condition object, part of MARIGOLD framework
-     - query:           L/D endpoint
-     - z_step:          Axial mesh cell size [-]
-     - io:              Output package of iate_1d_1g(), can be used as input for subsequent runs
-     - geometry:        Geometry type, defaults to None, can be set to 'elbow', 'ubend'
-     - cond2:           Second condition object, for possible interpolation
-     - C_WE:            Wake entrainment coefficient
-     - C_RC:            Random collision coefficient
-     - C_TI:            Turbulent impact coefficient
-     - alpha_max:       Maximum void fraction based on HCP bubble distribution, used for random collision calculation
-     - C:               Additional factor accounting for the range of eddy size capable of transporting bubbles. Value assumed to be 3, but no justification for this selection is made
-     - We_cr:           Weber number criterion, used for turbulent impact calculation
-     - acrit_flag:      Enable/disable shutting off turbulence-based mechanisms beyond a critical void fraction
-     - acrit:           Critical void fraction for shutting off turbulence-based mechanisms
-     - preset:          Author preset, fixes coefficients and method arguments to match old MATLAB runs
-     - avg_method:      Area-averaging method, can be set to None (for Python Simpson's rule), 'legacy' (for Excel Simpson's Rule)
-     - cd_method:       Drag coefficient prediction method, 'err_iter', 'fixed_iter', or 'doe'
-     - dpdz_method:     Pressure drop prediction method, 'LM' or 'Kim'
-     - void_method:     Void fraction prediction method, 'driftflux' or 'continuity'
-     - LM_C:            Lockhart-Martinelli Chisholm parameter
-     - k_m:             Minor loss coefficient
-     - m:               Friction factor constant
-     - n:               Friction factor constant
-     - C0:              Drift flux distribution parameter overriding value
-     - C_inf:           Drift flux distribution parameter limiting value. Will be used to calculate C0, if none specified
-
-    Notes:
-     - Notice some grav terms are made absolute; needs downward flow fixes
-     - IATE coefficients set as optional inputs, with default values set depending on geometry
-     - vgz calculation in elbow and dissipation length regions still need to be implemented
-     - Need a way to compute void fraction across restrictions, void fraction prediction falters
-     - Modify MG for Yadav data extraction
-     - Revise vgj calculation
+    **Args**:
+    
+     - ``cond``: Condition object, part of MARIGOLD framework
+     - ``query``: L/D endpoint
+     - ``z_step``: Axial mesh cell size [-]. Defaults to 0.01.
+     - ``R_c``: Radius of curvature ratio. Defaults to 9.
+     - ``io``: Output package of iate_1d_1g(), can be used as input for subsequent runs. Defaults to None.
+     - ``geometry``: Geometry type, defaults to None, can be set to 'elbow', 'ubend'. Defaults to None.
+     - ``cond2``: Second condition object, for possible interpolation. Defaults to None.
+     - ``C_WE``: Wake entrainment coefficient. Defaults to None.
+     - ``C_RC``: Random collision coefficient. Defaults to None.
+     - ``C_TI``: Turbulent impact coefficient. Defaults to None.
+     - ``alpha_max``: Maximum void fraction based on HCP bubble distribution, used for random collision calculation. Defaults to 0.75.
+     - ``C``: Additional factor accounting for the range of eddy size capable of transporting bubbles. Value assumed to be 3, but no justification for this selection is made. Defaults to 3.
+     - ``We_cr``: Weber number criterion, used for turbulent impact calculation. Defaults to 6.
+     - ``acrit_flag``: Enable/disable shutting off turbulence-based mechanisms beyond a critical void fraction. Defaults to 0.
+     - ``acrit``: Critical void fraction for shutting off turbulence-based mechanisms. Defaults to None.
+     - ``preset``: Author preset, fixes coefficients and method arguments to match old MATLAB runs. Defaults to None.
+     - ``avg_method``: Area-averaging method, can be set to None (for Python Simpson's rule), 'legacy' (for Excel Simpson's Rule). Defaults to None.
+     - ``cov_method``: _description_. Defaults to 'fixed'.
+     - ``rf``: _description_. Defaults to False.
+     - ``cd_method``: Drag coefficient prediction method, 'err_iter', 'fixed_iter', or 'doe'. Defaults to 'doe'.
+     - ``dpdz_method``: Pressure drop prediction method, 'LM' or 'Kim'. Defaults to 'LM'.
+     - ``void_method``: Void fraction prediction method, 'driftflux' or 'continuity'. Defaults to None.
+     - ``LM_C``: Lockhart-Martinelli Chisholm parameter. Defaults to None.
+     - ``k_m``: Minor loss coefficient. Defaults to None.
+     - ``L_res``: _description_. Defaults to None.
+     - ``COV_RC``: _description_. Defaults to None.
+     - ``COV_TI``: _description_. Defaults to None.
+     - ``m``: Friction factor constant. Defaults to 0.316.
+     - ``n``: Friction factor constant. Defaults to 0.25.
+     - ``C_inf``: Drift flux distribution parameter limiting value. Will be used to calculate C0, if none specified. Defaults to 1.20.
+     - ``verbose``: _description_. Defaults to False.
+    
+    **Raises**:
+    
+     - ``ValueError``: _description_
     """
+    # Notes:
+    #  - Notice some grav terms are made absolute; needs downward flow fixes
+    #  - IATE coefficients set as optional inputs, with default values set depending on geometry
+    #  - vgz calculation in elbow and dissipation length regions still need to be implemented
+    #  - Need a way to compute void fraction across restrictions, void fraction prediction falters
+    #  - Modify MG for Yadav data extraction
+    #  - Revise vgj calculation
 
     # MARIGOLD retrieval and setup
     theta           = cond.theta                                # Pipe inclination angle [degrees]
