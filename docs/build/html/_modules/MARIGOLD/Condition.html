@@ -1448,7 +1448,7 @@
 <span class="sd">         - angle, angle to search along</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">         - r/R location of the maximum value of param when :math:`\\varphi`=angle</span>
+<span class="sd">         - r/R location of the maximum value of param when :math:`\\varphi` = ``angle``</span>
 <span class="sd">                          </span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">max</span> <span class="o">=</span> <span class="mi">0</span>
@@ -1664,19 +1664,42 @@
 <div class="viewcode-block" id="Condition.area_avg">
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.area_avg">[docs]</a>
     <span class="k">def</span> <span class="nf">area_avg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">even_opt</span><span class="o">=</span><span class="s1">&#39;first&#39;</span><span class="p">,</span> <span class="n">recalc</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Method for calculating the area-average of a parameter, &quot;param&quot;</span>
-<span class="sd">        </span>
-<span class="sd">        Inputs:</span>
-<span class="sd">         - param, string of local parameter to area-average</span>
-<span class="sd">         - even_opt, passed to integration method</span>
-<span class="sd">         - recalc, if area-average previously calculated, it was stored in a dictionary, and can just pull from there</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Method for calculating the area-average of a parameter</span>
 
-<span class="sd">        Returns:</span>
-<span class="sd">         - Area-averaged parameter, or None if the method failed</span>
+<span class="sd">        .. math:: \\langle \\psi \\rangle = \\frac{1}{A} \iint_A \\psi(r,\\varphi) r \,dr\,d\\varphi</span>
 <span class="sd">        </span>
-<span class="sd">        Uses Simpson&#39;s rule for integration, specifically scipy.integrate.simpsons</span>
+<span class="sd">        **Args**:</span>
 <span class="sd">        </span>
+<span class="sd">         - ``param``: ``midas_dict`` parameter to area-average. See :func:`~MARIGOLD.Condition.print_params` for options</span>
+<span class="sd">         - ``even_opt``: option for ``scipy.integrate.simpsons``. Defaults to &#39;first&#39;.</span>
+<span class="sd">         - ``recalc``: if true, will recalculate area average. Defaults to True.</span>
+<span class="sd">         - ``method``: method to area-average. Defaults to None.</span>
+
+<span class="sd">             - ``legacy``, using the same method as the Excel spreadsheets</span>
+<span class="sd">             - ``legacy_old``, actually what we use in spreadsheets, hardcoded values</span>
+<span class="sd">             - None, will use ``scipy.integrate.simpsons``. Recommended option</span>
+<span class="sd">        </span>
+<span class="sd">        **Raises**:</span>
+<span class="sd">        </span>
+<span class="sd">         - ``KeyError``: if ``param`` not found</span>
+<span class="sd">        </span>
+<span class="sd">        **Returns**:</span>
+<span class="sd">        </span>
+<span class="sd">         - area-averaged value</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Method for calculating the area-average of a parameter, &quot;param&quot;</span>
+        
+        <span class="c1"># Inputs:</span>
+        <span class="c1">#  - param, string of local parameter to area-average</span>
+        <span class="c1">#  - even_opt, passed to integration method</span>
+        <span class="c1">#  - recalc, if area-average previously calculated, it was stored in a dictionary, and can just pull from there</span>
+
+        <span class="c1"># Returns:</span>
+        <span class="c1">#  - Area-averaged parameter, or None if the method failed</span>
+        
+        <span class="c1"># Uses Simpson&#39;s rule for integration, specifically scipy.integrate.simpsons</span>
+        
+        <span class="c1"># </span>
 
         <span class="c1"># Check that the parameter that the user requested exists</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_param</span><span class="p">(</span><span class="n">param</span><span class="p">):</span>
@@ -2873,7 +2896,8 @@
 
 <span class="sd">        Method Options:</span>
 <span class="sd">         - Blasius</span>
-<span class="sd">        .. math:: f_k = \\frac{C}{Re_k^n}</span>
+
+<span class="sd">         .. math:: f_k = \\frac{C}{Re_k^n}</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">         - Tuple of f_f, f_g</span>
@@ -2968,8 +2992,10 @@
 <span class="sd">        </span>
 <span class="sd">        Stores:</span>
 <span class="sd">         - &quot;cd&quot; in midas_dict </span>
-<span class="sd">         - &quot;Reb&quot; in midas_dict. Calculated by :math:`Re_{b} = \\frac{(1 - \\alpha) \\rho_{f} v_{r} D_{sm,1} }{\\mu_{m}}`. \ </span>
-<span class="sd">:math:`\\mu_{m}` comes from :any:`calc_mu_eff`</span>
+<span class="sd">         - &quot;Reb&quot; in midas_dict. Calculated by :math:`Re_{b} = \\frac{(1 - \\alpha) \\rho_{f} v_{r} D_{sm,1} }{\\mu_{m}}`.</span>
+<span class="sd">         </span>
+<span class="sd">         :math:`\\mu_{m}` comes from :any:`calc_mu_eff`</span>
+
 <span class="sd">         - &quot;eo&quot;, if using &quot;tomiyama&quot; or &quot;ishii&quot; limits</span>
 
 <span class="sd">        Options for method:</span>
@@ -3084,31 +3110,73 @@
     <span class="k">def</span> <span class="nf">calc_vr_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;km1_simp&#39;</span><span class="p">,</span> <span class="n">kw</span> <span class="o">=</span> <span class="mf">0.654</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">Lw</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span> <span class="n">kf</span> <span class="o">=</span> <span class="mf">0.113</span><span class="p">,</span> 
                       <span class="n">iterate_cd</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">initial_vr</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> 
                       <span class="n">quiet</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">recalc_cd</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">iter_tol</span> <span class="o">=</span> <span class="mf">1e-4</span><span class="p">,</span> <span class="n">custom_f</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">CC</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Method for calculating relative velocity based on models</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;_summary_</span>
 <span class="sd">        </span>
-<span class="sd">        Inputs:</span>
-<span class="sd">         - method, what method to use for modeling :math:`v_{r}`</span>
-<span class="sd">         - kw, wake coeffieient for some models</span>
-<span class="sd">         - n, exponent for some models</span>
-<span class="sd">         - Lw, really :math:`L_{w}^{*}`, effective wake length divided by the bubble diameter</span>
-<span class="sd">         - kf, fluid coefficient for some models</span>
-<span class="sd">         - iterate_cd, flag to pass to :any:`calc_cd`. Basically whether to iterate to calculate :math:`C_{D}` based on \</span>
-<span class="sd">the newly calculated :math:`v_{r}` or not</span>
-<span class="sd">         - quiet, flag for extra debugging messages</span>
+<span class="sd">        **Args**:</span>
 <span class="sd">        </span>
-<span class="sd">        Stores:</span>
-<span class="sd">         - &quot;vr\_&#39;method_name&#39;&quot; in midas_dict </span>
-<span class="sd">         - &quot;vr_model&quot; in midas_dict </span>
+<span class="sd">         - ``method``: what method to use for modeling :math:`v_{r}`. Defaults to &#39;km1_simp&#39;. Options include:</span>
 
-<span class="sd">        Options for method:</span>
-<span class="sd">         - &quot;km1_simp&quot;, most up to date :math:`v_{r} = K_{f} - K_{w}  \\alpha  v_{f}  C_{d}^{1/3}`</span>
-<span class="sd">         - &quot;Ishii-Chawla&quot;, :math:`v_{r} = \\sqrt{2} (\\frac{\\sigma g \\Delta \\rho}{\\rho_{f}^{2}})^{1/4}`</span>
-<span class="sd">         - A bunch of obsolete ones that I haven&#39;t deleted but probably should</span>
+<span class="sd">             - ``&#39;wake_1&#39;``, depracated, earliest attempt, don&#39;t use</span>
 
-<span class="sd">        Returns:</span>
+<span class="sd">             .. math:: v_{r} = K_{w} v_{f} C_{D}^{1/3}</span>
+
+<span class="sd">             - ``&#39;wake_alpha&#39;``, depracated, don&#39;t use</span>
+
+<span class="sd">             .. math:: v_{r} = K_{w} (1-\\alpha)^{n} v_{f} C_{D}^{1/3}</span>
+
+<span class="sd">             - ``&#39;wake_alpha2&#39;``, depracated, don&#39;t use</span>
+
+<span class="sd">             .. math:: v_{r} = K_{w} \\alpha (1-\\alpha)^{n} v_{f} C_{D}^{1/3}</span>
+
+<span class="sd">             - ``&#39;wake_lambda&#39;``, depracated, don&#39;t use</span>
+<span class="sd">             - ``&#39;wake_vg_lambda&#39;``, depracated, don&#39;t use</span>
+<span class="sd">             - ``&#39;hubris&#39;``, depracated, don&#39;t use</span>
+<span class="sd">             - ``&#39;km1&#39;``, depracated, don&#39;t use</span>
+<span class="sd">             - ``&#39;km1&#39;``, depracated, don&#39;t use</span>
+<span class="sd">         - ``kw``: _description_. Defaults to 0.654.</span>
+<span class="sd">         - ``n``: _description_. Defaults to 1.</span>
+<span class="sd">         - ``Lw``: _description_. Defaults to 5.</span>
+<span class="sd">         - ``kf``: _description_. Defaults to 0.113.</span>
+<span class="sd">         - ``iterate_cd``: _description_. Defaults to True.</span>
+<span class="sd">         - ``initial_vr``: _description_. Defaults to None.</span>
+<span class="sd">         - ``quiet``: _description_. Defaults to True.</span>
+<span class="sd">         - ``recalc_cd``: _description_. Defaults to True.</span>
+<span class="sd">         - ``iter_tol``: _description_. Defaults to 1e-4.</span>
+<span class="sd">         - ``custom_f``: _description_. Defaults to None.</span>
+<span class="sd">         - ``CC``: _description_. Defaults to 1.</span>
+<span class="sd">        </span>
+<span class="sd">        **Raises**:</span>
+<span class="sd">        </span>
+<span class="sd">         - ``ValueError``: _description_</span>
+<span class="sd">        </span>
+<span class="sd">        **Returns**:</span>
+<span class="sd">        </span>
 <span class="sd">         - area average relative velocity calculated by the model</span>
-
 <span class="sd">        &quot;&quot;&quot;</span>
+<span class="c1">#         Method for calculating relative velocity based on models</span>
+        
+<span class="c1">#         Inputs:</span>
+<span class="c1">#          - method, </span>
+<span class="c1">#          - kw, wake coeffieient for some models</span>
+<span class="c1">#          - n, exponent for some models</span>
+<span class="c1">#          - Lw, really :math:`L_{w}^{*}`, effective wake length divided by the bubble diameter</span>
+<span class="c1">#          - kf, fluid coefficient for some models</span>
+<span class="c1">#          - iterate_cd, flag to pass to :any:`calc_cd`. Basically whether to iterate to calculate :math:`C_{D}` based on \</span>
+<span class="c1"># the newly calculated :math:`v_{r}` or not</span>
+<span class="c1">#          - quiet, flag for extra debugging messages</span>
+        
+<span class="c1">#         Stores:</span>
+<span class="c1">#          - &quot;vr\_&#39;method_name&#39;&quot; in midas_dict </span>
+<span class="c1">#          - &quot;vr_model&quot; in midas_dict </span>
+
+<span class="c1">#         Options for method:</span>
+<span class="c1">#          - &quot;km1_simp&quot;, most up to date :math:`v_{r} = K_{f} - K_{w}  \\alpha  v_{f}  C_{d}^{1/3}`</span>
+<span class="c1">#          - &quot;Ishii-Chawla&quot;, :math:`v_{r} = \\sqrt{2} (\\frac{\\sigma g \\Delta \\rho}{\\rho_{f}^{2}})^{1/4}`</span>
+<span class="c1">#          - A bunch of obsolete ones that I haven&#39;t deleted but probably should</span>
+
+<span class="c1">#         Returns:</span>
+<span class="c1">#          - </span>
+        
 
         <span class="n">MAX_ITERATIONS</span> <span class="o">=</span> <span class="mi">100</span>
         <span class="n">iterations</span> <span class="o">=</span> <span class="mi">0</span>
@@ -3282,9 +3350,10 @@
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.calc_vgj_model">[docs]</a>
     <span class="k">def</span> <span class="nf">calc_vgj_model</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Method for calculating local Vgj based on models</span>
-<span class="sd">        </span>
-<span class="sd">        midas_dict[&#39;vgj_model&#39;] = (1 - midas_dict[&#39;alpha&#39;]) * midas_dict[&#39;vr_model&#39;]</span>
 
+<span class="sd">        Stores:</span>
+<span class="sd">         - ``midas_dict[&#39;vgj_model&#39;] = (1 - midas_dict[&#39;alpha&#39;]) * midas_dict[&#39;vr_model&#39;]``</span>
+<span class="sd">        </span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">for</span> <span class="n">angle</span><span class="p">,</span> <span class="n">r_dict</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
@@ -3302,6 +3371,26 @@
 <div class="viewcode-block" id="Condition.calc_IS_term">
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.calc_IS_term">[docs]</a>
     <span class="k">def</span> <span class="nf">calc_IS_term</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;power&#39;</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">mu</span> <span class="o">=</span> <span class="mf">1.5</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the interfacial shear term, for the 1-D averaged TFM, :math:`\\nabla \\alpha \\bullet \\tau_{i}`</span>
+<span class="sd">        </span>
+<span class="sd">        **Args**:</span>
+
+<span class="sd">         - ``method``: method used to calculate term. Defaults to &#39;power&#39;. Options:</span>
+
+<span class="sd">             - ``power``</span>
+
+<span class="sd">             .. math:: \\tau_{i} = \\tau_{fw} (r^{*})^{n}</span>
+
+<span class="sd">             - ``power_total``</span>
+<span class="sd">             - ``lognorm``</span>
+<span class="sd">             - ``alpha``</span>
+<span class="sd">         - ``n``: _description_. Defaults to 2.</span>
+<span class="sd">         - ``mu``: _description_. Defaults to 1.5.</span>
+<span class="sd">        </span>
+<span class="sd">        **Returns**:</span>
+
+<span class="sd">         - ``self.area_avg(&#39;ISxgrad&#39;)``. ``&#39;ISxgrad`` and ``&#39;IS&#39;`` stored in ``midas_dict``</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">calc_cd</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">calc_fric</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">calc_grad</span><span class="p">(</span><span class="s1">&#39;alpha&#39;</span><span class="p">)</span>
@@ -3345,7 +3434,46 @@
     
 <div class="viewcode-block" id="Condition.calc_aa_vr_model">
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.calc_aa_vr_model">[docs]</a>
-    <span class="k">def</span> <span class="nf">calc_aa_vr_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;km1_naive&#39;</span><span class="p">,</span> <span class="n">IS_method</span> <span class="o">=</span> <span class="s1">&#39;power&#39;</span><span class="p">,</span> <span class="n">kw</span><span class="o">=</span><span class="mf">0.654</span><span class="p">,</span> <span class="n">kf</span><span class="o">=</span><span class="mf">0.113</span><span class="p">,</span> <span class="n">Lw</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span> <span class="n">Cavf</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">Ctau</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">IS_mu</span> <span class="o">=</span> <span class="mf">1.5</span><span class="p">,</span> <span class="n">Cvfacd</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">calc_aa_vr_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;km1_naive&#39;</span><span class="p">,</span> <span class="n">IS_method</span> <span class="o">=</span> <span class="s1">&#39;power&#39;</span><span class="p">,</span> <span class="n">kw</span><span class="o">=</span><span class="mf">0.654</span><span class="p">,</span> <span class="n">kf</span><span class="o">=</span><span class="mf">0.113</span><span class="p">,</span> <span class="n">Lw</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span> <span class="n">Ctau</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">IS_mu</span> <span class="o">=</span> <span class="mf">1.5</span><span class="p">,</span> <span class="n">Cvfacd</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;to calculate estimate the area-averaged relative velocity</span>
+<span class="sd">        </span>
+<span class="sd">        **Args:**</span>
+
+<span class="sd">         - ``method``: _description_. Defaults to &#39;km1_naive&#39;.</span>
+
+<span class="sd">             - ``km1_naive``, depracated, similar to ``prelim`` but with an older form and different coefficients</span>
+
+<span class="sd">             .. math:: \\langle v_{r} \\rangle = K_{f} \\frac{\\langle j_{f} \\rangle}{1 - \\langle \\alpha \\rangle} + K_{w} \\frac{\\pi}{4} \\frac{2^{-1/3}-L_{w}^{1/3}}{0.5-L_{w}} \\langle C_{D} \\rangle^{1/3} \\langle \\alpha \\rangle \\frac{\\langle j_{f} \\rangle}{1 - \\langle \\alpha \\rangle}</span>
+
+<span class="sd">             - ``km1_naive2``, depracated, same as ``prelim``, but signs of :math:`K_{w}` and :math:`K_{f}` flipped.</span>
+<span class="sd">             - ``prelim``, Same as final, but no covariance. For backwards compatability </span>
+
+<span class="sd">             .. math:: \\langle v_{r} \\rangle = - K_{f} \\frac{\\langle j_{f} \\rangle}{1 - \\langle \\alpha \\rangle} - K_{w} \\langle C_{D} \\rangle^{1/3} \\langle \\alpha \\rangle \\frac{\\langle j_{f} \\rangle}{1 - \\langle \\alpha \\rangle}</span>
+
+<span class="sd">             - ``final``, recommended method, Eq. (4.37) of Dix (2025)</span>
+
+<span class="sd">             .. math:: \\langle v_{r} \\rangle = - K_{f} \\frac{\\langle j_{f} \\rangle}{1 - \\langle \\alpha \\rangle} - K_{w} C_{\\alpha, v_{f}} \\langle C_{D} \\rangle^{1/3} \\langle \\alpha \\rangle \\frac{\\langle j_{f} \\rangle}{1 - \\langle \\alpha \\rangle}</span>
+
+<span class="sd">             - ``IS_Ctau``, uses a 1-D interfacial shear model with :math:`C_{\\tau}` to calculate :math:`v_{r}`. Not recommended</span>
+
+<span class="sd">             .. math:: \\langle v_{r} \\rangle | \\langle v_{r} \\rangle| = \\frac{8 r_{b}}{3} \\frac{1}{C_{D} \\rho_{f}} ((1-C_{\\tau})\\frac{4 \\tau_{fw}}{D_{h}} + (1-\\langle \\alpha \\rangle)g_{z}(\\rho_{f} - \\rho_{g}) )</span>
+<span class="sd">             </span>
+<span class="sd">             - ``IS``, using 1-D interfacial shear model. Uses :meth:`~MARIGOLD.Condition.Condition.calc_IS_term` for :math:`\\tau_{i}`. Not recommended</span>
+
+<span class="sd">             .. math:: \\langle v_{r} \\rangle | \\langle v_{r} \\rangle| = \\frac{8 r_{b}}{3} \\frac{1}{C_{D} \\rho_{f}} (\\frac{4 \\tau_{fw}}{D_{h}} + (1-\\langle \\alpha \\rangle)g_{z}(\\rho_{f} - \\rho_{g}) - \\frac{1}{\\langle \\alpha \\rangle} \\tau_{i})</span>
+<span class="sd">         </span>
+<span class="sd">         - ``IS_method``: When ``method=&#39;IS&#39;``, what method to pass to use for interfacial shear calculation. See :meth:`~MARIGOLD.Condition.Condition.calc_IS_term` for options. Defaults to ``&#39;power&#39;``. </span>
+<span class="sd">         - ``kw``: Wake coefficient. Defaults to 0.654.</span>
+<span class="sd">         - ``kf``: Liquid coefficient. Defaults to 0.113.</span>
+<span class="sd">         - ``Lw``: Effective wake length. Defaults to 5.</span>
+<span class="sd">         - ``Ctau``: Interfacial shear constant. Defaults to 1.</span>
+<span class="sd">         - ``n``: Power constant. Defaults to 2.</span>
+<span class="sd">         - ``IS_mu``: Interfacial shear viscosity. Defaults to 1.5.</span>
+<span class="sd">         - ``Cvfacd``: Covariance. Defaults to 1.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">         - ``self.aa_vr``</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;km1_naive&#39;</span><span class="p">:</span>
             <span class="n">vr</span> <span class="o">=</span> <span class="n">kw</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">4</span><span class="p">)</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">area_avg</span><span class="p">(</span><span class="s1">&#39;alpha&#39;</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">jf</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">area_avg</span><span class="p">(</span><span class="s1">&#39;alpha&#39;</span><span class="p">))</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">area_avg</span><span class="p">(</span><span class="s1">&#39;cd&#39;</span><span class="p">)</span><span class="o">**</span><span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span> <span class="o">*</span>  <span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="p">(</span><span class="o">-</span><span class="mf">1.</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span> <span class="o">-</span> <span class="n">Lw</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">))</span><span class="o">/</span><span class="p">(</span><span class="mf">0.5</span> <span class="o">-</span> <span class="n">Lw</span><span class="p">)</span> <span class="o">+</span> <span class="n">kf</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">jf</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">area_avg</span><span class="p">(</span><span class="s1">&#39;alpha&#39;</span><span class="p">))</span>
@@ -3392,6 +3520,16 @@
 <div class="viewcode-block" id="Condition.calc_vw_aa_Vgj_model">
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.calc_vw_aa_Vgj_model">[docs]</a>
     <span class="k">def</span> <span class="nf">calc_vw_aa_Vgj_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Kw</span><span class="o">=</span><span class="mf">0.654</span><span class="p">,</span> <span class="n">Kf</span><span class="o">=</span><span class="mf">0.113</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Calculate drift velocity, :math:`\\langle \\langle V_{gj} \\rangle \\rangle`, based on Dix (2025) model. See Eq. (4.47) of his thesis</span>
+<span class="sd">        </span>
+<span class="sd">        **Args:**</span>
+
+<span class="sd">         - ``Kw``: Wake coefficient. Defaults to 0.654.</span>
+<span class="sd">         - ``Kf``: Liquid coefficient. Defaults to 0.113.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">         - ``self.vw_aa_Vgj_model``</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">Cajf</span> <span class="o">=</span> <span class="mf">0.12</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">jf</span> <span class="o">+</span> <span class="mf">0.43</span><span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">jgloc</span><span class="o">**-</span><span class="mf">0.1</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">Cajc</span> <span class="o">=</span> <span class="mf">61.4</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">jf</span><span class="o">**-</span><span class="mf">2.25</span>
 
@@ -3407,19 +3545,26 @@
 <div class="viewcode-block" id="Condition.calc_errors">
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.calc_errors">[docs]</a>
     <span class="k">def</span> <span class="nf">calc_errors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param1</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">param2</span><span class="p">:</span><span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; Calculates the errors, ε, between two parameters (param1 - param2) in midas_dict</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculates the errors, ε, between two parameters (param1 - param2) in midas_dict</span>
 
 <span class="sd">        Usually want to do param1=predicted, param2=experimental</span>
-<span class="sd">        </span>
-<span class="sd">        Stores:</span>
-<span class="sd">         - error, &quot;eps_param1_param2&quot;, param1 - param2</span>
-<span class="sd">         - relative, &quot;eps_rel_param1_param2&quot;, (param1 - param2) / param2</span>
-<span class="sd">         - absolute relative, &quot;eps_abs_rel_param1_param2&quot;, | param1 - param2 | / param2</span>
-<span class="sd">         - square, &quot;eps_sq_param1_param2&quot;, (param1 - param2)**2</span>
-<span class="sd">         - relative square, &quot;eps_rel_sq_param1_param2&quot;, ((param1 - param2)/param2)**2</span>
 
-<span class="sd">         If param2 = 0, relative errors are considered 0</span>
+<span class="sd">        If param2 = 0, relative errors are considered 0</span>
 <span class="sd">        </span>
+<span class="sd">        **Args:**</span>
+
+<span class="sd">         - ``param1``: parameter to calculate error between (predicted)</span>
+<span class="sd">         - ``param2``: parameter to calculate error between (experimental)</span>
+
+<span class="sd">        Stores:</span>
+<span class="sd">         - error, ``&#39;eps_param1_param2&#39;``, param1 - param2</span>
+<span class="sd">         - relative, ``&#39;eps_rel_param1_param2&#39;``, (param1 - param2) / param2</span>
+<span class="sd">         - absolute relative, ``&#39;eps_abs_rel_param1_param2&#39;``, | param1 - param2 | / param2</span>
+<span class="sd">         - square, ``&#39;eps_sq_param1_param2&#39;``, (param1 - param2)**2</span>
+<span class="sd">         - relative square, ``&#39;eps_rel_sq_param1_param2&#39;``, ((param1 - param2)/param2)**2</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">         - Area-averaged error</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">param_error_name</span> <span class="o">=</span> <span class="s2">&quot;eps_&quot;</span> <span class="o">+</span> <span class="n">param1</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">param2</span>
@@ -3448,14 +3593,17 @@
 <div class="viewcode-block" id="Condition.calc_AA_error">
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.calc_AA_error">[docs]</a>
     <span class="k">def</span> <span class="nf">calc_AA_error</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param1</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">param2</span><span class="p">:</span><span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; Calculates the error, ε, between the area-average of two parameters (⟨param1⟩ - ⟨param2⟩) in midas_dict</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculates the error, ε, between the area-average of two parameters (⟨param1⟩ - ⟨param2⟩) in ``midas_dict``</span>
+<span class="sd">        </span>
+<span class="sd">        **Args:**</span>
 
-<span class="sd">        Usually want to do param1=predicted, param2=experimental</span>
+<span class="sd">         - ``param1``: parameter to calculate error between (predicted)</span>
+<span class="sd">         - ``param2``: parameter to calculate error between (experimental)</span>
 <span class="sd">        </span>
-<span class="sd">        Returns</span>
+<span class="sd">        Returns:</span>
 <span class="sd">         - relative error (⟨param1⟩ - ⟨param2⟩) / ⟨param1⟩</span>
-<span class="sd">        </span>
 <span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="n">eps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">area_avg</span><span class="p">(</span><span class="n">param1</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">area_avg</span><span class="p">(</span><span class="n">param2</span><span class="p">)</span>
         <span class="n">rel_error</span> <span class="o">=</span> <span class="n">eps</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">area_avg</span><span class="p">(</span><span class="n">param1</span><span class="p">)</span>
 
@@ -3465,27 +3613,21 @@
 <div class="viewcode-block" id="Condition.calc_symmetry">
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.calc_symmetry">[docs]</a>
     <span class="k">def</span> <span class="nf">calc_symmetry</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">sym_type</span> <span class="o">=</span> <span class="s1">&#39;sym90&#39;</span><span class="p">,</span> <span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;rmse&#39;</span><span class="p">,</span> <span class="n">rel_error</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; Function for checking the symmetry of a condition</span>
-
-<span class="sd">        sym_type</span>
-<span class="sd">         - &#39;sym90&#39;, will compare data at 0° and 180°</span>
-
-<span class="sd">        .. math:: \\epsilon(r) = param(r, 0°) - param(r, 180°)</span>
-
-<span class="sd">        rel_error will divide by param 0</span>
-
-<span class="sd">        Method</span>
-<span class="sd">         - rmse, </span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Function for checking the symmetry of a condition</span>
 <span class="sd">        </span>
-<span class="sd">        .. math:: \\epsilon_{sym} = \\sqrt{\\bar{\\epsilon(r)^{2}}}</span>
+<span class="sd">        **Args:**</span>
 
-<span class="sd">        Returns</span>
+<span class="sd">         - ``param``: ``midas_dict`` parameter to plot. See :func:`~MARIGOLD.Condition.print_params` for options</span>
+<span class="sd">         - ``sym_type``: type of symmetry to compare. Defaults to &#39;sym90&#39;. Currently the only option.</span>
+<span class="sd">         - ``method``: error options. Defaults to &#39;rmse&#39;. Options:</span>
+<span class="sd">             - ``&#39;rmse&#39;``, :math:`\\epsilon_{sym} = \\sqrt{\\bar{\\epsilon(r)^{2}}}`</span>
+<span class="sd">             - ``&#39;mean&#39;``, :math:`\\epsilon_{sym} = \\bar{\\epsilon(r)}`</span>
+<span class="sd">         - ``rel_error``: will divide by param. Defaults to False.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
 <span class="sd">         - :math:`\\epsilon_{sym}`</span>
-<span class="sd">        </span>
-<span class="sd">        Stores</span>
-<span class="sd">         - :math:`\\epsilon_{sym}`</span>
-<span class="sd">        </span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        
         <span class="n">errs</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">if</span> <span class="n">sym_type</span> <span class="o">==</span> <span class="s1">&#39;sym90&#39;</span><span class="p">:</span>
 
@@ -3516,9 +3658,12 @@
 <div class="viewcode-block" id="Condition.calc_symmetry_area_avg">
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.calc_symmetry_area_avg">[docs]</a>
     <span class="k">def</span> <span class="nf">calc_symmetry_area_avg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">sym_type</span><span class="o">=</span><span class="s1">&#39;sym_half&#39;</span><span class="p">,</span> <span class="n">rel_error</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">even_opt</span><span class="o">=</span><span class="s1">&#39;first&#39;</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;_summary_</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the symmetry error</span>
+
+<span class="sd">        Not sure this is necessary, could use :meth:`~MARIGOLD.Condition.Condition.calc_symmetry` and :meth:`~MARIGOLD.Condition.Condition.area_avg` to achieve a similar thing</span>
 <span class="sd">        </span>
-<span class="sd">        Args:</span>
+<span class="sd">        **Args:**</span>
+
 <span class="sd">         - ``param``: ``midas_dict`` parameter to plot. See :func:`~MARIGOLD.Condition.print_params` for options</span>
 <span class="sd">         - ``sym_type``: _description_. Defaults to &#39;sym_half&#39;.</span>
 <span class="sd">         - ``rel_error``: _description_. Defaults to True.</span>
@@ -3601,7 +3746,8 @@
     <span class="k">def</span> <span class="nf">calc_vr_uncertainty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sigma_vg</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">sigma_alpha</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">sigma_dp</span><span class="o">=</span><span class="mf">0.03</span><span class="p">,</span> <span class="n">percentage</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Function to calculate the uncertainty in pitot-tube measurements</span>
 <span class="sd">        </span>
-<span class="sd">        Args:</span>
+<span class="sd">        **Args:**</span>
+
 <span class="sd">         - ``sigma_vg``: _description_. Defaults to 0.1.</span>
 <span class="sd">         - ``sigma_alpha``: _description_. Defaults to 0.05.</span>
 <span class="sd">         - ``sigma_dp``: _description_. Defaults to 0.03.</span>
@@ -3948,7 +4094,8 @@
     <span class="k">def</span> <span class="nf">reconstruct_void</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;talley&#39;</span><span class="p">,</span> <span class="n">avg_method</span> <span class="o">=</span> <span class="s1">&#39;legacy&#39;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Method to reconstruct the void fraction profile by various means. </span>
 <span class="sd">        </span>
-<span class="sd">        Args:</span>
+<span class="sd">        **Args:**</span>
+
 <span class="sd">         - ``method``: method to use to reconstruct void. Defaults to ``&#39;talley&#39;``. Options include:</span>
 <span class="sd">             - ``&#39;talley&#39;``</span>
 <span class="sd">             - ``&#39;not_talley&#39;``</span>
@@ -4247,10 +4394,11 @@
                       <span class="n">const_to_plot</span> <span class="o">=</span> <span class="p">[</span><span class="mi">90</span><span class="p">,</span> <span class="mf">67.5</span><span class="p">,</span> <span class="mi">45</span><span class="p">,</span> <span class="mf">22.5</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">include_complement</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">skip_1_comp</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                       <span class="n">fig_size</span><span class="o">=</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="mi">4</span><span class="p">),</span> <span class="n">fs</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">label_str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">legend_loc</span> <span class="o">=</span> <span class="s1">&#39;best&#39;</span><span class="p">,</span> <span class="n">xlabel_loc</span> <span class="o">=</span> <span class="s1">&#39;center&#39;</span><span class="p">,</span> <span class="n">include_const</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                       <span class="n">set_min</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">set_max</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">show_spines</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">xlabel_loc_coords</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">ylabel_loc_coords</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">cs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ms</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">ls</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;_summary_</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Line plots of params</span>
 <span class="sd">        </span>
-<span class="sd">        Args:</span>
-<span class="sd">         - ``param``: ``midas_dict`` parameter to plot. See :func:`~MARIGOLD.Condition.print_params` for options</span>
+<span class="sd">        **Args:**</span>
+
+<span class="sd">         - ``param``: ``midas_dict`` parameter to plot. See :func:`~MARIGOLD.Condition.print_params` for options. Can be a single string, or a list of ``param`` strings.</span>
 <span class="sd">         - ``save_dir``: directory in which to save the .png file. Will not save the file unless show = False. Defaults to &#39;.&#39;.</span>
 <span class="sd">         - ``show``: display the figure (in an iPython notebook or have it pop up). Defaults to True.</span>
 <span class="sd">         - ``x_axis``: the variable to put on the x-axis. Usually for vertical flow this is ``&#39;rs&#39;``, for horizontal, ``&#39;vals&#39;``. Also can be &#39;phis&#39;. Defaults to &#39;vals&#39;.</span>
@@ -4643,9 +4791,10 @@
                       <span class="n">const_to_plot</span> <span class="o">=</span> <span class="p">[</span><span class="mi">90</span><span class="p">,</span> <span class="mf">67.5</span><span class="p">,</span> <span class="mi">45</span><span class="p">,</span> <span class="mf">22.5</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">include_complement</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> 
                       <span class="n">rotate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">fig_size</span><span class="o">=</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="mi">4</span><span class="p">),</span> <span class="n">title</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">label_str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">legend_loc</span> <span class="o">=</span> <span class="s1">&#39;best&#39;</span><span class="p">,</span> <span class="n">xlabel_loc</span> <span class="o">=</span> <span class="s1">&#39;center&#39;</span><span class="p">,</span>
                       <span class="n">set_min</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">set_max</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">show_spines</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">force_RH_y_axis</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">xlabel_loc_coords</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">cs</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;_summary_</span>
-<span class="sd">        </span>
-<span class="sd">        Args:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Line plot of ``param``. Only a single ``param`` can be plotted at a time, but plot can be arbitrarily rotated. </span>
+
+<span class="sd">        **Args:**</span>
+
 <span class="sd">         - ``param``: ``midas_dict`` parameter to plot. See :func:`~MARIGOLD.Condition.print_params` for options</span>
 <span class="sd">         - ``save_dir``: _description_. Defaults to &#39;.&#39;.</span>
 <span class="sd">         - ``show``: _description_. Defaults to True.</span>
@@ -4891,7 +5040,8 @@
                      <span class="n">save_dir</span> <span class="o">=</span> <span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">extra_text</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;_summary_</span>
 <span class="sd">        </span>
-<span class="sd">        Args:</span>
+<span class="sd">        **Args:**</span>
+
 <span class="sd">         - ``param``: ``midas_dict`` parameter to plot. See :func:`~MARIGOLD.Condition.print_params` for options</span>
 <span class="sd">         - ``iso_axis``: _description_</span>
 <span class="sd">         - ``iso_val``: _description_</span>
@@ -4947,7 +5097,8 @@
                      <span class="n">annotate_h</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">cartesian</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">h_star_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;method&#39;</span><span class="p">:</span> <span class="s1">&#39;max_dsm&#39;</span><span class="p">,</span> <span class="s1">&#39;min_void&#39;</span><span class="p">:</span> <span class="s1">&#39;0.05&#39;</span><span class="p">},</span> <span class="n">plot_measured_points</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">font_size</span> <span class="o">=</span> <span class="mi">12</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Function to create a contour plot of a given param</span>
 
-<span class="sd">        Args:</span>
+<span class="sd">        **Args:**</span>
+
 <span class="sd">         - ``param``: ``midas_dict`` parameter to plot. See :func:`~MARIGOLD.Condition.print_params` for options</span>
 <span class="sd">         - ``save_dir``: directory to save contour plot to. Defaults to &#39;.&#39;.</span>
 <span class="sd">         - ``show``: whether or not to show the contour plot. Defaults to True.</span>
@@ -5157,7 +5308,8 @@
                      <span class="n">plot_surface_kwargs</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">solid_color</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">label_str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">title_str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">colormap</span> <span class="o">=</span> <span class="s1">&#39;viridis&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Function to create a 3 dimensional surface plot of a given parameter</span>
 <span class="sd">        </span>
-<span class="sd">        Args:</span>
+<span class="sd">        **Args:**</span>
+
 <span class="sd">         - ``param``: ``midas_dict`` parameter to plot. See :func:`~MARIGOLD.Condition.print_params` for options</span>
 <span class="sd">         - ``save_dir``: directory to save surface plot image to. Defaults to &#39;.&#39;.</span>
 <span class="sd">         - ``show``: option to show surface plot. Defaults to True.</span>
@@ -6060,9 +6212,9 @@
 <span class="sd">     - ``&#39;sigma_ug1&#39;``, standard deviation of Group I bubble velocities (?) :math:`[m/s]`</span>
 <span class="sd">     - ``&#39;sigma_ug2&#39;``, standard deviation of Group II bubble velocities (?) :math:`[m/s]`</span>
 <span class="sd">     - ``&#39;fluctuation&#39;`` :math:`[m/s]`</span>
-<span class="sd">     - ``&#39;alpha_ug1&#39;``, Local :math:`j_{g}`&#39; calculated by :math:`\\alpha` and Group I bubble velocity :math:`[m/s]`</span>
-<span class="sd">     - ``&#39;alpha_ug2&#39;``, Local :math:`j_{g}`&#39; calculated by :math:`\\alpha` and Group II bubble velocity :math:`[m/s]`</span>
-<span class="sd">     - ``&#39;alpha_ug&#39;``, Total local :math:`j_{g}&#39; :math:`[m/s]`</span>
+<span class="sd">     - ``&#39;alpha_ug1&#39;``, Local :math:`j_{g}` calculated by :math:`\\alpha` and Group I bubble velocity :math:`[m/s]`</span>
+<span class="sd">     - ``&#39;alpha_ug2&#39;``, Local :math:`j_{g}` calculated by :math:`\\alpha` and Group II bubble velocity :math:`[m/s]`</span>
+<span class="sd">     - ``&#39;alpha_ug&#39;``, Total local :math:`j_{g}` :math:`[m/s]`</span>
 <span class="sd">     - ``&#39;alpha_Dsm1&#39;``, Product of alpha and :math:`D_{sm,1}` :math:`[mm]`</span>
 <span class="sd">     - ``&#39;alpha_Dsm2&#39;``, Product of alpha and :math:`D_{sm,2}` :math:`[mm]`</span>
 <span class="sd">     - ``&#39;r01&#39;``, distance between sensor 0 and 1 :math:`[mm]`</span>

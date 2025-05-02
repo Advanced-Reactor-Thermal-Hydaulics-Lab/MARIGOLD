@@ -99,7 +99,7 @@ The next cell is an example agreement plot for the gas benchmark. ::
    
 This is honestly more ``matplotlib`` stuff than MARIGOLD, so no additional comments will be made.
 
-Plotting is an important feature in MARIGOLD. Below is an example of how to do line plots. Again, this is a method on a ``Condition`` object, so it has some similarities with ``.avea_avg()``. ::
+Plotting is an important feature in MARIGOLD. Below is an example of how to do line plots. Again, this is a method on a ``Condition`` object, so it has some similarities with :meth:`~MARIGOLD.Condition.Condition.area_avg`. ::
    
    for cond in database:
        for param in ['alpha', 'ai', 'ug1', 'Dsm1', 'vf', 'vr']:
@@ -115,4 +115,4 @@ Plotting is an important feature in MARIGOLD. Below is an example of how to do l
            # 6.35 x 3 is the best size to fit 4 graphs all on the same ppt slide
            cond.plot_profiles2(param, x_axis = 'r', const_to_plot = [90], title = False, fig_size = (6.35, 3), show = True, cs = 'infer', set_min = set_min)
 
-Hopefully this gave you a start on performing two-phase flow analysis with MARIGOLD. Some things that weren't covered in this tutorial include contour plotting with ``plot_contour`` and interpolation. 
+Hopefully this gave you a start on performing two-phase flow analysis with MARIGOLD. Some things that weren't covered in this tutorial include contour plotting with :meth:`~MARIGOLD.Condition.Condition.plot_contour` and interpolation. 

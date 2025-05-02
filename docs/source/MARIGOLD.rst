@@ -1,9 +1,6 @@
 MARIGOLD Documentation
 ======================
 
-----------------------
-
-
 .. automodule:: MARIGOLD.Condition
    :members:
    :undoc-members:

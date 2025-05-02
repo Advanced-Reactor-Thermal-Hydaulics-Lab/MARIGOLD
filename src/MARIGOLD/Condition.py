@@ -1310,7 +1310,7 @@ class Condition:
          - angle, angle to search along
 
         Returns:
-         - r/R location of the maximum value of param when :math:`\\varphi`=angle
+         - r/R location of the maximum value of param when :math:`\\varphi` = ``angle``
                           
         """
         max = 0
@@ -1463,15 +1463,18 @@ class Condition:
         return avg_param / count
     
     def check_param(self, param:str, strict=True) -> bool:
-        """Checks if a parameter is present in condition data. Ignores r/R = 1.0
-
-        :param param: parameter to check
-        :type param: str
-        :param strict: Check each point. Otherwise, one value every angle is acceptable., defaults to True
-        :type strict: bool, optional
-        :return: True if param is present, false if not
-        :rtype: bool
-        """        
+        """_summary_
+        
+        **Args**:
+        
+         - ``param``: _description_
+         - ``strict``: _description_. Defaults to True.
+        
+        **Returns**:
+        
+         - _description_
+        """
+         
         points_to_add = []
         for angle, r_dict in self.data.items():
             param_in_angle = False
@@ -1508,21 +1511,30 @@ class Condition:
         return ()
 
     def area_avg(self, param: str, even_opt='first', recalc=True, method=None) -> float:
-        """Method for calculating the area-average of a parameter, "param"
-        
-        Inputs:
-         - param, string of local parameter to area-average
-         - even_opt, passed to integration method
-         - recalc, if area-average previously calculated, it was stored in a dictionary, and can just pull from there
+        """Method for calculating the area-average of a parameter
 
-        Returns:
-         - Area-averaged parameter, or None if the method failed
+        .. math:: \\langle \\psi \\rangle = \\frac{1}{A} \iint_A \\psi(r,\\varphi) r \,dr\,d\\varphi
         
-        Uses Simpson's rule for integration, specifically scipy.integrate.simpsons
+        **Args**:
         
+         - ``param``: ``midas_dict`` parameter to area-average. See :func:`~MARIGOLD.Condition.print_params` for options
+         - ``even_opt``: option for ``scipy.integrate.simpsons``. Defaults to 'first'.
+         - ``recalc``: if true, will recalculate area average. Defaults to True.
+         - ``method``: method to area-average. Defaults to None.
+
+             - ``legacy``, using the same method as the Excel spreadsheets
+             - ``legacy_old``, actually what we use in spreadsheets, hardcoded values
+             - None, will use ``scipy.integrate.simpsons``. Recommended option
+        
+        **Raises**:
+        
+         - ``KeyError``: if ``param`` not found
+        
+        **Returns**:
+        
+         - area-averaged value
         """
 
-        # Check that the parameter that the user requested exists
         if not self.check_param(param):
             raise KeyError(f"Invalid parameter {param} selected. Not present at {self.check_param_loc(param)}")
         
@@ -2660,7 +2672,8 @@ class Condition:
 
         Method Options:
          - Blasius
-        .. math:: f_k = \\frac{C}{Re_k^n}
+
+         .. math:: f_k = \\frac{C}{Re_k^n}
 
         Returns:
          - Tuple of f_f, f_g
@@ -2749,8 +2762,10 @@ class Condition:
         
         Stores:
          - "cd" in midas_dict 
-         - "Reb" in midas_dict. Calculated by :math:`Re_{b} = \\frac{(1 - \\alpha) \\rho_{f} v_{r} D_{sm,1} }{\\mu_{m}}`. \ 
-:math:`\\mu_{m}` comes from :any:`calc_mu_eff`
+         - "Reb" in midas_dict. Calculated by :math:`Re_{b} = \\frac{(1 - \\alpha) \\rho_{f} v_{r} D_{sm,1} }{\\mu_{m}}`.
+         
+         :math:`\\mu_{m}` comes from :any:`calc_mu_eff`
+
          - "eo", if using "tomiyama" or "ishii" limits
 
         Options for method:
@@ -2856,31 +2871,73 @@ class Condition:
     def calc_vr_model(self, method='km1_simp', kw = 0.654, n=1, Lw = 5, kf = 0.113, 
                       iterate_cd = True, initial_vr = None, 
                       quiet = True, recalc_cd = True, iter_tol = 1e-4, custom_f = None, CC = 1):
-        """Method for calculating relative velocity based on models
+        """_summary_
         
-        Inputs:
-         - method, what method to use for modeling :math:`v_{r}`
-         - kw, wake coeffieient for some models
-         - n, exponent for some models
-         - Lw, really :math:`L_{w}^{*}`, effective wake length divided by the bubble diameter
-         - kf, fluid coefficient for some models
-         - iterate_cd, flag to pass to :any:`calc_cd`. Basically whether to iterate to calculate :math:`C_{D}` based on \
-the newly calculated :math:`v_{r}` or not
-         - quiet, flag for extra debugging messages
+        **Args**:
         
-        Stores:
-         - "vr\_'method_name'" in midas_dict 
-         - "vr_model" in midas_dict 
+         - ``method``: what method to use for modeling :math:`v_{r}`. Defaults to 'km1_simp'. Options include:
 
-        Options for method:
-         - "km1_simp", most up to date :math:`v_{r} = K_{f} - K_{w}  \\alpha  v_{f}  C_{d}^{1/3}`
-         - "Ishii-Chawla", :math:`v_{r} = \\sqrt{2} (\\frac{\\sigma g \\Delta \\rho}{\\rho_{f}^{2}})^{1/4}`
-         - A bunch of obsolete ones that I haven't deleted but probably should
+             - ``'wake_1'``, depracated, earliest attempt, don't use
 
-        Returns:
+             .. math:: v_{r} = K_{w} v_{f} C_{D}^{1/3}
+
+             - ``'wake_alpha'``, depracated, don't use
+
+             .. math:: v_{r} = K_{w} (1-\\alpha)^{n} v_{f} C_{D}^{1/3}
+
+             - ``'wake_alpha2'``, depracated, don't use
+
+             .. math:: v_{r} = K_{w} \\alpha (1-\\alpha)^{n} v_{f} C_{D}^{1/3}
+
+             - ``'wake_lambda'``, depracated, don't use
+             - ``'wake_vg_lambda'``, depracated, don't use
+             - ``'hubris'``, depracated, don't use
+             - ``'km1'``, depracated, don't use
+             - ``'km1'``, depracated, don't use
+         - ``kw``: _description_. Defaults to 0.654.
+         - ``n``: _description_. Defaults to 1.
+         - ``Lw``: _description_. Defaults to 5.
+         - ``kf``: _description_. Defaults to 0.113.
+         - ``iterate_cd``: _description_. Defaults to True.
+         - ``initial_vr``: _description_. Defaults to None.
+         - ``quiet``: _description_. Defaults to True.
+         - ``recalc_cd``: _description_. Defaults to True.
+         - ``iter_tol``: _description_. Defaults to 1e-4.
+         - ``custom_f``: _description_. Defaults to None.
+         - ``CC``: _description_. Defaults to 1.
+        
+        **Raises**:
+        
+         - ``ValueError``: _description_
+        
+        **Returns**:
+        
          - area average relative velocity calculated by the model
-
         """
+#         Method for calculating relative velocity based on models
+        
+#         Inputs:
+#          - method, 
+#          - kw, wake coeffieient for some models
+#          - n, exponent for some models
+#          - Lw, really :math:`L_{w}^{*}`, effective wake length divided by the bubble diameter
+#          - kf, fluid coefficient for some models
+#          - iterate_cd, flag to pass to :any:`calc_cd`. Basically whether to iterate to calculate :math:`C_{D}` based on \
+# the newly calculated :math:`v_{r}` or not
+#          - quiet, flag for extra debugging messages
+        
+#         Stores:
+#          - "vr\_'method_name'" in midas_dict 
+#          - "vr_model" in midas_dict 
+
+#         Options for method:
+#          - "km1_simp", most up to date :math:`v_{r} = K_{f} - K_{w}  \\alpha  v_{f}  C_{d}^{1/3}`
+#          - "Ishii-Chawla", :math:`v_{r} = \\sqrt{2} (\\frac{\\sigma g \\Delta \\rho}{\\rho_{f}^{2}})^{1/4}`
+#          - A bunch of obsolete ones that I haven't deleted but probably should
+
+#         Returns:
+#          - 
+        
 
         MAX_ITERATIONS = 100
         iterations = 0
@@ -3051,9 +3108,10 @@ the newly calculated :math:`v_{r}` or not
             
     def calc_vgj_model(self):
         """Method for calculating local Vgj based on models
-        
-        midas_dict['vgj_model'] = (1 - midas_dict['alpha']) * midas_dict['vr_model']
 
+        Stores:
+         - ``midas_dict['vgj_model'] = (1 - midas_dict['alpha']) * midas_dict['vr_model']``
+        
         """
 
         for angle, r_dict in self.data.items():
@@ -3068,6 +3126,26 @@ the newly calculated :math:`v_{r}` or not
         return
     
     def calc_IS_term(self, method = 'power', n=2, mu = 1.5):
+        """Calculate the interfacial shear term, for the 1-D averaged TFM, :math:`\\nabla \\alpha \\bullet \\tau_{i}`
+        
+        **Args**:
+
+         - ``method``: method used to calculate term. Defaults to 'power'. Options:
+
+             - ``power``
+
+             .. math:: \\tau_{i} = \\tau_{fw} (r^{*})^{n}
+
+             - ``power_total``
+             - ``lognorm``
+             - ``alpha``
+         - ``n``: _description_. Defaults to 2.
+         - ``mu``: _description_. Defaults to 1.5.
+        
+        **Returns**:
+
+         - ``self.area_avg('ISxgrad')``. ``'ISxgrad`` and ``'IS'`` stored in ``midas_dict``
+        """
         self.calc_cd()
         self.calc_fric()
         self.calc_grad('alpha')
@@ -3108,7 +3186,46 @@ the newly calculated :math:`v_{r}` or not
 
         return self.area_avg('ISxgrad')
     
-    def calc_aa_vr_model(self, method='km1_naive', IS_method = 'power', kw=0.654, kf=0.113, Lw = 5, Cavf=1, Ctau=1, n=2, IS_mu = 1.5, Cvfacd = 1):
+    def calc_aa_vr_model(self, method='km1_naive', IS_method = 'power', kw=0.654, kf=0.113, Lw = 5, Ctau=1, n=2, IS_mu = 1.5, Cvfacd = 1):
+        """to calculate estimate the area-averaged relative velocity
+        
+        **Args:**
+
+         - ``method``: _description_. Defaults to 'km1_naive'.
+
+             - ``km1_naive``, depracated, similar to ``prelim`` but with an older form and different coefficients
+
+             .. math:: \\langle v_{r} \\rangle = K_{f} \\frac{\\langle j_{f} \\rangle}{1 - \\langle \\alpha \\rangle} + K_{w} \\frac{\\pi}{4} \\frac{2^{-1/3}-L_{w}^{1/3}}{0.5-L_{w}} \\langle C_{D} \\rangle^{1/3} \\langle \\alpha \\rangle \\frac{\\langle j_{f} \\rangle}{1 - \\langle \\alpha \\rangle}
+
+             - ``km1_naive2``, depracated, same as ``prelim``, but signs of :math:`K_{w}` and :math:`K_{f}` flipped.
+             - ``prelim``, Same as final, but no covariance. For backwards compatability 
+
+             .. math:: \\langle v_{r} \\rangle = - K_{f} \\frac{\\langle j_{f} \\rangle}{1 - \\langle \\alpha \\rangle} - K_{w} \\langle C_{D} \\rangle^{1/3} \\langle \\alpha \\rangle \\frac{\\langle j_{f} \\rangle}{1 - \\langle \\alpha \\rangle}
+
+             - ``final``, recommended method, Eq. (4.37) of Dix (2025)
+
+             .. math:: \\langle v_{r} \\rangle = - K_{f} \\frac{\\langle j_{f} \\rangle}{1 - \\langle \\alpha \\rangle} - K_{w} C_{\\alpha, v_{f}} \\langle C_{D} \\rangle^{1/3} \\langle \\alpha \\rangle \\frac{\\langle j_{f} \\rangle}{1 - \\langle \\alpha \\rangle}
+
+             - ``IS_Ctau``, uses a 1-D interfacial shear model with :math:`C_{\\tau}` to calculate :math:`v_{r}`. Not recommended
+
+             .. math:: \\langle v_{r} \\rangle | \\langle v_{r} \\rangle| = \\frac{8 r_{b}}{3} \\frac{1}{C_{D} \\rho_{f}} ((1-C_{\\tau})\\frac{4 \\tau_{fw}}{D_{h}} + (1-\\langle \\alpha \\rangle)g_{z}(\\rho_{f} - \\rho_{g}) )
+             
+             - ``IS``, using 1-D interfacial shear model. Uses :meth:`~MARIGOLD.Condition.Condition.calc_IS_term` for :math:`\\tau_{i}`. Not recommended
+
+             .. math:: \\langle v_{r} \\rangle | \\langle v_{r} \\rangle| = \\frac{8 r_{b}}{3} \\frac{1}{C_{D} \\rho_{f}} (\\frac{4 \\tau_{fw}}{D_{h}} + (1-\\langle \\alpha \\rangle)g_{z}(\\rho_{f} - \\rho_{g}) - \\frac{1}{\\langle \\alpha \\rangle} \\tau_{i})
+         
+         - ``IS_method``: When ``method='IS'``, what method to pass to use for interfacial shear calculation. See :meth:`~MARIGOLD.Condition.Condition.calc_IS_term` for options. Defaults to ``'power'``. 
+         - ``kw``: Wake coefficient. Defaults to 0.654.
+         - ``kf``: Liquid coefficient. Defaults to 0.113.
+         - ``Lw``: Effective wake length. Defaults to 5.
+         - ``Ctau``: Interfacial shear constant. Defaults to 1.
+         - ``n``: Power constant. Defaults to 2.
+         - ``IS_mu``: Interfacial shear viscosity. Defaults to 1.5.
+         - ``Cvfacd``: Covariance. Defaults to 1.
+        
+        Returns:
+         - ``self.aa_vr``
+        """
 
         if method == 'km1_naive':
             vr = kw * (np.pi/4)**(1/3) * self.area_avg('alpha') * self.jf / (1 - self.area_avg('alpha')) * self.area_avg('cd')**(1./3) *  (2**(-1./3) - Lw**(1/3))/(0.5 - Lw) + kf * self.jf / (1 - self.area_avg('alpha'))
@@ -3152,6 +3269,16 @@ the newly calculated :math:`v_{r}` or not
         return vr
     
     def calc_vw_aa_Vgj_model(self, Kw=0.654, Kf=0.113):
+        """ Calculate drift velocity, :math:`\\langle \\langle V_{gj} \\rangle \\rangle`, based on Dix (2025) model. See Eq. (4.47) of his thesis
+        
+        **Args:**
+
+         - ``Kw``: Wake coefficient. Defaults to 0.654.
+         - ``Kf``: Liquid coefficient. Defaults to 0.113.
+        
+        Returns:
+         - ``self.vw_aa_Vgj_model``
+        """
         self.Cajf = 0.12 * self.jf + 0.43* self.jgloc**-0.1
         self.Cajc = 61.4 * self.jf**-2.25
 
@@ -3164,19 +3291,26 @@ the newly calculated :math:`v_{r}` or not
         return self.vw_aa_Vgj_model
     
     def calc_errors(self, param1:str, param2:str) -> float:
-        """ Calculates the errors, ε, between two parameters (param1 - param2) in midas_dict
+        """Calculates the errors, ε, between two parameters (param1 - param2) in midas_dict
 
         Usually want to do param1=predicted, param2=experimental
-        
-        Stores:
-         - error, "eps_param1_param2", param1 - param2
-         - relative, "eps_rel_param1_param2", (param1 - param2) / param2
-         - absolute relative, "eps_abs_rel_param1_param2", | param1 - param2 | / param2
-         - square, "eps_sq_param1_param2", (param1 - param2)**2
-         - relative square, "eps_rel_sq_param1_param2", ((param1 - param2)/param2)**2
 
-         If param2 = 0, relative errors are considered 0
+        If param2 = 0, relative errors are considered 0
         
+        **Args:**
+
+         - ``param1``: parameter to calculate error between (predicted)
+         - ``param2``: parameter to calculate error between (experimental)
+
+        Stores:
+         - error, ``'eps_param1_param2'``, param1 - param2
+         - relative, ``'eps_rel_param1_param2'``, (param1 - param2) / param2
+         - absolute relative, ``'eps_abs_rel_param1_param2'``, | param1 - param2 | / param2
+         - square, ``'eps_sq_param1_param2'``, (param1 - param2)**2
+         - relative square, ``'eps_rel_sq_param1_param2'``, ((param1 - param2)/param2)**2
+        
+        Returns:
+         - Area-averaged error
         """
 
         param_error_name = "eps_" + param1 + "_" + param2
@@ -3202,41 +3336,38 @@ the newly calculated :math:`v_{r}` or not
         return self.area_avg(param_error_name)
     
     def calc_AA_error(self, param1:str, param2:str) -> float:
-        """ Calculates the error, ε, between the area-average of two parameters (⟨param1⟩ - ⟨param2⟩) in midas_dict
+        """Calculates the error, ε, between the area-average of two parameters (⟨param1⟩ - ⟨param2⟩) in ``midas_dict``
+        
+        **Args:**
 
-        Usually want to do param1=predicted, param2=experimental
+         - ``param1``: parameter to calculate error between (predicted)
+         - ``param2``: parameter to calculate error between (experimental)
         
-        Returns
+        Returns:
          - relative error (⟨param1⟩ - ⟨param2⟩) / ⟨param1⟩
-        
         """
+
         eps = self.area_avg(param1) - self.area_avg(param2)
         rel_error = eps / self.area_avg(param1)
 
         return rel_error
 
     def calc_symmetry(self, param, sym_type = 'sym90', method = 'rmse', rel_error = False):
-        """ Function for checking the symmetry of a condition
-
-        sym_type
-         - 'sym90', will compare data at 0° and 180°
-
-        .. math:: \\epsilon(r) = param(r, 0°) - param(r, 180°)
-
-        rel_error will divide by param 0
-
-        Method
-         - rmse, 
+        """Function for checking the symmetry of a condition
         
-        .. math:: \\epsilon_{sym} = \\sqrt{\\bar{\\epsilon(r)^{2}}}
+        **Args:**
 
-        Returns
+         - ``param``: ``midas_dict`` parameter to plot. See :func:`~MARIGOLD.Condition.print_params` for options
+         - ``sym_type``: type of symmetry to compare. Defaults to 'sym90'. Currently the only option.
+         - ``method``: error options. Defaults to 'rmse'. Options:
+             - ``'rmse'``, :math:`\\epsilon_{sym} = \\sqrt{\\bar{\\epsilon(r)^{2}}}`
+             - ``'mean'``, :math:`\\epsilon_{sym} = \\bar{\\epsilon(r)}`
+         - ``rel_error``: will divide by param. Defaults to False.
+        
+        Returns:
          - :math:`\\epsilon_{sym}`
-        
-        Stores
-         - :math:`\\epsilon_{sym}`
-        
         """
+        
         errs = []
         if sym_type == 'sym90':
 
@@ -3264,9 +3395,12 @@ the newly calculated :math:`v_{r}` or not
         return self.sym_error
 
     def calc_symmetry_area_avg(self, param, sym_type='sym_half', rel_error=True, even_opt='first'):
-        """_summary_
+        """Calculate the symmetry error
+
+        Not sure this is necessary, could use :meth:`~MARIGOLD.Condition.Condition.calc_symmetry` and :meth:`~MARIGOLD.Condition.Condition.area_avg` to achieve a similar thing
         
-        Args:
+        **Args:**
+
          - ``param``: ``midas_dict`` parameter to plot. See :func:`~MARIGOLD.Condition.print_params` for options
          - ``sym_type``: _description_. Defaults to 'sym_half'.
          - ``rel_error``: _description_. Defaults to True.
@@ -3346,7 +3480,8 @@ the newly calculated :math:`v_{r}` or not
     def calc_vr_uncertainty(self, sigma_vg=0.1, sigma_alpha=0.05, sigma_dp=0.03, percentage = True):
         """Function to calculate the uncertainty in pitot-tube measurements
         
-        Args:
+        **Args:**
+
          - ``sigma_vg``: _description_. Defaults to 0.1.
          - ``sigma_alpha``: _description_. Defaults to 0.05.
          - ``sigma_dp``: _description_. Defaults to 0.03.
@@ -3681,7 +3816,8 @@ the newly calculated :math:`v_{r}` or not
     def reconstruct_void(self, method='talley', avg_method = 'legacy'):
         """Method to reconstruct the void fraction profile by various means. 
         
-        Args:
+        **Args:**
+
          - ``method``: method to use to reconstruct void. Defaults to ``'talley'``. Options include:
              - ``'talley'``
              - ``'not_talley'``
@@ -3977,10 +4113,11 @@ the newly calculated :math:`v_{r}` or not
                       const_to_plot = [90, 67.5, 45, 22.5, 0], include_complement = True, skip_1_comp = False,
                       fig_size=(4,4), fs = 10, title=True, label_str = '', legend_loc = 'best', xlabel_loc = 'center', include_const = False,
                       set_min = None, set_max = None, show_spines = True, xlabel_loc_coords = None, ylabel_loc_coords = None, cs=None, ms = None, ls = None) -> None:
-        """_summary_
+        """Line plots of params
         
-        Args:
-         - ``param``: ``midas_dict`` parameter to plot. See :func:`~MARIGOLD.Condition.print_params` for options
+        **Args:**
+
+         - ``param``: ``midas_dict`` parameter to plot. See :func:`~MARIGOLD.Condition.print_params` for options. Can be a single string, or a list of ``param`` strings.
          - ``save_dir``: directory in which to save the .png file. Will not save the file unless show = False. Defaults to '.'.
          - ``show``: display the figure (in an iPython notebook or have it pop up). Defaults to True.
          - ``x_axis``: the variable to put on the x-axis. Usually for vertical flow this is ``'rs'``, for horizontal, ``'vals'``. Also can be 'phis'. Defaults to 'vals'.
@@ -4370,9 +4507,10 @@ the newly calculated :math:`v_{r}` or not
                       const_to_plot = [90, 67.5, 45, 22.5, 0], include_complement = True, 
                       rotate=False, fig_size=(4,4), title=True, label_str = '', legend_loc = 'best', xlabel_loc = 'center',
                       set_min = None, set_max = None, show_spines = True, force_RH_y_axis = False, xlabel_loc_coords = None, cs=None) -> None:
-        """_summary_
-        
-        Args:
+        """Line plot of ``param``. Only a single ``param`` can be plotted at a time, but plot can be arbitrarily rotated. 
+
+        **Args:**
+
          - ``param``: ``midas_dict`` parameter to plot. See :func:`~MARIGOLD.Condition.print_params` for options
          - ``save_dir``: _description_. Defaults to '.'.
          - ``show``: _description_. Defaults to True.
@@ -4615,7 +4753,8 @@ the newly calculated :math:`v_{r}` or not
                      save_dir = '.', show=True, extra_text = '') -> None:
         """_summary_
         
-        Args:
+        **Args:**
+
          - ``param``: ``midas_dict`` parameter to plot. See :func:`~MARIGOLD.Condition.print_params` for options
          - ``iso_axis``: _description_
          - ``iso_val``: _description_
@@ -4668,7 +4807,8 @@ the newly calculated :math:`v_{r}` or not
                      annotate_h = False, cartesian = False, h_star_kwargs = {'method': 'max_dsm', 'min_void': '0.05'}, plot_measured_points = False, font_size = 12) -> None:
         """Function to create a contour plot of a given param
 
-        Args:
+        **Args:**
+
          - ``param``: ``midas_dict`` parameter to plot. See :func:`~MARIGOLD.Condition.print_params` for options
          - ``save_dir``: directory to save contour plot to. Defaults to '.'.
          - ``show``: whether or not to show the contour plot. Defaults to True.
@@ -4875,7 +5015,8 @@ the newly calculated :math:`v_{r}` or not
                      plot_surface_kwargs = None, solid_color = False, label_str = None, title_str = '', colormap = 'viridis') -> None:
         """Function to create a 3 dimensional surface plot of a given parameter
         
-        Args:
+        **Args:**
+
          - ``param``: ``midas_dict`` parameter to plot. See :func:`~MARIGOLD.Condition.print_params` for options
          - ``save_dir``: directory to save surface plot image to. Defaults to '.'.
          - ``show``: option to show surface plot. Defaults to True.
@@ -5762,9 +5903,9 @@ def print_params() -> None:
      - ``'sigma_ug1'``, standard deviation of Group I bubble velocities (?) :math:`[m/s]`
      - ``'sigma_ug2'``, standard deviation of Group II bubble velocities (?) :math:`[m/s]`
      - ``'fluctuation'`` :math:`[m/s]`
-     - ``'alpha_ug1'``, Local :math:`j_{g}`' calculated by :math:`\\alpha` and Group I bubble velocity :math:`[m/s]`
-     - ``'alpha_ug2'``, Local :math:`j_{g}`' calculated by :math:`\\alpha` and Group II bubble velocity :math:`[m/s]`
-     - ``'alpha_ug'``, Total local :math:`j_{g}' :math:`[m/s]`
+     - ``'alpha_ug1'``, Local :math:`j_{g}` calculated by :math:`\\alpha` and Group I bubble velocity :math:`[m/s]`
+     - ``'alpha_ug2'``, Local :math:`j_{g}` calculated by :math:`\\alpha` and Group II bubble velocity :math:`[m/s]`
+     - ``'alpha_ug'``, Total local :math:`j_{g}` :math:`[m/s]`
      - ``'alpha_Dsm1'``, Product of alpha and :math:`D_{sm,1}` :math:`[mm]`
      - ``'alpha_Dsm2'``, Product of alpha and :math:`D_{sm,2}` :math:`[mm]`
      - ``'r01'``, distance between sensor 0 and 1 :math:`[mm]`

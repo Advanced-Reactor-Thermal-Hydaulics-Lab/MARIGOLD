@@ -43,6 +43,8 @@ napoleon_use_param = False
 napoleon_use_ivar = True
 strip_signature_backslash = True
 
+myst_footnote_transition = False
+
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
