@@ -100,6 +100,8 @@
 
 <span class="sd">&quot;&quot;&quot;</span>
     <span class="n">debugFID</span> <span class="o">=</span> <span class="kc">None</span>
+<div class="viewcode-block" id="Condition.__init__">
+<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.__init__">[docs]</a>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">jgref</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">jgloc</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">jf</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">theta</span><span class="p">:</span><span class="nb">int</span><span class="p">,</span> <span class="n">port</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">database</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">fluids</span> <span class="o">=</span> <span class="s1">&#39;air-water&#39;</span><span class="p">,</span> <span class="n">g</span> <span class="o">=</span> <span class="mf">9.81</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize Condition object</span>
 
@@ -236,21 +238,33 @@
         
         <span class="bp">self</span><span class="o">.</span><span class="n">g</span> <span class="o">=</span> <span class="n">g</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">gz</span> <span class="o">=</span> <span class="n">g</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">theta</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">180</span><span class="p">)</span>
-        <span class="k">return</span>
+        <span class="k">return</span></div>
 
+
+<div class="viewcode-block" id="Condition.__eq__">
+<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.__eq__">[docs]</a>
     <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">__o</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">__o</span><span class="p">,</span> <span class="n">Condition</span><span class="p">):</span>
 
             <span class="k">return</span> <span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">jf</span> <span class="o">==</span> <span class="n">__o</span><span class="o">.</span><span class="n">jf</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">jgref</span> <span class="o">==</span> <span class="n">__o</span><span class="o">.</span><span class="n">jgref</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">theta</span> <span class="o">==</span> <span class="n">__o</span><span class="o">.</span><span class="n">theta</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">port</span> <span class="o">==</span> <span class="n">__o</span><span class="o">.</span><span class="n">port</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">database</span> <span class="o">==</span> <span class="n">__o</span><span class="o">.</span><span class="n">database</span><span class="p">)</span>
         
-        <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
 
+
+<div class="viewcode-block" id="Condition.__hash__">
+<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.__hash__">[docs]</a>
     <span class="k">def</span> <span class="fm">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-        <span class="k">return</span> <span class="nb">hash</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+        <span class="k">return</span> <span class="nb">hash</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span></div>
 
+
+<div class="viewcode-block" id="Condition.__repr__">
+<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.__repr__">[docs]</a>
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span></div>
 
+
+<div class="viewcode-block" id="Condition.__call__">
+<a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.__call__">[docs]</a>
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">phi_in</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">r_in</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">interp_method</span><span class="o">=</span><span class="s1">&#39;None&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the value of param at (phi, r). Phi is in radians, r nondimensional</span>
 
@@ -319,7 +333,8 @@
                 <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">linear_xy_interp</span><span class="p">[</span><span class="n">param</span><span class="p">](</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
         
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">NameError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">interp_method</span><span class="si">}</span><span class="s2"> not recognized. Accepted arguments are &#39;None&#39;, &#39;spline&#39;, &#39;linear&#39; or &#39;linear_xy&#39;&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">NameError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">interp_method</span><span class="si">}</span><span class="s2"> not recognized. Accepted arguments are &#39;None&#39;, &#39;spline&#39;, &#39;linear&#39; or &#39;linear_xy&#39;&quot;</span><span class="p">)</span></div>
+
 
 <div class="viewcode-block" id="Condition.pretty_print">
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.pretty_print">[docs]</a>
@@ -1036,22 +1051,22 @@
 <div class="viewcode-block" id="Condition.calc_grad">
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.calc_grad">[docs]</a>
     <span class="k">def</span> <span class="nf">calc_grad</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">recalc</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculates gradient of param based on the data in self. </span>
-
-<span class="sd">        Inputs:</span>
-<span class="sd">         - &quot;param&quot;, string for local parameter to calculate the gradient of</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculates gradient of a given parameter</span>
 <span class="sd">        </span>
-<span class="sd">        Stores:</span>
-<span class="sd">         - grad\_&#39;param&#39;_r</span>
-<span class="sd">         - grad\_&#39;param&#39;_phi</span>
-<span class="sd">         - grad\_&#39;param&#39;_phinor</span>
-<span class="sd">         - grad\_&#39;param&#39;_x</span>
-<span class="sd">         - grad\_&#39;param&#39;_y</span>
-<span class="sd">         - grad\_&#39;param&#39;_total</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">         - Area average grad\_&#39;param&#39;_total</span>
-
+<span class="sd">        **Args**:</span>
+<span class="sd">        </span>
+<span class="sd">         - ``param``: ``midas_dict`` parameter to calculate gradient of. See :func:`~MARIGOLD.Condition.print_params` for options</span>
+<span class="sd">         - ``recalc``: recalculate when called. If False, will pull from dictionary if entry is available. Defaults to False.</span>
+<span class="sd">        </span>
+<span class="sd">        **Returns**:</span>
+<span class="sd">        </span>
+<span class="sd">         - Area averaged ``grad_&#39;param&#39;_total``. Also stores:</span>
+<span class="sd">             - ``&#39;grad_param_r&#39;``</span>
+<span class="sd">             - ``&#39;grad_param_phi&#39;``</span>
+<span class="sd">             - ``&#39;grad_param_phinor&#39;``</span>
+<span class="sd">             - ``&#39;grad_param_x&#39;``</span>
+<span class="sd">             - ``&#39;grad_param_y&#39;``</span>
+<span class="sd">             - ``&#39;grad_param_total&#39;``</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">mirrored</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">mirror</span><span class="p">()</span>
@@ -1174,10 +1189,15 @@
 <div class="viewcode-block" id="Condition.fit_spline">
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.fit_spline">[docs]</a>
     <span class="k">def</span> <span class="nf">fit_spline</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fits a RectBivariateSpline for the given param. </span>
-
-<span class="sd">           Can access later with self.spline_interp[param]. Must specify the &#39;param&#39; to fit</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;fits a spline to the data of param using ``scipy.interpolate.RectBivariateSpline``</span>
 <span class="sd">        </span>
+<span class="sd">        **Args**:</span>
+<span class="sd">        </span>
+<span class="sd">         - ``param``: ``midas_dict`` parameter to fit spline. See :func:`~MARIGOLD.Condition.print_params` for options</span>
+<span class="sd">        </span>
+<span class="sd">        **Raises**:</span>
+<span class="sd">        </span>
+<span class="sd">         - ``KeyError``: If invalid parameter called</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_param</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
@@ -1229,12 +1249,17 @@
 <div class="viewcode-block" id="Condition.fit_linear_interp">
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.fit_linear_interp">[docs]</a>
     <span class="k">def</span> <span class="nf">fit_linear_interp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">suppress</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">refit</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Makes a LinearNDInterpolator for the given param. </span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;_summary_</span>
 <span class="sd">        </span>
-<span class="sd">            Access with self.linear_interp[param], phi in radians</span>
-
-<span class="sd">            If the requested param does not exist for a given (r, phi), this fills in 0</span>
-<span class="sd">             </span>
+<span class="sd">        **Args**:</span>
+<span class="sd">        </span>
+<span class="sd">         - ``param``: _description_</span>
+<span class="sd">         - ``suppress``: _description_. Defaults to True.</span>
+<span class="sd">         - ``refit``: _description_. Defaults to False.</span>
+<span class="sd">        </span>
+<span class="sd">        **Raises**:</span>
+<span class="sd">        </span>
+<span class="sd">         - ``KeyError``: _description_</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_param</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
@@ -1278,10 +1303,16 @@
 <div class="viewcode-block" id="Condition.fit_linear_xy_interp">
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.fit_linear_xy_interp">[docs]</a>
     <span class="k">def</span> <span class="nf">fit_linear_xy_interp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">suppress</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; Makes a LinearNDInterpolator for the given param in x y coords</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;fits a linear Cartesian interpreter to the data</span>
 <span class="sd">        </span>
-<span class="sd">        Can access  with self.linear_xy_interp[param]</span>
-<span class="sd">                          </span>
+<span class="sd">        **Args**:</span>
+<span class="sd">        </span>
+<span class="sd">         - ``param``: ``midas_dict`` parameter to find maximum of. See :func:`~MARIGOLD.Condition.print_params` for options</span>
+<span class="sd">         - ``suppress``: Suppress ``KeyErrors``. Defaults to True.</span>
+<span class="sd">        </span>
+<span class="sd">        **Raises**:</span>
+<span class="sd">        </span>
+<span class="sd">         - ``KeyError``: if the requested ``param`` is not present everywhere</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_param</span><span class="p">(</span><span class="n">param</span><span class="p">):</span>
@@ -1320,14 +1351,15 @@
 <div class="viewcode-block" id="Condition.sum">
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.sum">[docs]</a>
     <span class="k">def</span> <span class="nf">sum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; Adds all values of param</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Sums values of ``param``</span>
 <span class="sd">        </span>
-<span class="sd">        Inputs:</span>
-<span class="sd">         - ``param``, string of local parameter to sum</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">         - sum of the value of parameter at every point</span>
-<span class="sd">                          </span>
+<span class="sd">        **Args**:</span>
+<span class="sd">        </span>
+<span class="sd">         - ``param``: ``midas_dict`` parameter to sum. See :func:`~MARIGOLD.Condition.print_params` for options</span>
+<span class="sd">        </span>
+<span class="sd">        **Returns**:</span>
+<span class="sd">        </span>
+<span class="sd">         - sum</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">total</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">for</span> <span class="n">angle</span><span class="p">,</span> <span class="n">r_dict</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
@@ -1339,16 +1371,17 @@
     
 <div class="viewcode-block" id="Condition.max">
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.max">[docs]</a>
-    <span class="k">def</span> <span class="nf">max</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">recalc</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; Return maximum value of param in the Condition</span>
+    <span class="k">def</span> <span class="nf">max</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">recalc</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Finds the maximum value of ``param``</span>
 <span class="sd">        </span>
-<span class="sd">        Inputs:</span>
-<span class="sd">         - param, string of local parameter to find maximum of</span>
-<span class="sd">         - recalc, if already calculated, will pull from dictionary instead of calculating unless this is true</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">         - maximum value of param</span>
-<span class="sd">                          </span>
+<span class="sd">        **Args**:</span>
+<span class="sd">        </span>
+<span class="sd">         - ``param``: ``midas_dict`` parameter to find maximum of. See :func:`~MARIGOLD.Condition.print_params` for options</span>
+<span class="sd">         - ``recalc``: recalculate maximum. If False, and this has been called before, returns previously calculated value. Defaults to True.</span>
+<span class="sd">        </span>
+<span class="sd">        **Returns**:</span>
+<span class="sd">        </span>
+<span class="sd">         - Maximum value</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         
         <span class="k">if</span> <span class="p">(</span><span class="n">param</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">maxs</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span> <span class="n">recalc</span><span class="p">):</span>
@@ -1366,14 +1399,15 @@
 <div class="viewcode-block" id="Condition.max_loc">
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.max_loc">[docs]</a>
     <span class="k">def</span> <span class="nf">max_loc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span><span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; Return location of maximum value of param</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Finds the location of the maximum value of ``param``</span>
 <span class="sd">        </span>
-<span class="sd">        Inputs:</span>
-<span class="sd">         - param, string of local parameter to find maximum of</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">         - r/R location of the maximum value of param</span>
-<span class="sd">                          </span>
+<span class="sd">        **Args**:</span>
+<span class="sd">        </span>
+<span class="sd">         - ``param``: ``midas_dict`` parameter to find maximum of. See :func:`~MARIGOLD.Condition.print_params` for options</span>
+<span class="sd">        </span>
+<span class="sd">        **Returns**:</span>
+<span class="sd">        </span>
+<span class="sd">         - ``(rstar, angle)`` location corresponding to the maximum</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">max</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">for</span> <span class="n">angle</span><span class="p">,</span> <span class="n">r_dict</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
@@ -1388,16 +1422,17 @@
 <div class="viewcode-block" id="Condition.min">
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.min">[docs]</a>
     <span class="k">def</span> <span class="nf">min</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">recalc</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">nonzero</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; Return minimum value of param in the Condition</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Finds the minimum value of ``param``</span>
 <span class="sd">        </span>
-<span class="sd">        Inputs:</span>
-<span class="sd">         - param, string of local parameter to find minimum of</span>
-<span class="sd">         - recalc, if already calculated, will pull from dictionary instead of calculating unless this is true</span>
-<span class="sd">         - nonzero, if true, will exclude points with the param = 0 when finding the minimum</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">         - minimum value of param</span>
-<span class="sd">                          </span>
+<span class="sd">        **Args**:</span>
+<span class="sd">        </span>
+<span class="sd">         - ``param``: ``midas_dict`` parameter to find minimum of. See :func:`~MARIGOLD.Condition.print_params` for options</span>
+<span class="sd">         - ``recalc``: recalculate minimum. If False, and this has been called before, returns previously calculated value. Defaults to True.</span>
+<span class="sd">         - ``nonzero``: If True, will exclude 0 from the minimum search. Defaults to False.</span>
+<span class="sd">        </span>
+<span class="sd">        **Returns**:</span>
+<span class="sd">        </span>
+<span class="sd">         - The minimum value</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="p">(</span><span class="n">param</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">mins</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span> <span class="n">recalc</span><span class="p">):</span>
@@ -1419,15 +1454,17 @@
 <div class="viewcode-block" id="Condition.min_loc">
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.min_loc">[docs]</a>
     <span class="k">def</span> <span class="nf">min_loc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span><span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; Return location of minimum value of param</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Finds the location of the minimum value of ``param`` </span>
 <span class="sd">        </span>
-<span class="sd">        Inputs:</span>
-<span class="sd">         - param, string of local parameter to find minimum of</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">         - r/R location of the maximum value of param</span>
-<span class="sd">                          </span>
+<span class="sd">        **Args**:</span>
+<span class="sd">        </span>
+<span class="sd">         - ``param``: ``midas_dict`` parameter to find minimum of. See :func:`~MARIGOLD.Condition.print_params` for options</span>
+<span class="sd">        </span>
+<span class="sd">        **Returns**:</span>
+<span class="sd">        </span>
+<span class="sd">         - ``(rstar, angle)`` location corresponding to the minimum</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+                
         <span class="nb">min</span> <span class="o">=</span> <span class="mi">10</span><span class="o">**</span><span class="mi">7</span>
         <span class="k">for</span> <span class="n">angle</span><span class="p">,</span> <span class="n">r_dict</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">for</span> <span class="n">rstar</span><span class="p">,</span> <span class="n">midas_dict</span> <span class="ow">in</span> <span class="n">r_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
@@ -1441,15 +1478,16 @@
 <div class="viewcode-block" id="Condition.max_line_loc">
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.max_line_loc">[docs]</a>
     <span class="k">def</span> <span class="nf">max_line_loc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">angle</span><span class="p">:</span><span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; Return location of maximum value of param at a given angle</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Finds the location of the maximum value of ``param`` along a given line, defined by ``alpha``</span>
 <span class="sd">        </span>
-<span class="sd">        Inputs:</span>
-<span class="sd">         - param, string of local parameter to find maximum of</span>
-<span class="sd">         - angle, angle to search along</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">         - r/R location of the maximum value of param when :math:`\\varphi` = ``angle``</span>
-<span class="sd">                          </span>
+<span class="sd">        **Args**:</span>
+<span class="sd">        </span>
+<span class="sd">         - ``param``: ``midas_dict`` parameter to find maximum of. See :func:`~MARIGOLD.Condition.print_params` for options</span>
+<span class="sd">         - ``angle``: :math:`\\varphi` value to search down</span>
+<span class="sd">        </span>
+<span class="sd">        **Returns**:</span>
+<span class="sd">        </span>
+<span class="sd">         - ``rstar`` corresponding to the maximum</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">max</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">for</span> <span class="n">rstar</span><span class="p">,</span> <span class="n">midas_dict</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">angle</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
@@ -1463,15 +1501,16 @@
 <div class="viewcode-block" id="Condition.max_line">
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.max_line">[docs]</a>
     <span class="k">def</span> <span class="nf">max_line</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">angle</span><span class="p">:</span><span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; Return maximum value of param at a given angle</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Finds the maximum value of ``param`` along a given line, defined by ``alpha``</span>
 <span class="sd">        </span>
-<span class="sd">        Inputs:</span>
-<span class="sd">         - param, string of local parameter to find maximum of</span>
-<span class="sd">         - angle, angle to search along</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">         - maximum value of param when φ=angle</span>
-<span class="sd">                          </span>
+<span class="sd">        **Args**:</span>
+<span class="sd">        </span>
+<span class="sd">         - ``param``: ``midas_dict`` parameter to find maximum of. See :func:`~MARIGOLD.Condition.print_params` for options</span>
+<span class="sd">         - ``angle``: :math:`\\varphi` value to search down</span>
+<span class="sd">        </span>
+<span class="sd">        **Returns**:</span>
+<span class="sd">        </span>
+<span class="sd">         - maximum value</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">max</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">for</span> <span class="n">rstar</span><span class="p">,</span> <span class="n">midas_dict</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">angle</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
@@ -1485,24 +1524,27 @@
 <div class="viewcode-block" id="Condition.find_hstar_pos">
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.find_hstar_pos">[docs]</a>
     <span class="k">def</span> <span class="nf">find_hstar_pos</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;max_dsm&#39;</span><span class="p">,</span> <span class="n">void_criteria</span> <span class="o">=</span> <span class="mf">0.05</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; Returns the vertical distance from the top of the pipe to the bubble layer interface</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the vertical distance from the top of the pipe to the &quot;bubble layer interface&quot;</span>
 
-<span class="sd">        Inputs:</span>
-<span class="sd">         - method</span>
-<span class="sd">         - void_criteria, used in some methods</span>
+<span class="sd">        .. math:: h^{*} = 1 - r^{*} \\sin{\\varphi}</span>
 <span class="sd">        </span>
-<span class="sd">        Methods for determining bubble layer interface</span>
-<span class="sd">         - max_dsm</span>
-<span class="sd">         - min_grad_y</span>
-<span class="sd">         - max_grad_y</span>
-<span class="sd">         - max_mag_grad_y</span>
-<span class="sd">         - zero_void</span>
-<span class="sd">         - percent_void, search down the phi = 90 line, find largest value of rstar where alpha &lt; min_void</span>
-<span class="sd">         - Ryan_Ref, uses 1.3 - 1.57e-5 * Ref, proposed by Ryan (2022)</span>
+<span class="sd">        **Args**:</span>
+<span class="sd">        </span>
+<span class="sd">         - ``method``: method for determining :math:`h^{*}`, the bubble layer height. Defaults to &#39;max_dsm&#39;.</span>
+<span class="sd">             </span>
+<span class="sd">             - ``max_dsm``, :math:`r` and :math:`\\varphi` determined by calling :any:`max_loc`\ ``(&#39;Dsm1&#39;)``. Assumes the bubble layer limit corresponds to the maximum Sauter-mean diameter</span>
+<span class="sd">             - ``min_grad_y``, :math:`r` and :math:`\\varphi` determined by calling :any:`min_loc` for ``grad_alpha_y``, after calling :any:`calc_grad`\ ``(&#39;alpha&#39;)``</span>
+<span class="sd">             - ``max_grad_y``:math:`r` and :math:`\\varphi` determined by calling :any:`max_loc` for ``grad_alpha_y``, after calling :any:`calc_grad`\ ``(&#39;alpha&#39;)``</span>
+<span class="sd">             - ``max_mag_grad_y``, Not implemented</span>
+<span class="sd">             - ``zero_void``, searches down the :math:`\\varphi = 0` line until the largest :math:`r^{*}` is found where :math:`\\alpha (r^{*})` &lt; :math:`\\alpha_{c}`  </span>
+<span class="sd">             - ``percent_void``, searches down the :math:`\\varphi = 0` line until the largest :math:`r^{*}` is found where :math:`\\alpha (r^{*})` &lt; :math:`\\alpha_{c}` \\times :math:`\\alpha_{max}`  </span>
+<span class="sd">             - ``Ryan_Ref``, :math:`h^{*} = 1 - (1.3 - 1.57 \\times 10^{-5})`, based on Ryan (2022) :math:`(r/R)_{end}`</span>
 
-<span class="sd">        Returns:</span>
-<span class="sd">         - hstar</span>
+<span class="sd">         - ``void_criteria``: value for alpha comparisons, :math:`\\alpha_c`. Either a constant, for the ``zero_void`` option, or a percentage, for ``percent_void``. Defaults to 0.05.</span>
 <span class="sd">        </span>
+<span class="sd">        **Returns**:</span>
+<span class="sd">        </span>
+<span class="sd">         - ``h_star``, if successful. ``np.NaN`` otherwise</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;max_dsm&#39;</span><span class="p">:</span>
@@ -1584,16 +1626,20 @@
 <div class="viewcode-block" id="Condition.avg">
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.avg">[docs]</a>
     <span class="k">def</span> <span class="nf">avg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">include_zero</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculates a basic average of a parameter, &quot;param&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculates a basic average of a parameter</span>
+
+<span class="sd">        This function does not mirror the data. Note that mirroring might change the average.</span>
 <span class="sd">        </span>
-<span class="sd">        Inputs:</span>
-<span class="sd">         - param, string of local parameter to find average of</span>
-<span class="sd">         - include_zero, if you want to include when param = 0 in average</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">         - average value of param</span>
-
+<span class="sd">        **Args**:</span>
+<span class="sd">        </span>
+<span class="sd">         - ``param``: ``midas_dict`` parameter to average. See :func:`~MARIGOLD.Condition.print_params` for options</span>
+<span class="sd">         - ``include_zero``: include zero values . Defaults to True.</span>
+<span class="sd">        </span>
+<span class="sd">        **Returns**:</span>
+<span class="sd">        </span>
+<span class="sd">         - the average</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="n">avg_param</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">for</span> <span class="n">angle</span><span class="p">,</span> <span class="n">r_dict</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
@@ -1613,15 +1659,18 @@
 <div class="viewcode-block" id="Condition.check_param">
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.check_param">[docs]</a>
     <span class="k">def</span> <span class="nf">check_param</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Checks if a parameter is present in condition data. Ignores r/R = 1.0</span>
-
-<span class="sd">        :param param: parameter to check</span>
-<span class="sd">        :type param: str</span>
-<span class="sd">        :param strict: Check each point. Otherwise, one value every angle is acceptable., defaults to True</span>
-<span class="sd">        :type strict: bool, optional</span>
-<span class="sd">        :return: True if param is present, false if not</span>
-<span class="sd">        :rtype: bool</span>
-<span class="sd">        &quot;&quot;&quot;</span>        
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;method to check if a parameter is present for a condition</span>
+<span class="sd">        </span>
+<span class="sd">        **Args**:</span>
+<span class="sd">        </span>
+<span class="sd">         - ``param``: ``midas_dict`` parameter to check. See :func:`~MARIGOLD.Condition.print_params` for options</span>
+<span class="sd">         - ``strict``: if true, will return false if a single point is missing (as long as that point isn&#39;t at r/R=1). Defaults to True.</span>
+<span class="sd">        </span>
+<span class="sd">        **Returns**:</span>
+<span class="sd">        </span>
+<span class="sd">         - ``True`` if parameter is present everywhere, ``False`` if not</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+         
         <span class="n">points_to_add</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">angle</span><span class="p">,</span> <span class="n">r_dict</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="n">param_in_angle</span> <span class="o">=</span> <span class="kc">False</span>
@@ -1631,8 +1680,8 @@
                     <span class="k">if</span> <span class="n">strict</span><span class="p">:</span>
                         <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">rstar</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">0.001</span><span class="p">:</span>
                             <span class="n">points_to_add</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">(</span><span class="n">angle</span><span class="p">,</span> <span class="n">rstar</span><span class="p">))</span>
-                            <span class="k">pass</span> <span class="c1"># TODO add extra stuff if it doesn&#39;t exist at 1.0, it really shouldn&#39;t be a problem</span>
-                        <span class="k">else</span><span class="p">:</span>
+                            <span class="k">pass</span> 
+                        <span class="k">elif</span> <span class="n">points_to_add</span> <span class="o">==</span> <span class="p">[]:</span>
                             <span class="c1"># return (False, rstar, angle)</span>
                             <span class="k">return</span> <span class="kc">False</span>
                 
@@ -1642,6 +1691,11 @@
             <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">param_in_angle</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span> <span class="n">strict</span><span class="p">):</span>
                 <span class="c1"># return (False, rstar, angle)</span>
                 <span class="k">return</span> <span class="kc">False</span>
+            
+            <span class="c1"># The only points missing were at r/R = 1, which should just be 0 anyways</span>
+            <span class="k">if</span> <span class="n">points_to_add</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">phi</span><span class="p">,</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">points_to_add</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">phi</span><span class="p">][</span><span class="n">r</span><span class="p">][</span><span class="n">param</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
 
         <span class="k">return</span> <span class="kc">True</span></div>
 
@@ -1687,21 +1741,7 @@
 <span class="sd">        </span>
 <span class="sd">         - area-averaged value</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># Method for calculating the area-average of a parameter, &quot;param&quot;</span>
-        
-        <span class="c1"># Inputs:</span>
-        <span class="c1">#  - param, string of local parameter to area-average</span>
-        <span class="c1">#  - even_opt, passed to integration method</span>
-        <span class="c1">#  - recalc, if area-average previously calculated, it was stored in a dictionary, and can just pull from there</span>
 
-        <span class="c1"># Returns:</span>
-        <span class="c1">#  - Area-averaged parameter, or None if the method failed</span>
-        
-        <span class="c1"># Uses Simpson&#39;s rule for integration, specifically scipy.integrate.simpsons</span>
-        
-        <span class="c1"># </span>
-
-        <span class="c1"># Check that the parameter that the user requested exists</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_param</span><span class="p">(</span><span class="n">param</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid parameter </span><span class="si">{</span><span class="n">param</span><span class="si">}</span><span class="s2"> selected. Not present at </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">check_param_loc</span><span class="p">(</span><span class="n">param</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         

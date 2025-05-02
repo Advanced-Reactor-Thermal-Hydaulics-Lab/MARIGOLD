@@ -925,22 +925,22 @@ class Condition:
         return self.void_area_avg('vgj')
 
     def calc_grad(self, param: str, recalc = False) -> None:
-        """Calculates gradient of param based on the data in self. 
-
-        Inputs:
-         - "param", string for local parameter to calculate the gradient of
+        """Calculates gradient of a given parameter
         
-        Stores:
-         - grad\_'param'_r
-         - grad\_'param'_phi
-         - grad\_'param'_phinor
-         - grad\_'param'_x
-         - grad\_'param'_y
-         - grad\_'param'_total
-
-        Returns:
-         - Area average grad\_'param'_total
-
+        **Args**:
+        
+         - ``param``: ``midas_dict`` parameter to calculate gradient of. See :func:`~MARIGOLD.Condition.print_params` for options
+         - ``recalc``: recalculate when called. If False, will pull from dictionary if entry is available. Defaults to False.
+        
+        **Returns**:
+        
+         - Area averaged ``grad_'param'_total``. Also stores:
+             - ``'grad_param_r'``
+             - ``'grad_param_phi'``
+             - ``'grad_param_phinor'``
+             - ``'grad_param_x'``
+             - ``'grad_param_y'``
+             - ``'grad_param_total'``
         """
         
         if not self.mirrored: self.mirror()
@@ -1060,10 +1060,15 @@ class Condition:
         return self.area_avg(grad_param_name+'_total')
     
     def fit_spline(self, param: str) -> None:
-        """Fits a RectBivariateSpline for the given param. 
-
-           Can access later with self.spline_interp[param]. Must specify the 'param' to fit
+        """fits a spline to the data of param using ``scipy.interpolate.RectBivariateSpline``
         
+        **Args**:
+        
+         - ``param``: ``midas_dict`` parameter to fit spline. See :func:`~MARIGOLD.Condition.print_params` for options
+        
+        **Raises**:
+        
+         - ``KeyError``: If invalid parameter called
         """
         
         if not self.check_param(param, strict=False):
@@ -1112,12 +1117,17 @@ class Condition:
         return
     
     def fit_linear_interp(self, param: str, suppress=True, refit = False) -> None:
-        """Makes a LinearNDInterpolator for the given param. 
+        """_summary_
         
-            Access with self.linear_interp[param], phi in radians
-
-            If the requested param does not exist for a given (r, phi), this fills in 0
-             
+        **Args**:
+        
+         - ``param``: _description_
+         - ``suppress``: _description_. Defaults to True.
+         - ``refit``: _description_. Defaults to False.
+        
+        **Raises**:
+        
+         - ``KeyError``: _description_
         """
 
         if not self.check_param(param, strict=False):
@@ -1158,10 +1168,16 @@ class Condition:
         return
     
     def fit_linear_xy_interp(self, param: str, suppress=True) -> None:
-        """ Makes a LinearNDInterpolator for the given param in x y coords
+        """fits a linear Cartesian interpreter to the data
         
-        Can access  with self.linear_xy_interp[param]
-                          
+        **Args**:
+        
+         - ``param``: ``midas_dict`` parameter to find maximum of. See :func:`~MARIGOLD.Condition.print_params` for options
+         - ``suppress``: Suppress ``KeyErrors``. Defaults to True.
+        
+        **Raises**:
+        
+         - ``KeyError``: if the requested ``param`` is not present everywhere
         """
 
         if not self.check_param(param):
@@ -1197,14 +1213,15 @@ class Condition:
         return
     
     def sum(self, param: str) -> float:
-        """ Adds all values of param
+        """Sums values of ``param``
         
-        Inputs:
-         - ``param``, string of local parameter to sum
-
-        Returns:
-         - sum of the value of parameter at every point
-                          
+        **Args**:
+        
+         - ``param``: ``midas_dict`` parameter to sum. See :func:`~MARIGOLD.Condition.print_params` for options
+        
+        **Returns**:
+        
+         - sum
         """
         total = 0
         for angle, r_dict in self.data.items():
@@ -1213,16 +1230,17 @@ class Condition:
 
         return total
     
-    def max(self, param: str, recalc=False) -> float:
-        """ Return maximum value of param in the Condition
+    def max(self, param: str, recalc=True) -> float:
+        """Finds the maximum value of ``param``
         
-        Inputs:
-         - param, string of local parameter to find maximum of
-         - recalc, if already calculated, will pull from dictionary instead of calculating unless this is true
-
-        Returns:
-         - maximum value of param
-                          
+        **Args**:
+        
+         - ``param``: ``midas_dict`` parameter to find maximum of. See :func:`~MARIGOLD.Condition.print_params` for options
+         - ``recalc``: recalculate maximum. If False, and this has been called before, returns previously calculated value. Defaults to True.
+        
+        **Returns**:
+        
+         - Maximum value
         """
         
         if (param in self.maxs.keys()) and (not recalc):
@@ -1237,14 +1255,15 @@ class Condition:
         return (max)
 
     def max_loc(self, param: str)-> tuple:
-        """ Return location of maximum value of param
+        """Finds the location of the maximum value of ``param``
         
-        Inputs:
-         - param, string of local parameter to find maximum of
-
-        Returns:
-         - r/R location of the maximum value of param
-                          
+        **Args**:
+        
+         - ``param``: ``midas_dict`` parameter to find maximum of. See :func:`~MARIGOLD.Condition.print_params` for options
+        
+        **Returns**:
+        
+         - ``(rstar, angle)`` location corresponding to the maximum
         """
         max = 0
         for angle, r_dict in self.data.items():
@@ -1256,16 +1275,17 @@ class Condition:
         return (location)
     
     def min(self, param: str, recalc = True, nonzero=False)-> float:
-        """ Return minimum value of param in the Condition
+        """Finds the minimum value of ``param``
         
-        Inputs:
-         - param, string of local parameter to find minimum of
-         - recalc, if already calculated, will pull from dictionary instead of calculating unless this is true
-         - nonzero, if true, will exclude points with the param = 0 when finding the minimum
-
-        Returns:
-         - minimum value of param
-                          
+        **Args**:
+        
+         - ``param``: ``midas_dict`` parameter to find minimum of. See :func:`~MARIGOLD.Condition.print_params` for options
+         - ``recalc``: recalculate minimum. If False, and this has been called before, returns previously calculated value. Defaults to True.
+         - ``nonzero``: If True, will exclude 0 from the minimum search. Defaults to False.
+        
+        **Returns**:
+        
+         - The minimum value
         """
 
         if (param in self.mins.keys()) and (not recalc):
@@ -1284,15 +1304,17 @@ class Condition:
         return (min)
 
     def min_loc(self, param: str)-> float:
-        """ Return location of minimum value of param
+        """Finds the location of the minimum value of ``param`` 
         
-        Inputs:
-         - param, string of local parameter to find minimum of
-
-        Returns:
-         - r/R location of the maximum value of param
-                          
+        **Args**:
+        
+         - ``param``: ``midas_dict`` parameter to find minimum of. See :func:`~MARIGOLD.Condition.print_params` for options
+        
+        **Returns**:
+        
+         - ``(rstar, angle)`` location corresponding to the minimum
         """
+                
         min = 10**7
         for angle, r_dict in self.data.items():
             for rstar, midas_dict in r_dict.items():
@@ -1303,15 +1325,16 @@ class Condition:
         return (location)
     
     def max_line_loc(self, param: str, angle:float) -> float:
-        """ Return location of maximum value of param at a given angle
+        """Finds the location of the maximum value of ``param`` along a given line, defined by ``alpha``
         
-        Inputs:
-         - param, string of local parameter to find maximum of
-         - angle, angle to search along
-
-        Returns:
-         - r/R location of the maximum value of param when :math:`\\varphi` = ``angle``
-                          
+        **Args**:
+        
+         - ``param``: ``midas_dict`` parameter to find maximum of. See :func:`~MARIGOLD.Condition.print_params` for options
+         - ``angle``: :math:`\\varphi` value to search down
+        
+        **Returns**:
+        
+         - ``rstar`` corresponding to the maximum
         """
         max = 0
         for rstar, midas_dict in self.data[angle].items():
@@ -1322,15 +1345,16 @@ class Condition:
         return (location)
     
     def max_line(self, param: str, angle:float) -> float:
-        """ Return maximum value of param at a given angle
+        """Finds the maximum value of ``param`` along a given line, defined by ``alpha``
         
-        Inputs:
-         - param, string of local parameter to find maximum of
-         - angle, angle to search along
-
-        Returns:
-         - maximum value of param when φ=angle
-                          
+        **Args**:
+        
+         - ``param``: ``midas_dict`` parameter to find maximum of. See :func:`~MARIGOLD.Condition.print_params` for options
+         - ``angle``: :math:`\\varphi` value to search down
+        
+        **Returns**:
+        
+         - maximum value
         """
         max = 0
         for rstar, midas_dict in self.data[angle].items():
@@ -1341,24 +1365,27 @@ class Condition:
         return (max)
     
     def find_hstar_pos(self, method='max_dsm', void_criteria = 0.05) -> float:
-        """ Returns the vertical distance from the top of the pipe to the bubble layer interface
+        """Returns the vertical distance from the top of the pipe to the "bubble layer interface"
 
-        Inputs:
-         - method
-         - void_criteria, used in some methods
+        .. math:: h^{*} = 1 - r^{*} \\sin{\\varphi}
         
-        Methods for determining bubble layer interface
-         - max_dsm
-         - min_grad_y
-         - max_grad_y
-         - max_mag_grad_y
-         - zero_void
-         - percent_void, search down the phi = 90 line, find largest value of rstar where alpha < min_void
-         - Ryan_Ref, uses 1.3 - 1.57e-5 * Ref, proposed by Ryan (2022)
+        **Args**:
+        
+         - ``method``: method for determining :math:`h^{*}`, the bubble layer height. Defaults to 'max_dsm'.
+             
+             - ``max_dsm``, :math:`r` and :math:`\\varphi` determined by calling :any:`max_loc`\ ``('Dsm1')``. Assumes the bubble layer limit corresponds to the maximum Sauter-mean diameter
+             - ``min_grad_y``, :math:`r` and :math:`\\varphi` determined by calling :any:`min_loc` for ``grad_alpha_y``, after calling :any:`calc_grad`\ ``('alpha')``
+             - ``max_grad_y``:math:`r` and :math:`\\varphi` determined by calling :any:`max_loc` for ``grad_alpha_y``, after calling :any:`calc_grad`\ ``('alpha')``
+             - ``max_mag_grad_y``, Not implemented
+             - ``zero_void``, searches down the :math:`\\varphi = 0` line until the largest :math:`r^{*}` is found where :math:`\\alpha (r^{*})` < :math:`\\alpha_{c}`  
+             - ``percent_void``, searches down the :math:`\\varphi = 0` line until the largest :math:`r^{*}` is found where :math:`\\alpha (r^{*})` < :math:`\\alpha_{c}` \\times :math:`\\alpha_{max}`  
+             - ``Ryan_Ref``, :math:`h^{*} = 1 - (1.3 - 1.57 \\times 10^{-5})`, based on Ryan (2022) :math:`(r/R)_{end}`
 
-        Returns:
-         - hstar
+         - ``void_criteria``: value for alpha comparisons, :math:`\\alpha_c`. Either a constant, for the ``zero_void`` option, or a percentage, for ``percent_void``. Defaults to 0.05.
         
+        **Returns**:
+        
+         - ``h_star``, if successful. ``np.NaN`` otherwise
         """
 
         if method == 'max_dsm':
@@ -1437,16 +1464,20 @@ class Condition:
         return np.NaN
 
     def avg(self, param: str, include_zero=True) -> float:
-        """Calculates a basic average of a parameter, "param"
+        """Calculates a basic average of a parameter
+
+        This function does not mirror the data. Note that mirroring might change the average.
         
-        Inputs:
-         - param, string of local parameter to find average of
-         - include_zero, if you want to include when param = 0 in average
-
-        Returns:
-         - average value of param
-
+        **Args**:
+        
+         - ``param``: ``midas_dict`` parameter to average. See :func:`~MARIGOLD.Condition.print_params` for options
+         - ``include_zero``: include zero values . Defaults to True.
+        
+        **Returns**:
+        
+         - the average
         """
+
         count = 0
         avg_param = 0
         for angle, r_dict in self.data.items():
@@ -1463,16 +1494,16 @@ class Condition:
         return avg_param / count
     
     def check_param(self, param:str, strict=True) -> bool:
-        """_summary_
+        """method to check if a parameter is present for a condition
         
         **Args**:
         
-         - ``param``: _description_
-         - ``strict``: _description_. Defaults to True.
+         - ``param``: ``midas_dict`` parameter to check. See :func:`~MARIGOLD.Condition.print_params` for options
+         - ``strict``: if true, will return false if a single point is missing (as long as that point isn't at r/R=1). Defaults to True.
         
         **Returns**:
         
-         - _description_
+         - ``True`` if parameter is present everywhere, ``False`` if not
         """
          
         points_to_add = []
@@ -1484,8 +1515,8 @@ class Condition:
                     if strict:
                         if abs(rstar - 1.0) < 0.001:
                             points_to_add.append( (angle, rstar))
-                            pass # TODO add extra stuff if it doesn't exist at 1.0, it really shouldn't be a problem
-                        else:
+                            pass 
+                        elif points_to_add == []:
                             # return (False, rstar, angle)
                             return False
                 
@@ -1495,6 +1526,11 @@ class Condition:
             if (not param_in_angle) and (not strict):
                 # return (False, rstar, angle)
                 return False
+            
+            # The only points missing were at r/R = 1, which should just be 0 anyways
+            if points_to_add:
+                for phi, r in points_to_add:
+                    self.data[phi][r][param] = 0
 
         return True
     
@@ -2498,12 +2534,17 @@ class Condition:
         return I
 
     def top_bottom(self, param, even_opt='first') -> float:
-        """Honestly, I forgot what this does
-
-        I think it area-averages the way Bottin did, which is not
-        a good way of doing so. 
+        """Not sure how this isn't the same as :any:`area_avg`. 
         
-        """
+        **Args**:
+        
+         - ``param``: ``midas_dict`` parameter to find maximum of. See :func:`~MARIGOLD.Condition.print_params` for options
+         - ``even_opt``: for scipy.integrate.simpsons. Defaults to 'first'.
+        
+        **Returns**:
+        
+         - area-average?
+        """       
         
         # Check that the parameter that the user requested exists
         try:
@@ -2555,24 +2596,32 @@ class Condition:
         return I
 
     def calc_dpdz(self, method = 'LM', m = 0.316, n = 0.25, chisholm = 25, k_m = 0.10, L = None, alpha = None, akapower = 0.875):
-        """ Calculates the frictional pressure gradient, dp/dz, according to various methods. Can access later with self.dpdz
- 
-        Options:
-            - method    : Calculation method
-              * 'LM'    : Lockhart Martinelli
-              * 'Kim'   : Kim-modified Lockhart Martinelli
-            - rho_f     : Liquid phase density
-            - rho_g     : Gas phase density
-            - mu_f      : Liquid phase dynamic viscosity
-            - mu_g      : Gas phase dynamic viscosity
-            - m         : Fed to calc_fric()
-            - n         : Fed to calc_fric()
-            - chisholm  : Chisholm parameter, the C in Lockhart-Martinelli
-            - k_m       : Minor loss coefficient
-            - L         : Length of restriction, only matters for 'Kim' method
-
+        """Calculates pressure gradient
+        
+        **Args**:
+        
+         - ``method``: Calculation method. Defaults to 'LM'.
+             
+             - ``'LM'``, Lockhart-martinelli
+             -  ``'Kim'``, Kim-modified Lockhart Martinelli
+             - ``'akagawa'``, 
+         - ``m``: option for :any:`calc_fric`. Defaults to 0.316.
+         - ``n``: option for :any:`calc_fric`. Defaults to 0.25.
+         - ``chisholm``: Chisholm parameter, the C in Lockhart-Martinelli. Defaults to 25.
+         - ``k_m``: Minor loss coefficient. Defaults to 0.10.
+         - ``L``: Length of restriction, only matters for 'Kim' method. Defaults to None.
+         - ``alpha``: void fraction for Akagawa model. Defaults to None.
+         - ``akapower``: power for Akagawa model. Defaults to 0.875.
+        
+        **Raises**:
+        
+         - ``NotImplementedError``: if unknown option called
+        
+        **Returns**:
+        
+         - ``dpdz``
         """
-
+        
         if chisholm == 'Ryan':
             chisholm = 26 - 4.7*np.cos( self.theta*np.pi/180 )
         
@@ -2755,28 +2804,50 @@ class Condition:
     def calc_cd(self, method='Ishii-Zuber', vr_cheat = False, limit = 10**-6, const_CD = 0.44):
         """Method for calculating drag coefficient
         
-        Inputs:
-         - method, what method to use for modeling :math:`C_{D}`
-         - vr_cheat, flag to use "vr" from midas_dict or "vr_model" when calculating :math:`Re_{b}`
-         - limit, if supplied, will limit the drag coefficient to the given maximum value. For instance, 0.44 like in CFX
+        **Args**:
         
-        Stores:
-         - "cd" in midas_dict 
-         - "Reb" in midas_dict. Calculated by :math:`Re_{b} = \\frac{(1 - \\alpha) \\rho_{f} v_{r} D_{sm,1} }{\\mu_{m}}`.
-         
-         :math:`\\mu_{m}` comes from :any:`calc_mu_eff`
+         - ``method``: what method to use for modeling :math:`C_{D}`. Defaults to 'Ishii-Zuber'. Options:
+             
+             - ``'Ishii-Zuber'``
+             - ``'Schiller-Naumann'``
+             - ``'constant'``
 
-         - "eo", if using "tomiyama" or "ishii" limits
-
-        Options for method:
-         - Ishii-Zuber, :math:`C_{D} = \\frac{24}{Re_{b}} (1 + 0.1 Re_{b}^{0.75})`
-         - Schiller-Naumann, :math:`C_{D} = \\frac{24}{Re_{b}} (1 + 0.15 Re_{b}^{0.687})`. Here, :math:`Re_{b}` uses :math:`\\mu_{f}`
-         - const
-
-        Returns:
-         - area average drag coefficient
-
+         - ``vr_cheat``: flag to use "vr" from midas_dict or "vr_model" when calculating :math:`Re_{b}`. Defaults to False.
+         - ``limit``: _description_. Defaults to 10**-6.
+         - ``const_CD``: _description_. Defaults to 0.44.
+        
+        **Raises**:
+        
+         - ``NotImplementedError``: _description_
+        
+        **Returns**:
+        
+         - _description_
         """
+        # 
+        
+        # Inputs:
+        #  - method, what method to use for modeling :math:`C_{D}`
+        #  - vr_cheat, flag to use "vr" from midas_dict or "vr_model" when calculating :math:`Re_{b}`
+        #  - limit, if supplied, will limit the drag coefficient to the given maximum value. For instance, 0.44 like in CFX
+        
+        # Stores:
+        #  - "cd" in midas_dict 
+        #  - "Reb" in midas_dict. Calculated by :math:`Re_{b} = \\frac{(1 - \\alpha) \\rho_{f} v_{r} D_{sm,1} }{\\mu_{m}}`.
+         
+        #  :math:`\\mu_{m}` comes from :any:`calc_mu_eff`
+
+        #  - "eo", if using "tomiyama" or "ishii" limits
+
+        # Options for method:
+        #  - Ishii-Zuber, :math:`C_{D} = \\frac{24}{Re_{b}} (1 + 0.1 Re_{b}^{0.75})`
+        #  - Schiller-Naumann, :math:`C_{D} = \\frac{24}{Re_{b}} (1 + 0.15 Re_{b}^{0.687})`. Here, :math:`Re_{b}` uses :math:`\\mu_{f}`
+        #  - const
+
+        # Returns:
+        #  - area average drag coefficient
+
+        # 
 
         self.calc_mu_eff()
 
@@ -2840,10 +2911,8 @@ class Condition:
         return self.area_avg('cd')
     
     def calc_Reb(self):
-        """TODO, function to calculate bubble Reynolds number
-
-        Options:
-         - ???
+        """TODO, not impelmented
+        
         """
         for angle, r_dict in self.data.items():
             for rstar, midas_dict in r_dict.items():
@@ -2851,12 +2920,16 @@ class Condition:
                 midas_dict.update({'Reb': Reb})
 
     def calc_cl(self, method='tomiyama', sharma_factor = False):
-        """TODO, function to calculate lift coefficient
+        """TODO, not implemented
+        
+        **Args**:
+        
+         - ``method``: _description_. Defaults to 'tomiyama'.
 
-        :param method: method to use to calculate lift coefficient, defaults to 'tomiyama'
-        :type method: str, optional
-        :param sharma_factor: Option to use Sharma's exponential Ref, defaults to False
-        :type sharma_factor: bool, optional
+             - ``'tomiyama'``
+             - ``'hibiki-ishii'``
+
+         - ``sharma_factor``: _description_. Defaults to False.
         """
         for angle, r_dict in self.data.items():
             for rstar, midas_dict in r_dict.items():
@@ -5238,16 +5311,7 @@ class Condition:
 
     def rough_FR_ID(self) -> None:
         """Identifies the flow regime for the given condition, by some rough methods
-
-        Inputs:
-         - None
-
-        Stores:
-         - ``FR`` in self
-
-        Returns:
-         - FR
-
+        
         First checks if it matches any given by previous researchers, or the hierarchical
         clustering algorithm results
 
@@ -5259,9 +5323,10 @@ class Condition:
         6 = stratified wavy
         7 = annular
         
-        """ 
-
-        # These values are taken from the respective theses where the data comes from
+        **Returns**:
+        
+         - FR
+        """
                
         drew_frid = [
             (0, 4,    0.111, 1),

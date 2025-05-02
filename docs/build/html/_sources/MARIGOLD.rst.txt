@@ -3,6 +3,8 @@ MARIGOLD Documentation
 
 .. automodule:: MARIGOLD.Condition
    :members:
+   :private-members:
+   :special-members:
    :undoc-members:
    :show-inheritance:
 
