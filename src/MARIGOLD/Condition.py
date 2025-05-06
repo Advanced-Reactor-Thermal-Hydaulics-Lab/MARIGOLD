@@ -5,9 +5,10 @@ from scipy.optimize import minimize
 
 
 class Condition:
-    """ Class to handle the local probe data
+    """
+    Class to handle the local probe data
 
-    Data is stored in the Condition.data property. It's actually 3 layers of dictionary
+    Data is stored in the ``Condition.data`` property. It's actually 3 layers of dictionary
 
     ``cond.data[angle]`` gives a dictionary with the various r/R
 
@@ -19,31 +20,29 @@ class Condition:
 
     Can also get the data at a local point from calling the condition, syntax
 
-    cond(phi, r, 'param'). Phi is in radians, the arguments can be constants or numpy arrays.
+    ``cond(phi, r, 'param')``. Phi is in radians, the arguments can be constants or numpy arrays.
     Also has an option for interpolation, 'interp_method' 
+    """
 
-"""
     debugFID = None
+    
     def __init__(self, jgref:float, jgloc:float, jf:float, theta:int, port:str, database:str, fluids = 'air-water', g = 9.81) -> None:
-        """Initialize Condition object
-
-        :param jgref: reference superficial gas velocity
-        :type jgref: float
-        :param jgloc: local superficial gas velocity
-        :type jgloc: float
-        :param jf: superficial liquid velocity
-        :type jf: float
-        :param theta: angle of inclination of flow direction (0° is horizontal, 90° is vertical upwards)
-        :type theta: int
-        :param port: string to denote the port
-        :type port: str
-        :param database: string to associate what database this data is from
-        :type database: str
-        :param fluids: what fluid pair to use as the gas and liquid, defaults to 'air-water'
-        :type fluids: str, optional
-        :param g: gravitational acceleration. In case you're on Mars. MARIGOLD multiplies by sin(θ), defaults to 9.81
-        :type g: float, optional
-        :raises NotImplementedError: If unknown fluid pair is specified. 
+        """Initialize condition object
+        
+        **Args**:
+        
+         - ``jgref``: reference superficial gas velocity.
+         - ``jgloc``: local superficial gas velocity.
+         - ``jf``: superficial liquid velocity.
+         - ``theta``: facility angle
+         - ``port``: string to represent the port the data was taken at.
+         - ``database``: database that the data was a part of
+         - ``fluids``: fluids to use. Defaults to 'air-water'.
+         - ``g``: _description_. Defaults to 9.81.
+        
+        **Raises**:
+        
+         - ``NotImplementedError``: _description_
         """
 
         self.jgref = jgref
@@ -170,26 +169,49 @@ class Condition:
         return False
 
     def __hash__(self) -> int:
+        """hash
+        
+        
+        **Returns**:
+        
+         - hash(repr(self))
+        """
         return hash(repr(self))
 
     def __repr__(self) -> str:
+        """representation
+        
+        
+        **Returns**:
+        
+         - ``self.name``, "jf=X.XX_jgloc=Y.YY_theta=ZZ_port=PX_Database"
+        """
         return self.name
 
     def __call__(self, phi_in:np.ndarray, r_in:np.ndarray, param:str, interp_method='None') -> np.ndarray:
-        """Returns the value of param at (phi, r). Phi is in radians, r nondimensional
+        """Returns the value of param at :math:`(\\varphi, r)`. Phi is in radians, r nondimensional
+        
+        **Args**:
+        
+         - ``phi_in``: phi values to return values of
+         - ``r_in``: r values to return values of
+         - ``param``: ``midas_dict`` parameter to return values of. See :any:`print_params` for options
+         - ``interp_method``: method to interpolate :math:`(\\varphi, r)`. Defaults to 'None'.
 
-        :param phi_in: Array of :math:`\\varphi` points
-        :type phi_in: np.ndarray
-        :param r_in: _description_
-        :type r_in: np.ndarray
-        :param param: _description_
-        :type param: str
-        :param interp_method: _description_, defaults to 'None'
-        :type interp_method: str, optional
-        :raises NameError: _description_
-        :return: _description_
-        :rtype: np.ndarray
+             - ``'None'``, just use the data
+             - ``'linear'``, linear interpolation
+             - ``'spline'``, spline interpolation
+             - ``'linear_xy'``, phi = x, r = y
+        
+        **Raises**:
+        
+         - ``NameError``: if invalid ``interp_method`` selected.
+        
+        **Returns**:
+        
+         - Values of ``param`` 
         """
+
         if type(phi_in) != np.ndarray:
             if debug: warnings.warn("Converting phi_in to np.ndarray")
             phi_in = np.asarray(phi_in)
@@ -246,15 +268,23 @@ class Condition:
             raise NameError(f"{interp_method} not recognized. Accepted arguments are 'None', 'spline', 'linear' or 'linear_xy'")
 
     def pretty_print(self, print_to_file= False, FID=debugFID, mirror=False) -> None:
-        """Prints out all the information in a Condition in a structured way 
-
-        Specifically, everything in the Condition.phi dictionary, which has angles
-        and r/Rs.
-
-        Can either print to a file (specified by FID) or to stdout. Option to mirror the 
-        data, if that hasn't already been done
-
+        """_Prints out all the information in a Condition in a structured way summary_
+        
+        **Args**:
+        
+         - ``print_to_file``: option to print the output to a file. Defaults to False.
+         - ``FID``: file ID to write to. Defaults to debugFID.
+         - ``mirror``: mirror before printing. Defaults to False.
         """
+        # Prints out all the information in a Condition in a structured way 
+
+        # Specifically, everything in the Condition.phi dictionary, which has angles
+        # and r/Rs.
+
+        # Can either print to a file (specified by FID) or to stdout. Option to mirror the 
+        # data, if that hasn't already been done
+
+        # 
 
         print(f"jf = {self.jf}\tjg = {self.jgref}\ttheta = {self.theta}\t{self.port}\t{self.database}", file=FID)
         
@@ -276,22 +306,40 @@ class Condition:
         return
 
     def mirror(self, method = 'sym90', sym90 = False, axisym = False, uniform_rmesh = False, uniform_rmesh_fill = 'interp', force_remirror=False) -> None:
-        """ Mirrors data, so we have data for every angle
+        """Mirrors data, so we have data for every angle.
 
-        :param method: method to use for mirroring. Options are 'sym90', 'axisym', and 'avg_axisym'. Defaults to 'sym90'
-        :type method: str, optional
-        :param sym90: overwrites method, for backwards compatibility, defaults to False
-        :type sym90: bool, optional
-        :param axisym: overwrites method, for backwards compatibility, defaults to False
-        :type axisym: bool, optional
-        :param uniform_rmesh: ensure every angle has data for every r/R point. Will linearly interpolate when data on either side is available. This only  considers the +r/R mesh, defaults to False
-        :type uniform_rmesh: bool, optional
-        :param force_remirror: Usually can only mirror once. This overrides that restriction, defaults to False
-        :type force_remirror: bool, optional
+        Typically, data is only recorded in one or two quadrants of the pipe cross section. This function copies that data across specified lines of symmetry to ensure data is present at every angle
+        
+        **Args**:
+        
+         - ``method``: method, or lines of symmetry to assume. Defaults to ``'sym90'``. Options:
+             
+             - ``'sym90'``, for horizontal or inclined flows which exhibit symmetry across the :math:`\\varphi = 90\\degree` line 
+             - ``'axisym'``, for vertical upward or downwards axisymmetric flows
+             - ``'avg_axisym'``, for vertical upward or downwards axisymmetric flows. Averages the angle with the most data and its complement.
 
-        Saves:
-         - original_mesh
+         - ``sym90``: overwrites method, for backwards compatibility. Defaults to False.
+         - ``axisym``: overwrites method, for backwards compatibility. Defaults to False.
+         - ``uniform_rmesh``: ensure every angle has data for every r/R point. Will linearly interpolate when data on either side is available. This only  considers the +r/R mesh. Defaults to False.
+         - ``uniform_rmesh_fill``: what to fill in for ``uniform_rmesh``. Defaults to 'interp'. Could also be 0.
+         - ``force_remirror``: this overrides the typical behavior of exiting if ``mirror`` has been called before. Defaults to False.
         """
+        #  Mirrors data, so we have data for every angle
+
+        # :param method: method to use for mirroring. Options are 'sym90', 'axisym', and 'avg_axisym'. Defaults to 'sym90'
+        # :type method: str, optional
+        # :param sym90: overwrites method, for backwards compatibility, defaults to False
+        # :type sym90: bool, optional
+        # :param axisym: overwrites method, for backwards compatibility, defaults to False
+        # :type axisym: bool, optional
+        # :param uniform_rmesh: ensure every angle has data for every r/R point. Will linearly interpolate when data on either side is available. This only  considers the +r/R mesh, defaults to False
+        # :type uniform_rmesh: bool, optional
+        # :param force_remirror: Usually can only mirror once. This overrides that restriction, defaults to False
+        # :type force_remirror: bool, optional
+
+        # Saves:
+        #  - original_mesh
+        # 
 
         # Only ever call this function once
         if self.mirrored and not force_remirror:
@@ -571,14 +619,12 @@ class Condition:
     def add_mesh_points(self, r_points:list, suppress=False):
         """Method for adding additional r/R points
 
-        Data linearly interpolated based on surrounding data (specifically using ``__call__`` at the ``(angle, r)`` location in question)
-
-        :param r_points: List of r locations to add
-        :type r_points: list
-        :param suppress: _description_, defaults to False
-        :type suppress: bool, optional
-        :return: 1
-        :rtype: _type_
+        Data linearly interpolated based on surrounding data (specifically using :any:`__call__` at the :math:`(\\varphi, r)` location in question)
+        
+        **Args**:
+        
+         - ``r_points``: List of r locations to add
+         - ``suppress``: print KeyErrors. Defaults to False.
         """
 
         for angle in self.data.keys():
@@ -600,21 +646,23 @@ class Condition:
                         temp_midas_data.append( 0 )
                 
                 self.data[angle].update( {r: dict(zip(tab_keys, temp_midas_data))} )
-
-        return 1
     
     def approx_vf(self, n=7, overwrite_vf = False) -> None:
         """Method for approximating :math:`v_{f}` with power-law relation. 
 
         .. math:: v_{f, approx} = \\frac{(n+1)(2n+1)}{ (2n^{2})}  (j_{f} / (1- \\langle \\alpha \\rangle))  (1 - |r^{*}|)^{1/n}
         
-        Stores:
-         - ``'vf_approx'`` in midas_dict
-         - ``'vf'``, if it does not alread exist in midas_dict
-
-        Returns:
+        **Args**:
+        
+         - ``n``: power. Defaults to 7.
+         - ``overwrite_vf``: will update ``'vf'`` even if it already exists. Defaults to False.
+        
+        **Returns**:
+        
          - Area-averaged ``'vf_approx'``
-
+         - Stores: 
+             - ``'vf_approx'`` in ``midas_dict``
+             - ``'vf'``, if it does not alread exist in ``midas_dict``
         """
 
         self.mirror()
@@ -635,22 +683,35 @@ class Condition:
     
     def approx_vg(self, method = 'vr', n=7, update_ug1 = False) -> None:
         """Method for approximating :math:`v_{g}` with power-law relation. I don't think this makes sense
+        
+        **Args**:
+        
+         - ``method``: _description_. Defaults to 'vr'.
+             - ``'power-law'``, pretty stupid for bubbly flows, not recommended
 
-        .. math:: v_{g, approx} = \\frac{(n+1)(2n+1)}{ (2n^{2})}  (j_{g} / \\langle \\alpha \\rangle)  (1 - |r^{*}|)^{1/n}
+             .. math:: v_{g, approx} = \\frac{(n+1)(2n+1)}{ (2n^{2})}  (j_{g} / \\langle \\alpha \\rangle)  (1 - |r^{*}|)^{1/n}
 
-        Methods:
-         - power-law
-         - vrmodel, 
+             - ``'vrmodel'``
 
-        Stores:
-         - ``'vg_approx'`` in midas_dict
-         - ``'ug1'``, if it does not alread exist in midas_dict
+             .. math:: v_{g, approx} = v_{f} + v_{r, model}
 
-        Returns:
+             - ``'vr'``
+
+             .. math:: v_{g, approx} = v_{f} + v_{r}
+
+         - ``n``: _description_. Defaults to 7.
+         - ``update_ug1``: _description_. Defaults to False.
+        
+        **Raises**:
+        
+         - ``ValueError``: If unknown method selected
+        
+        **Returns**:
+        
          - Area-averaged ``'vg_approx'``
-
-        If you have a lot of group II bubbles this functions' no good
-
+         - Stores:
+             - ``'vg_approx'`` in ``midas_dict``
+             - ``'ug1'``, if it does not alread exist in midas_dict
         """
 
         self.mirror()
@@ -678,10 +739,11 @@ class Condition:
         return self.area_avg('vg_approx')
     
     def approx_vf_Kong(self, n=7) -> None:
-        """Method for approximating :math:`v_{f}` from Kong. TODO 
-
-        Not currently implemented
-
+        """Not currently implemented, right now a 1/nth power law thing
+        
+        **Args**:
+        
+         - ``n``: power. Defaults to 7.
         """
 
         self.mirror()
@@ -694,23 +756,28 @@ class Condition:
         return
     
     def calc_vf_lee(self, K=1):
-        """ Calculate :math:`v_{f}`, :math:`j_{f}`, :math:`v_{r}` based on Lee et al. (2002) equation
-
-        Inputs:
-         - None
-
-        Stores:
-         - ``'vf_lee'`` in midas_dict
-         - ``'jf_lee'`` in midas_dict
-         - ``'vr_lee'`` in midas_dict
-
-        Returns:
-         - Area-average vf_lee
+        """Calculate :math:`v_{f}`, :math:`j_{f}`, :math:`v_{r}` based on Lee et al. (2002) equation
 
         Really a model proposed by Bosio and Malnes (1968)
 
-        .. math:: v_{f} = \\frac{ 1 }{ \\sqrt{1 - \\alpha^{2} / 2} } * \\sqrt{ \\frac{ 2 \\Delta p }{K \\rho_{f}} } 
+        .. math:: v_{f} = \\frac{ 1 }{ \\sqrt{1 - \\alpha^{2} / 2} } * \\sqrt{ \\frac{ 2 \\Delta p }{K \\rho_{f}} }
         
+        **Args**:
+        
+         - ``K``: _description_. Defaults to 1.
+        
+        **Raises**:
+        
+         - ``NotImplementedError``: If ``'delta_p'`` not in ``midas_dict``
+        
+        **Returns**:
+        
+         - Area-average vf_lee
+         - Stores:
+             - ``'vf_lee'`` in ``'midas_dict'``
+             - ``'jf_lee'`` in ``'midas_dict'``
+             - ``'vr_lee'`` in ``'midas_dict'``
+
         """
 
         self.mirror()
@@ -737,22 +804,21 @@ class Condition:
         return self.area_avg('vf_lee')
     
     def calc_vf_naive(self):
-        """ Calculate :math:`v_{f}`, :math:`j_{f}`, :math:`v_{r}` based on single-phase Pitot-tube equation
+        """Calculate :math:`v_{f}`, :math:`j_{f}`, :math:`v_{r}` based on single-phase Pitot-tube equation
 
-        Inputs:
-         - None
-
-        Stores:
-         - ``'vf_naive'`` in midas_dict
-         - ``'jf_naive'`` in midas_dict
-         - ``'vr_naive'`` in midas_dict
-
-        Returns:
-         - Area-average ``'vf_naive'``
-
-        Mathematically performing the operation 
-        .. math::  v_{f} = \\sqrt{ \\frac{ 2 \\Delta p }{ \\rho_{f}} } 
+        .. math:: v_{f, naive} = \\sqrt{ \\frac{2 \\Delta p}{\\rho_{f}} }        
         
+        **Raises**:
+        
+         - ``NotImplementedError``: If ``'delta_p'`` not in ``midas_dict``
+        
+        **Returns**:
+        
+         - Area-average ``'vf_naive'``
+         - Stores:
+             - ``'vf_naive'`` in ``'midas_dict'``
+             - ``'jf_naive'`` in ``'midas_dict'``
+             - ``'vr_naive'`` in ``'midas_dict'``
         """
 
         self.mirror()
@@ -842,7 +908,7 @@ class Condition:
         return self.area_avg('vr')
     
     def calc_vr2(self, warn_approx = True) -> None:
-        """Method for calculating relative velocity based on ug2
+        """Method for calculating relative velocity based on ``'ug2'``
 
         .. math:: v_{r,2} = v_{g, 2} - v_{f}
         

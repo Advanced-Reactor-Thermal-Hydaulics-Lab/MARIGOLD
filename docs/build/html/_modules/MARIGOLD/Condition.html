@@ -740,22 +740,35 @@
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.approx_vg">[docs]</a>
     <span class="k">def</span> <span class="nf">approx_vg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;vr&#39;</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">update_ug1</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Method for approximating :math:`v_{g}` with power-law relation. I don&#39;t think this makes sense</span>
+<span class="sd">        </span>
+<span class="sd">        **Args**:</span>
+<span class="sd">        </span>
+<span class="sd">         - ``method``: _description_. Defaults to &#39;vr&#39;.</span>
+<span class="sd">             - ``&#39;power-law&#39;``, pretty stupid for bubbly flows, not recommended</span>
 
-<span class="sd">        .. math:: v_{g, approx} = \\frac{(n+1)(2n+1)}{ (2n^{2})}  (j_{g} / \\langle \\alpha \\rangle)  (1 - |r^{*}|)^{1/n}</span>
+<span class="sd">             .. math:: v_{g, approx} = \\frac{(n+1)(2n+1)}{ (2n^{2})}  (j_{g} / \\langle \\alpha \\rangle)  (1 - |r^{*}|)^{1/n}</span>
 
-<span class="sd">        Methods:</span>
-<span class="sd">         - power-law</span>
-<span class="sd">         - vrmodel, </span>
+<span class="sd">             - ``&#39;vrmodel&#39;``</span>
 
-<span class="sd">        Stores:</span>
-<span class="sd">         - ``&#39;vg_approx&#39;`` in midas_dict</span>
-<span class="sd">         - ``&#39;ug1&#39;``, if it does not alread exist in midas_dict</span>
+<span class="sd">             .. math:: v_{g, approx} = v_{f} + v_{r, model}</span>
 
-<span class="sd">        Returns:</span>
+<span class="sd">             - ``&#39;vr&#39;``</span>
+
+<span class="sd">             .. math:: v_{g, approx} = v_{f} + v_{r}</span>
+
+<span class="sd">         - ``n``: _description_. Defaults to 7.</span>
+<span class="sd">         - ``update_ug1``: _description_. Defaults to False.</span>
+<span class="sd">        </span>
+<span class="sd">        **Raises**:</span>
+<span class="sd">        </span>
+<span class="sd">         - ``ValueError``: _description_</span>
+<span class="sd">        </span>
+<span class="sd">        **Returns**:</span>
+<span class="sd">        </span>
 <span class="sd">         - Area-averaged ``&#39;vg_approx&#39;``</span>
-
-<span class="sd">        If you have a lot of group II bubbles this functions&#39; no good</span>
-
+<span class="sd">         - Stores:</span>
+<span class="sd">             - ``&#39;vg_approx&#39;`` in ``midas_dict``</span>
+<span class="sd">             - ``&#39;ug1&#39;``, if it does not alread exist in midas_dict</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">mirror</span><span class="p">()</span>
@@ -786,10 +799,11 @@
 <div class="viewcode-block" id="Condition.approx_vf_Kong">
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.approx_vf_Kong">[docs]</a>
     <span class="k">def</span> <span class="nf">approx_vf_Kong</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Method for approximating :math:`v_{f}` from Kong. TODO </span>
-
-<span class="sd">        Not currently implemented</span>
-
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Not currently implemented, right now a 1/nth power law thing</span>
+<span class="sd">        </span>
+<span class="sd">        **Args**:</span>
+<span class="sd">        </span>
+<span class="sd">         - ``n``: power. Defaults to 7.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">mirror</span><span class="p">()</span>
@@ -805,23 +819,28 @@
 <div class="viewcode-block" id="Condition.calc_vf_lee">
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.calc_vf_lee">[docs]</a>
     <span class="k">def</span> <span class="nf">calc_vf_lee</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">K</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; Calculate :math:`v_{f}`, :math:`j_{f}`, :math:`v_{r}` based on Lee et al. (2002) equation</span>
-
-<span class="sd">        Inputs:</span>
-<span class="sd">         - None</span>
-
-<span class="sd">        Stores:</span>
-<span class="sd">         - ``&#39;vf_lee&#39;`` in midas_dict</span>
-<span class="sd">         - ``&#39;jf_lee&#39;`` in midas_dict</span>
-<span class="sd">         - ``&#39;vr_lee&#39;`` in midas_dict</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">         - Area-average vf_lee</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate :math:`v_{f}`, :math:`j_{f}`, :math:`v_{r}` based on Lee et al. (2002) equation</span>
 
 <span class="sd">        Really a model proposed by Bosio and Malnes (1968)</span>
 
-<span class="sd">        .. math:: v_{f} = \\frac{ 1 }{ \\sqrt{1 - \\alpha^{2} / 2} } * \\sqrt{ \\frac{ 2 \\Delta p }{K \\rho_{f}} } </span>
+<span class="sd">        .. math:: v_{f} = \\frac{ 1 }{ \\sqrt{1 - \\alpha^{2} / 2} } * \\sqrt{ \\frac{ 2 \\Delta p }{K \\rho_{f}} }</span>
 <span class="sd">        </span>
+<span class="sd">        **Args**:</span>
+<span class="sd">        </span>
+<span class="sd">         - ``K``: _description_. Defaults to 1.</span>
+<span class="sd">        </span>
+<span class="sd">        **Raises**:</span>
+<span class="sd">        </span>
+<span class="sd">         - ``NotImplementedError``: If ``&#39;delta_p&#39;`` not in ``midas_dict``</span>
+<span class="sd">        </span>
+<span class="sd">        **Returns**:</span>
+<span class="sd">        </span>
+<span class="sd">         - Area-average vf_lee</span>
+<span class="sd">         - Stores:</span>
+<span class="sd">             - ``&#39;vf_lee&#39;`` in ``&#39;midas_dict&#39;``</span>
+<span class="sd">             - ``&#39;jf_lee&#39;`` in ``&#39;midas_dict&#39;``</span>
+<span class="sd">             - ``&#39;vr_lee&#39;`` in ``&#39;midas_dict&#39;``</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">mirror</span><span class="p">()</span>
@@ -851,22 +870,21 @@
 <div class="viewcode-block" id="Condition.calc_vf_naive">
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.calc_vf_naive">[docs]</a>
     <span class="k">def</span> <span class="nf">calc_vf_naive</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; Calculate :math:`v_{f}`, :math:`j_{f}`, :math:`v_{r}` based on single-phase Pitot-tube equation</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate :math:`v_{f}`, :math:`j_{f}`, :math:`v_{r}` based on single-phase Pitot-tube equation</span>
 
-<span class="sd">        Inputs:</span>
-<span class="sd">         - None</span>
-
-<span class="sd">        Stores:</span>
-<span class="sd">         - ``&#39;vf_naive&#39;`` in midas_dict</span>
-<span class="sd">         - ``&#39;jf_naive&#39;`` in midas_dict</span>
-<span class="sd">         - ``&#39;vr_naive&#39;`` in midas_dict</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">         - Area-average ``&#39;vf_naive&#39;``</span>
-
-<span class="sd">        Mathematically performing the operation </span>
-<span class="sd">        .. math::  v_{f} = \\sqrt{ \\frac{ 2 \\Delta p }{ \\rho_{f}} } </span>
+<span class="sd">        .. math:: v_{f, naive} = \\sqrt{ \\frac{2 \\Delta p}{\\rho_{f}} }        </span>
 <span class="sd">        </span>
+<span class="sd">        **Raises**:</span>
+<span class="sd">        </span>
+<span class="sd">         - ``NotImplementedError``: If ``&#39;delta_p&#39;`` not in ``midas_dict``</span>
+<span class="sd">        </span>
+<span class="sd">        **Returns**:</span>
+<span class="sd">        </span>
+<span class="sd">         - Area-average ``&#39;vf_naive&#39;``</span>
+<span class="sd">         - Stores:</span>
+<span class="sd">             - ``&#39;vf_naive&#39;`` in ``&#39;midas_dict&#39;``</span>
+<span class="sd">             - ``&#39;jf_naive&#39;`` in ``&#39;midas_dict&#39;``</span>
+<span class="sd">             - ``&#39;vr_naive&#39;`` in ``&#39;midas_dict&#39;``</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">mirror</span><span class="p">()</span>
@@ -919,23 +937,6 @@
 <span class="sd">         - Area-average vr</span>
 <span class="sd">         - Stores ``&#39;vr&#39;`` in ``midas_dict``</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># Method for calculating relative velocity. </span>
-        
-        <span class="c1"># Inputs:</span>
-        <span class="c1">#  - warn_approx, flag for warning if :math`v_r` is not found and function is approximating</span>
-
-        <span class="c1"># Note that if vg = 0, then this method says vr = 0. This will happen when no data is present,</span>
-        <span class="c1"># such as in the bottom of the pipe in horizontal, when this is not necessarily true.</span>
-
-        <span class="c1"># This method also assumes vg = ug1, so if group II bubbles are present this may not be accurate</span>
-
-        <span class="c1"># Stores:</span>
-        <span class="c1">#  - ``&#39;vr&#39;`` in midas_dict</span>
-
-        <span class="c1"># Returns:</span>
-        <span class="c1">#  - Area-average vr</span>
-
-        <span class="c1"># </span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">mirror</span><span class="p">()</span>
 
@@ -979,7 +980,7 @@
 <div class="viewcode-block" id="Condition.calc_vr2">
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.calc_vr2">[docs]</a>
     <span class="k">def</span> <span class="nf">calc_vr2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">warn_approx</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Method for calculating relative velocity based on ug2</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Method for calculating relative velocity based on ``&#39;ug2&#39;``</span>
 
 <span class="sd">        .. math:: v_{r,2} = v_{g, 2} - v_{f}</span>
 <span class="sd">        </span>

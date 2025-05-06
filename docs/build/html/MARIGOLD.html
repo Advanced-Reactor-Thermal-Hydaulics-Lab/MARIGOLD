@@ -348,33 +348,65 @@ Also has an option for interpolation, ‘interp_method’</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.approx_vf_Kong">
 <span class="sig-name descname"><span class="pre">approx_vf_Kong</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">7</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.approx_vf_Kong"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.approx_vf_Kong" title="Link to this definition"></a></dt>
-<dd><p>Method for approximating <span class="math notranslate nohighlight">\(v_{f}\)</span> from Kong. TODO</p>
-<p>Not currently implemented</p>
+<dd><p>Not currently implemented, right now a 1/nth power law thing</p>
+<p><strong>Args</strong>:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">n</span></code>: power. Defaults to 7.</p></li>
+</ul>
+</div></blockquote>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.approx_vg">
 <span class="sig-name descname"><span class="pre">approx_vg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'vr'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">7</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">update_ug1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.approx_vg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.approx_vg" title="Link to this definition"></a></dt>
 <dd><p>Method for approximating <span class="math notranslate nohighlight">\(v_{g}\)</span> with power-law relation. I don’t think this makes sense</p>
+<p><strong>Args</strong>:</p>
+<blockquote>
+<div><ul>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">method</span></code>: _description_. Defaults to ‘vr’.</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">'power-law'</span></code>, pretty stupid for bubbly flows, not recommended</p></li>
+</ul>
 <div class="math notranslate nohighlight">
 \[v_{g, approx} = \frac{(n+1)(2n+1)}{ (2n^{2})}  (j_{g} / \langle \alpha \rangle)  (1 - |r^{*}|)^{1/n}\]</div>
-<dl class="simple">
-<dt>Methods:</dt><dd><ul class="simple">
-<li><p>power-law</p></li>
-<li><p>vrmodel,</p></li>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">'vrmodel'</span></code></p></li>
 </ul>
+<div class="math notranslate nohighlight">
+\[v_{g, approx} = v_{f} + v_{r, model}\]</div>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">'vr'</span></code></p></li>
+</ul>
+<div class="math notranslate nohighlight">
+\[v_{g, approx} = v_{f} + v_{r}\]</div>
 </dd>
-<dt>Stores:</dt><dd><ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">'vg_approx'</span></code> in midas_dict</p></li>
+</dl>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">n</span></code>: _description_. Defaults to 7.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">update_ug1</span></code>: _description_. Defaults to False.</p></li>
+</ul>
+</div></blockquote>
+<p><strong>Raises</strong>:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ValueError</span></code>: _description_</p></li>
+</ul>
+</div></blockquote>
+<p><strong>Returns</strong>:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Area-averaged <code class="docutils literal notranslate"><span class="pre">'vg_approx'</span></code></p></li>
+<li><dl class="simple">
+<dt>Stores:</dt><dd><ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">'vg_approx'</span></code> in <code class="docutils literal notranslate"><span class="pre">midas_dict</span></code></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">'ug1'</span></code>, if it does not alread exist in midas_dict</p></li>
 </ul>
 </dd>
-<dt>Returns:</dt><dd><ul class="simple">
-<li><p>Area-averaged <code class="docutils literal notranslate"><span class="pre">'vg_approx'</span></code></p></li>
-</ul>
-</dd>
 </dl>
-<p>If you have a lot of group II bubbles this functions’ no good</p>
+</li>
+</ul>
+</div></blockquote>
 </dd></dl>
 
 <dl class="py method">
@@ -953,49 +985,65 @@ Also has an option for interpolation, ‘interp_method’</p>
 <dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.calc_vf_lee">
 <span class="sig-name descname"><span class="pre">calc_vf_lee</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">K</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.calc_vf_lee"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.calc_vf_lee" title="Link to this definition"></a></dt>
 <dd><p>Calculate <span class="math notranslate nohighlight">\(v_{f}\)</span>, <span class="math notranslate nohighlight">\(j_{f}\)</span>, <span class="math notranslate nohighlight">\(v_{r}\)</span> based on Lee et al. (2002) equation</p>
-<dl class="simple">
-<dt>Inputs:</dt><dd><ul class="simple">
-<li><p>None</p></li>
-</ul>
-</dd>
-<dt>Stores:</dt><dd><ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">'vf_lee'</span></code> in midas_dict</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">'jf_lee'</span></code> in midas_dict</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">'vr_lee'</span></code> in midas_dict</p></li>
-</ul>
-</dd>
-<dt>Returns:</dt><dd><ul class="simple">
-<li><p>Area-average vf_lee</p></li>
-</ul>
-</dd>
-</dl>
 <p>Really a model proposed by Bosio and Malnes (1968)</p>
 <div class="math notranslate nohighlight">
 \[v_{f} = \frac{ 1 }{ \sqrt{1 - \alpha^{2} / 2} } * \sqrt{ \frac{ 2 \Delta p }{K \rho_{f}} }\]</div>
+<p><strong>Args</strong>:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">K</span></code>: _description_. Defaults to 1.</p></li>
+</ul>
+</div></blockquote>
+<p><strong>Raises</strong>:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">NotImplementedError</span></code>: If <code class="docutils literal notranslate"><span class="pre">'delta_p'</span></code> not in <code class="docutils literal notranslate"><span class="pre">midas_dict</span></code></p></li>
+</ul>
+</div></blockquote>
+<p><strong>Returns</strong>:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Area-average vf_lee</p></li>
+<li><dl class="simple">
+<dt>Stores:</dt><dd><ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">'vf_lee'</span></code> in <code class="docutils literal notranslate"><span class="pre">'midas_dict'</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'jf_lee'</span></code> in <code class="docutils literal notranslate"><span class="pre">'midas_dict'</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'vr_lee'</span></code> in <code class="docutils literal notranslate"><span class="pre">'midas_dict'</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.calc_vf_naive">
 <span class="sig-name descname"><span class="pre">calc_vf_naive</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.calc_vf_naive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.calc_vf_naive" title="Link to this definition"></a></dt>
 <dd><p>Calculate <span class="math notranslate nohighlight">\(v_{f}\)</span>, <span class="math notranslate nohighlight">\(j_{f}\)</span>, <span class="math notranslate nohighlight">\(v_{r}\)</span> based on single-phase Pitot-tube equation</p>
-<dl class="simple">
-<dt>Inputs:</dt><dd><ul class="simple">
-<li><p>None</p></li>
+<div class="math notranslate nohighlight">
+\[v_{f, naive} = \sqrt{ \frac{2 \Delta p}{\rho_{f}} }\]</div>
+<p><strong>Raises</strong>:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">NotImplementedError</span></code>: If <code class="docutils literal notranslate"><span class="pre">'delta_p'</span></code> not in <code class="docutils literal notranslate"><span class="pre">midas_dict</span></code></p></li>
 </ul>
-</dd>
-<dt>Stores:</dt><dd><ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">'vf_naive'</span></code> in midas_dict</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">'jf_naive'</span></code> in midas_dict</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">'vr_naive'</span></code> in midas_dict</p></li>
-</ul>
-</dd>
-<dt>Returns:</dt><dd><ul class="simple">
+</div></blockquote>
+<p><strong>Returns</strong>:</p>
+<blockquote>
+<div><ul class="simple">
 <li><p>Area-average <code class="docutils literal notranslate"><span class="pre">'vf_naive'</span></code></p></li>
+<li><dl class="simple">
+<dt>Stores:</dt><dd><ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">'vf_naive'</span></code> in <code class="docutils literal notranslate"><span class="pre">'midas_dict'</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'jf_naive'</span></code> in <code class="docutils literal notranslate"><span class="pre">'midas_dict'</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'vr_naive'</span></code> in <code class="docutils literal notranslate"><span class="pre">'midas_dict'</span></code></p></li>
 </ul>
 </dd>
 </dl>
-<p>Mathematically performing the operation
-.. math::  v_{f} = sqrt{ frac{ 2 Delta p }{ rho_{f}} }</p>
+</li>
+</ul>
+</div></blockquote>
 </dd></dl>
 
 <dl class="py method">
@@ -1085,7 +1133,7 @@ Also has an option for interpolation, ‘interp_method’</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="MARIGOLD.Condition.Condition.calc_vr2">
 <span class="sig-name descname"><span class="pre">calc_vr2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">warn_approx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/MARIGOLD/Condition.html#Condition.calc_vr2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#MARIGOLD.Condition.Condition.calc_vr2" title="Link to this definition"></a></dt>
-<dd><p>Method for calculating relative velocity based on ug2</p>
+<dd><p>Method for calculating relative velocity based on <code class="docutils literal notranslate"><span class="pre">'ug2'</span></code></p>
 <div class="math notranslate nohighlight">
 \[v_{r,2} = v_{g, 2} - v_{f}\]</div>
 <p>Note that if vg2 = 0, then this method says vr2 = 0. This will happen when no data is present,
