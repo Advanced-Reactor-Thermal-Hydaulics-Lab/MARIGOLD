@@ -81,9 +81,10 @@
 <div class="viewcode-block" id="Condition">
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition">[docs]</a>
 <span class="k">class</span> <span class="nc">Condition</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot; Class to handle the local probe data</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class to handle the local probe data</span>
 
-<span class="sd">    Data is stored in the Condition.data property. It&#39;s actually 3 layers of dictionary</span>
+<span class="sd">    Data is stored in the ``Condition.data`` property. It&#39;s actually 3 layers of dictionary</span>
 
 <span class="sd">    ``cond.data[angle]`` gives a dictionary with the various r/R</span>
 
@@ -95,33 +96,31 @@
 
 <span class="sd">    Can also get the data at a local point from calling the condition, syntax</span>
 
-<span class="sd">    cond(phi, r, &#39;param&#39;). Phi is in radians, the arguments can be constants or numpy arrays.</span>
+<span class="sd">    ``cond(phi, r, &#39;param&#39;)``. Phi is in radians, the arguments can be constants or numpy arrays.</span>
 <span class="sd">    Also has an option for interpolation, &#39;interp_method&#39; </span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
-<span class="sd">&quot;&quot;&quot;</span>
     <span class="n">debugFID</span> <span class="o">=</span> <span class="kc">None</span>
+    
 <div class="viewcode-block" id="Condition.__init__">
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.__init__">[docs]</a>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">jgref</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">jgloc</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">jf</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">theta</span><span class="p">:</span><span class="nb">int</span><span class="p">,</span> <span class="n">port</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">database</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">fluids</span> <span class="o">=</span> <span class="s1">&#39;air-water&#39;</span><span class="p">,</span> <span class="n">g</span> <span class="o">=</span> <span class="mf">9.81</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize Condition object</span>
-
-<span class="sd">        :param jgref: reference superficial gas velocity</span>
-<span class="sd">        :type jgref: float</span>
-<span class="sd">        :param jgloc: local superficial gas velocity</span>
-<span class="sd">        :type jgloc: float</span>
-<span class="sd">        :param jf: superficial liquid velocity</span>
-<span class="sd">        :type jf: float</span>
-<span class="sd">        :param theta: angle of inclination of flow direction (0° is horizontal, 90° is vertical upwards)</span>
-<span class="sd">        :type theta: int</span>
-<span class="sd">        :param port: string to denote the port</span>
-<span class="sd">        :type port: str</span>
-<span class="sd">        :param database: string to associate what database this data is from</span>
-<span class="sd">        :type database: str</span>
-<span class="sd">        :param fluids: what fluid pair to use as the gas and liquid, defaults to &#39;air-water&#39;</span>
-<span class="sd">        :type fluids: str, optional</span>
-<span class="sd">        :param g: gravitational acceleration. In case you&#39;re on Mars. MARIGOLD multiplies by sin(θ), defaults to 9.81</span>
-<span class="sd">        :type g: float, optional</span>
-<span class="sd">        :raises NotImplementedError: If unknown fluid pair is specified. </span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize condition object</span>
+<span class="sd">        </span>
+<span class="sd">        **Args**:</span>
+<span class="sd">        </span>
+<span class="sd">         - ``jgref``: reference superficial gas velocity.</span>
+<span class="sd">         - ``jgloc``: local superficial gas velocity.</span>
+<span class="sd">         - ``jf``: superficial liquid velocity.</span>
+<span class="sd">         - ``theta``: facility angle</span>
+<span class="sd">         - ``port``: string to represent the port the data was taken at.</span>
+<span class="sd">         - ``database``: database that the data was a part of</span>
+<span class="sd">         - ``fluids``: fluids to use. Defaults to &#39;air-water&#39;.</span>
+<span class="sd">         - ``g``: _description_. Defaults to 9.81.</span>
+<span class="sd">        </span>
+<span class="sd">        **Raises**:</span>
+<span class="sd">        </span>
+<span class="sd">         - ``NotImplementedError``: _description_</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">jgref</span> <span class="o">=</span> <span class="n">jgref</span>
@@ -254,32 +253,55 @@
 <div class="viewcode-block" id="Condition.__hash__">
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.__hash__">[docs]</a>
     <span class="k">def</span> <span class="fm">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;hash</span>
+<span class="sd">        </span>
+<span class="sd">        </span>
+<span class="sd">        **Returns**:</span>
+<span class="sd">        </span>
+<span class="sd">         - hash(repr(self))</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">hash</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span></div>
 
 
 <div class="viewcode-block" id="Condition.__repr__">
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.__repr__">[docs]</a>
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;representation</span>
+<span class="sd">        </span>
+<span class="sd">        </span>
+<span class="sd">        **Returns**:</span>
+<span class="sd">        </span>
+<span class="sd">         - ``self.name``, &quot;jf=X.XX_jgloc=Y.YY_theta=ZZ_port=PX_Database&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span></div>
 
 
 <div class="viewcode-block" id="Condition.__call__">
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.__call__">[docs]</a>
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">phi_in</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">r_in</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">interp_method</span><span class="o">=</span><span class="s1">&#39;None&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the value of param at (phi, r). Phi is in radians, r nondimensional</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the value of param at :math:`(\\varphi, r)`. Phi is in radians, r nondimensional</span>
+<span class="sd">        </span>
+<span class="sd">        **Args**:</span>
+<span class="sd">        </span>
+<span class="sd">         - ``phi_in``: phi values to return values of</span>
+<span class="sd">         - ``r_in``: r values to return values of</span>
+<span class="sd">         - ``param``: ``midas_dict`` parameter to return values of. See :any:`print_params` for options</span>
+<span class="sd">         - ``interp_method``: method to interpolate :math:`(\\varphi, r)`. Defaults to &#39;None&#39;.</span>
 
-<span class="sd">        :param phi_in: Array of :math:`\\varphi` points</span>
-<span class="sd">        :type phi_in: np.ndarray</span>
-<span class="sd">        :param r_in: _description_</span>
-<span class="sd">        :type r_in: np.ndarray</span>
-<span class="sd">        :param param: _description_</span>
-<span class="sd">        :type param: str</span>
-<span class="sd">        :param interp_method: _description_, defaults to &#39;None&#39;</span>
-<span class="sd">        :type interp_method: str, optional</span>
-<span class="sd">        :raises NameError: _description_</span>
-<span class="sd">        :return: _description_</span>
-<span class="sd">        :rtype: np.ndarray</span>
+<span class="sd">             - ``&#39;None&#39;``, just use the data</span>
+<span class="sd">             - ``&#39;linear&#39;``, linear interpolation</span>
+<span class="sd">             - ``&#39;spline&#39;``, spline interpolation</span>
+<span class="sd">             - ``&#39;linear_xy&#39;``, phi = x, r = y</span>
+<span class="sd">        </span>
+<span class="sd">        **Raises**:</span>
+<span class="sd">        </span>
+<span class="sd">         - ``NameError``: if invalid ``interp_method`` selected.</span>
+<span class="sd">        </span>
+<span class="sd">        **Returns**:</span>
+<span class="sd">        </span>
+<span class="sd">         - Values of ``param`` </span>
 <span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">phi_in</span><span class="p">)</span> <span class="o">!=</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">debug</span><span class="p">:</span> <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Converting phi_in to np.ndarray&quot;</span><span class="p">)</span>
             <span class="n">phi_in</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">phi_in</span><span class="p">)</span>
@@ -339,15 +361,23 @@
 <div class="viewcode-block" id="Condition.pretty_print">
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.pretty_print">[docs]</a>
     <span class="k">def</span> <span class="nf">pretty_print</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">print_to_file</span><span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">FID</span><span class="o">=</span><span class="n">debugFID</span><span class="p">,</span> <span class="n">mirror</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Prints out all the information in a Condition in a structured way </span>
-
-<span class="sd">        Specifically, everything in the Condition.phi dictionary, which has angles</span>
-<span class="sd">        and r/Rs.</span>
-
-<span class="sd">        Can either print to a file (specified by FID) or to stdout. Option to mirror the </span>
-<span class="sd">        data, if that hasn&#39;t already been done</span>
-
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;_Prints out all the information in a Condition in a structured way </span>
+<span class="sd">        </span>
+<span class="sd">        **Args**:</span>
+<span class="sd">        </span>
+<span class="sd">         - ``print_to_file``: option to print the output to a file. Defaults to False.</span>
+<span class="sd">         - ``FID``: file ID to write to. Defaults to debugFID.</span>
+<span class="sd">         - ``mirror``: mirror before printing. Defaults to False.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Prints out all the information in a Condition in a structured way </span>
+
+        <span class="c1"># Specifically, everything in the Condition.phi dictionary, which has angles</span>
+        <span class="c1"># and r/Rs.</span>
+
+        <span class="c1"># Can either print to a file (specified by FID) or to stdout. Option to mirror the </span>
+        <span class="c1"># data, if that hasn&#39;t already been done</span>
+
+        <span class="c1"># </span>
 
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;jf = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">jf</span><span class="si">}</span><span class="se">\t</span><span class="s2">jg = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">jgref</span><span class="si">}</span><span class="se">\t</span><span class="s2">theta = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">theta</span><span class="si">}</span><span class="se">\t</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="si">}</span><span class="se">\t</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">FID</span><span class="p">)</span>
         
@@ -372,22 +402,40 @@
 <div class="viewcode-block" id="Condition.mirror">
 <a class="viewcode-back" href="../../MARIGOLD.html#MARIGOLD.Condition.Condition.mirror">[docs]</a>
     <span class="k">def</span> <span class="nf">mirror</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;sym90&#39;</span><span class="p">,</span> <span class="n">sym90</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">axisym</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">uniform_rmesh</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">uniform_rmesh_fill</span> <span class="o">=</span> <span class="s1">&#39;interp&#39;</span><span class="p">,</span> <span class="n">force_remirror</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; Mirrors data, so we have data for every angle</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Mirrors data, so we have data for every angle.</span>
 
-<span class="sd">        :param method: method to use for mirroring. Options are &#39;sym90&#39;, &#39;axisym&#39;, and &#39;avg_axisym&#39;. Defaults to &#39;sym90&#39;</span>
-<span class="sd">        :type method: str, optional</span>
-<span class="sd">        :param sym90: overwrites method, for backwards compatibility, defaults to False</span>
-<span class="sd">        :type sym90: bool, optional</span>
-<span class="sd">        :param axisym: overwrites method, for backwards compatibility, defaults to False</span>
-<span class="sd">        :type axisym: bool, optional</span>
-<span class="sd">        :param uniform_rmesh: ensure every angle has data for every r/R point. Will linearly interpolate when data on either side is available. This only  considers the +r/R mesh, defaults to False</span>
-<span class="sd">        :type uniform_rmesh: bool, optional</span>
-<span class="sd">        :param force_remirror: Usually can only mirror once. This overrides that restriction, defaults to False</span>
-<span class="sd">        :type force_remirror: bool, optional</span>
+<span class="sd">        Typically, data is only recorded in one or two quadrants of the pipe cross section. This function copies that data across specified lines of symmetry to ensure data is present at every angle</span>
+<span class="sd">        </span>
+<span class="sd">        **Args**:</span>
+<span class="sd">        </span>
+<span class="sd">         - ``method``: method, or lines of symmetry to assume. Defaults to ``&#39;sym90&#39;``. Options:</span>
+<span class="sd">             </span>
+<span class="sd">             - ``&#39;sym90&#39;``, for horizontal or inclined flows which exhibit symmetry across the :math:`\\varphi = 90\\degree` line </span>
+<span class="sd">             - ``&#39;axisym&#39;``, for vertical upward or downwards axisymmetric flows</span>
+<span class="sd">             - ``&#39;avg_axisym&#39;``, for vertical upward or downwards axisymmetric flows. Averages the angle with the most data and its complement.</span>
 
-<span class="sd">        Saves:</span>
-<span class="sd">         - original_mesh</span>
+<span class="sd">         - ``sym90``: overwrites method, for backwards compatibility. Defaults to False.</span>
+<span class="sd">         - ``axisym``: overwrites method, for backwards compatibility. Defaults to False.</span>
+<span class="sd">         - ``uniform_rmesh``: ensure every angle has data for every r/R point. Will linearly interpolate when data on either side is available. This only  considers the +r/R mesh. Defaults to False.</span>
+<span class="sd">         - ``uniform_rmesh_fill``: what to fill in for ``uniform_rmesh``. Defaults to &#39;interp&#39;. Could also be 0.</span>
+<span class="sd">         - ``force_remirror``: this overrides the typical behavior of exiting if ``mirror`` has been called before. Defaults to False.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1">#  Mirrors data, so we have data for every angle</span>
+
+        <span class="c1"># :param method: method to use for mirroring. Options are &#39;sym90&#39;, &#39;axisym&#39;, and &#39;avg_axisym&#39;. Defaults to &#39;sym90&#39;</span>
+        <span class="c1"># :type method: str, optional</span>
+        <span class="c1"># :param sym90: overwrites method, for backwards compatibility, defaults to False</span>
+        <span class="c1"># :type sym90: bool, optional</span>
+        <span class="c1"># :param axisym: overwrites method, for backwards compatibility, defaults to False</span>
+        <span class="c1"># :type axisym: bool, optional</span>
+        <span class="c1"># :param uniform_rmesh: ensure every angle has data for every r/R point. Will linearly interpolate when data on either side is available. This only  considers the +r/R mesh, defaults to False</span>
+        <span class="c1"># :type uniform_rmesh: bool, optional</span>
+        <span class="c1"># :param force_remirror: Usually can only mirror once. This overrides that restriction, defaults to False</span>
+        <span class="c1"># :type force_remirror: bool, optional</span>
+
+        <span class="c1"># Saves:</span>
+        <span class="c1">#  - original_mesh</span>
+        <span class="c1"># </span>
 
         <span class="c1"># Only ever call this function once</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mirrored</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">force_remirror</span><span class="p">:</span>
@@ -670,14 +718,12 @@
     <span class="k">def</span> <span class="nf">add_mesh_points</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">r_points</span><span class="p">:</span><span class="nb">list</span><span class="p">,</span> <span class="n">suppress</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Method for adding additional r/R points</span>
 
-<span class="sd">        Data linearly interpolated based on surrounding data (specifically using ``__call__`` at the ``(angle, r)`` location in question)</span>
-
-<span class="sd">        :param r_points: List of r locations to add</span>
-<span class="sd">        :type r_points: list</span>
-<span class="sd">        :param suppress: _description_, defaults to False</span>
-<span class="sd">        :type suppress: bool, optional</span>
-<span class="sd">        :return: 1</span>
-<span class="sd">        :rtype: _type_</span>
+<span class="sd">        Data linearly interpolated based on surrounding data (specifically using :any:`__call__` at the :math:`(\\varphi, r)` location in question)</span>
+<span class="sd">        </span>
+<span class="sd">        **Args**:</span>
+<span class="sd">        </span>
+<span class="sd">         - ``r_points``: List of r locations to add</span>
+<span class="sd">         - ``suppress``: print KeyErrors. Defaults to False.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">for</span> <span class="n">angle</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
@@ -698,9 +744,7 @@
                         
                         <span class="n">temp_midas_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="mi">0</span> <span class="p">)</span>
                 
-                <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">angle</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">(</span> <span class="p">{</span><span class="n">r</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">tab_keys</span><span class="p">,</span> <span class="n">temp_midas_data</span><span class="p">))}</span> <span class="p">)</span>
-
-        <span class="k">return</span> <span class="mi">1</span></div>
+                <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">angle</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">(</span> <span class="p">{</span><span class="n">r</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">tab_keys</span><span class="p">,</span> <span class="n">temp_midas_data</span><span class="p">))}</span> <span class="p">)</span></div>
 
     
 <div class="viewcode-block" id="Condition.approx_vf">
@@ -710,13 +754,17 @@
 
 <span class="sd">        .. math:: v_{f, approx} = \\frac{(n+1)(2n+1)}{ (2n^{2})}  (j_{f} / (1- \\langle \\alpha \\rangle))  (1 - |r^{*}|)^{1/n}</span>
 <span class="sd">        </span>
-<span class="sd">        Stores:</span>
-<span class="sd">         - ``&#39;vf_approx&#39;`` in midas_dict</span>
-<span class="sd">         - ``&#39;vf&#39;``, if it does not alread exist in midas_dict</span>
-
-<span class="sd">        Returns:</span>
+<span class="sd">        **Args**:</span>
+<span class="sd">        </span>
+<span class="sd">         - ``n``: power. Defaults to 7.</span>
+<span class="sd">         - ``overwrite_vf``: will update ``&#39;vf&#39;`` even if it already exists. Defaults to False.</span>
+<span class="sd">        </span>
+<span class="sd">        **Returns**:</span>
+<span class="sd">        </span>
 <span class="sd">         - Area-averaged ``&#39;vf_approx&#39;``</span>
-
+<span class="sd">         - Stores: </span>
+<span class="sd">             - ``&#39;vf_approx&#39;`` in ``midas_dict``</span>
+<span class="sd">             - ``&#39;vf&#39;``, if it does not alread exist in ``midas_dict``</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">mirror</span><span class="p">()</span>
@@ -761,7 +809,7 @@
 <span class="sd">        </span>
 <span class="sd">        **Raises**:</span>
 <span class="sd">        </span>
-<span class="sd">         - ``ValueError``: _description_</span>
+<span class="sd">         - ``ValueError``: If unknown method selected</span>
 <span class="sd">        </span>
 <span class="sd">        **Returns**:</span>
 <span class="sd">        </span>
