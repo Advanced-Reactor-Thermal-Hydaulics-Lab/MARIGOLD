@@ -85,7 +85,7 @@
         <span class="n">C_WE</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">C_RC</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">C_TI</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">alpha_max</span> <span class="o">=</span> <span class="mf">0.75</span><span class="p">,</span> <span class="n">C</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span> <span class="n">We_cr</span> <span class="o">=</span> <span class="mi">6</span><span class="p">,</span> <span class="n">acrit_flag</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">acrit</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>      <span class="c1">#1105 changed We_cr to 6, acrit = 1.00</span>
 
         <span class="c1"># Method arguments</span>
-        <span class="n">preset</span> <span class="o">=</span> <span class="s1">&#39;Quan&#39;</span><span class="p">,</span> <span class="n">avg_method</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">cov_method</span> <span class="o">=</span> <span class="s1">&#39;fixed&#39;</span><span class="p">,</span> <span class="n">rf</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">cd_method</span> <span class="o">=</span> <span class="s1">&#39;doe&#39;</span><span class="p">,</span> <span class="n">dpdz_method</span> <span class="o">=</span> <span class="s1">&#39;LM&#39;</span><span class="p">,</span> <span class="n">void_method</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">LM_C</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">k_m</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">L_res</span><span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">preset</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">avg_method</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">cov_method</span> <span class="o">=</span> <span class="s1">&#39;fixed&#39;</span><span class="p">,</span> <span class="n">rf</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">cd_method</span> <span class="o">=</span> <span class="s1">&#39;doe&#39;</span><span class="p">,</span> <span class="n">dpdz_method</span> <span class="o">=</span> <span class="s1">&#39;LM&#39;</span><span class="p">,</span> <span class="n">void_method</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">LM_C</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">k_m</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">L_res</span><span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 
         <span class="c1"># Covariance calculation</span>
         <span class="n">COV_RC</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">COV_TI</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -104,43 +104,53 @@
         <span class="n">verbose</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 
         <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot; Calculate the area-averaged interfacial area concentration at query location based on the 1D 1G IATE</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;_summary_</span>
 <span class="sd">    </span>
-<span class="sd">    Inputs:</span>
-<span class="sd">     - cond:            Condition object, part of MARIGOLD framework</span>
-<span class="sd">     - query:           L/D endpoint</span>
-<span class="sd">     - z_step:          Axial mesh cell size [-]</span>
-<span class="sd">     - io:              Output package of iate_1d_1g(), can be used as input for subsequent runs</span>
-<span class="sd">     - geometry:        Geometry type, defaults to None, can be set to &#39;elbow&#39;, &#39;ubend&#39;</span>
-<span class="sd">     - cond2:           Second condition object, for possible interpolation</span>
-<span class="sd">     - C_WE:            Wake entrainment coefficient</span>
-<span class="sd">     - C_RC:            Random collision coefficient</span>
-<span class="sd">     - C_TI:            Turbulent impact coefficient</span>
-<span class="sd">     - alpha_max:       Maximum void fraction based on HCP bubble distribution, used for random collision calculation</span>
-<span class="sd">     - C:               Additional factor accounting for the range of eddy size capable of transporting bubbles. Value assumed to be 3, but no justification for this selection is made</span>
-<span class="sd">     - We_cr:           Weber number criterion, used for turbulent impact calculation</span>
-<span class="sd">     - acrit_flag:      Enable/disable shutting off turbulence-based mechanisms beyond a critical void fraction</span>
-<span class="sd">     - acrit:           Critical void fraction for shutting off turbulence-based mechanisms</span>
-<span class="sd">     - preset:          Author preset, fixes coefficients and method arguments to match old MATLAB runs</span>
-<span class="sd">     - avg_method:      Area-averaging method, can be set to None (for Python Simpson&#39;s rule), &#39;legacy&#39; (for Excel Simpson&#39;s Rule)</span>
-<span class="sd">     - cd_method:       Drag coefficient prediction method, &#39;err_iter&#39;, &#39;fixed_iter&#39;, or &#39;doe&#39;</span>
-<span class="sd">     - dpdz_method:     Pressure drop prediction method, &#39;LM&#39; or &#39;Kim&#39;</span>
-<span class="sd">     - void_method:     Void fraction prediction method, &#39;driftflux&#39; or &#39;continuity&#39;</span>
-<span class="sd">     - LM_C:            Lockhart-Martinelli Chisholm parameter</span>
-<span class="sd">     - k_m:             Minor loss coefficient</span>
-<span class="sd">     - m:               Friction factor constant</span>
-<span class="sd">     - n:               Friction factor constant</span>
-<span class="sd">     - C0:              Drift flux distribution parameter overriding value</span>
-<span class="sd">     - C_inf:           Drift flux distribution parameter limiting value. Will be used to calculate C0, if none specified</span>
-
-<span class="sd">    Notes:</span>
-<span class="sd">     - Notice some grav terms are made absolute; needs downward flow fixes</span>
-<span class="sd">     - IATE coefficients set as optional inputs, with default values set depending on geometry</span>
-<span class="sd">     - vgz calculation in elbow and dissipation length regions still need to be implemented</span>
-<span class="sd">     - Need a way to compute void fraction across restrictions, void fraction prediction falters</span>
-<span class="sd">     - Modify MG for Yadav data extraction</span>
-<span class="sd">     - Revise vgj calculation</span>
+<span class="sd">    **Args**:</span>
+<span class="sd">    </span>
+<span class="sd">     - ``cond``: Condition object, part of MARIGOLD framework</span>
+<span class="sd">     - ``query``: L/D endpoint</span>
+<span class="sd">     - ``z_step``: Axial mesh cell size [-]. Defaults to 0.01.</span>
+<span class="sd">     - ``R_c``: Radius of curvature ratio. Defaults to 9.</span>
+<span class="sd">     - ``io``: Output package of iate_1d_1g(), can be used as input for subsequent runs. Defaults to None.</span>
+<span class="sd">     - ``geometry``: Geometry type, defaults to None, can be set to &#39;elbow&#39;, &#39;ubend&#39;. Defaults to None.</span>
+<span class="sd">     - ``cond2``: Second condition object, for possible interpolation. Defaults to None.</span>
+<span class="sd">     - ``C_WE``: Wake entrainment coefficient. Defaults to None.</span>
+<span class="sd">     - ``C_RC``: Random collision coefficient. Defaults to None.</span>
+<span class="sd">     - ``C_TI``: Turbulent impact coefficient. Defaults to None.</span>
+<span class="sd">     - ``alpha_max``: Maximum void fraction based on HCP bubble distribution, used for random collision calculation. Defaults to 0.75.</span>
+<span class="sd">     - ``C``: Additional factor accounting for the range of eddy size capable of transporting bubbles. Value assumed to be 3, but no justification for this selection is made. Defaults to 3.</span>
+<span class="sd">     - ``We_cr``: Weber number criterion, used for turbulent impact calculation. Defaults to 6.</span>
+<span class="sd">     - ``acrit_flag``: Enable/disable shutting off turbulence-based mechanisms beyond a critical void fraction. Defaults to 0.</span>
+<span class="sd">     - ``acrit``: Critical void fraction for shutting off turbulence-based mechanisms. Defaults to None.</span>
+<span class="sd">     - ``preset``: Author preset, fixes coefficients and method arguments to match old MATLAB runs. Defaults to None.</span>
+<span class="sd">     - ``avg_method``: Area-averaging method, can be set to None (for Python Simpson&#39;s rule), &#39;legacy&#39; (for Excel Simpson&#39;s Rule). Defaults to None.</span>
+<span class="sd">     - ``cov_method``: _description_. Defaults to &#39;fixed&#39;.</span>
+<span class="sd">     - ``rf``: _description_. Defaults to False.</span>
+<span class="sd">     - ``cd_method``: Drag coefficient prediction method, &#39;err_iter&#39;, &#39;fixed_iter&#39;, or &#39;doe&#39;. Defaults to &#39;doe&#39;.</span>
+<span class="sd">     - ``dpdz_method``: Pressure drop prediction method, &#39;LM&#39; or &#39;Kim&#39;. Defaults to &#39;LM&#39;.</span>
+<span class="sd">     - ``void_method``: Void fraction prediction method, &#39;driftflux&#39; or &#39;continuity&#39;. Defaults to None.</span>
+<span class="sd">     - ``LM_C``: Lockhart-Martinelli Chisholm parameter. Defaults to None.</span>
+<span class="sd">     - ``k_m``: Minor loss coefficient. Defaults to None.</span>
+<span class="sd">     - ``L_res``: _description_. Defaults to None.</span>
+<span class="sd">     - ``COV_RC``: _description_. Defaults to None.</span>
+<span class="sd">     - ``COV_TI``: _description_. Defaults to None.</span>
+<span class="sd">     - ``m``: Friction factor constant. Defaults to 0.316.</span>
+<span class="sd">     - ``n``: Friction factor constant. Defaults to 0.25.</span>
+<span class="sd">     - ``C_inf``: Drift flux distribution parameter limiting value. Will be used to calculate C0, if none specified. Defaults to 1.20.</span>
+<span class="sd">     - ``verbose``: _description_. Defaults to False.</span>
+<span class="sd">    </span>
+<span class="sd">    **Raises**:</span>
+<span class="sd">    </span>
+<span class="sd">     - ``ValueError``: _description_</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Notes:</span>
+    <span class="c1">#  - Notice some grav terms are made absolute; needs downward flow fixes</span>
+    <span class="c1">#  - IATE coefficients set as optional inputs, with default values set depending on geometry</span>
+    <span class="c1">#  - vgz calculation in elbow and dissipation length regions still need to be implemented</span>
+    <span class="c1">#  - Need a way to compute void fraction across restrictions, void fraction prediction falters</span>
+    <span class="c1">#  - Modify MG for Yadav data extraction</span>
+    <span class="c1">#  - Revise vgj calculation</span>
 
     <span class="c1"># MARIGOLD retrieval and setup</span>
     <span class="n">theta</span>           <span class="o">=</span> <span class="n">cond</span><span class="o">.</span><span class="n">theta</span>                                <span class="c1"># Pipe inclination angle [degrees]</span>
