@@ -24,7 +24,7 @@ class Condition:
 
 """
     debugFID = None
-    def __init__(self, jgref:float, jgloc:float, jf:float, theta:int, port:str, database:str, fluids = 'air-water', g = 9.81) -> None:
+    def __init__(self, jgref:float, jgloc:float, jf:float, theta:int, port:str, database:str, fluids = 'air-water', g = 9.81, p_atm = 101325, T = 293.15) -> None:
         """Initialize Condition object
 
         :param jgref: reference superficial gas velocity
@@ -43,6 +43,10 @@ class Condition:
         :type fluids: str, optional
         :param g: gravitational acceleration. In case you're on Mars. MARIGOLD multiplies by sin(θ), defaults to 9.81
         :type g: float, optional
+        :param p_atm: atmospheric pressure
+        :type p_atm: float, optional
+        :param T: ambient absolute temperature
+        :type T: float, optional
         :raises NotImplementedError: If unknown fluid pair is specified. 
         """
 
@@ -144,13 +148,14 @@ class Condition:
         self.mins = {}
         self._grads_calced = []
 
+        # Constants
         if fluids == 'air-water' or fluids == 'water-air':
-            self.rho_f = 998       # kg/m^3
-            self.rho_g = 1.204     # kg/m^3
-            self.mu_f = 0.001002   # Pa s
-            self.mu_g = 0.01803e-3 # Pa s
-
-            self.sigma = 0.0728    # N/m
+            self.rho_f = 998        # kg/m^3
+            self.rho_g = 1.204      # kg/m^3
+            self.mu_f = 0.001002    # Pa-s
+            self.mu_g = 0.01803e-3  # Pa-s
+            self.R_spec = 287.058   # J/kg-K
+            self.sigma = 0.0728     # N/m
 
             self.Ref = self.rho_f * self.jf * self.Dh / self.mu_f
             self.Reg = self.rho_g * self.jgloc * self.Dh / self.mu_g
@@ -159,7 +164,10 @@ class Condition:
             raise NotImplementedError(f"{fluids} not available, try 'air-water'")
         
         self.g = g
-        self.gz = g * np.sin(self.theta * np.pi/180)
+        self.gz = g * np.sin(np.radians(self.theta))
+        self.p_atm = p_atm
+        self.T = T
+
         return
 
     def __eq__(self, __o: object) -> bool:

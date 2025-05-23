@@ -857,7 +857,7 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                 else:
                     cond = all_conditions[ all_conditions.index(newCond) ]
 
-                cond.Dh = 4 * 0.20 * 0.01 / 2 / (0.20 + 0.01)        # 1 x 20 cm^2 rectangular channel
+                cond.Dh = 4 * 0.20 * 0.01 / 2 / (0.20 + 0.01)       # 1 x 20 cm^2 rectangular channel
 
                 cond.area_avg_void_sheet = area_avg_void_sheet
                 cond.area_avg_ai_sheet = area_avg_ai_sheet
@@ -866,7 +866,7 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                 cond.LoverD = LoverD
                 cond.dpdz = dpdz
 
-                cond.jgatm = jgloc * pz / 101330        # It's important that P_atm is 101330 if you want to match with old results
+                cond.jgatm = jgloc * pz / cond.p_atm                # It's important that P_atm is 101330 if you want to match with old results
             
             ############################################################################################################################
             #                                                                                                                          #
