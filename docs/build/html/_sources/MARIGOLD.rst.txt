@@ -1,44 +1,40 @@
-MARIGOLD
-================
-
-----------
-
-Condition object
--------------------------
+MARIGOLD Documentation
+======================
 
 .. automodule:: MARIGOLD.Condition
    :members:
+   :private-members:
+   :special-members:
    :undoc-members:
    :show-inheritance:
-
-iate
---------------------
 
 .. automodule:: MARIGOLD.iate
    :members:
    :undoc-members:
    :show-inheritance:
 
-CFD Functions
--------------------
-
 .. automodule:: MARIGOLD.CFD
    :members:
    :undoc-members:
    :show-inheritance:
-
-extracts\_and\_loads
-------------------------------------
 
 .. automodule:: MARIGOLD.extracts_and_loads
    :members:
    :undoc-members:
    :show-inheritance:
 
-misc
---------------------
-
-.. automodule:: MARIGOLD.misc
+.. automodule:: MARIGOLD.utils
    :members:
    :undoc-members:
    :show-inheritance:
+
+.. automodule:: MARIGOLD.plot_utils
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. automodule:: MARIGOLD.processing
+   :members:
+   :undoc-members:
+   :show-inheritance:
+

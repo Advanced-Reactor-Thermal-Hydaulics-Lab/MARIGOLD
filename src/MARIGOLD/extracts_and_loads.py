@@ -497,7 +497,7 @@ def extractProbeData(dump_file = 'database.dat', in_dir = [], require_terms = No
                             continue
                         
                         midas_output = []
-                        for cell in ws[f'CQ{i}':f'ES{i}'][0]:
+                        for cell in ws[f'CP{i}':f'ES{i}'][0]:
                             if cell.value == '---':
                                 midas_output.append(0)
                             elif cell.value is None:
@@ -680,7 +680,7 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                 else:
                     print(f'Nope. Skipping...')
                     continue
-            
+            # print(jf, jgref, port, theta)
             ############################################################################################################################
             #                                                                                                                          #
             #                                                       BETTIS DATA                                                        #
@@ -857,7 +857,7 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                 else:
                     cond = all_conditions[ all_conditions.index(newCond) ]
 
-                cond.Dh = 4 * 0.20 * 0.01 / 2 / (0.20 + 0.01)        # 1 x 20 cm^2 rectangular channel
+                cond.Dh = 4 * 0.20 * 0.01 / 2 / (0.20 + 0.01)       # 1 x 20 cm^2 rectangular channel
 
                 cond.area_avg_void_sheet = area_avg_void_sheet
                 cond.area_avg_ai_sheet = area_avg_ai_sheet
@@ -866,7 +866,7 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                 cond.LoverD = LoverD
                 cond.dpdz = dpdz
 
-                cond.jgatm = jgloc * pz / 101330        # It's important that P_atm is 101330 if you want to match with old results
+                cond.jgatm = jgloc * pz / cond.p_atm                # It's important that P_atm is 101330 if you want to match with old results
             
             ############################################################################################################################
             #                                                                                                                          #
@@ -1167,6 +1167,43 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                     Q2_check = 'DA'
                     Q1_pitot_check = 'CJ'
                     Q2_pitot_check = 'FZ'
+                
+                elif sheet_type == 'neup_template':
+                    pitot_sheet = True
+                    Q1_ranges = list(zip([90, 67.5, 45, 22.5, 0], [ [i for i in range(8, 31)], [i for i in range(55, 78)], [i for i in range(104, 127)], [i for i in range(151, 174)], [i for i in range(200, 223)] ]))
+                    Q2_ranges = list(zip([112.5, 135, 157.5], [ [i for i in range(55, 78)], [i for i in range(104, 127)], [i for i in range(151, 174)] ]))
+                    Q2_start = 'CR'
+                    Q2_end = 'ET'
+                    Q1_start = 'A'
+                    Q1_end = 'BD'
+                    Q1_pitot_start = 'CF'
+                    Q1_pitot_end = 'CO'
+                    Q2_pitot_start = 'FV'
+                    Q2_pitot_end = 'GE'
+
+                    Q1_check = 'K'
+                    Q2_check = 'DA'
+                    Q1_pitot_check = 'CJ'
+                    Q2_pitot_check = 'FZ'
+
+                elif sheet_type.lower() == 'neup_template1':
+                    pitot_sheet = True
+                    Q1_ranges = list(zip([90, 67.5, 45, 22.5, 0], [ [i for i in range(8, 31)], [i for i in range(55, 78)], [i for i in range(104, 127)], [i for i in range(151, 174)], [i for i in range(200, 223)] ]))
+                    Q2_ranges = list(zip([112.5, 135, 157.5], [ [i for i in range(55, 78)], [i for i in range(104, 127)], [i for i in range(151, 174)] ]))
+                    Q2_start = 'CR'
+                    Q2_end = 'ET'
+                    Q1_start = 'A'
+                    Q1_end = 'BD'
+                    Q1_pitot_start = 'CF'
+                    Q1_pitot_end = 'CO'
+                    Q2_pitot_start = 'FV'
+                    Q2_pitot_end = 'GE'
+
+                    Q1_check = 'K'
+                    Q2_check = 'DA'
+                    Q1_pitot_check = 'CJ'
+                    Q2_pitot_check = 'FZ'
+
 
                 elif sheet_type == 'custom' or sheet_type == 'Custom':
                     print('Hopefully you specified all the ranges, starts, ends, and checks')
@@ -1177,7 +1214,7 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                 
                 ws = wb['1']
                 
-                jglocs = ['O16', 'O17', 'O18', 'O19', 'O20']
+                jglocs = ['O16', 'O17', 'O18', 'O19', 'O20', 'O21', 'O22', 'O23', 'O24', 'O25'] # Experimental Port 1,2,3,4,5A,5C,5B,6A,6,7 --> Now Port 1,2,3,4,5,6,7,8,9,10. Quan 10/28
                 try:
                     jgloc = ws[jglocs[int(re.findall(r'\d+', port)[0])-1]].value
                     #jgloc = ws[jglocs[int(port.strip('P'))]].value
@@ -1193,7 +1230,7 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                 elif jgloc is None:
                     print(f"Warning: jgloc could not be found, setting jgloc = jgref")
                     jgloc = jgref
-
+                # print(theta)
                 newCond = Condition(jgref, jgloc, jf, theta, port, sheet_type.split('_')[0])
 
                 if newCond not in all_conditions:
@@ -1205,7 +1242,8 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                 cond.run_ID = ws['B2'].value
 
                 # Local corrected gauge pressure can also be back-calculated from jgloc and jgatm (DHK)
-                cond.jgatm = ws['D6'].value
+                # cond.jgatm = ws['D6'].value  # Recorded experimental jgatm when data was taken, might vary slightly on different days or at different ports due to different temp or other BCs
+                cond.jgatm = ws['D7'].value   # Quan 10/25 U-bend data, fixed jgatm for all the ports to avoid cofusion in later modeling 
 
                 ws = wb['2']
                 

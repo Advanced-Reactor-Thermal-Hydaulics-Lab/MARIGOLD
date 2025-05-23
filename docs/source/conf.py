@@ -24,7 +24,7 @@ extensions = [
     'sphinx.ext.napoleon',
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
-    'sphinx_rtd_dark_mode'
+    'sphinx_rtd_theme'
 ]
 
 templates_path = ['_templates']
@@ -43,8 +43,17 @@ napoleon_use_param = False
 napoleon_use_ivar = True
 strip_signature_backslash = True
 
+myst_footnote_transition = False
+
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-html_theme = 'sphinx_rtd_theme'
+html_theme = "sphinx_rtd_theme"
 html_static_path = ['_static']
+pygments_style = 'sphinx'
+
+html_favicon = '_static/favicon.ico'
+
+html_css_files = [
+    'css/custom.css'
+]

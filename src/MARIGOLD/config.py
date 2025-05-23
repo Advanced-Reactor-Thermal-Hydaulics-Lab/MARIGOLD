@@ -10,8 +10,10 @@ import matplotlib.pyplot as plt
 import matplotlib.tri as tri
 import matplotlib as mpl
 import openpyxl as op
+import warnings
+import re
 
 debug = False
 debugFID = None
 
-__all__ = ['os', 'np', 'datetime', 'pickle', 'integrate', 'deepcopy', 'cm', 'plt', 'tri', 'op', 'debug', 'debugFID']
+__all__ = ['os', 'np', 'datetime', 'pickle', 'integrate', 'deepcopy', 'cm', 'plt', 'tri', 'op', 're', 'debug', 'warnings','debugFID']

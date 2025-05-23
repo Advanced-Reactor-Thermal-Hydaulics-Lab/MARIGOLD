@@ -1,14 +1,16 @@
 from .config import *
+import warnings
+
 
 def iate_1d_1g(
         # Basic inputs
-        cond, query, z_step = 0.01, io = None, geometry = None, cond2 = None,
+        cond, query, z_step = 0.01, io = None, geometry = None, R_c = None, L_res = None, cond2 = None,
         
         # IATE Coefficients
         C_WE = None, C_RC = None, C_TI = None, alpha_max = 0.75, C = 3, We_cr = 6, acrit_flag = 0, acrit = 0.13,
 
         # Method arguments
-        preset = None, avg_method = None, cov_method = 'fixed', rf = False, cd_method = 'doe', dpdz_method = 'LM', void_method = 'driftflux',
+        preset = None, avg_method = None, cov_method = 'fixed', reconstruct_flag = False, cd_method = 'doe', dpdz_method = 'LM', void_method = 'driftflux',
 
         # Covariance calculation
         COV_RC = None, COV_TI = None,
@@ -19,96 +21,139 @@ def iate_1d_1g(
         # Void fraction calculation
         C0 = None, C_inf = 1.20,
 
-        ):
-    """ Calculate the area-averaged interfacial area concentration at query location based on the 1D 1G IATE
-    
-    Inputs:
-     - cond:            Condition object, part of MARIGOLD framework
-     - query:           L/D endpoint
-     - z_step:          Axial mesh cell size [-]
-     - io:              Output package of iate_1d_1g(), can be used as input for subsequent runs
-     - geometry:        Geometry type, defaults to None, can be set to 'elbow', 'ubend'
-     - cond2:           Second condition object, for possible interpolation
-     - C_WE:            Wake entrainment coefficient
-     - C_RC:            Random collision coefficient
-     - C_TI:            Turbulent impact coefficient
-     - alpha_max:       Maximum void fraction based on HCP bubble distribution, used for random collision calculation
-     - C:               C
-     - We_cr:           Weber number criterion, used for turbulent impact calculation
-     - acrit_flag:      Enable/disable shutting off turbulence-based mechanisms beyond a critical void fraction
-     - acrit:           Critical void fraction for shutting off turbulence-based mechanisms
-     - preset:          Author preset, fixes coefficients and method arguments to match old MATLAB runs
-     - avg_method:      Area-averaging method, can be set to None (for Python Simpson's rule), 'legacy' (for Excel Simpson's Rule)
-     - cd_method:       Drag coefficient prediction method, 'err_iter', 'fixed_iter', or 'doe'
-     - dpdz_method:     Pressure drop prediction method, 'LM' or 'Kim'
-     - void_method:     Void fraction prediction method, 'driftflux' or 'continuity'
-     - LM_C:            Lockhart-Martinelli Chisholm parameter
-     - k_m:             Minor loss coefficient
-     - m:               Friction factor constant
-     - n:               Friction factor constant
-     - C0:              Drift flux distribution parameter overriding value
-     - C_inf:           Drift flux distribution parameter limiting value. Will be used to calculate C0, if none specified
+        # Debugging
+        verbose = False,
 
-    Notes:
-     - Notice some grav terms are made absolute; needs downward flow fixes
-     - IATE coefficients set as optional inputs, with default values set depending on geometry
-     - vgz calculation in elbow and dissipation length regions still need to be implemented
-     - Need a way to compute void fraction across restrictions, void fraction prediction falters
-     - Modify MG for Yadav data extraction
-     - Revise vgj calculation
+        ):
+    """_summary_
+    
+    **Args**:
+    
+     - ``cond``: Condition object, part of MARIGOLD framework
+     - ``query``: L/D endpoint
+     - ``z_step``: Axial mesh cell size [-]. Defaults to 0.01.
+     - ``R_c``: Radius of curvature ratio. Defaults to None.
+     - ``io``: Output package of iate_1d_1g(), can be used as input for subsequent runs. Defaults to None.
+     - ``geometry``: Geometry type, defaults to None, can be set to 'elbow', 'ubend'. Defaults to None.
+     - ``cond2``: Second condition object, for possible interpolation. Defaults to None.
+     - ``C_WE``: Wake entrainment coefficient. Defaults to None.
+     - ``C_RC``: Random collision coefficient. Defaults to None.
+     - ``C_TI``: Turbulent impact coefficient. Defaults to None.
+     - ``alpha_max``: Maximum void fraction based on HCP bubble distribution, used for random collision calculation. Defaults to 0.75.
+     - ``C``: Additional factor accounting for the range of eddy size capable of transporting bubbles. Value assumed to be 3, but no justification for this selection is made. Defaults to 3.
+     - ``We_cr``: Weber number criterion, used for turbulent impact calculation. Defaults to 6.
+     - ``acrit_flag``: Enable/disable shutting off turbulence-based mechanisms beyond a critical void fraction. Defaults to 0.
+     - ``acrit``: Critical void fraction for shutting off turbulence-based mechanisms. Defaults to 0.13.
+     - ``preset``: Author preset, fixes coefficients and method arguments to match old MATLAB runs. Defaults to None.
+     - ``avg_method``: Area-averaging method, can be set to None (for Python Simpson's rule), 'legacy' (for Excel Simpson's Rule). Defaults to None.
+     - ``cov_method``: Covariance calculation method. Defaults to 'fixed'.
+     - ``reconstruct_flag``: Void reconstruction flag. Defaults to False.
+     - ``cd_method``: Drag coefficient prediction method, 'err_iter', 'fixed_iter', or 'doe'. Defaults to 'doe'.
+     - ``dpdz_method``: Pressure drop prediction method, 'LM' or 'Kim'. Defaults to 'LM'.
+     - ``void_method``: Void fraction prediction method, 'driftflux' or 'continuity'. Defaults to 'driftflux'.
+     - ``LM_C``: Lockhart-Martinelli Chisholm parameter. Defaults to 25.
+     - ``k_m``: Minor loss coefficient. Defaults to 0.10.
+     - ``L_res``: Restriction length. Defaults to None.
+     - ``COV_RC``: Random collision mechanism covariance. Defaults to None.
+     - ``COV_TI``: Turbulent impact mechanism covariance. Defaults to None.
+     - ``m``: Friction factor constant. Defaults to 0.316.
+     - ``n``: Friction factor constant. Defaults to 0.25.
+     - ``C_inf``: Drift flux distribution parameter limiting value. Will be used to calculate C0, if none specified. Defaults to 1.20.
+     - ``verbose``: Print warnings and commentary. Defaults to False.
+    
+    **Raises**:
+    
+     - ``ValueError``: _description_
     """
+    # Code Repair:
+    #  - Investigate L_res uses. May be replaceable with mesh length. Must be something Zhengting added.
+    #  - There is no reason for jg_loc to be an array. It was fine before, don't know why Zhengting did this.
+
+    # Notes:
+    #  - Notice some grav terms are made absolute; needs downward flow fixes
+    #  - IATE coefficients set as optional inputs, with default values set depending on geometry
+    #  - vgz calculation in elbow and dissipation length regions still need to be implemented
+    #  - Need a way to compute void fraction across restrictions, void fraction prediction falters
+    #  - Modify MG for Yadav data extraction
+    #  - Revise vgj calculation
+
+    # IATE presets
+    if preset == 'kim':
+        # Constants
+        cond.rho_f          = 998
+        cond.rho_g          = 1.226
+        cond.mu_f           = 0.001
+        cond.sigma          = 0.07278
+        cond.g              = 9.8
+        cond.gz             = 9.8 * np.sin(np.radians(cond.theta))
+        cond.p_atm          = 101330
+        
+        # Methods
+        cd_method           = 'fixed_iter'
+        C0                  = 1.12
+    
+    elif preset == 'talley':
+        # Constants
+        cond.rho_f          = 998
+        cond.rho_g          = 1.23
+        cond.mu_f           = 0.001
+        cond.mu_g           = 1.73E-5
+        cond.sigma          = 0.07278
+        cond.p_atm          = 101353        # Implied by subtracting thesis gauge pressures from MATLAB absolute pressures
+
+        # Methods
+        avg_method          = 'legacy_old'
+        cd_method           = 'doe'
+        dpdz_method         = 'LM'
+        reconstruct_flag    = True
+
+        LM_C = 25
+    
+    elif preset == 'yadav':                 # (WIP)
+        # Constants
+        # Methods
+        void_method         = 'continuity'
+
+    elif preset == 'worosz':                # (WIP)
+        # Constants
+        # Methods
+        cd_method           = 'err_iter'
+
+    elif preset == 'quan':
+        # Constants
+        cond.Dh             = 0.0254        # Hydraulic diameter [m]
+        cond.rho_g          = 1.226         # Gas phase density [kg/m**3] or cond.rho_g 
+        cond.mu_f           = 0.001         # Dynamic viscosity of water [Pa-s]
+        cond.p_atm          = 101353        # Equivalent to 14.7 [psi]
+
+        # Methods
+        L_res   = 31.67                     # Length of restriction, based on U-bend experimental dpdz data
+        dpdz_method = 'kim'
+
+        C_WE = 0.000
+        C_RC = 0.060
+        C_TI = 0.000
+
+        # if geometry =='U-bend Dissipation ':
+        #     void_method = 'continuity'
+        # elif geometry =='vd ':
+        #     void_method = 'vgz_talley'
+        # else:
+        #     void_method = 'vgz_talley'
 
     # MARIGOLD retrieval and setup
     theta           = cond.theta                                # Pipe inclination angle [degrees]
     Dh              = cond.Dh                                   # Hydraulic diameter [m]
     rho_f           = cond.rho_f                                # Liquid phase density [kg/m**3]
-    rho_g           = cond.rho_g                                # Gas phase density [kg/m**3]
+    rho_g           = cond.rho_g                                # Gas phase density [kg/m**3] or cond.rho_g 
     mu_f            = cond.mu_f                                 # Dynamic viscosity of water [Pa-s]
     mu_g            = cond.mu_g                                 # Dynamic viscosity of air [Pa-s]
     sigma           = cond.sigma                                # Surface tension of air/water [N/m]
-    p_atm           = 101325                                    # Ambient pressure [Pa]
-    grav            = 9.81*np.sin((theta)*np.pi/180)            # Gravity constant (added by Drew to account for pipe inclination)
-    R_spec          = 287.058                                   # Specific gas constant for dry air [J/kg-K]
-    T               = 293.15                                    # Ambient absolute temperature [K], for calculating air density as a function of pressure along channel
+    grav            = cond.gz                                   # Gravity constant (added by Drew to account for pipe inclination) (also, notably negative for VD)
+    p_atm           = cond.p_atm                                # Ambient pressure 101325 [Pa]
+    R_spec          = cond.R_spec                               # Specific gas constant for dry air [J/kg-K]
+    T               = cond.T                                    # Ambient absolute temperature [K], for calculating air density as a function of pressure along channel
 
-    # IATE presets (WIP)
-    if preset == 'kim':
-        theta           = 90
-        Dh              = 4*0.20*0.01/2/(0.20+0.01)
-        rho_f           = 998
-        rho_g           = 1.226
-        mu_f            = 0.001
-        sigma           = 0.07278
-        p_atm           = 101330
-        grav            = 9.8
-
-        cd_method       = 'fixed_iter'
-        C0              = 1.12
-    
-    elif preset == 'talley':
-        theta           = 0
-        Dh              = 0.0381
-        rho_f           = 998
-        rho_g           = 1.23
-        mu_f            = 0.001
-        sigma           = 0.07278
-        p_atm           = 101353        # Implied by subtracting thesis gauge pressures from MATLAB absolute pressures
-
-        cond.mu_g       = 1.73E-5
-
-        rf              = True
-        avg_method      = 'legacy_old'
-        cd_method       = 'doe'
-        dpdz_method     = 'LM'
-
-        LM_C = 25
-    
-    elif preset == 'yadav':
-        void_method     = 'continuity'
-
-    elif preset == 'worosz':
-        cd_method       = 'err_iter'
-    
     # Starting L/D
     if io == None:
         LoverD      = cond.LoverD                               # Condition L/D
@@ -122,6 +167,8 @@ def iate_1d_1g(
     z_mesh = np.arange(LoverD, query + z_step, z_step)          # Axial mesh [-]
     z_mesh = z_mesh * Dh                                        # Axial mesh [m], units necessary for dp calculation
     z_step = z_step * Dh
+
+    R_c = R_c * Dh                                              # Radius of curvature
 
     ############################################################################################################################
     #                                                                                                                          #
@@ -138,51 +185,48 @@ def iate_1d_1g(
     #       c. 'dissipation'
     #       d. Other
     #  4. Else, default to vertical-upward
-    if theta == 0 and geometry == None:         # Horizontal, no elbow (Talley, 2012)
-        if C_WE == None:
-            C_WE    = 0.000
-        if C_RC == None:
-            C_RC    = 0.003
-        if C_TI == None:
-            C_TI    = 0.014
+
+    def set_coeffs(C_WE_default, C_RC_default, C_TI_default, **kwargs):
+        nonlocal C_WE, C_RC, C_TI
         
-        We_cr = 5
+        C_WE = C_WE if C_WE is not None else C_WE_default
+        C_RC = C_RC if C_RC is not None else C_RC_default
+        C_TI = C_TI if C_TI is not None else C_TI_default
+
+        for key, value in kwargs.items():
+            globals()[key] = value
+        
+    if theta == 0 and geometry == None:         # Horizontal, no elbow (Talley, 2012)
+        set_coeffs(0.000, 0.003, 0.014, We_cr = 5)
 
     elif geometry == 'elbow':                   # Elbow (Yadav, 2013)
-        if C_WE == None:
-            C_WE    = 0.000
-        if C_RC == None:
-            C_RC    = 0.008
-        if C_TI == None:
-            C_TI    = 0.085
+        set_coeffs(0.000, 0.008, 0.085)
+    
+    elif geometry == 'ubend':                   # U-bend (Quan, 2024)
+        set_coeffs(0.000, 0.010, 0.008,
+                   acrit = 1.00, We_cr = 6, LM_C = 85, k_m = 0.20)
+
+    elif geometry == 'dissipation':             # U-bend dissipation region (Quan, 2025)
+        set_coeffs(0.000, 0.004, 0.085,
+                   acrit = 1.00, We_cr = 6, LM_C = 68)
 
     elif geometry == 'vd':                      # Vertical-downward (Ishii, Paranjape, Kim, and Sun, 2004)
-        if C_WE == None:
-            C_WE    = 0.002
-        if C_RC == None:
-            C_RC    = 0.004
-        if C_TI == None:
-            C_TI    = 0.034
+        set_coeffs(0.002, 0.004, 0.034)
 
     else:                                       # Default to vertical-upward, no elbow (Ishii, Kim, and Uhle, 2002)
-        if C_WE == None:
-            C_WE    = 0.002
-        if C_RC == None:
-            C_RC    = 0.004
-        if C_TI == None:
-            C_TI    = 0.085
-    
+        set_coeffs(0.002, 0.004, 0.085)
+
+    ############################################################################################################################
+    #                                                                                                                          #
+    #                                                       COVARIANCE                                                         #
+    #                                                                                                                          #
+    ############################################################################################################################
     if cond2 == None:
         cov_method = 'fixed'
 
     if cov_method == 'interp':
         # Use data at initial condition, void reconstruction downstream
-        if io == None:
-            rf1 = False
-            rf2 = rf
-        else:
-            rf1 = rf
-            rf2 = rf
+        rf1, rf2 = (False, reconstruct_flag) if io is None else (reconstruct_flag, reconstruct_flag)
         
         if COV_RC == None:
             COV_RC1 = np.nan_to_num(cond.calc_COV_RC(reconstruct_flag = rf1, avg_method = avg_method, debug = False), nan=1.0)
@@ -196,10 +240,14 @@ def iate_1d_1g(
 
     else:
         if COV_RC == None:
-            COV_RC = 1
+            COV_RC = [1 for _ in range(len(z_mesh))]
+        else:
+            COV_RC = COV_RC * [1 for _ in range(len(z_mesh))]       # Not sure if this is necessary
 
         if COV_TI == None:
-            COV_TI = 1
+            COV_TI = [1 for _ in range(len(z_mesh))]
+        else:
+            COV_TI = COV_TI * [1 for _ in range(len(z_mesh))]
 
     ############################################################################################################################
     #                                                                                                                          #
@@ -218,13 +266,41 @@ def iate_1d_1g(
     STI             = np.empty(len(z_mesh))
     SEXP            = np.empty(len(z_mesh))
     SVG             = np.empty(len(z_mesh))
-    
+
     aiwe            = np.empty(len(z_mesh))
     airc            = np.empty(len(z_mesh))
     aiti            = np.empty(len(z_mesh))
     aiexp           = np.empty(len(z_mesh))
     aivg            = np.empty(len(z_mesh))
 
+    # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
+    # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
+    # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
+    # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE v
+    # QUARANTINE SECTION Q1
+    pz              = np.empty(len(z_mesh))     # Initialize 'pz' array for local absolute pressure along z_mesh
+    rho_gz          = np.empty(len(z_mesh))
+    jgloc           = np.empty(len(z_mesh))
+    #j               = np.empty(len(z_mesh))
+    vgj             = np.empty(len(z_mesh))
+    C0              = np.empty(len(z_mesh))
+    deltah          = np.empty(len(z_mesh))    #Quan, 1107
+
+    phi_f2          = np.empty(len(z_mesh))
+    rho_x           = np.empty(len(z_mesh))
+    quad_C          = np.empty(len(z_mesh))
+    chi_inv         = np.empty(len(z_mesh))
+    alpha_x         = np.empty(len(z_mesh))
+    dpdz            = np.empty(len(z_mesh))
+    rho_m           = np.empty(len(z_mesh))
+
+    COV_RC          = np.empty(len(z_mesh))          #1105
+    COV_TI          = np.empty(len(z_mesh))          #1105
+    # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE ^
+    # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
+    # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
+    # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
+    
     if io == None:
         aiwe[0]     = 0
         airc[0]     = 0
@@ -247,6 +323,20 @@ def iate_1d_1g(
             alpha[0]    = cond.area_avg("alpha",method=avg_method)                  # [-]
             Db[0]       = cond.void_area_avg("Dsm1",method=avg_method) / 1000       # [m]
 
+            # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
+            # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
+            # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
+            # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE v
+            # QUARANTINE SECTION Q2
+            vgz[0]      = cond.void_area_avg('ug1')                 #1105
+            
+
+        pz[0] = jgatm * p_atm / jgloc [0] # Initial corrected absolute pressure at the start of z_mesh
+        # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE ^
+        # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
+        # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
+        # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
+        
     else:
         aiwe[0]     = io["aiwe"][-1]
         airc[0]     = io["airc"][-1]
@@ -260,6 +350,25 @@ def iate_1d_1g(
         jf          = io["jf"]
         jgloc       = io["jgloc"]
         jgatm       = io["jgatm"]
+        
+        # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
+        # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
+        # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
+        # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE v
+        # QUARANTINE SECTION Q3
+        pz[0]       = io ["pz"][-1]
+        vgz[0]      = io["vgz"][-1]
+        
+    if geometry == 'U-bend Dissipation' or geometry == 'U-bend':
+        COV_RC[0]   = cond.calc_COV_RC()                        #1105
+        COV_TI[0]   = cond.calc_COV_TI()                        #1105
+    else:
+        COV_RC[0] = 1
+        COV_TI[0] = 1
+    # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE ^
+    # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
+    # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
+    # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
 
     ########################################################################################################################
     # Pressure drop [Pa/m]
@@ -274,33 +383,48 @@ def iate_1d_1g(
     else:
         delta_h = (z_mesh[-1] - z_mesh[0])                      # Dissipation region is going to be the same as standard VU
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+    # CHECKPOINT
+
     # Calculate initial pressure and pressure gradient
-    p = jgatm * p_atm / jgloc                                   # Back-calculate local corrected absolute pressure
+  #  p = jgatm * p_atm / jgloc                                   # Back-calculate local corrected absolute pressure
 
-    if preset == 'kim':
-        p = cond.pz                                             # Override
-        dpdz = cond.dpdz
+ #   if preset == 'kim':
+      #  p = cond.pz                                             # Override
+    #    dpdz = cond.dpdz
 
-    elif dpdz_method == 'interp':
-        dpdz = ((cond2.jgatm * p_atm / cond2.jgloc) - p) / (cond2.LoverD - LoverD)
+   # elif dpdz_method == 'interp':
+   #     dpdz = ((cond2.jgatm * p_atm / cond2.jgloc) - p) / (cond2.LoverD - LoverD)
 
-    else:
-        dpdz = cond.calc_dpdz(
-            method = dpdz_method, 
-            chisholm = LM_C, 
-            m = m, 
-            n = n, 
-            k_m = k_m, 
-            L = (query - LoverD) * Dh
-            ) + ((rho_f * grav * delta_h) / (z_mesh[-1] - z_mesh[0]))   # Pressure gradient from gravity
+  #  else:
+   #     dpdz = cond.calc_dpdz(
+     #       method = dpdz_method, 
+    #        chisholm = LM_C, 
+     #       m = m, 
+     #       n = n, 
+     #       k_m = k_m, 
+      #      L = (query - LoverD) * Dh
+       #     ) + (rho_m*grav)   # Pressure gradient from gravity old version is incorrect: ((rho_f * grav * delta_h) / (z_mesh[-1] - z_mesh[0])) 
 
-    pz = p * (1 - (z_mesh - z_mesh[0]) * (dpdz / p))
+   # pz = p * (1 - (z_mesh - z_mesh[0]) * (dpdz / p))
     
 	# Local gas density along the test section
-    if preset == 'worosz':
-        rho_gz = pz / R_spec / T                                # Worosz, Ideal Gas Law
-    else:
-        rho_gz = rho_g * pz / p                                 # Talley
+   # if preset == 'worosz':
+   #     rho_gz = pz / R_spec / T                                # Worosz, Ideal Gas Law
+   # else:
+     #   rho_gz = rho_g * pz / p                                 # Talley
     
     ############################################################################################################################
     #                                                                                                                          #
@@ -309,30 +433,50 @@ def iate_1d_1g(
     ############################################################################################################################
     
     # Calculate ai(z) to evaluate the steady state one-dim one-group model
+
     for i, z in enumerate(z_mesh):
         if (i+1) >= len(z_mesh):
             break
             
-        jgloc = jgatm * p_atm / pz[i]                           # Talley used jgP1 and pressure at P1 instead of jgatm and p_atm
+        jgloc [i]= jgatm * p_atm /pz[i]                          # Talley used jgP1 and pressure at P1 instead of jgatm and p_atm
         
-        if void_method == 'vgz_talley':
-            vgz[i] = 1.05 * (jf + jgloc) - 1.23                 # Talley 2012, Eq. 3-31
-            alpha[i] = jgloc / vgz[i]
-            Db[i] = 6 * alpha[i] / ai[i]
-
-        if void_method == 'vgz_interp' and cond2 != None:
-            vgz[i] = np.interp(z_mesh[i] / Dh,
-                               (cond.LoverD, cond2.LoverD),
-                               (cond.void_area_avg('ug1',method=avg_method), cond2.void_area_avg('ug1',method=avg_method))
-                               )
-
-            alpha[i] = jgloc / vgz[i]
-            Db[i] = 6 * alpha[i] / ai[i]
-            
+        if preset == 'worosz':
+            rho_gz[i] = pz[i] / R_spec / T                                # Worosz, Ideal Gas Law
         else:
-            vgz[i] = jgloc / alpha[i]                           # Estimate void weighted velocity
+            rho_gz[i]= rho_g * pz[i] / pz[0]                                 # Talley?
+           # rho_gz[i]= rho_g * pz[i] / p_atm                                 # Worosz, 2015
+
+      #  if void_method == 'vgz_talley':
+      #      vgz[i] = 1.05 * (jf + jgloc) - 1.23                 # Talley 2012, Eq. 3-31
+       #     alpha[i] = jgloc / vgz[i]
+       #     Db[i] = 6 * alpha[i] / ai[i]
+
+      #  else:
+       #     vgz[i] = np.interp(z_mesh[i] / Dh,
+        #                       (cond.LoverD, cond2.LoverD),
+        #                       (cond.void_area_avg('ug1',method=avg_method), cond2.void_area_avg('ug1',method=avg_method))
+         #                      )
+#
+            # alpha[i] = jgloc / vgz[i]
+            # Db[i] = 6 * alpha[i] / ai[i]
+            
+       # else:
+       # vgz[i] = jgloc[i] / alpha[i]                           # Estimate void weighted velocity
 
         vfz = jf / (1 - alpha[i])
+
+
+        # CHECKPOINT
+
+
+
+
+
+
+
+
+
+
 
         ########################################################################################################################
         # Estimate bubble relative velocity <ur> (See Talley, 2012, 4.2.2.6)
@@ -381,7 +525,47 @@ def iate_1d_1g(
 
         vm = (rho_f * (1 - alpha[i]) * vfz + rho_gz[i] * alpha[i] * vgz[i]) \
             / rho_m                                             # Mixture velocity
+
+        # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
+        # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
+        # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
+        # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE v
+        # QUARANTINE SECTION Q4
+        if geometry == 'U-bend':
+            if i <= 5.9*Dh /z_step:  # actual L/D length from P3 to inlet of U-bend is 5.9
+                deltah [i]=z_step  #Quan, 1107
+            elif i >= (np.pi * R_c + 5.9*Dh)/z_step:    # Temporary use only, consider additional 3.4 length from P5 (exit of U-bend) to P6
+                theta= -90
+                deltah [i]=z_step
+            else:
+                deltah [i] = R_c * np.sin(((i+1)*z_step -5.9*Dh)/ R_c) -R_c * np.sin((i*z_step-5.9*Dh) / R_c)  #Quan, 1107
+        else:
+             deltah [:] = z_step
+
+        if preset == 'kim':
+          #p = cond.pz                                             # Override
+          dpdz = cond.dpdz
+
+        elif dpdz_method == 'interp':
+            dpdz = ((cond2.jgatm * p_atm / cond2.jgloc) - pz[i]) / (cond2.LoverD - LoverD)  
+
+        else:
+         dpdz [i]= cond.calc_dpdz(    # just frictional part
+            method = dpdz_method, 
+            chisholm = LM_C, 
+            m = m, 
+            n = n, 
+            k_m = k_m, 
+            L = L_res       #L = (query - LoverD) * Dh  #Length of restriction, only matters for 'Kim' method
+            )    # Pressure gradient from gravity. old version is incorrect: ((rho_f * grav * delta_h) / (z_mesh[-1] - z_mesh[0])) 
         
+         pz[i+1] = pz[i] - dpdz[i] * z_step - rho_m[i]*grav*deltah [i]    # local absolute pressure, deltah different across U-bend
+         rho_gz[i+1] = rho_g * pz[i+1] / pz[0]
+        # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE ^
+        # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
+        # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
+        # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
+
         if preset == 'kim':
             Rem = rho_f * vm * Dh / mu_m                        # Mixture Reynolds number
         else:
@@ -422,6 +606,82 @@ def iate_1d_1g(
             vgz[i] = vgzP4 * (1 + Const1 * np.log(Sratio))
             '''
 
+        # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
+        # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
+        # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
+        # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE v
+        # QUARANTINE SECTION Q5
+        elif geometry == 'U-bend Dissipation':       #Quan, 10/29
+
+            void_method = 'continuity'
+            
+            Fr_m = jf**2/abs(grav) / Dh / (1-alpha[0])**4                   # Nondimensional number used to model beta_diss, use value at exit of U-bend
+
+           # beta_diss = 0.00049266 * Fr_m-0.13838962                    # dissipation coefficient (P5-P8) in the U-bend dissipation region, P5 data as reference
+            beta_diss = 0.00013487 * Fr_m-0.08896764                    # dissipation coefficient (P6-P8) in the U-bend dissipation region, P6 data as reference
+
+            delta_z  = (z_mesh[i]-z_mesh[0])/Dh
+            
+            #print(f"\t{Fr_m=}")
+            #print(f"\t{beta_diss=}")
+
+          #  vgz[i+1] = vgz[0]* (1-0.20942590*beta_diss*delta_z)   # based on dissipation coefficient (P5-P8) in the U-bend dissipation region, P5 data as reference
+            vgz[i+1] = vgz[0]* (1-0.3066728*beta_diss*delta_z)   # based on dissipation coefficient (P5-P8) in the U-bend dissipation region, P5 data as reference
+
+            SWE[i] = 0
+            SRC[i] = 0
+            STI[i] = 0
+            
+            COV_RC[i+1]=COV_RC [0]*np.exp (1.14819931*beta_diss*delta_z)   #based on dissipation coefficient (P6-P8) in the U-bend dissipation region, P56 data as reference
+
+            COV_TI[:] = 0.87
+        
+        elif geometry == 'vd':       #Quan, 1105
+            #All one or constant
+          #  vgz[i+1] = 1.05 * (jf + jgloc[i]) - 1.23     #Talley
+
+            void_method = 'vgz_Quan_vd'
+
+            SWE[i] = 0
+            SRC[i] = 0
+            STI[i] = 0
+
+            COV_RC[:] = 1
+            COV_TI[:] = 1
+        
+        elif geometry == 'vu':       #Quan, 1105
+            #All one or constant
+          #  vgz[i+1] = 1.05 * (jf + jgloc[i]) - 1.23     #Talley
+
+            void_method = 'vgz_Quan_vu'
+
+            SWE[i] = C_WE * CDwe**(1/3) * ur * ai[i]**2 / 3 / np.pi
+            SRC[i] = 0
+            STI[i] = 0
+
+            COV_RC[:] =1 
+            COV_TI[:] =1
+        
+        elif geometry == 'U-bend':       #Quan, 1105, define models like in U-bend dissipation region
+
+            void_method = 'continuity'
+
+            Fr_m = jf**2/abs(grav) / Dh / (1-alpha[0])**4
+            c_diss = -0.00789605 * Fr_m + 1.25165543             # void fraction variance changing coefficient in the U-bend, based on P3-P5 data, P3 as reference
+            delta_z  = (z_mesh[i]-z_mesh[0])/Dh
+            vgz[i+1] = vgz[0]* (1-0.01441839*c_diss*delta_z)    # based on P3-P5 data, P3 as reference
+
+            SWE[i] = 0
+            SRC[i] = 0
+            STI[i] = 0
+
+            COV_RC[i+1]=COV_RC [0]*np.exp (0.1317*c_diss*delta_z)   #1107   # based on P3-P5 data, P3 as reference
+            COV_TI[:] =0.92
+        # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE ^
+        # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
+        # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
+        # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
+
         else:
             SWE[i] = C_WE * CDwe**(1/3) * ur * ai[i]**2 / 3 / np.pi
         
@@ -443,9 +703,14 @@ def iate_1d_1g(
         ########################################################################################################################
         # Estimate sources & sinks in the Interfacial Area Transport Eqn. (Part 2)
 
+        # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
+        # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
+        # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
+        # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE v
+        # QUARANTINE SECTION Q6
         # Source due to Bubble Expansion
-        if preset == 'kim' or preset == 'talley':
-            SEXP[i] = -2 / 3 / pz[i] * ai[i] * vgz[i] * (-dpdz)     # Original DOE_MATLAB_IAC
+        if preset == 'kim' or preset == 'talley' or preset == 'Quan':
+            SEXP[i] = -2 / 3 / pz[i] * ai[i] * vgz[i] * (-dpdz[i])     # Original DOE_MATLAB_IAC
         else:
             if i <= 2:      # Previously 3, but in MATLAB (1 indexing vs. 0 indexing)
                 # Forward difference for first node
@@ -453,6 +718,10 @@ def iate_1d_1g(
             else:
                 # Backwards difference for remaining nodes
                 SEXP[i] = -2 / 3 / rho_gz[i] * ai[i] * vgz[i] * (rho_gz[i] - rho_gz[i-1]) / z_step
+        # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE ^
+        # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
+        # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
+        # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
 
         # Source/sink due to Bubble Acceleration (advection in Yadav's script) (VG for velocity gradient)
         if i <= 2:
@@ -532,6 +801,35 @@ def iate_1d_1g(
                                )
             alpha[i+1] = jgloc / vgz[i+1]
 
+        # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
+        # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
+        # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
+        # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE v
+        # QUARANTINE SECTION Q7
+        elif void_method == 'vgz_Quan_vd':
+           
+
+           jgloc[i+1] = jgatm * p_atm / pz[i+1]                       
+
+           vgz[i+1] = 1.06 * (jf + jgloc[i+1]) - 0.07                 # coefficients based on U-bend data at P9
+          # vgz[i+1] = 0.95* (jf + jgloc[i+1]) +0.04                   # coefficients based on U-bend data at P8
+
+           alpha[i+1] = jgloc[i+1] / vgz[i+1]
+
+        elif void_method == 'vgz_Quan_vu':
+           
+
+           jgloc[i+1] = jgatm * p_atm / pz[i+1]                       
+
+        #   vgz[i+1] = 1.05 * (jf + jgloc[i+1]) +0.188                 # Drew
+           vgz[i+1] = 1.02* (jf + jgloc[i+1]) +0.03                   # coefficients based on U-bend data at P3
+
+           alpha[i+1] = jgloc[i+1] / vgz[i+1]
+        # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE ^
+        # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
+        # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
+        # QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE QUARANTINE
+
         elif void_method == 'pressure_kim':
             f_f, f_g = cond.calc_fric(m = m, n = n)
             dpdz_f = f_f * 1/Dh * rho_f * jf**2 / 2
@@ -589,7 +887,8 @@ def iate_1d_1g(
         "aiwe"          : aiwe,
         "aivg"          : aivg,
         "z_mesh"        : z_mesh,
-        "pz"            : pz
+        "pz"            : pz,
+        "vgz"           : vgz # quanz
     }
 
     return io
