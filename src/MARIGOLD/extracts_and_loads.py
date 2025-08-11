@@ -1,8 +1,7 @@
-
 from .config import *
 from .Condition import Condition
-from .Iskandrani_Condition import Iskandrani_Condition
-from .Yang_Condition import Yang_Condition
+from .Condition_Archive import Iskandrani_Condition
+from .Condition_Archive import Yang_Condition
 
 import re
 import xlrd
@@ -530,7 +529,6 @@ def extractProbeData(dump_file = 'database.dat', in_dir = [], require_terms = No
     with open(dump_file, 'wb') as g:
         pickle.dump(all_conditions, g)
     return
-
 
 def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], require_terms = ['jf'], 
                             skip_terms = ['CFD', 'Copy'], sheet_type = 'adix_template', append_to_json = None,
@@ -1392,7 +1390,6 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
     with open(dump_file, 'wb') as g:
         pickle.dump(all_conditions, g)
     return
-
 
 def dump_data_from_tabs(dump_file = 'PITA_Database.dat', skip_dir = "") -> None:
     all_conditions = []
