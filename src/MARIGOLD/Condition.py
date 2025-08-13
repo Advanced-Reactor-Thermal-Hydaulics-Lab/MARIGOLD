@@ -1,4 +1,6 @@
 from .config import *
+from .operations import *
+from .velocity import*
 from .plot_utils import *
 from scipy import interpolate
 from scipy.optimize import minimize
@@ -1491,7 +1493,7 @@ class Condition:
                 try:
                     vfp = midas_dict['vf']
                 except KeyError:
-                    calc_vr()
+                    calc_vr(self)
 
                 if vfp == 0:
                     if midas_dict['vr'] != 0:

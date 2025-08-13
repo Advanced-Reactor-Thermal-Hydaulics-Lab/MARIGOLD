@@ -1,5 +1,6 @@
 from .Condition import Condition
 from .config import *
+from .operations import *
 from subprocess import run
 from shutil import copy2
 

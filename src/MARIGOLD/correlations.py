@@ -1,4 +1,5 @@
 from .config import *
+from .operations import *
 from .plot_utils import *
 from scipy import interpolate
 from scipy.optimize import minimize
@@ -67,7 +68,7 @@ def calc_mu_eff(cond, method='Ishii', alpha_peak = 1.0):
     """
 
     cond.mirror()
-    alpha_avg = cond.area_avg('alpha')
+    alpha_avg = area_avg(cond,'alpha')
             
     for angle, r_dict in cond.data.items():
         for rstar, midas_dict in r_dict.items():
@@ -93,7 +94,7 @@ def calc_mu_eff(cond, method='Ishii', alpha_peak = 1.0):
             midas_dict.update({'mu_eff': mu_eff})
             midas_dict.update({'mu_m': mu_m})
     try:
-        return cond.area_avg('mu_eff')
+        return area_avg(cond,'mu_eff')
     except:
         return 0
 
@@ -129,7 +130,7 @@ def calc_dpdz(cond, method = 'LM', m = 0.316, n = 0.25, chisholm = 25, k_m = 0.1
         chisholm = 26 - 4.7*np.cos( cond.theta*np.pi/180 )
     
     if method.lower() == 'lm' or method.lower() == 'lockhart' or method.lower() == 'lockhart-martinelli':
-        f_f, f_g = cond.calc_fric(m = m, n = n)
+        f_f, f_g = calc_fric(cond,m = m, n = n)
 
         dpdz_f = f_f * 1/cond.Dh * cond.rho_f * cond.jf**2 / 2
         dpdz_g = f_g * 1/cond.Dh * cond.rho_g * cond.jgloc**2 / 2
@@ -139,7 +140,7 @@ def calc_dpdz(cond, method = 'LM', m = 0.316, n = 0.25, chisholm = 25, k_m = 0.1
         dpdz = phi_f2 * dpdz_f
 
     elif method.lower() == 'kim':
-        f_f, f_g = cond.calc_fric(m = m, n = n)
+        f_f, f_g = calc_fric(cond,m = m, n = n)
 
         dpdz_f = f_f * 1/cond.Dh * cond.rho_f * cond.jf**2 / 2
         dpdz_g = f_g * 1/cond.Dh * cond.rho_g * cond.jgloc**2 / 2
@@ -152,7 +153,7 @@ def calc_dpdz(cond, method = 'LM', m = 0.316, n = 0.25, chisholm = 25, k_m = 0.1
         dpdz = phi_f2 * dpdz_f
 
     elif method.lower() == 'akagawa':
-        f_f, f_g = cond.calc_fric(m = m, n = n)
+        f_f, f_g = calc_fric(cond,m = m, n = n)
 
         dpdz_f = f_f * 1/cond.Dh * cond.rho_f * cond.jf**2 / 2
         phi_f2 = ((1 - alpha)**(-akapower))**2
@@ -209,7 +210,7 @@ def calc_cd(cond, method='Ishii-Zuber', vr_cheat = False, limit = 10**-6, const_
         - Stores ``'cd'`` and ``'Reb'`` in ``midas_dict``
     """
 
-    cond.calc_mu_eff()
+    calc_mu_eff(cond)
 
     for angle, r_dict in cond.data.items():
         for rstar, midas_dict in r_dict.items():
@@ -268,7 +269,7 @@ def calc_cd(cond, method='Ishii-Zuber', vr_cheat = False, limit = 10**-6, const_
 
             midas_dict.update({'cd': cd})
 
-    return cond.area_avg('cd')
+    return area_avg(cond,'cd')
 
 def calc_cl(cond, method='tomiyama', sharma_factor = False):
     """TODO, not implemented
@@ -392,11 +393,11 @@ def calc_vr_model(cond, method='km1_simp', kw = 0.654, n=1, Lw = 5, kf = 0.113,
                             )
                     initialize_vr = False
 
-                cond.calc_cd(vr_cheat=False)
+                calc_cd(cond,vr_cheat=False)
             else:
-                cond.calc_cd(vr_cheat=True)
+                calc_cd(cond,vr_cheat=True)
         try:
-            old_vr = cond.area_avg('vr_model', recalc=True)
+            old_vr = area_avg(cond,'vr_model', recalc=True)
         except KeyError:
             old_vr = initial_vr # Initialize?
 
@@ -435,7 +436,7 @@ def calc_vr_model(cond, method='km1_simp', kw = 0.654, n=1, Lw = 5, kf = 0.113,
 
                 elif method == 'prelim_plus':
                     if custom_f is None:
-                        ff, fg = cond.calc_fric()
+                        ff, fg = calc_fric(cond)
                     else:
                         ff = custom_f
 
@@ -445,7 +446,7 @@ def calc_vr_model(cond, method='km1_simp', kw = 0.654, n=1, Lw = 5, kf = 0.113,
                     try:
                         vr = (
                         +kw * midas_dict['alpha'] * midas_dict['vf'] * midas_dict['cd']**(1./3) - kf * midas_dict['vf'] 
-                        + np.sqrt( 4./3 * cond.void_area_avg('Dsm1')*0.001/midas_dict['cd'] * ( ff/cond.Dh * cond.jf**2/2 + 
+                        + np.sqrt( 4./3 * void_area_avg(cond,'Dsm1')*0.001/midas_dict['cd'] * ( ff/cond.Dh * cond.jf**2/2 + 
                                                                                 (1 - midas_dict['alpha'])*(1-cond.rho_g/cond.rho_f) * cond.gz ) )
                         )
                     except ZeroDivisionError:
@@ -463,7 +464,7 @@ def calc_vr_model(cond, method='km1_simp', kw = 0.654, n=1, Lw = 5, kf = 0.113,
                     try:
                         vr = (
                         np.sign(old_vr) * kw * midas_dict['alpha'] * midas_dict['vf'] * midas_dict['cd']**(1./3) - kf * midas_dict['vf'] 
-                        + np.sqrt( 4./3 * cond.void_area_avg('Dsm1')*0.001/midas_dict['cd'] * (1 - midas_dict['alpha'])*(1-cond.rho_g/cond.rho_f) * cond.gz ) )
+                        + np.sqrt( 4./3 * void_area_avg(cond,'Dsm1')*0.001/midas_dict['cd'] * (1 - midas_dict['alpha'])*(1-cond.rho_g/cond.rho_f) * cond.gz ) )
                     except ZeroDivisionError:
                         vr = 0
                     
@@ -480,7 +481,7 @@ def calc_vr_model(cond, method='km1_simp', kw = 0.654, n=1, Lw = 5, kf = 0.113,
                     vr = np.sqrt(2) * (cond.sigma * cond.g * (cond.rho_f - cond.rho_g) / (cond.rho_f**2))**0.25
                 
                 elif method.lower() == 'chahed': # see Chahed et al. (2017)
-                    cond.calc_dpdz()
+                    calc_dpdz(cond)
                     cond.calc_grad('alpha')
                     cond.calc_grad('vf')
                     if abs(midas_dict['alpha']) < 1e-6 or abs(midas_dict['cd']) < 1e-6:
@@ -509,32 +510,32 @@ def calc_vr_model(cond, method='km1_simp', kw = 0.654, n=1, Lw = 5, kf = 0.113,
         iterations += 1
 
         try:
-            cond.area_avg('vr_model', recalc=True)
+            area_avg(cond,'vr_model', recalc=True)
         except:
             print(f"Error calculating vr" )
 
         if old_vr == np.inf or old_vr != old_vr or vr == np.inf:
-            print(f"Error calculating vr: {cond.area_avg('vr_model', recalc=True)}")
+            print(f"Error calculating vr: {area_avg(cond,'vr_model', recalc=True)}")
 
         if old_vr == 0:
             if not quiet:
                 print(f"vr_model calculated as 0 after {iterations} iterations")
-                print(old_vr, cond.area_avg('vr_model', recalc=True))
+                print(old_vr, area_avg(cond,'vr_model', recalc=True))
             return
 
-        if abs(old_vr - cond.area_avg('vr_model', recalc=True)) / abs(old_vr) < iter_tol:
+        if abs(old_vr - area_avg(cond,'vr_model', recalc=True)) / abs(old_vr) < iter_tol:
             if not quiet:
                 print(f"vr_model converged in {iterations} iterations")
-                print(old_vr, cond.area_avg('vr_model', recalc=True))
-            return cond.area_avg("vr_model")
+                print(old_vr, area_avg(cond,'vr_model', recalc=True))
+            return area_avg(cond,"vr_model")
         
         if iterations > MAX_ITERATIONS:
             print("Warning, max iterations exceeded in calculating vr_model")
-            print(f"{old_vr}\t{cond.area_avg('vr_model', recalc=True)}\t{(old_vr - cond.area_avg('vr_model', recalc=True))/old_vr*100}")
+            print(f"{old_vr}\t{area_avg(cond,'vr_model', recalc=True)}\t{(old_vr - area_avg(cond,'vr_model', recalc=True))/old_vr*100}")
             return
         
     
-    return cond.area_avg("vr_model")
+    return area_avg(cond,"vr_model")
 
 def calc_vgj_model(cond):
     """Method for calculating local Vgj based on models
@@ -549,7 +550,7 @@ def calc_vgj_model(cond):
 
             if 'vr_model' not in midas_dict.keys():
                 print(f"Warning: vr_model not found for {angle}, {rstar}, calling calc_vr_model with default inputs")
-                cond.calc_vr_model()
+                calc_vr_model(cond)
 
             midas_dict['vgj_model'] = (1 - midas_dict['alpha']) * midas_dict['vr_model']
 
@@ -574,10 +575,10 @@ def calc_IS_term(cond, method = 'power', n=2, mu = 1.5):
     
     **Returns**:
 
-        - ``cond.area_avg('ISxgrad')``. ``'ISxgrad`` and ``'IS'`` stored in ``midas_dict``
+        - ``area_avg(cond,'ISxgrad')``. ``'ISxgrad`` and ``'IS'`` stored in ``midas_dict``
     """
-    cond.calc_cd()
-    cond.calc_fric()
+    calc_cd(cond)
+    calc_fric(cond)
     cond.calc_grad('alpha')
     
     for angle, r_dict in cond.data.items():
@@ -608,13 +609,13 @@ def calc_IS_term(cond, method = 'power', n=2, mu = 1.5):
                     )
 
                 elif method == 'alpha':
-                    taui = n * cond.tau_fw * midas_dict['alpha'] / cond.area_avg('alpha')
+                    taui = n * cond.tau_fw * midas_dict['alpha'] / area_avg(cond,'alpha')
                     midas_dict.update(
                         {'ISxgrad': float(taui * (midas_dict['grad_alpha_r'] )) , 'IS': float(taui)}
                     )
 
 
-    return cond.area_avg('ISxgrad')
+    return area_avg(cond,'ISxgrad')
 
 def calc_aa_vr_model(cond, method='km1_naive', IS_method = 'power', kw=0.654, kf=0.113, Lw = 5, Ctau=1, n=2, IS_mu = 1.5, Cvfacd = 1):
     """to calculate estimate the area-averaged relative velocity
@@ -658,35 +659,35 @@ def calc_aa_vr_model(cond, method='km1_naive', IS_method = 'power', kw=0.654, kf
     """
 
     if method == 'km1_naive':
-        vr = kw * (np.pi/4)**(1/3) * cond.area_avg('alpha') * cond.jf / (1 - cond.area_avg('alpha')) * cond.area_avg('cd')**(1./3) *  (2**(-1./3) - Lw**(1/3))/(0.5 - Lw) + kf * cond.jf / (1 - cond.area_avg('alpha'))
+        vr = kw * (np.pi/4)**(1/3) * area_avg(cond,'alpha') * cond.jf / (1 - area_avg(cond,'alpha')) * area_avg(cond,'cd')**(1./3) *  (2**(-1./3) - Lw**(1/3))/(0.5 - Lw) + kf * cond.jf / (1 - area_avg(cond,'alpha'))
     
     elif method == 'km1_naive2' :#or method == 'prelim':
-        cond.calc_cd()
-        vr = kw * cond.area_avg('alpha') * cond.jf / (1 - cond.area_avg('alpha')) * cond.area_avg('cd')**(1./3)  + kf * cond.jf / (1 - cond.area_avg('alpha'))
+        calc_cd(cond)
+        vr = kw * area_avg(cond,'alpha') * cond.jf / (1 - area_avg(cond,'alpha')) * area_avg(cond,'cd')**(1./3)  + kf * cond.jf / (1 - area_avg(cond,'alpha'))
 
     elif method == 'km1_simp' or method == 'prelim':
-        vr = -kw * cond.area_avg('alpha') * cond.jf / (1 - cond.area_avg('alpha')) * cond.area_avg('cd')**(1./3) - kf * cond.jf / (1 - cond.area_avg('alpha'))
+        vr = -kw * area_avg(cond,'alpha') * cond.jf / (1 - area_avg(cond,'alpha')) * area_avg(cond,'cd')**(1./3) - kf * cond.jf / (1 - area_avg(cond,'alpha'))
     
     elif method == 'final':
-        cond.calc_cd()
-        vr = Cvfacd * -kw * cond.area_avg('alpha') * cond.jf / (1 - cond.area_avg('alpha')) * cond.area_avg('cd')**(1./3) - kf * cond.jf / (1 - cond.area_avg('alpha'))
+        calc_cd(cond)
+        vr = Cvfacd * -kw * area_avg(cond,'alpha') * cond.jf / (1 - area_avg(cond,'alpha')) * area_avg(cond,'cd')**(1./3) - kf * cond.jf / (1 - area_avg(cond,'alpha'))
     
     elif method == 'IS_Ctau':
-        cond.calc_cd()
-        cond.calc_fric()
-        rb = cond.void_area_avg('Dsm1') / 2 /1000 # Convert to m
-        CD = cond.void_area_avg('cd')
-        alpha = cond.area_avg('alpha')
+        calc_cd(cond)
+        calc_fric(cond)
+        rb = void_area_avg(cond,'Dsm1') / 2 /1000 # Convert to m
+        CD = void_area_avg(cond,'cd')
+        alpha = area_avg(cond,'alpha')
 
         discrim = (1-alpha)*cond.gz * (cond.rho_f - cond.rho_g) + (1-Ctau)*4*cond.tau_fw/cond.Dh
         vr = np.sign(discrim) * np.sqrt(8*rb/3 * 1/(CD * cond.rho_f) * abs( discrim ))
 
     elif method == 'IS':
-        IS_term = cond.calc_IS_term(method = IS_method, n = n, mu = IS_mu)
+        IS_term = calc_IS_term(cond,method = IS_method, n = n, mu = IS_mu)
 
-        rb = cond.void_area_avg('Dsm1') / 2 /1000 # Convert to m
-        CD = cond.void_area_avg('cd')
-        alpha = cond.area_avg('alpha')
+        rb = void_area_avg(cond,'Dsm1') / 2 /1000 # Convert to m
+        CD = void_area_avg(cond,'cd')
+        alpha = area_avg(cond,'alpha')
 
         discrim = 4*cond.tau_fw/cond.Dh + (1-alpha)*cond.gz * (cond.rho_f - cond.rho_g) - 1/alpha * IS_term
         vr = np.sign(discrim) * np.sqrt(8*rb/3 * 1/(CD * cond.rho_f) * abs( discrim ))
@@ -694,7 +695,7 @@ def calc_aa_vr_model(cond, method='km1_naive', IS_method = 'power', kw=0.654, kf
         raise(ValueError("Invalid calc_aa_vr_model method"))
         
 
-    cond.vwvgj = (1-cond.area_avg('alpha'))*vr # Legacy, do not use
+    cond.vwvgj = (1-area_avg(cond,'alpha'))*vr # Legacy, do not use
     cond.aa_vr = vr
     return vr
 
@@ -716,6 +717,6 @@ def calc_vw_aa_Vgj_model(cond, Kw=0.654, Kf=0.113):
         for rstar, midas_dict in rdict.items():
             midas_dict.update({'cd13': midas_dict['cd']**(1./3)})
 
-    cond.vw_aa_Vgj_model = -Kf * cond.Cajf * cond.jf - Kw * (cond.Cajc * cond.Cajf * cond.area_avg('alpha') * cond.jf * cond.void_area_avg('cd13'))
+    cond.vw_aa_Vgj_model = -Kf * cond.Cajf * cond.jf - Kw * (cond.Cajc * cond.Cajf * area_avg(cond,'alpha') * cond.jf * void_area_avg(cond,'cd13'))
     
     return cond.vw_aa_Vgj_model

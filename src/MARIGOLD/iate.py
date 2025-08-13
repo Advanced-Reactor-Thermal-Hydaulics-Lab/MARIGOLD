@@ -1,4 +1,6 @@
 from .config import *
+from .operations import *
+from .correlations import *
 import warnings
 
 ############################################################################################################################
@@ -113,7 +115,8 @@ def iate_1d_1g(
     z_mesh = z_mesh * Dh                                        # Axial mesh [m], units necessary for dp calculation
     z_step = z_step * Dh
 
-    R_c = R_c * Dh                                              # Radius of curvature
+    if geometry != None:
+        R_c = R_c * Dh                                              # Radius of curvature
 
     ############################################################################################################################
     #                                                                                                                          #
@@ -245,7 +248,8 @@ def iate_1d_1g(
         dpdz = ((cond2.jgatm * p_atm / cond2.jgloc) - p) / (cond2.LoverD - LoverD)
 
     else:
-        dpdz = cond.calc_dpdz(
+        dpdz = calc_dpdz(
+            cond, 
             method = dpdz_method, 
             chisholm = LM_C, 
             m = m, 
@@ -472,7 +476,7 @@ def iate_1d_1g(
             alpha[i+1] = jgloc / vgz[i+1]
 
         elif void_method == 'pressure_kim':
-            f_f, f_g = cond.calc_fric(m = m, n = n)
+            f_f, f_g = calc_fric(cond, m = m, n = n)
             dpdz_f = f_f * 1/Dh * rho_f * jf**2 / 2
 
             phi_f2 = (dpdz - ((rho_f * grav * delta_h) / (z_mesh[-1] - z_mesh[0]))) / dpdz_f
@@ -494,7 +498,7 @@ def iate_1d_1g(
             alpha[i+1] = alpha_x / (alpha_x + 1)
 
         elif void_method == 'pressure_LM':
-            f_f, f_g = cond.calc_fric(m = m, n = n)
+            f_f, f_g = calc_fric(cond, m = m, n = n)
             dpdz_f = f_f * 1/Dh * rho_f * jf**2 / 2
 
             phi_f2 = (dpdz - ((rho_f * grav * delta_h) / (z_mesh[-1] - z_mesh[0]))) / dpdz_f
@@ -713,6 +717,12 @@ def set_geometry_coeffs(theta, geometry, Dh, R_c):
 #                                                       FORMULAS                                                           #
 #                                                                                                                          #
 ############################################################################################################################
+def lineq(x, m, x0, b):
+    return float(max(m * (x - x0) + b, 0))
+
+def quadeq(x, a, b, c):
+    return float(max(), 0)
+
 def calc_Re(rho, v, D, mu):
     return rho * v * D / mu
 
@@ -732,7 +742,7 @@ def calc_CD(Re, method = None):
     return CD
 
 def calc_ur():
-    ur = 1
+    ur = 0
     return ur
 
 ############################################################################################################################
@@ -740,7 +750,7 @@ def calc_ur():
 #                                                        METHODS                                                           #
 #                                                                                                                          #
 ############################################################################################################################
-def calc_COV(cond, alpha_peak = 0.75, alpha_cr = 0.11, avg_method = 'legacy', reconstruct_flag = True):
+def calc_COV(cond, alpha_peak = 0.75, alpha_cr = 0.11, We_cr = 5, avg_method = 'legacy', reconstruct_flag = True):
     """Calculates the experimental covariances based on Talley (2012) method (without modification factor m_RC)
         - Stored in cond.COV_XX
         
@@ -859,61 +869,21 @@ def reconstruct_void(cond, method='talley', avg_method = 'legacy'):
 
         - ``method``: method to use to reconstruct void. Defaults to ``'talley'``. Options include:
             - ``'talley'``
-            - ``'not_talley'``
-            - ``'ryan'`` TODO, not implemented
-            - ``'adix'``, an incorrect implementation of Talley's method
+            - ``'ryan'`` (WIP)
         - ``avg_method``: option passed to :func:`~MARIGOLD.Condition.Condition.area_avg`. Defaults to ``'legacy'``.
     
     Returns:
         - area-averaged reconstructed void
     """
 
-    debug = False
-
     if method.lower() == 'talley':
+        # STEP 1: Determine r* at which void fraction reaches zero.
         cond.roverRend = round(-1.472e-5 * cond.Ref + 2.571,1)      # Inner r/R, outer end fixed at r/R = 1. Also, Talley rounds his r/R_end to the nearest 0.1
 
-        if debug:
-            print(cond.roverRend)
+        # STEP 3: Determine peak void fraction location. Peak location assumed to be 0.90.
+        rstar_peak = 0.90
 
-        def lineq(x, m, x0, b):
-            return float(max(m * (x - x0) + b, 0))
-
-        '''
-        def find_alpha_peak(alpha_peak):
-            for angle, r_dict in cond.data.items():
-                for rstar, midas_dict in r_dict.items():
-
-                    x = rstar * np.cos(angle * np.pi / 180)
-                    y = rstar * np.sin(angle * np.pi / 180)
-
-                    # First calculate centerline void fraction (first linear interpolation)
-                    if y > 0.9:
-                        alpha_CL = alpha_peak / 0.1 * (1 - y)
-                    else:
-                        alpha_CL = max(alpha_peak / (0.9 - cond.roverRend) * (y - cond.roverRend), 0) # make sure it's not < 0. This covers for y < roverRend
-                    alpha_CL = float(alpha_CL)
-
-                    # Then calculate
-                    if rstar >= 0.9:
-                        xtrans = 0.9 * np.cos(angle * np.pi / 180)
-                        midas_dict['alpha_reconstructed'] = alpha_CL / (1 - xtrans) * (1-x)
-                    else:
-                        midas_dict['alpha_reconstructed'] = alpha_CL
-
-            return abs( area_avg(cond,'alpha') - area_avg(cond,'alpha_reconstructed') )
-        
-        result = minimize(find_alpha_peak, x0 = 0.5)
-
-        if result.success:
-            cond.alpha_peak_reconstructed = result.x
-            find_alpha_peak(cond.alpha_peak_reconstructed)
-        else:
-            if debug:
-                warnings.warn("Minimization did not return a successful result")
-                print(f"⟨α⟩_data: {area_avg(cond,'alpha')}\n⟨α⟩_reconstructed: {area_avg(cond,'alpha_reconstructed')}\n")
-        '''
-
+        # STEP 2: Determine peak void fraction value.
         def find_alpha_peak(alpha_peak, rstar_peak=0.90):
             # Talley's reconstruction has a finer grid than experimental data
             # This will affect the slope of the drop-off point if r/R_end is not coincident with a point on the experiment mesh
@@ -921,7 +891,7 @@ def reconstruct_void(cond, method='talley', avg_method = 'legacy'):
             cond.add_mesh_points(r_points)
 
             interps = {}
-            
+
             for angle, r_dict in cond.data.items():                 # 360 degrees covered, not just one quadrant
                 
                 if angle < 90:
@@ -967,18 +937,11 @@ def reconstruct_void(cond, method='talley', avg_method = 'legacy'):
                     y_peak = rstar_peak * np.sin(angle_q1 * np.pi / 180)
                     rstar_nn = y_peak / np.sin(angle_nn * np.pi / 180)
 
-                    # if debug:
-                    #     print(f"angle: {angle}\tangle_nn: {angle_nn}")
-
                     # Peak void fraction of current angle defined as void fraction at previous angle r*
                     peak = lineq(x = rstar_nn,
                                     m = m_nn,
                                     x0 = x0_nn,
                                     b = b_nn)
-                    
-                    if debug and angle == 22.5:
-                        print(f"y_peak: {y_peak}\trstar_nn: {rstar_nn}")
-                        pass
                     
                     anchor = 0
                     rstar_anchor = cond.roverRend / np.cos((90 - angle_q1) * np.pi / 180)       # Talley's implementation in Excel
@@ -1008,7 +971,7 @@ def reconstruct_void(cond, method='talley', avg_method = 'legacy'):
                 m_o2 = (0 - base) / (-1 - rstar_base)                   # Slope of outer interpolation, on opposite wall
 
                 for rstar, midas_dict in r_dict.items():                # Only goes from 0.0 to 1.0
-
+                    
                     if angle >= 180 and angle < 360:
                         rstar = -rstar                                  # Use same slopes for -1.0 to 0.0
 
@@ -1045,106 +1008,22 @@ def reconstruct_void(cond, method='talley', avg_method = 'legacy'):
                                                                         x0 = rstar_base,
                                                                         b = base)
 
-                    if debug:
-                        print(f"{angle}\t{rstar}:\t\talpha_rec: {midas_dict['alpha_reconstructed']:.4f}\talpha_dat: {midas_dict['alpha']:.4f}")
-                
                 cond.alpha_peak = alpha_peak
-
+                
             return abs( round(area_avg(cond,'alpha',method=avg_method),3) - area_avg(cond,'alpha_reconstructed',method=avg_method) )    # Talley's value is to three decimals of precision
-        
-        result = minimize(find_alpha_peak, x0 = 0.5, bounds = ((0,1),))      # The way they want me to format bounds is stupid. Python is stupid.
 
-        if result.success:
-            cond.alpha_peak_reconstructed = result.x
-            find_alpha_peak(cond.alpha_peak_reconstructed)
-        else:
-            warnings.warn("Minimization did not return a successful result")
-            print(result.message)
-        
-        print(f"\n\tr/R_end: {cond.roverRend}")
-        print(f"\talpha_peak: {cond.alpha_peak}")
-        print(f"\t⟨α⟩_data: {round(area_avg(cond,'alpha',method=avg_method),3)}")
-        print(f"\t⟨α⟩_reconstructed: {area_avg(cond,'alpha_reconstructed',method=avg_method)}")
-
-    elif method.lower() == 'not_talley' or method.lower() == 'double_linear':
-        cond.roverRend = -1.472e-5 * cond.Ref + 2.571
-
-        def find_alpha_peak(alpha_peak):
-            for angle, r_dict in cond.data.items():
-                for rstar, midas_dict in r_dict.items():
-
-                    x = rstar * np.cos(angle * np.pi / 180)
-                    y = rstar * np.sin(angle * np.pi / 180)
-
-                    # First calculate centerline void fraction (first linear interpolation)
-                    if y > 0.9:
-                        alpha_CL = alpha_peak / 0.1 * (1 - y)
-                    else:
-                        alpha_CL = max(alpha_peak / (0.9 - cond.roverRend) * (y - cond.roverRend), 0) # make sure it's not < 0. This covers for y < roverRend
-
-                    # 
-                    if np.sqrt(1 - y**2) == 0:
-                        midas_dict['alpha_reconstructed'] = 0
-                    else:
-                        midas_dict['alpha_reconstructed'] = float(alpha_CL / np.sqrt(1 - y**2) * (np.sqrt(1 - y**2) - np.abs(x) ))
-
-            return abs( area_avg(cond,'alpha') - area_avg(cond,'alpha_reconstructed') )
-        
-        result = minimize(find_alpha_peak, x0 = 0.5)
-
-        if result.success:
-            cond.alpha_peak_reconstructed = result.x
-            find_alpha_peak(cond.alpha_peak_reconstructed)
-        else:
-            if debug:
-                warnings.warn("Minimization did not return a successful result")
-                print(f"⟨α⟩_data: {area_avg(cond,'alpha')}\n⟨α⟩_reconstructed: {area_avg(cond,'alpha_reconstructed')}\n")
-        
     elif method.lower() == 'ryan':
-        cond.roverRend = 0.85      # 1 - 2Db/Dh
+        # STEP 1: Determine r* at which void fraction reaches zero (Eq. 7-32).
+        cond.roverRend = (1.3 - ((1.57e-5) * cond.Ref)) * np.cos(cond.theta * np.pi / 180)
 
-        print(f"r*_end: {1-(2*area_avg(cond,'Dsm'))}")
-        if debug:
-            print(cond.roverRend)
-
-        def lineq(x, m, x0, b):
-            return float(max(m * (x - x0) + b, 0))
-
-        '''
-        def find_alpha_peak(alpha_peak):
-            for angle, r_dict in cond.data.items():
-                for rstar, midas_dict in r_dict.items():
-
-                    x = rstar * np.cos(angle * np.pi / 180)
-                    y = rstar * np.sin(angle * np.pi / 180)
-
-                    # First calculate centerline void fraction (first linear interpolation)
-                    if y > 0.9:
-                        alpha_CL = alpha_peak / 0.1 * (1 - y)
-                    else:
-                        alpha_CL = max(alpha_peak / (0.9 - cond.roverRend) * (y - cond.roverRend), 0) # make sure it's not < 0. This covers for y < roverRend
-                    alpha_CL = float(alpha_CL)
-
-                    # Then calculate
-                    if rstar >= 0.9:
-                        xtrans = 0.9 * np.cos(angle * np.pi / 180)
-                        midas_dict['alpha_reconstructed'] = alpha_CL / (1 - xtrans) * (1-x)
-                    else:
-                        midas_dict['alpha_reconstructed'] = alpha_CL
-
-            return abs( area_avg(cond,'alpha') - area_avg(cond,'alpha_reconstructed') )
-        
-        result = minimize(find_alpha_peak, x0 = 0.5)
-
-        if result.success:
-            cond.alpha_peak_reconstructed = result.x
-            find_alpha_peak(cond.alpha_peak_reconstructed)
+        # STEP 2: Determine peak void fraction location (Eq. 7-31).
+        if cond.Ref > 75000:
+            rstar_peak = (1 - (2 * area_avg(cond,'Dsm') / cond.Dh)) * np.cos(cond.theta * np.pi / 180)**0.25
         else:
-            if debug:
-                warnings.warn("Minimization did not return a successful result")
-                print(f"⟨α⟩_data: {area_avg(cond,'alpha')}\n⟨α⟩_reconstructed: {area_avg(cond,'alpha_reconstructed')}\n")
-        '''
+            rstar_peak = (1 - (2 * area_avg(cond,'Dsm') / cond.Dh))
 
+        # STEP 3: Determine peak void fraction value (WIP).
+        # This approach is nearly identical to Talley's, except the linear estimation lineq() is replaced with a quadratic quadeq().
         def find_alpha_peak(alpha_peak, rstar_peak=0.90):
             # Talley's reconstruction has a finer grid than experimental data
             # This will affect the slope of the drop-off point if r/R_end is not coincident with a point on the experiment mesh
@@ -1198,33 +1077,15 @@ def reconstruct_void(cond, method='talley', avg_method = 'legacy'):
                     y_peak = rstar_peak * np.sin(angle_q1 * np.pi / 180)
                     rstar_nn = y_peak / np.sin(angle_nn * np.pi / 180)
 
-                    # if debug:
-                    #     print(f"angle: {angle}\tangle_nn: {angle_nn}")
-
                     # Peak void fraction of current angle defined as void fraction at previous angle r*
                     peak = lineq(x = rstar_nn,
                                     m = m_nn,
                                     x0 = x0_nn,
                                     b = b_nn)
                     
-                    if debug and angle == 22.5:
-                        print(f"y_peak: {y_peak}\trstar_nn: {rstar_nn}")
-                        pass
-                    
                     anchor = 0
                     rstar_anchor = cond.roverRend / np.cos((90 - angle_q1) * np.pi / 180)       # Talley's implementation in Excel
                     # rstar_anchor = cond.roverRend / np.sin(angle_q1 * np.pi / 180)            # But why not like this
-                    
-                    # if cond.roverRend > 0:
-                    #     anchor = 0
-                    #     rstar_anchor = cond.roverRend
-                    # else:
-                    #     # Value at r/R = 0 along the 90 degree axis
-                    #     anchor = lineq(x = 0,
-                    #                    m = 0 - alpha_peak / (cond.roverRend - rstar_peak),
-                    #                    x0 = rstar_peak,
-                    #                    b = alpha_peak)
-                    #     rstar_anchor = 0
 
                 # Linear interpolation, y = mx + b
                 m_o1 = (0 - peak) / (1 - rstar_peak)                    # Slope of outer interpolation
@@ -1276,67 +1137,22 @@ def reconstruct_void(cond, method='talley', avg_method = 'legacy'):
                                                                         x0 = rstar_base,
                                                                         b = base)
 
-                    if debug:
-                        print(f"{angle}\t{rstar}:\t\talpha_rec: {midas_dict['alpha_reconstructed']:.4f}\talpha_dat: {midas_dict['alpha']:.4f}")
-                
                 cond.alpha_peak = alpha_peak
 
             return abs( round(area_avg(cond,'alpha',method=avg_method),3) - area_avg(cond,'alpha_reconstructed',method=avg_method) )    # Talley's value is to three decimals of precision
-        
-        result = minimize(find_alpha_peak, x0 = 0.5, bounds = ((0,1),))      # The way they want me to format bounds is stupid. Python is stupid.
+    
+    result = minimize(find_alpha_peak, x0=0.5, bounds=((0,1),))
 
-        if result.success:
-            cond.alpha_peak_reconstructed = result.x
-            find_alpha_peak(cond.alpha_peak_reconstructed)
-        else:
-            warnings.warn("Minimization did not return a successful result")
-            print(result.message)
-        
-        print(f"\n\tr/R_end: {cond.roverRend}")
-        print(f"\talpha_peak: {cond.alpha_peak}")
-        print(f"\t⟨α⟩_data: {round(area_avg(cond,'alpha',method=avg_method),3)}")
-        print(f"\t⟨α⟩_reconstructed: {area_avg(cond,'alpha_reconstructed',method=avg_method)}")
-
-    elif method.lower() == 'adix':
-        # No fucking idea what this is
-        
-        def complicated_alpha(params):
-            s, n, sigma = params
-            for angle, r_dict in cond.data.items():
-                for rstar, midas_dict in r_dict.items():
-
-                    x = rstar * np.cos(angle * np.pi / 180)
-                    y = rstar * np.sin(angle * np.pi / 180)
-                    h = 1 - y
-                    
-                    if (np.sqrt(1-y**2) - abs(x)) < 0:
-                        if debug: print((np.sqrt(1-y**2) - abs(x)), x, y)
-                    # alpha = float(s * abs(np.sqrt(1-y**2) - abs(x))**(n) * np.sqrt(h) /sigma**2 * np.exp(-h**2 / (2*sigma**2)) )
-                    alpha = float(abs(np.sqrt(1-y**2) - abs(x))**(n) *  s * 1 / sigma * (h/sigma)**(0.5) * np.exp(-(h/sigma)**0.5))
-                    if alpha < 1e-3:
-                        alpha = 0
-                    elif alpha > 1:
-                        alpha = 1
-                    midas_dict['alpha_reconstructed'] = alpha
-
-            cond.calc_errors('alpha', 'alpha_reconstructed')
-
-            # return (abs( area_avg(cond,'alpha') - area_avg(cond,'alpha_reconstructed') )/area_avg(cond,'alpha') + abs(cond.max('alpha') - cond.max('alpha_reconstructed')) / cond.max('alpha')) * 100
-            return cond.sum('eps_sq_alpha_alpha_reconstructed')
-
-            
-        # result = minimize(complicated_alpha, x0 = [0.2, 2, 0.3], method='Nelder-Mead', bounds=( (0.01, 1), (1, 100), (0.01, 10) ), options = {'maxiter': 100000, 'disp': True}, tol = 1e-9)
-        result = minimize(complicated_alpha, x0 = [0.041, 0.1417, 0.0155], method='Nelder-Mead', bounds=( (0.0001, 1), (0.001, 10), (0.0001, 0.1) ), options = {'maxiter': 100000})
-
-        if result.success:
-            cond.reconstruct_s = result.x[0]
-            cond.reconstruct_n = result.x[1]
-            cond.reconstruct_sigma = result.x[2]
-            complicated_alpha(result.x)
-        else:
-            if debug:
-                warnings.warn("Minimization did not return a successful result")
-                complicated_alpha(result.x)
-                print(f"⟨α⟩_data: {area_avg(cond,'alpha')}\n⟨α⟩_reconstructed: {area_avg(cond,'alpha_reconstructed')}\n{result.x}")
-
+    if result.success:
+        cond.alpha_peak_reconstructed = result.x
+        find_alpha_peak(cond.alpha_peak_reconstructed)
+    else:
+        warnings.warn("Minimization did not return a successful result")
+        print(result.message)
+    
+    print(f"\tr/R_end: {cond.roverRend}")
+    print(f"\talpha_peak: {cond.alpha_peak}")
+    print(f"\talpha_data_aavg: {round(area_avg(cond,'alpha',method=avg_method),3)}")
+    print(f"\talpha_reconstructed_aavg: {area_avg(cond,'alpha_reconstructed',method=avg_method)}")
+    
     return area_avg(cond,"alpha_reconstructed")

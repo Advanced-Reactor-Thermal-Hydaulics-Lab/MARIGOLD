@@ -141,47 +141,43 @@ def area_avg(cond, param: str, even_opt='first', recalc=True, method=None) -> fl
             if angle == 360:
                 continue
 
-            try:
-                if 0.95 in r_dict:
-                    S_1 = 0.05 * sum((1 * 0,
-                            4 * 0.95 * r_dict[0.95][param],
-                            2 * 0.90 * r_dict[0.90][param],
-                            4 * 0.85 * r_dict[0.85][param],
-                            1 * 0.80 * r_dict[0.80][param],
-                            )) / 3
-                    
-                    S_2 = 0.10 * sum((1 * 0.80 * r_dict[0.8][param],
-                            4 * 0.70 * r_dict[0.7][param],
-                            2 * 0.60 * r_dict[0.6][param],
-                            4 * 0.50 * r_dict[0.5][param],
-                            1 * 0.40 * r_dict[0.4][param],
-                            )) / 3
-                    
-                    S_3 = 0.20 * sum((1 * 0.40 * r_dict[0.4][param],
-                            4 * 0.20 * r_dict[0.2][param],
-                            2 * 0.00 * r_dict[0.0][param],
-                            )) / 3
-                else:
-                    S_1 = 0
+            if 0.95 in r_dict:
+                S_1 = 0.05 * sum((1 * 0,
+                        4 * 0.95 * r_dict[0.95][param],
+                        2 * 0.90 * r_dict[0.90][param],
+                        4 * 0.85 * r_dict[0.85][param],
+                        1 * 0.80 * r_dict[0.80][param],
+                        )) / 3
+                
+                S_2 = 0.10 * sum((1 * 0.80 * r_dict[0.8][param],
+                        4 * 0.70 * r_dict[0.7][param],
+                        2 * 0.60 * r_dict[0.6][param],
+                        4 * 0.50 * r_dict[0.5][param],
+                        1 * 0.40 * r_dict[0.4][param],
+                        )) / 3
+                
+                S_3 = 0.20 * sum((1 * 0.40 * r_dict[0.4][param],
+                        4 * 0.20 * r_dict[0.2][param],
+                        2 * 0.00 * r_dict[0.0][param],
+                        )) / 3
+            else:
+                S_1 = 0
 
-                    S_2 = 0.10 * sum((1 * 0,
-                            4 * 0.90 * r_dict[0.9][param],
-                            2 * 0.80 * r_dict[0.8][param],
-                            4 * 0.70 * r_dict[0.7][param],
-                            2 * 0.60 * r_dict[0.6][param],
-                            4 * 0.50 * r_dict[0.5][param],
-                            1 * 0.40 * r_dict[0.4][param],
-                            )) / 3
-                    
-                    S_3 = 0.20 * sum((1 * 0.40 * r_dict[0.4][param],
-                            4 * 0.20 * r_dict[0.2][param],
-                            2 * 0.00 * r_dict[0.0][param],             # Might be doubling up
-                            )) / 3
+                S_2 = 0.10 * sum((1 * 0,
+                        4 * 0.90 * r_dict[0.9][param],
+                        2 * 0.80 * r_dict[0.8][param],
+                        4 * 0.70 * r_dict[0.7][param],
+                        2 * 0.60 * r_dict[0.6][param],
+                        4 * 0.50 * r_dict[0.5][param],
+                        1 * 0.40 * r_dict[0.4][param],
+                        )) / 3
+                
+                S_3 = 0.20 * sum((1 * 0.40 * r_dict[0.4][param],
+                        4 * 0.20 * r_dict[0.2][param],
+                        2 * 0.00 * r_dict[0.0][param],             # Might be doubling up
+                        )) / 3
 
-                param_r.append(sum((S_1, S_2, S_3)))
-
-            except Exception as e:
-                print(e)
+            param_r.append(sum((S_1, S_2, S_3)))
 
         I = sum(param_r) / 8
         cond.area_avgs.update({param: I})
@@ -466,7 +462,7 @@ def line_avg_dev(cond, param:str, phi_angle:float, even_opt='first') -> float:
     for rstar, midas_dict in cond.data[phi_angle].items():
         if rstar not in r_for_int:
             r_for_int.append(rstar)
-            var_for_int.append((midas_dict[param] - cond.area_avg(param))**2)
+            var_for_int.append((midas_dict[param] - area_avg(cond,param))**2)
 
     if phi_angle <=180:
         comp_angle = phi_angle+180
@@ -477,12 +473,12 @@ def line_avg_dev(cond, param:str, phi_angle:float, even_opt='first') -> float:
     for rstar, midas_dict in cond.data[comp_angle].items():
         if rstar not in r_for_int:
             r_for_int.append(-rstar)
-            var_for_int.append((midas_dict[param] - cond.area_avg(param))**2)
+            var_for_int.append((midas_dict[param] - area_avg(cond,param))**2)
 
     var_for_int = [param for _, param in sorted(zip(r_for_int, var_for_int))]
     r_for_int = sorted(r_for_int)
 
-    I = integrate.simpson(y=var_for_int, x=r_for_int) / 2 / cond.area_avg(param)**2 # Integrate wrt theta, divide by normalized length
+    I = integrate.simpson(y=var_for_int, x=r_for_int) / 2 / area_avg(cond,param)**2 # Integrate wrt theta, divide by normalized length
 
     return I
 
@@ -574,7 +570,7 @@ def void_area_avg(cond, param: str, even_opt='first', method = None) -> float:
             
             param_r.append(la)
 
-        I = sum(param_r) / 8 / cond.area_avg('alpha',method=method)
+        I = sum(param_r) / 8 / area_avg(cond,'alpha',method=method)
 
     elif method == 'legacy_old':
         # We have to integrate twice, once with resepect to r, again with respect to phi
@@ -634,7 +630,7 @@ def void_area_avg(cond, param: str, even_opt='first', method = None) -> float:
             except Exception as e:
                 print(e)
                 
-        I = sum(param_r) / 8 / cond.area_avg('alpha',method=method)
+        I = sum(param_r) / 8 / area_avg(cond,'alpha',method=method)
 
     else:
         # We have to integrate twice, once with resepect to r, again with respect to phi
@@ -675,7 +671,7 @@ def void_area_avg(cond, param: str, even_opt='first', method = None) -> float:
         param_r = [param for _, param in sorted(zip(angles, param_r))]
         angles = sorted(angles)
 
-        I = integrate.simpson(y=param_r, x=angles) / np.pi / cond.area_avg('alpha') # Integrate wrt theta, divide by normalized area
+        I = integrate.simpson(y=param_r, x=angles) / np.pi / area_avg(cond,'alpha') # Integrate wrt theta, divide by normalized area
 
     return I
 

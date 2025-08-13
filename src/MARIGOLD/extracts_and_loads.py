@@ -1,4 +1,5 @@
 from .config import *
+from .operations import *
 from .Condition import Condition
 from .Condition_Archive import Iskandrani_Condition
 from .Condition_Archive import Yang_Condition
@@ -1184,25 +1185,6 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                     Q1_pitot_check = 'CJ'
                     Q2_pitot_check = 'FZ'
 
-                elif sheet_type.lower() == 'neup_template1':
-                    pitot_sheet = True
-                    Q1_ranges = list(zip([90, 67.5, 45, 22.5, 0], [ [i for i in range(8, 31)], [i for i in range(55, 78)], [i for i in range(104, 127)], [i for i in range(151, 174)], [i for i in range(200, 223)] ]))
-                    Q2_ranges = list(zip([112.5, 135, 157.5], [ [i for i in range(55, 78)], [i for i in range(104, 127)], [i for i in range(151, 174)] ]))
-                    Q2_start = 'CR'
-                    Q2_end = 'ET'
-                    Q1_start = 'A'
-                    Q1_end = 'BD'
-                    Q1_pitot_start = 'CF'
-                    Q1_pitot_end = 'CO'
-                    Q2_pitot_start = 'FV'
-                    Q2_pitot_end = 'GE'
-
-                    Q1_check = 'K'
-                    Q2_check = 'DA'
-                    Q1_pitot_check = 'CJ'
-                    Q2_pitot_check = 'FZ'
-
-
                 elif sheet_type == 'custom' or sheet_type == 'Custom':
                     print('Hopefully you specified all the ranges, starts, ends, and checks')
                 
@@ -1240,9 +1222,8 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                 cond.run_ID = ws['B2'].value
 
                 # Local corrected gauge pressure can also be back-calculated from jgloc and jgatm (DHK)
-                # cond.jgatm = ws['D6'].value  # Recorded experimental jgatm when data was taken, might vary slightly on different days or at different ports due to different temp or other BCs
-                cond.jgatm = ws['D7'].value   # Quan 10/25 U-bend data, fixed jgatm for all the ports to avoid cofusion in later modeling 
-
+                cond.jgatm = ws['D6'].value  # Recorded experimental jgatm when data was taken, might vary slightly on different days or at different ports due to different temp or other BCs
+                
                 ws = wb['2']
                 
                 if sheet_type == 'ryan_template':
@@ -1283,7 +1264,6 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                                 cond.data[phi].update({1.0: deepcopy(zero_data)})
                                 #cond.phi[phi_val].update({0.0: zero_data}) # Cuz I'm paranoid
                                 cond.data[phi].update({roverR: data})
-
                 
                 if pitot_sheet: # Pitot data for Q1
                     for phi, indices in Q1_ranges:

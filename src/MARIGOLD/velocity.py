@@ -1,4 +1,5 @@
 from .config import *
+from .operations import *
 from .plot_utils import *
 from scipy import interpolate
 from scipy.optimize import minimize
@@ -26,7 +27,7 @@ def approx_vf(cond, n=7, overwrite_vf = False) -> None:
 
     for angle, r_dict in cond.data.items():
         for rstar, midas_dict in r_dict.items():
-            vf_approx = (n+1)*(2*n+1) / (2*n*n) * (cond.jf / (1-cond.area_avg('alpha'))) * (1 - abs(rstar))**(1/n)
+            vf_approx = (n+1)*(2*n+1) / (2*n*n) * (cond.jf / (1-area_avg(cond,'alpha'))) * (1 - abs(rstar))**(1/n)
             if 'vf' in midas_dict.keys():
                 if debug: print(f"approx_vf: data found for {angle}\t{rstar}", file=debugFID)
                 if overwrite_vf:
@@ -36,7 +37,7 @@ def approx_vf(cond, n=7, overwrite_vf = False) -> None:
             
             midas_dict.update({'vf_approx': vf_approx})
 
-    return cond.area_avg('vf_approx')
+    return area_avg(cond,'vf_approx')
 
 def approx_vg(cond, method = 'vr', n=7, update_ug1 = False) -> None:
     """Method for approximating :math:`v_{g}` with power-law relation. I don't think this makes sense
@@ -76,7 +77,7 @@ def approx_vg(cond, method = 'vr', n=7, update_ug1 = False) -> None:
     for angle, r_dict in cond.data.items():
         for rstar, midas_dict in r_dict.items():
             if method == 'power-law':
-                vg_approx = (n+1)*(2*n+1) / (2*n*n) * (cond.jgloc / (cond.area_avg('alpha'))) * (1 - abs(rstar))**(1/n)
+                vg_approx = (n+1)*(2*n+1) / (2*n*n) * (cond.jgloc / (area_avg(cond,'alpha'))) * (1 - abs(rstar))**(1/n)
             elif method == 'vrmodel':
                 if 'vr_model' not in midas_dict.keys():
                     cond.calc_vr_model()
@@ -93,7 +94,7 @@ def approx_vg(cond, method = 'vr', n=7, update_ug1 = False) -> None:
             
             midas_dict.update({'vg_approx': vg_approx})
 
-    return cond.area_avg('vg_approx')
+    return area_avg(cond,'vg_approx')
 
 def approx_vf_Kong(cond, n=7) -> None:
     """Not currently implemented, right now a 1/nth power law thing
@@ -107,7 +108,7 @@ def approx_vf_Kong(cond, n=7) -> None:
 
     for angle, r_dict in cond.data.items():
         for rstar, midas_dict in r_dict.items():
-            vf_approx = (n+1)*(2*n+1) / (2*n*n) * (cond.jf / (1-cond.area_avg('alpha'))) * (1 - abs(rstar))**(1/n)
+            vf_approx = (n+1)*(2*n+1) / (2*n*n) * (cond.jf / (1-area_avg(cond,'alpha'))) * (1 - abs(rstar))**(1/n)
             midas_dict.update({'vf': vf_approx})
 
     return
@@ -158,7 +159,7 @@ def calc_vf_lee(cond, K=1):
                 vr_lee = vg - vf_lee
             midas_dict.update({'vr_lee':  vr_lee})
 
-    return cond.area_avg('vf_lee')
+    return area_avg(cond,'vf_lee')
 
 def calc_vf_naive(cond):
     """Calculate :math:`v_{f}`, :math:`j_{f}`, :math:`v_{r}` based on single-phase Pitot-tube equation
@@ -202,7 +203,7 @@ def calc_vf_naive(cond):
                 vr_naive = vg - vf_naive
             midas_dict.update({'vr_naive':  vr_naive})
 
-    return cond.area_avg('vf_naive')
+    return area_avg(cond,'vf_naive')
 
 def calc_vr(cond, method = None, quiet = False) -> None:
     """Calculate relative velocity
@@ -262,7 +263,7 @@ def calc_vr(cond, method = None, quiet = False) -> None:
                 midas_dict.update({'vr': vr})
                 
 
-    return cond.area_avg('vr')
+    return area_avg(cond,'vr')
 
 def calc_vr2(cond, warn_approx = True) -> None:
     """Method for calculating relative velocity based on ``'ug2'``
@@ -312,7 +313,7 @@ def calc_vr2(cond, warn_approx = True) -> None:
                 midas_dict.update({'vr2': vr})
                 
 
-    return cond.area_avg('vr2')
+    return area_avg(cond,'vr2')
 
 def calc_vgj(cond, warn_approx = True) -> None:
     """Method for calculating :math:`V_{gj}`
@@ -349,7 +350,7 @@ def calc_vgj(cond, warn_approx = True) -> None:
             midas_dict.update({'j': j_local})
             midas_dict.update({'alpha_j': alpha_j})
 
-    return cond.void_area_avg('vgj')
+    return void_area_avg(cond,'vgj')
 
 def calc_vr_uncertainty(cond, sigma_vg=0.1, sigma_alpha=0.05, sigma_dp=0.03, percentage = True):
     """Function to calculate the uncertainty in pitot-tube measurements
@@ -392,4 +393,4 @@ def calc_vr_uncertainty(cond, sigma_vg=0.1, sigma_alpha=0.05, sigma_dp=0.03, per
                 midas_dict['sigma_vf'] = np.sqrt( 1./(2*cond.rho_f) * (sigma_dp**2/((1-alpha)*dp)  + sigma_alpha**2 * dp / (1-alpha)**3) )
                 midas_dict['sigma_vr'] = np.sqrt( midas_dict['sigma_vf']**2 + midas_dict['sigma_vg']**2)
 
-    return cond.area_avg('sigma_vr')
+    return area_avg(cond,'sigma_vr')
