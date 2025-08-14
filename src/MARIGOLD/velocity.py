@@ -1,9 +1,4 @@
 from .config import *
-from .operations import *
-from .plot_utils import *
-from scipy import interpolate
-from scipy.optimize import minimize
-import warnings
 
 def approx_vf(cond, n=7, overwrite_vf = False) -> None:
     """Method for approximating :math:`v_{f}` with power-law relation. 

@@ -8,7 +8,7 @@ from .flow_regime import *
 from .formulas import *
 from .iate import *
 from .operations import *
-from .plot_utils import *
+from .plotting import *
 from .processing import *
 from .utils import *
 from .velocity import *

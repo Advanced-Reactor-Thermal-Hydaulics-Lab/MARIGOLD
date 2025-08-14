@@ -1,8 +1,4 @@
-from .Condition import Condition
 from .config import *
-from .operations import *
-from subprocess import run
-from shutil import copy2
 
 """
 This file contains functions related to interacting with raw data files from the NI card, MIDAS or PP

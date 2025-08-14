@@ -1,8 +1,4 @@
 from .config import *
-from .plot_utils import *
-from scipy import interpolate
-from scipy.optimize import minimize
-import warnings
 
 def avg(cond, param: str, include_zero=True) -> float:
     """Calculates a basic average of a parameter

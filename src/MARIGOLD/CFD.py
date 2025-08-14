@@ -1,8 +1,4 @@
-from .Condition import Condition, zero_data
 from .config import *
-from .operations import *
-import subprocess
-from copy import copy
 
 """ Functions for interfacing with CFX
 

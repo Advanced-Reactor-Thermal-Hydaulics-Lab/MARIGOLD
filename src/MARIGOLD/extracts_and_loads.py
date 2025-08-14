@@ -1,11 +1,4 @@
 from .config import *
-from .operations import *
-from .Condition import Condition
-from .Condition_Archive import Iskandrani_Condition
-from .Condition_Archive import Yang_Condition
-
-import re
-import xlrd
 
 def extractProbeData(dump_file = 'database.dat', in_dir = [], require_terms = None, skip_terms = ['CFD', 'Copy'],
                      extract_Ryan = True, Ryan_path = 'Z:\\TRSL\\PITA\\Data\\LocalData\\spreadsheets\\PITA',

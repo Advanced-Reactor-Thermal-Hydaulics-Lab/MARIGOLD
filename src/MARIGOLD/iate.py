@@ -1,7 +1,4 @@
 from .config import *
-from .operations import *
-from .correlations import *
-import warnings
 
 ############################################################################################################################
 #                                                                                                                          #
@@ -12,14 +9,14 @@ def iate_1d_1g(
         # Basic inputs
         cond, query, z_step = 0.01, io = None, geometry = None, R_c = None, L_res = None, cond2 = None,
         
-        # IATE Coefficients
+        # IATE coefficients
         C_WE = None, C_RC = None, C_TI = None, alpha_max = 0.75, C = 3, We_cr = 6, acrit_flag = 0, acrit = 0.13,
 
         # Method arguments
         preset = None, avg_method = None, cov_method = 'fixed', reconstruct_flag = False, cd_method = 'doe', dpdz_method = 'LM', void_method = 'driftflux',
 
         # Covariance calculation
-        COV_RC = None, COV_TI = None,
+        COV_WE = None, COV_RC = None, COV_TI = None,
 
         # Pressure drop calculation
         LM_C = 25, k_m = 0.10, m = 0.316, n = 0.25,
@@ -60,6 +57,7 @@ def iate_1d_1g(
      - ``LM_C``: Lockhart-Martinelli Chisholm parameter. Defaults to 25.
      - ``k_m``: Minor loss coefficient. Defaults to 0.10.
      - ``L_res``: Restriction length. Defaults to None.
+     - ``COV_WE``: Wake entrainment mechanism covariance. Defaults to None.
      - ``COV_RC``: Random collision mechanism covariance. Defaults to None.
      - ``COV_TI``: Turbulent impact mechanism covariance. Defaults to None.
      - ``m``: Friction factor constant. Defaults to 0.316.
@@ -130,6 +128,8 @@ def iate_1d_1g(
     C_WE = C_WE if C_WE is not None else default_C_WE
     C_RC = C_RC if C_RC is not None else default_C_RC
     C_TI = C_TI if C_TI is not None else default_C_TI
+
+    print_iate_args(inspect.currentframe())
 
     ############################################################################################################################
     #                                                                                                                          #
@@ -202,9 +202,16 @@ def iate_1d_1g(
         if preset == 'kim':
             # jgloc = cond.jgref      # Testing for Bettis data
 
-            ai[0]       = cond.area_avg_ai_sheet
-            alpha[0]    = cond.area_avg_void_sheet
-            Db[0]       = 6 * alpha[0] / ai[0]
+            try:
+                ai[0]       = cond.area_avg_ai_sheet
+                alpha[0]    = cond.area_avg_void_sheet
+                Db[0]       = 6 * alpha[0] / ai[0]
+            
+            except:
+                ai[0]       = area_avg(cond,"ai",method=avg_method)                 # [1/m]
+                alpha[0]    = area_avg(cond,"alpha",method=avg_method)              # [-]
+                Db[0]       = void_area_avg(cond,"Dsm1",method=avg_method) / 1000   # [m]
+
         else:
             ai[0]       = area_avg(cond,"ai",method=avg_method)                     # [1/m]
             alpha[0]    = area_avg(cond,"alpha",method=avg_method)                  # [-]
@@ -711,6 +718,23 @@ def set_geometry_coeffs(theta, geometry, Dh, R_c):
         })
 
     return C_WE, C_RC, C_TI, overrides
+
+def print_iate_args(frame):
+    """Print grouped arguments for iate_1d_1g based on current values."""
+    values = inspect.getargvalues(frame).locals
+
+    def print_group(title, arg_names):
+        print(f"\n{title}:")
+        for name in arg_names:
+            print(f"  {name:<12} = {values[name]!r}")
+
+    print_group("Basic inputs", ["cond", "query", "z_step", "io", "geometry", "R_c", "L_res", "cond2"])
+    print_group("IATE coefficients", ["C_WE", "C_RC", "C_TI", "alpha_max", "C", "We_cr", "acrit_flag", "acrit"])
+    print_group("Method arguments", ["preset", "avg_method", "cov_method", "reconstruct_flag", "cd_method", "dpdz_method", "void_method"])
+    print_group("Covariance calculation", ["COV_WE", "COV_RC", "COV_TI"])
+    print_group("Pressure drop calculation", ["LM_C", "k_m", "m", "n"])
+    print_group("Void fraction calculation", ["C0", "C_inf"])
+    print_group("Debugging", ["verbose"])
 
 ############################################################################################################################
 #                                                                                                                          #
