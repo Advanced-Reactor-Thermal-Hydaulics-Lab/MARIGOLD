@@ -163,7 +163,7 @@ def calc_dpdz(cond, method = 'LM', m = 0.316, n = 0.25, chisholm = 25, k_m = 0.1
 
     return dpdz
 
-def calc_cd(cond, method='Ishii-Zuber', vr_cheat = False, limit = 10**-6, const_CD = 0.44):
+def calc_cond_cd(cond, method='Ishii-Zuber', vr_cheat = False, limit = 10**-6, const_CD = 0.44):
     """Method for calculating drag coefficient
     
     **Args**:
@@ -266,7 +266,7 @@ def calc_cd(cond, method='Ishii-Zuber', vr_cheat = False, limit = 10**-6, const_
 
     return area_avg(cond,'cd')
 
-def calc_cl(cond, method='tomiyama', sharma_factor = False):
+def calc_cond_cl(cond, method='tomiyama', sharma_factor = False):
     """TODO, not implemented
     
     **Args**:
@@ -388,9 +388,9 @@ def calc_vr_model(cond, method='km1_simp', kw = 0.654, n=1, Lw = 5, kf = 0.113,
                             )
                     initialize_vr = False
 
-                calc_cd(cond,vr_cheat=False)
+                calc_cond_cd(cond,vr_cheat=False)
             else:
-                calc_cd(cond,vr_cheat=True)
+                calc_cond_cd(cond,vr_cheat=True)
         try:
             old_vr = area_avg(cond,'vr_model', recalc=True)
         except KeyError:
@@ -572,7 +572,7 @@ def calc_IS_term(cond, method = 'power', n=2, mu = 1.5):
 
         - ``area_avg(cond,'ISxgrad')``. ``'ISxgrad`` and ``'IS'`` stored in ``midas_dict``
     """
-    calc_cd(cond)
+    calc_cond_cd(cond)
     calc_fric(cond)
     cond.calc_grad('alpha')
     
@@ -657,18 +657,18 @@ def calc_aa_vr_model(cond, method='km1_naive', IS_method = 'power', kw=0.654, kf
         vr = kw * (np.pi/4)**(1/3) * area_avg(cond,'alpha') * cond.jf / (1 - area_avg(cond,'alpha')) * area_avg(cond,'cd')**(1./3) *  (2**(-1./3) - Lw**(1/3))/(0.5 - Lw) + kf * cond.jf / (1 - area_avg(cond,'alpha'))
     
     elif method == 'km1_naive2' :#or method == 'prelim':
-        calc_cd(cond)
+        calc_cond_cd(cond)
         vr = kw * area_avg(cond,'alpha') * cond.jf / (1 - area_avg(cond,'alpha')) * area_avg(cond,'cd')**(1./3)  + kf * cond.jf / (1 - area_avg(cond,'alpha'))
 
     elif method == 'km1_simp' or method == 'prelim':
         vr = -kw * area_avg(cond,'alpha') * cond.jf / (1 - area_avg(cond,'alpha')) * area_avg(cond,'cd')**(1./3) - kf * cond.jf / (1 - area_avg(cond,'alpha'))
     
     elif method == 'final':
-        calc_cd(cond)
+        calc_cond_cd(cond)
         vr = Cvfacd * -kw * area_avg(cond,'alpha') * cond.jf / (1 - area_avg(cond,'alpha')) * area_avg(cond,'cd')**(1./3) - kf * cond.jf / (1 - area_avg(cond,'alpha'))
     
     elif method == 'IS_Ctau':
-        calc_cd(cond)
+        calc_cond_cd(cond)
         calc_fric(cond)
         rb = void_area_avg(cond,'Dsm1') / 2 /1000 # Convert to m
         CD = void_area_avg(cond,'cd')
@@ -694,7 +694,7 @@ def calc_aa_vr_model(cond, method='km1_naive', IS_method = 'power', kw=0.654, kf
     cond.aa_vr = vr
     return vr
 
-def calc_vw_aa_Vgj_model(cond, Kw=0.654, Kf=0.113):
+def calc_vw_aa_vgj_model(cond, Kw=0.654, Kf=0.113):
     """ Calculate drift velocity, :math:`\\langle \\langle V_{gj} \\rangle \\rangle`, based on Dix (2025) model. See Eq. (4.47) of his thesis
     
     **Args:**
@@ -715,3 +715,68 @@ def calc_vw_aa_Vgj_model(cond, Kw=0.654, Kf=0.113):
     cond.vw_aa_Vgj_model = -Kf * cond.Cajf * cond.jf - Kw * (cond.Cajc * cond.Cajf * area_avg(cond,'alpha') * cond.jf * void_area_avg(cond,'cd13'))
     
     return cond.vw_aa_Vgj_model
+
+def approx_vf_kong(cond, n=7) -> None:
+    """Not currently implemented, right now a 1/nth power law thing
+    
+    **Args**:
+    
+        - ``n``: power. Defaults to 7.
+    """
+
+    cond.mirror()
+
+    for angle, r_dict in cond.data.items():
+        for rstar, midas_dict in r_dict.items():
+            vf_approx = (n+1)*(2*n+1) / (2*n*n) * (cond.jf / (1-area_avg(cond,'alpha'))) * (1 - abs(rstar))**(1/n)
+            midas_dict.update({'vf': vf_approx})
+
+    return
+
+def calc_vf_lee(cond, K=1):
+    """Calculate :math:`v_{f}`, :math:`j_{f}`, :math:`v_{r}` based on Lee et al. (2002) equation
+
+    Really a model proposed by Bosio and Malnes (1968)
+
+    .. math:: v_{f} = \\frac{ 1 }{ \\sqrt{1 - \\alpha^{2} / 2} } * \\sqrt{ \\frac{ 2 \\Delta p }{K \\rho_{f}} }
+    
+    **Args**:
+    
+        - ``K``: momentum coefficient. Defaults to 1.
+    
+    **Raises**:
+    
+        - ``NotImplementedError``: If ``'delta_p'`` not in ``midas_dict``
+    
+    **Returns**:
+    
+        - Area-average vf_lee
+        - Stores:
+            - ``'vf_lee'`` in ``'midas_dict'``
+            - ``'jf_lee'`` in ``'midas_dict'``
+            - ``'vr_lee'`` in ``'midas_dict'``
+
+    """
+
+    cond.mirror()
+
+    for angle, r_dict in cond.data.items():
+        for rstar, midas_dict in r_dict.items():
+            try:
+                dp = midas_dict['delta_p'] * 6894.757
+            except:
+                raise NotImplementedError("Δp needed for cacluclation of vf_lee")
+            
+            vf_lee = 1 / np.sqrt(1 - midas_dict['alpha']**2/2) * np.sqrt( 2 * dp / (K * cond.rho_f))
+            
+            midas_dict.update({'vf_lee': vf_lee})
+            midas_dict.update({'jf_lee': (1-midas_dict['alpha'])* vf_lee})
+            
+            vg = midas_dict['ug1']
+            if vg == 0:
+                vr_lee = 0
+            else:
+                vr_lee = vg - vf_lee
+            midas_dict.update({'vr_lee':  vr_lee})
+
+    return area_avg(cond,'vf_lee')

@@ -1456,53 +1456,6 @@ class Condition:
         I = integrate.simpson(y=param_r, x=angles) / np.pi # Integrate wrt theta, divide by normalized area
         return I
 
-    def calc_vwvg(self) -> None:
-        """Calculates :math:`\\langle \\langle V_{gj} \\rangle \\rangle` via a rough method
-        
-        .. math:: \\langle \\langle V_{gj} \\rangle \\rangle = \\frac{j_{g, loc} }{\\langle \\alpha \\rangle}
-        
-        **Returns**:
-        
-         - :math:`V_{gj}`
-         - Stores ``self.vwvg``
-        """
-
-        print("This guy needs work, probably don't want to use it")
-        self.vwvg = self.jgloc / area_avg(self,'alpha')
-        return self.jgloc / area_avg(self,'alpha')
-    
-    def calc_W(self):
-        """Calculates W
-        
-        .. math:: W = \\frac{v_r}{v_f}
-        
-        **Returns**:
-        
-         - Area-average W
-         - Stores ``'W'`` in ``midas_dict``
-        """
-
-        for angle, r_dict in self.data.items():
-            for rstar, midas_dict in r_dict.items():
-                try:
-                    vfp = midas_dict['vf']
-                except KeyError:
-                    calc_vr(self)
-
-                if vfp == 0:
-                    if midas_dict['vr'] != 0:
-                        print("Warning, vf = 0 but vr != 0. Defaulting to W = 0")
-                    midas_dict.update({
-                            'W' : 0
-                        })
-                else:
-
-                    midas_dict.update({
-                        'W' : midas_dict['vr'] / vfp
-                    })
-
-        return area_avg(self,'W')
-    
     def calc_errors(self, param1:str, param2:str) -> float:
         """Calculates the errors, ε, between two parameters (param1 - param2) in midas_dict
 

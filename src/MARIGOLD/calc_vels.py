@@ -91,71 +91,6 @@ def approx_vg(cond, method = 'vr', n=7, update_ug1 = False) -> None:
 
     return area_avg(cond,'vg_approx')
 
-def approx_vf_Kong(cond, n=7) -> None:
-    """Not currently implemented, right now a 1/nth power law thing
-    
-    **Args**:
-    
-        - ``n``: power. Defaults to 7.
-    """
-
-    cond.mirror()
-
-    for angle, r_dict in cond.data.items():
-        for rstar, midas_dict in r_dict.items():
-            vf_approx = (n+1)*(2*n+1) / (2*n*n) * (cond.jf / (1-area_avg(cond,'alpha'))) * (1 - abs(rstar))**(1/n)
-            midas_dict.update({'vf': vf_approx})
-
-    return
-
-def calc_vf_lee(cond, K=1):
-    """Calculate :math:`v_{f}`, :math:`j_{f}`, :math:`v_{r}` based on Lee et al. (2002) equation
-
-    Really a model proposed by Bosio and Malnes (1968)
-
-    .. math:: v_{f} = \\frac{ 1 }{ \\sqrt{1 - \\alpha^{2} / 2} } * \\sqrt{ \\frac{ 2 \\Delta p }{K \\rho_{f}} }
-    
-    **Args**:
-    
-        - ``K``: momentum coefficient. Defaults to 1.
-    
-    **Raises**:
-    
-        - ``NotImplementedError``: If ``'delta_p'`` not in ``midas_dict``
-    
-    **Returns**:
-    
-        - Area-average vf_lee
-        - Stores:
-            - ``'vf_lee'`` in ``'midas_dict'``
-            - ``'jf_lee'`` in ``'midas_dict'``
-            - ``'vr_lee'`` in ``'midas_dict'``
-
-    """
-
-    cond.mirror()
-
-    for angle, r_dict in cond.data.items():
-        for rstar, midas_dict in r_dict.items():
-            try:
-                dp = midas_dict['delta_p'] * 6894.757
-            except:
-                raise NotImplementedError("Δp needed for cacluclation of vf_lee")
-            
-            vf_lee = 1 / np.sqrt(1 - midas_dict['alpha']**2/2) * np.sqrt( 2 * dp / (K * cond.rho_f))
-            
-            midas_dict.update({'vf_lee': vf_lee})
-            midas_dict.update({'jf_lee': (1-midas_dict['alpha'])* vf_lee})
-            
-            vg = midas_dict['ug1']
-            if vg == 0:
-                vr_lee = 0
-            else:
-                vr_lee = vg - vf_lee
-            midas_dict.update({'vr_lee':  vr_lee})
-
-    return area_avg(cond,'vf_lee')
-
 def calc_vf_naive(cond):
     """Calculate :math:`v_{f}`, :math:`j_{f}`, :math:`v_{r}` based on single-phase Pitot-tube equation
 
@@ -389,3 +324,50 @@ def calc_vr_uncertainty(cond, sigma_vg=0.1, sigma_alpha=0.05, sigma_dp=0.03, per
                 midas_dict['sigma_vr'] = np.sqrt( midas_dict['sigma_vf']**2 + midas_dict['sigma_vg']**2)
 
     return area_avg(cond,'sigma_vr')
+
+def calc_vwvg(cond) -> None:
+    """Calculates :math:`\\langle \\langle V_{gj} \\rangle \\rangle` via a rough method
+    
+    .. math:: \\langle \\langle V_{gj} \\rangle \\rangle = \\frac{j_{g, loc} }{\\langle \\alpha \\rangle}
+    
+    **Returns**:
+    
+        - :math:`V_{gj}`
+        - Stores ``cond.vwvg``
+    """
+
+    print("This guy needs work, probably don't want to use it")
+    cond.vwvg = cond.jgloc / area_avg(cond,'alpha')
+    return cond.jgloc / area_avg(cond,'alpha')
+
+def calc_W(cond):
+    """Calculates W
+    
+    .. math:: W = \\frac{v_r}{v_f}
+    
+    **Returns**:
+    
+        - Area-average W
+        - Stores ``'W'`` in ``midas_dict``
+    """
+
+    for angle, r_dict in cond.data.items():
+        for rstar, midas_dict in r_dict.items():
+            try:
+                vfp = midas_dict['vf']
+            except KeyError:
+                calc_vr(cond)
+
+            if vfp == 0:
+                if midas_dict['vr'] != 0:
+                    print("Warning, vf = 0 but vr != 0. Defaulting to W = 0")
+                midas_dict.update({
+                        'W' : 0
+                    })
+            else:
+
+                midas_dict.update({
+                    'W' : midas_dict['vr'] / vfp
+                })
+
+    return area_avg(cond,'W')

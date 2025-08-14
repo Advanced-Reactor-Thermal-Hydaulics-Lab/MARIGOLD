@@ -179,7 +179,7 @@ def print_iate_args(frame):
         for name in arg_names:
             print(f"  {name:<12} = {values[name]!r}")
 
-    print_group("Basic inputs", ["cond", "query", "z_step", "io", "geometry", "R_c", "L_res", "cond2"])
+    print_group("Basic inputs", ["cond", "query", "z_step", "io", "geometry", "R_c", "cond2"])
     print_group("IATE coefficients", ["C_WE", "C_RC", "C_TI", "alpha_max", "C", "We_cr", "acrit_flag", "acrit"])
     print_group("Method arguments", ["preset", "avg_method", "cov_method", "reconstruct_flag", "cd_method", "dpdz_method", "void_method"])
     print_group("Covariance calculation", ["COV_WE", "COV_RC", "COV_TI"])
@@ -193,6 +193,7 @@ def print_iate_args(frame):
 #                                                                                                                          #
 ############################################################################################################################
 def calc_CD(Re, method = None):
+
     if method == '':
         CD = 24 * (1 + 0.1 * Re**0.75) / Re
         pass
@@ -205,6 +206,38 @@ def calc_CD(Re, method = None):
 def calc_ur():
     ur = 0
     return ur
+
+def calc_void_dpdz(cond, jf, Dh, z_mesh, dpdz, LM_C, m, n, k_m, delta_h, grav, mu_f, mu_g, rho_f, rho_g, L_x, method):
+
+    f_f, f_g = calc_fric(cond, m = m, n = n)
+    dpdz_f = f_f * 1/Dh * rho_f * jf**2 / 2
+
+    phi_f2 = (dpdz - ((rho_f * grav * delta_h) / (z_mesh[-1] - z_mesh[0]))) / dpdz_f
+
+    rho_x = rho_g / rho_f
+    mu_x = mu_g / mu_f
+
+    if method == 'kim':
+        Re_f = rho_f * jf * Dh / mu_f
+
+        chiM_inv = (3.165 * k_m / L_x * Re_f**0.25)**0.5
+
+        quad_A = 1
+        quad_B = LM_C * (1 + (chiM_inv**2))**0.5
+        quad_C = 1 + (chiM_inv**2) - phi_f2
+
+    else:
+        # Default to LM
+        quad_A = 1
+        quad_B = LM_C
+        quad_C = 1 - phi_f2
+
+    chi_inv = ((-quad_B + (quad_B**2 - 4 * quad_A * quad_C)**0.5) / (2 * quad_A))   # Quadratic formula to solve for 1/X
+    alpha_x = (chi_inv**8 / rho_x**3 / mu_x)**(1/7)                                 # Solve for alpha/(1-alpha)
+
+    alpha = alpha_x / (alpha_x + 1)
+
+    return alpha
 
 ############################################################################################################################
 #                                                                                                                          #
