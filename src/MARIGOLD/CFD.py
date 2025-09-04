@@ -1,4 +1,5 @@
 from .config import *
+from .Condition import *
 
 """ Functions for interfacing with CFX
 

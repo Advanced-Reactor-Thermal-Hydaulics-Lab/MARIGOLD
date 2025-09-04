@@ -1,4 +1,5 @@
 from .config import *
+from .Condition import *
 
 """
 Helpful utilities for analyzing data, writing to a different format, etc. 

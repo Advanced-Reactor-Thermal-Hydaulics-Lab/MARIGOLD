@@ -1,4 +1,7 @@
 from .config import *
+from .formulas import *
+from .models import *
+from .operations import *
 
 def apply_preset(preset, cond):
     """Applies hard-coded presets to the condition object and returns overrides."""
@@ -15,9 +18,16 @@ def apply_preset(preset, cond):
 
         overrides.update({
             "cd_method"             : 'fixed_iter',
-            "C0"                    : 1.12
+            "void_method"           : 'driftflux',
+            "C0"                    : 1.12,
+            "C_WE"                  : 0.042,
+            "C_RC"                  : 0.003,
+            "C_TI"                  : 0.026,
+            "We_cr"                 : 8,
+            "C"                     : 3,
+            "alpha_max"             : 0.75,
         })
-
+                            
     elif preset == 'talley':
         cond.rho_f                  = 998
         cond.rho_g                  = 1.23
@@ -28,8 +38,10 @@ def apply_preset(preset, cond):
 
         overrides.update({
             "avg_method"            : 'legacy_old',
+            "cov_method"            : 'interp',
             "cd_method"             : 'doe',
             "dpdz_method"           : 'LM',
+            "void_method"           : 'vgz_talley',
             "reconstruct_flag"      : True,
             "LM_C"                  : 25
         })
@@ -76,7 +88,6 @@ def apply_preset(preset, cond):
         cond.p_atm                  = 101353            # Equivalent to 14.7 [psi]
 
         overrides.update({
-            "L_res"                 : 31.67,            # Length of restriction, based on U-bend experimental dpdz data
             "dpdz_method"           : 'kim',
             "C_WE"                  : 0.000,
             "C_RC"                  : 0.060,
@@ -330,17 +341,20 @@ def calc_COV(cond, alpha_peak = 0.75, alpha_cr = 0.11, We_cr = 5, avg_method = '
 
             # Ryan 2022, section 7.2.2
             # COV_WE
-            Reb = calc_Re()
-            CD = calc_CD(Reb)
-            ur = calc_ur()
-            COV_WE_loc = np.cbrt(CD) * ai_loc**2 * ur
-            midas_dict['COV_WE_loc'] = COV_WE_loc
+            # Reb = calc_Re()
+            # CD = calc_CD(Reb)
+            # ur = calc_ur()
+            # COV_WE_loc = np.cbrt(CD) * ai_loc**2 * ur
+            # midas_dict['COV_WE_loc'] = COV_WE_loc
 
     # Talley does not area-average local u_t; instead computes <u_t> with area-averaged parameters
     u_t_avg = 1.4 * np.cbrt(eps) * np.cbrt(6 * alpha_avg / ai_avg)
     We_avg = rho_f * u_t_avg**2 * (6 * alpha_avg / ai_avg) / sigma
 
     if u_t_avg > 0:
+        COV_WE_avg = 1
+        COV_WE = 1
+        
         COV_RC_avg = u_t_avg * ai_avg**2 / (np.cbrt(alpha_peak) * (np.cbrt(alpha_peak) - np.cbrt(alpha_avg)))
         COV_RC = area_avg(cond,'COV_RC_loc',method=avg_method) / COV_RC_avg
 
@@ -348,13 +362,15 @@ def calc_COV(cond, alpha_peak = 0.75, alpha_cr = 0.11, We_cr = 5, avg_method = '
         COV_TI = area_avg(cond,'COV_TI_loc',method=avg_method) / COV_TI_avg
 
     else:
+        COV_WE = 0
         COV_RC = 0
         COV_TI = 0
 
+    cond.COV_WE = COV_WE
     cond.COV_RC = COV_RC
     cond.COV_TI = COV_TI
 
-    return COV_RC, COV_TI
+    return COV_WE, COV_RC, COV_TI
 
 def reconstruct_void(cond, method='talley', avg_method = 'legacy'):
     """Method to reconstruct the void fraction profile by various means. 

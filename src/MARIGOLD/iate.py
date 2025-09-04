@@ -1,4 +1,6 @@
 from .config import *
+from .iate_utils import *
+from .operations import *
 
 ############################################################################################################################
 #                                                                                                                          #
@@ -136,24 +138,28 @@ def iate_1d_1g(
     #                                                       COVARIANCE                                                         #
     #                                                                                                                          #
     ############################################################################################################################
-    if cond2 == None:
-        cov_method = 'fixed'
 
-    if cov_method == 'interp':
+    if cov_method == 'interp' and cond2 != None:
         # Use data at initial condition, void reconstruction downstream
         rf1, rf2 = (False, reconstruct_flag) if io is None else (reconstruct_flag, reconstruct_flag)
         
-        if COV_RC == None:
-            COV_RC1 = np.nan_to_num(cond.calc_COV_RC(reconstruct_flag = rf1, avg_method = avg_method, debug = False), nan=1.0)
-            COV_RC2 = np.nan_to_num(cond2.calc_COV_RC(reconstruct_flag = rf2, avg_method = avg_method, debug = False), nan=1.0)
-            COV_RC = np.interp(z_mesh / Dh,(cond.LoverD, cond2.LoverD),(COV_RC1, COV_RC2))
-        
-        if COV_TI == None:
-            COV_TI1 = np.nan_to_num(cond.calc_COV_TI(reconstruct_flag = rf1, avg_method = avg_method, We_cr = We_cr, debug = False), nan=1.0)
-            COV_TI2 = np.nan_to_num(cond2.calc_COV_TI(reconstruct_flag = rf2, avg_method = avg_method, We_cr = We_cr, debug = False), nan=1.0)
-            COV_TI = np.interp(z_mesh / Dh,(cond.LoverD, cond2.LoverD),(COV_TI1, COV_TI2))
+        COV_WE1, COV_RC1, COV_TI1 = np.nan_to_num(
+            calc_COV(cond, reconstruct_flag = rf1, avg_method = avg_method), nan=1.0
+        )
+        COV_WE2, COV_RC2, COV_TI2 = np.nan_to_num(
+            calc_COV(cond2, reconstruct_flag = rf2, avg_method = avg_method), nan=1.0
+        )
 
+        COV_WE = np.interp(z_mesh / Dh,(cond.LoverD, cond2.LoverD),(COV_WE1, COV_WE2))
+        COV_RC = np.interp(z_mesh / Dh,(cond.LoverD, cond2.LoverD),(COV_RC1, COV_RC2))
+        COV_TI = np.interp(z_mesh / Dh,(cond.LoverD, cond2.LoverD),(COV_TI1, COV_TI2))
+        
     else:
+        if COV_WE == None:
+            COV_WE = [1 for _ in range(len(z_mesh))]
+        else:
+            COV_WE = COV_WE * [1 for _ in range(len(z_mesh))]
+
         if COV_RC == None:
             COV_RC = [1 for _ in range(len(z_mesh))]
         else:
@@ -162,7 +168,7 @@ def iate_1d_1g(
         if COV_TI == None:
             COV_TI = [1 for _ in range(len(z_mesh))]
         else:
-            COV_TI = COV_TI * [1 for _ in range(len(z_mesh))]
+            COV_TI = COV_TI * [1 for _ in range(len(z_mesh))]        
 
     ############################################################################################################################
     #                                                                                                                          #
@@ -227,7 +233,7 @@ def iate_1d_1g(
         alpha[0]    = io["alpha"][-1]
         Db[0]       = io["Db"][-1]
         jf          = io["jf"]
-        jgloc[0]    = io["jgloc"]
+        jgloc[0]    = io["jgloc"][-1]
         jgatm       = io["jgatm"]
 
     ############################################################################################################################
@@ -250,8 +256,20 @@ def iate_1d_1g(
     p = jgatm * p_atm / jgloc[0]                                # Back-calculate local corrected absolute pressure
 
     if preset == 'kim':
-        p = cond.pz                                             # Override
-        dpdz = cond.dpdz
+        try:
+            p = cond.pz                                         # Override
+            dpdz = cond.dpdz
+
+        except:
+            dpdz = calc_dpdz(
+                cond, 
+                method = dpdz_method, 
+                chisholm = LM_C, 
+                m = m, 
+                n = n, 
+                k_m = k_m, 
+                L = (query - LoverD) * Dh
+                ) + ((rho_f * grav * delta_h) / (z_mesh[-1] - z_mesh[0]))
 
     elif dpdz_method == 'interp':
         dpdz = ((cond2.jgatm * p_atm / cond2.jgloc) - p) / (cond2.LoverD - LoverD)
@@ -425,7 +443,7 @@ def iate_1d_1g(
 
         # Source due to Bubble Expansion
         if preset == 'kim' or preset == 'talley':
-            SEXP[i] = -2 / 3 / pz[i] * ai[i] * vgz[i] * (-dpdz)     # Original DOE_MATLAB_IAC
+            SEXP[i] = -2 / 3 / pz[i] * ai[i] * vgz[i] * (-dpdz) # Original DOE_MATLAB_IAC
         else:
             if i <= 2:      # Previously 3, but in MATLAB (1 indexing vs. 0 indexing)
                 # Forward difference for first node
@@ -438,8 +456,6 @@ def iate_1d_1g(
         if i <= 2:
             dvg = 0
             dvgdz = 0
-
-            # dvgdz = dvg / z_step                              # Gonna leave this here for a good chuckle
         else:
             dvg = vgz[i] - vgz[i-1]
             dvgdz = dvg / z_step
@@ -512,20 +528,25 @@ def iate_1d_1g(
         Db[i+1] = 6 * alpha[i+1] / ai[i+1]
         
     io = {
+        "z_mesh"        : z_mesh,
         "ai"            : ai,
         "alpha"         : alpha,
+        "pz"            : pz,
+
         "Db"            : Db,
         "jf"            : jf,
         "jgloc"         : jgloc,
         "jgatm"         : jgatm,
         
+        "COV_WE"        : COV_WE,
+        "COV_RC"        : COV_RC,
+        "COV_TI"        : COV_TI,
+
         "aiti"          : aiti,
         "airc"          : airc,
         "aiexp"         : aiexp,
         "aiwe"          : aiwe,
         "aivg"          : aivg,
-        "z_mesh"        : z_mesh,
-        "pz"            : pz
     }
 
     return io

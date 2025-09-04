@@ -1,4 +1,5 @@
 from .config import *
+from .Condition import Condition
 
 class Iskandrani_Condition(Condition):
     

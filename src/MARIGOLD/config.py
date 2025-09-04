@@ -21,20 +21,6 @@ from scipy.optimize import minimize
 from shutil import copy2
 from subprocess import run
 
-from .calc_vels import *
-from .cfd import *
-from .Condition_Archive import *
-from .Condition import *
-from .extracts_and_loads import *
-from .flow_regime import *
-from .formulas import *
-from .iate import *
-from .models import *
-from .operations import *
-from .plotting import *
-from .processing import *
-from .utils import *
-
 debug = False
 debugFID = None
 

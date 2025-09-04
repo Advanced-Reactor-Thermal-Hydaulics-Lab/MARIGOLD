@@ -1,4 +1,5 @@
 from .config import *
+from .operations import *
 
 class Condition:
     """
@@ -606,7 +607,7 @@ class Condition:
 
         self.mirrored = True
 
-        # clean up nones
+        # Clean up None's
         for angle, r_dict in self.data.items():
             for rstar, midas_dict in r_dict.items():
                 for param, value in midas_dict.items():

@@ -1,4 +1,5 @@
 from .config import *
+from .operations import *
 
 def approx_vf(cond, n=7, overwrite_vf = False) -> None:
     """Method for approximating :math:`v_{f}` with power-law relation. 
@@ -165,13 +166,13 @@ def calc_vr(cond, method = None, quiet = False) -> None:
                 if method == None:
                     vf = midas_dict['vf']
                 elif method == 'approx':
-                    cond.approx_vf()
+                    approx_vf(cond)
                     vf = midas_dict['vf_approx']
             except:
                 if not quiet:
                     print("Warning: Approximating vf in calculating vr, since no data found")
                     warn_approx = False
-                cond.approx_vf()
+                approx_vf(cond)
                 vf = midas_dict['vf']
             vg = midas_dict['ug1']
 
@@ -223,7 +224,7 @@ def calc_vr2(cond, warn_approx = True) -> None:
                 if warn_approx:
                     print("Warning: Approximating vf in calculating vr, since no data found")
                     warn_approx = False
-                cond.approx_vf()
+                approx_vf(cond)
                 vf = midas_dict['vf']
             vg = midas_dict['ug2']
 
@@ -271,7 +272,7 @@ def calc_vgj(cond, warn_approx = True) -> None:
                 if warn_approx:
                     print("Warning: Approximating vf in calculating local j, since no data found")
                     warn_approx = False
-                cond.approx_vf()
+                approx_vf(cond)
             
             j_local = midas_dict['alpha'] * midas_dict['ug1'] + (1 - midas_dict['alpha']) * midas_dict['vf']
             vgj = midas_dict['ug1'] - j_local
