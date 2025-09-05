@@ -1214,11 +1214,12 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                 else:
                     cond = all_conditions[ all_conditions.index(newCond) ]
 
-                cond.run_ID = ws['B2'].value
+                cond.run_ID = ws['B2'].value    # Run identifier
+                cond.temp = ws['D4'].value      # Water temperature, in degrees Fahrenheit (DHK)
 
                 # Local corrected gauge pressure can also be back-calculated from jgloc and jgatm (DHK)
-                cond.jgatm = ws['D6'].value  # Recorded experimental jgatm when data was taken, might vary slightly on different days or at different ports due to different temp or other BCs
-                
+                cond.jgatm = ws['D6'].value     # Recorded experimental jgatm when data was taken, might vary slightly on different days or at different ports due to different temp or other BCs
+
                 ws = wb['2']
                 
                 if sheet_type == 'ryan_template':
