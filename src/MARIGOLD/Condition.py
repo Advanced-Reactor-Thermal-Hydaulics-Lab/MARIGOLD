@@ -23,7 +23,7 @@ class Condition:
 
     debugFID = None
     
-    def __init__(self, jgref:float, jgloc:float, jf:float, theta:int, port:str, database:str, fluids = 'air-water', g = 9.81, p_atm = 101325, T = 293.15) -> None:
+    def __init__(self, jgref:float, jgloc:float, jf:float, theta:int, port:str, database:str, tag = '', fluids = 'air-water', g = 9.81, p_atm = 101325, T = 293.15) -> None:
         """Initialize condition object
         
         **Args**:
@@ -48,6 +48,7 @@ class Condition:
         self.theta = theta
         self.port = port
         self.database = database
+        self.tag = tag
 
          # Check if port is one of the specified vertical downward ports after U-bend, set theta to -90 degree if true (Quan 10/25)
         # if self.port in {"P5", "P6", "P7", "P8", "P9", "P10"}:

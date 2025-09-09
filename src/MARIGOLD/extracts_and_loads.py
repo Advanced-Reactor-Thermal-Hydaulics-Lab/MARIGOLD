@@ -592,10 +592,19 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                 continue
             
             try:
-                jf = float(file.split('_')[1].strip('jf'))
-                jgref = float(file.split('_')[2].strip('jg'))
-                port = file.split('_')[3].strip('.xlsx').strip('.xlsm')
-                theta = float(file.split('_')[0].strip('deg'))
+                parts = file.split('_')
+
+                theta = float(parts[0].strip('deg'))
+                jf = float(parts[1].strip('jf'))
+                jgref = float(parts[2].strip('jg'))
+                port = parts[3].strip('.xlsx').strip('.xlsm')
+                
+                # Extra string (DHK)
+                if len(parts) > 4:
+                    tag = file.split('_')[4].strip('xlsx').strip('xlsm')
+                else:
+                    tag = ''
+
             except:
                 print(f'Warning: Non-standard excel file name {file}. Is this Bettis template?')
                 
@@ -1206,7 +1215,7 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                     print(f"Warning: jgloc could not be found, setting jgloc = jgref")
                     jgloc = jgref
                 # print(theta)
-                newCond = Condition(jgref, jgloc, jf, theta, port, sheet_type.split('_')[0])
+                newCond = Condition(jgref, jgloc, jf, theta, port, sheet_type.split('_')[0], tag)
 
                 if newCond not in all_conditions:
                     all_conditions.append(newCond)
