@@ -1,8 +1,10 @@
 from .config import *
 from .operations import *
 
-def approx_vf(cond, n=7, overwrite_vf = False) -> None:
-    """Method for approximating :math:`v_{f}` with power-law relation. 
+def approx_vf(cond, n = 7, overwrite_vf = False, verbose = True) -> None:
+    """Method for approximating :math:`v_{f}` with power-law relation. Authored by Adam Dix, modified by David Kang 11SEP25.
+    Original approx_vf() function could still overwrite ``'vf'`` parameter if ``'vf'`` did not exist.
+    Option to overwrite removed entirely, and this quarantined function will only ever assign values to ``'approx_vf'``.
 
     .. math:: v_{f, approx} = \\frac{(n+1)(2n+1)}{ (2n^{2})}  (j_{f} / (1- \\langle \\alpha \\rangle))  (1 - |r^{*}|)^{1/n}
     
@@ -24,18 +26,19 @@ def approx_vf(cond, n=7, overwrite_vf = False) -> None:
     for angle, r_dict in cond.data.items():
         for rstar, midas_dict in r_dict.items():
             vf_approx = (n+1)*(2*n+1) / (2*n*n) * (cond.jf / (1-area_avg(cond,'alpha'))) * (1 - abs(rstar))**(1/n)
-            if 'vf' in midas_dict.keys():
-                if debug: print(f"approx_vf: data found for {angle}\t{rstar}", file=debugFID)
-                if overwrite_vf:
-                    midas_dict.update({'vf': vf_approx})
-            else:
+            
+            if overwrite_vf and 'vf' in midas_dict.keys():
+                if verbose:
+                    print("Warning: Overwriting vf with approximated vf")
+                    verbose = False
+
                 midas_dict.update({'vf': vf_approx})
             
             midas_dict.update({'vf_approx': vf_approx})
 
     return area_avg(cond,'vf_approx')
 
-def approx_vg(cond, method = 'vr', n=7, update_ug1 = False) -> None:
+def approx_vg(cond, method = 'vr', n = 7, update_ug1 = False) -> None:
     """Method for approximating :math:`v_{g}` with power-law relation. I don't think this makes sense
     
     **Args**:
@@ -168,12 +171,14 @@ def calc_vr(cond, method = None, quiet = False) -> None:
                 elif method == 'approx':
                     approx_vf(cond)
                     vf = midas_dict['vf_approx']
+
             except:
                 if not quiet:
                     print("Warning: Approximating vf in calculating vr, since no data found")
                     warn_approx = False
                 approx_vf(cond)
                 vf = midas_dict['vf']
+
             vg = midas_dict['ug1']
 
             if vg == 0: # should be the same as α = 0, could maybe switch this to that
@@ -193,7 +198,6 @@ def calc_vr(cond, method = None, quiet = False) -> None:
             except:
                 midas_dict.update({'vr': vr})
                 
-
     return area_avg(cond,'vr')
 
 def calc_vr2(cond, warn_approx = True) -> None:
@@ -246,8 +250,8 @@ def calc_vr2(cond, warn_approx = True) -> None:
 
     return area_avg(cond,'vr2')
 
-def calc_vgj(cond, warn_approx = True) -> None:
-    """Method for calculating :math:`V_{gj}`
+def calc_vgj(cond, method = None, verbose = True) -> None:
+    """Method for calculating :math:`V_{gj}`. Authored by Adam Dix, modified by David Kang 11SEP25.
     
     **Args**:
     
@@ -264,19 +268,28 @@ def calc_vgj(cond, warn_approx = True) -> None:
 
     cond.mirror()
 
+    if method == 'approx' or cond.check_param('vf') != True:
+        approx_vf(cond)
+
     for angle, r_dict in cond.data.items():
         for rstar, midas_dict in r_dict.items():
-            try:
-                dummy = midas_dict['vf']
-            except:
-                if warn_approx:
-                    print("Warning: Approximating vf in calculating local j, since no data found")
-                    warn_approx = False
-                approx_vf(cond)
             
-            j_local = midas_dict['alpha'] * midas_dict['ug1'] + (1 - midas_dict['alpha']) * midas_dict['vf']
+            if method == 'approx':
+                j_local = midas_dict['alpha'] * midas_dict['ug1'] + (1 - midas_dict['alpha']) * midas_dict['vf_approx']
+
+            else:
+                if cond.check_param('vf') == True:
+                    j_local = midas_dict['alpha'] * midas_dict['ug1'] + (1 - midas_dict['alpha']) * midas_dict['vf']
+                else:
+                    if verbose:
+                        print("Warning: Approximating vf in calculating local j, since no data found")
+                        verbose = False
+
+                    j_local = midas_dict['alpha'] * midas_dict['ug1'] + (1 - midas_dict['alpha']) * midas_dict['vf_approx']
+
             vgj = midas_dict['ug1'] - j_local
             alpha_j = midas_dict['alpha'] * j_local
+
             midas_dict.update({'vgj': vgj})
             midas_dict.update({'j': j_local})
             midas_dict.update({'alpha_j': alpha_j})
@@ -372,3 +385,27 @@ def calc_W(cond):
                 })
 
     return area_avg(cond,'W')
+
+def calc_diff(cond, param1, param2, suppress_zero = True):
+    """Calculate difference between two parameters. Authored by David Kang 11SEP25 to simplify calc_vr() usage.
+    Specifically, I'm not a fan of how vr refers to both vr calculated by measured vf and vr estimated by an approximated vf.
+    
+    **Returns**:
+    
+        - Area-average vr
+        - Stores ``'vr'`` in ``midas_dict``
+    """
+
+    cond.mirror()
+
+    for angle, r_dict in cond.data.items():
+        for rstar, midas_dict in r_dict.items():
+
+            if suppress_zero == True and midas_dict['alpha'] == 0:
+                diff = 0
+            else:
+                diff = midas_dict[param1] - midas_dict[param2]
+
+            midas_dict['diff'] = diff
+
+    return area_avg(cond,'diff')

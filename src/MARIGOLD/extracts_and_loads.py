@@ -601,7 +601,7 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                 
                 # Extra string (DHK)
                 if len(parts) > 4:
-                    tag = file.split('_')[4].strip('xlsx').strip('xlsm')
+                    tag = file.split('_')[4].strip('.xlsx').strip('.xlsm')
                 else:
                     tag = ''
 
