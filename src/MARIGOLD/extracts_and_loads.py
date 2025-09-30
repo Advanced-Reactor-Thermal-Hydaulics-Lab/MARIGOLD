@@ -1240,6 +1240,9 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                     cond.area_avg_ai_sheet = ws['J246'].value
                 
                 for phi, indices in Q1_ranges:
+                    cond.data.update( {phi:{}} )                            # Adds key phi to dictionary, only need this once. Otherwise, will overwrite updated data with empty cells (DHK)
+                    cond.data[phi].update({1.0: deepcopy(zero_data)})       # Forces wall boundary condition, set r* = 1.0 to zero (DHK)
+
                     for i in indices:
                         if ws[f'{Q1_check}{i}'].value:
 
@@ -1265,10 +1268,7 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                             try:
                                 cond.data[phi].update({roverR: data})
                             except KeyError:
-                                cond.data.update( {phi:{}} )
-                                cond.data[phi].update({1.0: deepcopy(zero_data)})
-                                #cond.phi[phi_val].update({0.0: zero_data}) # Cuz I'm paranoid
-                                cond.data[phi].update({roverR: data})
+                                pass
                 
                 if pitot_sheet: # Pitot data for Q1
                     for phi, indices in Q1_ranges:
@@ -1298,10 +1298,14 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                                 try:
                                     cond.data[phi][roverR].update(pitot_data)
                                 except KeyError:
-                                    cond.data[phi].update({roverR: deepcopy(zero_data)})
+                                    # KeyError almost certainly refers to roverR, as phi should already have been added
+                                    cond.data[phi].update({roverR: deepcopy(zero_data)})    # Required to establish roverR key and populate probe data with zeroes
                                     cond.data[phi][roverR].update(pitot_data)
 
                 for phi, indices in Q2_ranges:
+                    cond.data.update( {phi:{}} )                            # Adds key phi to dictionary, only need this once. Otherwise, will overwrite updated data with empty cells (DHK)
+                    cond.data[phi].update({1.0: deepcopy(zero_data)})       # Forces wall boundary condition, set r* = 1.0 to zero (DHK)
+
                     for i in indices:
                         if ws[f'{Q2_check}{i}'].value:
 
@@ -1327,10 +1331,7 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                             try:
                                 cond.data[phi].update({roverR: data})
                             except KeyError:
-                                cond.data.update( {phi:{}} )
-                                cond.data[phi].update({1.0: zero_data})
-                                #cond.phi[phi_val].update({0.0: zero_data}) # Cuz I'm paranoid
-                                cond.data[phi].update({roverR: data}) 
+                                pass
 
                 if pitot_sheet: # Pitot data for Q2
                     for phi, indices in Q2_ranges:
@@ -1359,7 +1360,8 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                                 try:
                                     cond.data[phi][roverR].update(pitot_data)
                                 except KeyError:
-                                    cond.data[phi].update({roverR: deepcopy(zero_data)})
+                                    # KeyError almost certainly refers to roverR, as phi should already have been added
+                                    cond.data[phi].update({roverR: deepcopy(zero_data)})    # Required to establish roverR key and populate probe data with zeroes
                                     cond.data[phi][roverR].update(pitot_data)
 
     if debug and False:
