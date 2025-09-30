@@ -289,10 +289,12 @@ def calc_vgj(cond, method = None, verbose = True) -> None:
 
             vgj = midas_dict['ug1'] - j_local
             alpha_j = midas_dict['alpha'] * j_local
+            vr_back = vgj / (1 - midas_dict['alpha'])
 
             midas_dict.update({'vgj': vgj})
             midas_dict.update({'j': j_local})
             midas_dict.update({'alpha_j': alpha_j})
+            midas_dict.update({'vr_back': vr_back})
 
     return void_area_avg(cond,'vgj')
 
@@ -389,11 +391,7 @@ def calc_W(cond):
 def calc_diff(cond, param1, param2, suppress_zero = True):
     """Calculate difference between two parameters. Authored by David Kang 11SEP25 to simplify calc_vr() usage.
     Specifically, I'm not a fan of how vr refers to both vr calculated by measured vf and vr estimated by an approximated vf.
-    
-    **Returns**:
-    
-        - Area-average vr
-        - Stores ``'vr'`` in ``midas_dict``
+
     """
 
     cond.mirror()
@@ -409,3 +407,22 @@ def calc_diff(cond, param1, param2, suppress_zero = True):
             midas_dict['diff'] = diff
 
     return area_avg(cond,'diff')
+
+def calc_quot(cond, param1, param2, suppress_zero = True):
+    """Calculate quotient between two parameters. Authored by David Kang 26SEP25 to flexibly implement back-calculation of vr from Vgj.
+    
+    """
+
+    cond.mirror()
+
+    for angle, r_dict in cond.data.items():
+        for rstar, midas_dict in r_dict.items():
+
+            if suppress_zero == True and midas_dict['alpha'] == 0:
+                quot = 0
+            else:
+                quot = midas_dict[param1] / midas_dict[param2]
+
+            midas_dict['quot'] = quot
+
+    return area_avg(cond,'quot')

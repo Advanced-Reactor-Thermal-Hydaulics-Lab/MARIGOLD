@@ -1520,6 +1520,54 @@ class Condition:
 
         return rel_error
 
+    import numpy as np
+
+    def calc_rmse(self, param1: str, param2: str) -> float:
+        """Calculates the root mean squared error between two parameters (param1 - param2)
+
+        **Args:**
+        
+         - ``param1``: parameter to calculate error between (predicted)
+         - ``param2``: parameter to calculate error between (experimental)
+
+        Returns:
+         - RMSE
+        """
+        sum_se = 0.0    # Sum of squared errors
+        n = 0
+
+        for angle, r_dict in self.data.items():
+            for rstar, midas_dict in r_dict.items():
+                if param1 not in midas_dict or param2 not in midas_dict:
+                    raise KeyError(
+                        f"Missing '{param1}' or '{param2}' in self.data[{angle}][{rstar}]"
+                    )
+
+                a = np.asarray(midas_dict[param1], dtype=float)
+                b = np.asarray(midas_dict[param2], dtype=float)
+
+                if a.shape != b.shape:
+                    raise ValueError(
+                        f"Shape mismatch at angle={angle}, r*={rstar}: "
+                        f"{param1} shape {a.shape} != {param2} shape {b.shape}"
+                    )
+
+                mask = np.isfinite(a) & np.isfinite(b)
+                if not np.any(mask):
+                    midas_dict['rmse'] = float('nan')
+                    continue
+
+                diff = a[mask] - b[mask]
+                se = diff**2
+                rmse_entry = float(np.sqrt(np.mean(se)))
+
+                midas_dict['rmse'] = rmse_entry
+
+                sum_se += float(se.sum())
+                n += int(se.size)
+
+        return float(np.sqrt(sum_se / n)) if n > 0 else float('nan')
+
     def calc_symmetry(self, param, sym_type = 'sym90', method = 'rmse', rel_error = False):
         """Function for checking the symmetry of a condition
         
