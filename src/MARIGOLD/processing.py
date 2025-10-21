@@ -1,7 +1,4 @@
-from .Condition import Condition
 from .config import *
-from subprocess import run
-from shutil import copy2
 
 """
 This file contains functions related to interacting with raw data files from the NI card, MIDAS or PP
@@ -12,7 +9,6 @@ This file contains functions related to interacting with raw data files from the
 - process_dir, processes entire directory
 
 """
-
 
 def write_inp(roverR, filename, probe_number = 'AM4-5', r01=1.408, r02=1.593, r03=1.597, r12=0.570, r13=0.755, r23=0.343, directory = os.getcwd(), detailedOutput=0, signalOutput=0, inp_name = 'Input.inp', measure_time = 30):
     """ Write an .inp file for MIDAS
@@ -76,7 +72,6 @@ LRP={LRP}", file = f)
         
     return
 
-    
 def tdms_to_dat(infile:str, outfile = None):
     """_summary_
 

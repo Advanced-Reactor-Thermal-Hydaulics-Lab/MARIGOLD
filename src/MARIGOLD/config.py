@@ -1,19 +1,31 @@
-import os
-import numpy as np
-from datetime import datetime
-import pickle
-from scipy import integrate
-from scipy import interpolate
-from copy import deepcopy
-from matplotlib import cm
+import inspect
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 import matplotlib.tri as tri
-import matplotlib as mpl
+import numpy as np
 import openpyxl as op
-import warnings
+import os
+import pickle
 import re
+import subprocess
+import warnings
+import xlrd
+
+from copy import copy
+from copy import deepcopy
+from datetime import datetime
+from matplotlib import cm
+from scipy import integrate
+from scipy import interpolate
+from scipy.optimize import minimize
+from shutil import copy2
+from subprocess import run
 
 debug = False
 debugFID = None
 
-__all__ = ['os', 'np', 'datetime', 'pickle', 'integrate', 'deepcopy', 'cm', 'plt', 'tri', 'op', 're', 'debug', 'warnings','debugFID']
+# Automatically generate __all__ from current namespace
+__all__ = [
+    name for name in dir()
+    if not name.startswith('_')  # skip private names
+]

@@ -1,11 +1,6 @@
-
 from .config import *
-from .Condition import Condition
-from .Iskandrani_Condition import Iskandrani_Condition
-from .Yang_Condition import Yang_Condition
-
-import re
-import xlrd
+from .Condition import *
+from .Condition_Archive import *
 
 def extractProbeData(dump_file = 'database.dat', in_dir = [], require_terms = None, skip_terms = ['CFD', 'Copy'],
                      extract_Ryan = True, Ryan_path = 'Z:\\TRSL\\PITA\\Data\\LocalData\\spreadsheets\\PITA',
@@ -531,7 +526,6 @@ def extractProbeData(dump_file = 'database.dat', in_dir = [], require_terms = No
         pickle.dump(all_conditions, g)
     return
 
-
 def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], require_terms = ['jf'], 
                             skip_terms = ['CFD', 'Copy'], sheet_type = 'adix_template', append_to_json = None,
                             pitot_sheet = False, print_sheets = False,
@@ -598,10 +592,19 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                 continue
             
             try:
-                jf = float(file.split('_')[1].strip('jf'))
-                jgref = float(file.split('_')[2].strip('jg'))
-                port = file.split('_')[3].strip('.xlsx').strip('.xlsm')
-                theta = float(file.split('_')[0].strip('deg'))
+                parts = file.split('_')
+
+                theta = float(parts[0].strip('deg'))
+                jf = float(parts[1].strip('jf'))
+                jgref = float(parts[2].strip('jg'))
+                port = parts[3].strip('.xlsx').strip('.xlsm')
+                
+                # Extra string (DHK)
+                if len(parts) > 4:
+                    tag = file.split('_')[4].strip('.xlsx').strip('.xlsm')
+                else:
+                    tag = ''
+
             except:
                 print(f'Warning: Non-standard excel file name {file}. Is this Bettis template?')
                 
@@ -1186,25 +1189,6 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                     Q1_pitot_check = 'CJ'
                     Q2_pitot_check = 'FZ'
 
-                elif sheet_type.lower() == 'neup_template1':
-                    pitot_sheet = True
-                    Q1_ranges = list(zip([90, 67.5, 45, 22.5, 0], [ [i for i in range(8, 31)], [i for i in range(55, 78)], [i for i in range(104, 127)], [i for i in range(151, 174)], [i for i in range(200, 223)] ]))
-                    Q2_ranges = list(zip([112.5, 135, 157.5], [ [i for i in range(55, 78)], [i for i in range(104, 127)], [i for i in range(151, 174)] ]))
-                    Q2_start = 'CR'
-                    Q2_end = 'ET'
-                    Q1_start = 'A'
-                    Q1_end = 'BD'
-                    Q1_pitot_start = 'CF'
-                    Q1_pitot_end = 'CO'
-                    Q2_pitot_start = 'FV'
-                    Q2_pitot_end = 'GE'
-
-                    Q1_check = 'K'
-                    Q2_check = 'DA'
-                    Q1_pitot_check = 'CJ'
-                    Q2_pitot_check = 'FZ'
-
-
                 elif sheet_type == 'custom' or sheet_type == 'Custom':
                     print('Hopefully you specified all the ranges, starts, ends, and checks')
                 
@@ -1231,7 +1215,7 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                     print(f"Warning: jgloc could not be found, setting jgloc = jgref")
                     jgloc = jgref
                 # print(theta)
-                newCond = Condition(jgref, jgloc, jf, theta, port, sheet_type.split('_')[0])
+                newCond = Condition(jgref, jgloc, jf, theta, port, sheet_type.split('_')[0], tag)
 
                 if newCond not in all_conditions:
                     all_conditions.append(newCond)
@@ -1239,11 +1223,11 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                 else:
                     cond = all_conditions[ all_conditions.index(newCond) ]
 
-                cond.run_ID = ws['B2'].value
+                cond.run_ID = ws['B2'].value    # Run identifier
+                cond.temp = ws['D4'].value      # Water temperature, in degrees Fahrenheit (DHK)
 
                 # Local corrected gauge pressure can also be back-calculated from jgloc and jgatm (DHK)
-                # cond.jgatm = ws['D6'].value  # Recorded experimental jgatm when data was taken, might vary slightly on different days or at different ports due to different temp or other BCs
-                cond.jgatm = ws['D7'].value   # Quan 10/25 U-bend data, fixed jgatm for all the ports to avoid cofusion in later modeling 
+                cond.jgatm = ws['D6'].value     # Recorded experimental jgatm when data was taken, might vary slightly on different days or at different ports due to different temp or other BCs
 
                 ws = wb['2']
                 
@@ -1256,6 +1240,9 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                     cond.area_avg_ai_sheet = ws['J246'].value
                 
                 for phi, indices in Q1_ranges:
+                    cond.data.update( {phi:{}} )                            # Adds key phi to dictionary, only need this once. Otherwise, will overwrite updated data with empty cells (DHK)
+                    cond.data[phi].update({1.0: deepcopy(zero_data)})       # Forces wall boundary condition, set r* = 1.0 to zero (DHK)
+
                     for i in indices:
                         if ws[f'{Q1_check}{i}'].value:
 
@@ -1281,16 +1268,13 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                             try:
                                 cond.data[phi].update({roverR: data})
                             except KeyError:
-                                cond.data.update( {phi:{}} )
-                                cond.data[phi].update({1.0: deepcopy(zero_data)})
-                                #cond.phi[phi_val].update({0.0: zero_data}) # Cuz I'm paranoid
-                                cond.data[phi].update({roverR: data})
-
+                                pass
                 
                 if pitot_sheet: # Pitot data for Q1
                     for phi, indices in Q1_ranges:
                         for i in indices:
-                            if ws[f'{Q1_pitot_check}{i}'].value and ws[f'{Q1_check}{i}'].value:
+                            # Below modified to force read all pitot tube data, even in absence of conductivity probe data (DHK)
+                            if ws[f'{Q1_pitot_check}{i}'].value:    # and ws[f'{Q1_check}{i}'].value:
 
                                 try:
                                     roverR = float(ws[f'{Q1_pitot_start}{i}'].value)
@@ -1314,10 +1298,14 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                                 try:
                                     cond.data[phi][roverR].update(pitot_data)
                                 except KeyError:
-                                    cond.data[phi].update({roverR: deepcopy(zero_data)})
+                                    # KeyError almost certainly refers to roverR, as phi should already have been added
+                                    cond.data[phi].update({roverR: deepcopy(zero_data)})    # Required to establish roverR key and populate probe data with zeroes
                                     cond.data[phi][roverR].update(pitot_data)
 
                 for phi, indices in Q2_ranges:
+                    cond.data.update( {phi:{}} )                            # Adds key phi to dictionary, only need this once. Otherwise, will overwrite updated data with empty cells (DHK)
+                    cond.data[phi].update({1.0: deepcopy(zero_data)})       # Forces wall boundary condition, set r* = 1.0 to zero (DHK)
+
                     for i in indices:
                         if ws[f'{Q2_check}{i}'].value:
 
@@ -1343,10 +1331,7 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                             try:
                                 cond.data[phi].update({roverR: data})
                             except KeyError:
-                                cond.data.update( {phi:{}} )
-                                cond.data[phi].update({1.0: zero_data})
-                                #cond.phi[phi_val].update({0.0: zero_data}) # Cuz I'm paranoid
-                                cond.data[phi].update({roverR: data}) 
+                                pass
 
                 if pitot_sheet: # Pitot data for Q2
                     for phi, indices in Q2_ranges:
@@ -1375,7 +1360,8 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                                 try:
                                     cond.data[phi][roverR].update(pitot_data)
                                 except KeyError:
-                                    cond.data[phi].update({roverR: deepcopy(zero_data)})
+                                    # KeyError almost certainly refers to roverR, as phi should already have been added
+                                    cond.data[phi].update({roverR: deepcopy(zero_data)})    # Required to establish roverR key and populate probe data with zeroes
                                     cond.data[phi][roverR].update(pitot_data)
 
     if debug and False:
@@ -1392,7 +1378,6 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
     with open(dump_file, 'wb') as g:
         pickle.dump(all_conditions, g)
     return
-
 
 def dump_data_from_tabs(dump_file = 'PITA_Database.dat', skip_dir = "") -> None:
     all_conditions = []
@@ -1758,7 +1743,7 @@ pitot_keys = [
 pitot_keys2 = [
     'signed_roverR',
     'roverR',
-    'time',
+    'pitot_time',
     'frequency',
     'delta_p',
     'sigma_delta_p',
