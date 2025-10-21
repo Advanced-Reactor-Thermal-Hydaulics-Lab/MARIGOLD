@@ -163,20 +163,21 @@ def calc_vr(cond, method = None, quiet = False) -> None:
 
     cond.mirror()
 
+    if method == 'approx' or cond.check_param('vf') != True:
+        approx_vf(cond)
+
     for angle, r_dict in cond.data.items():
         for rstar, midas_dict in r_dict.items():
             try:
                 if method == None:
                     vf = midas_dict['vf']
                 elif method == 'approx':
-                    approx_vf(cond)
                     vf = midas_dict['vf_approx']
 
             except:
                 if not quiet:
                     print("Warning: Approximating vf in calculating vr, since no data found")
                     warn_approx = False
-                approx_vf(cond)
                 vf = midas_dict['vf']
 
             vg = midas_dict['ug1']
@@ -249,6 +250,46 @@ def calc_vr2(cond, warn_approx = True) -> None:
                 
 
     return area_avg(cond,'vr2')
+
+def calc_vrj(cond, method = None, quiet = False) -> None:
+    """Experimenting with one-dimensionalization of relative velocity. Calculate the void-weighted area-average of the difference in local superficial velocities.
+
+    .. math:: v_{rj} = j_{g} - j_{f}
+    
+    **Returns**:
+    
+        - Void-weighted area-averaged vrj
+        - Stores ``'vrj'`` in ``midas_dict``
+    """
+
+    cond.mirror()
+
+    if method == 'approx' or cond.check_param('vf') != True:
+        approx_vf(cond)
+
+    for angle, r_dict in cond.data.items():
+        for rstar, midas_dict in r_dict.items():
+            try:
+                # Still need vf to calculate local superficial velocity
+                if method == None:
+                    vf = midas_dict['vf']
+                elif method == 'approx':
+                    vf = midas_dict['vf_approx']
+
+            except:
+                if not quiet:
+                    print("Warning: Approximating vf in calculating vr, since no data found")
+                    warn_approx = False
+                vf = midas_dict['vf']
+
+            vg = midas_dict['ug1']
+            alpha = midas_dict['alpha']
+
+            vrj = (alpha * vg) - ((1 - alpha) * vf)
+
+            midas_dict.update({'vrj': vrj})
+                
+    return void_area_avg(cond,'vrj')
 
 def calc_vgj(cond, method = None, verbose = True) -> None:
     """Method for calculating :math:`V_{gj}`. Authored by Adam Dix, modified by David Kang 11SEP25.

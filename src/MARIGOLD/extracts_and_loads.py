@@ -1743,7 +1743,7 @@ pitot_keys = [
 pitot_keys2 = [
     'signed_roverR',
     'roverR',
-    'time',
+    'pitot_time',
     'frequency',
     'delta_p',
     'sigma_delta_p',
