@@ -1,5 +1,38 @@
 from .config import *
 
+def integration(rs, vars, method):
+        la = 0.0
+        
+        if method == 'trapezoid':
+            for i in range(len(rs) - 1):
+                dr = rs[i+1] - rs[i]
+                la += 0.5 * (vars[i] + vars[i+1]) * dr
+
+        elif method == 'legacy':
+            vars.reverse()      # I noticed too late that the list goes from r/R = 0 to 1, not the other way around
+            rs.reverse()        # Already wrote the actual Simpson's rule part, easier to just do this
+
+            delta = abs(np.diff(rs))                # r/R steps
+
+            for idx, var in enumerate(vars):
+                coeff = 2 * (2**(idx % 2)) / 3      # Simpson's Rule coefficient
+                
+                if idx < len(delta):
+                    if idx > 0:
+                        if delta[idx - 1] == delta[idx]:
+                            S = delta[idx] * coeff * var
+                        else:
+                            coeff = coeff / 2
+                            S = (delta[idx - 1] * coeff * var) + (delta[idx] * coeff * var)
+                    else:
+                        S = delta[idx] * coeff * var
+                else:
+                    S = delta[idx - 1] * coeff * var
+                
+                la = la + S
+
+        return la
+
 def avg(cond, param: str, include_zero=True) -> float:
     """Calculates a basic average of a parameter
 
@@ -30,7 +63,7 @@ def avg(cond, param: str, include_zero=True) -> float:
 
     return avg_param / count
 
-def area_avg(cond, param: str, even_opt='first', recalc=True, method=None) -> float:
+def area_avg(cond, param: str, even_opt='first', recalc=True, method='simpson') -> float:
     """Method for calculating the area-average of a parameter
 
     .. math:: \\langle \\psi \\rangle = \\frac{1}{A} \iint_A \\psi(r,\\varphi) r \,dr\,d\\varphi
@@ -55,84 +88,62 @@ def area_avg(cond, param: str, even_opt='first', recalc=True, method=None) -> fl
         - area-averaged value
     """
 
+    # Check that the parameter that the user requested exists
     if not cond.check_param(param):
         raise KeyError(f"Invalid parameter {param} selected. Not present at {cond.check_param_loc(param)}")
     
-    if (param in cond.area_avgs.keys()) and (not recalc):
-        return cond.area_avgs[param] # why waste time, if we already calculated this don't do it again
+    # Initialize variables
+    I       = 0     # Integral
+    las     = []    # Line-averages
+    angles  = []    # Azimuthal angles
     
-    if method == 'legacy':
-        I = 0
-        param_r = [] # array for parameter integrated wrt r
-        angles = []
+    if not cond.mirrored:
+        warnings.warn("Mirroring in area-avg")
+        cond.mirror()
+    
+    if method == 'simpson':     # Original, written by Adam
+        # We have to integrate twice, once with resepect to r, again with respect to phi
+        # Start with r
         
-        if not cond.mirrored:
-            warnings.warn("Mirroring in area-avg")
-            cond.mirror()
-
         for angle, r_dict in cond.data.items():
-
-            if angle == 360:    # We already have 0
-                continue
 
             rs_temp = []
             vars_temp = []
-            angles.append(angle * np.pi / 180)
+            angles.append(angle * np.pi/180)                                        # Convert degrees to radians
+
             for rstar, midas_dict in r_dict.items():
-                if rstar >= 0:
+                if rstar >= 0:                                                      # This should be unnecessary now with the new mirror, but it's not hurting anyone by being here
                     try:
-                        rs_temp.append(rstar)
-                        vars_temp.append(float(midas_dict[param] * rstar))
+                        rs_temp.append( rstar )                                     # This is proably equivalent to rs = list(r_dict.keys() ), but I'm paranoid about ordering
+                        vars_temp.append( float( midas_dict[param] * rstar))        # Floatify to avoid np inhomogeneous array issues
                     except:
                         if debug: print('Problem with:', angle, r_dict, param)
             
             vars = [var for _, var in sorted(zip(rs_temp, vars_temp))]
             rs = sorted(rs_temp)
 
-            vars.reverse()      # I noticed too late that the list goes from r/R = 0 to 1, not the other way around
-            rs.reverse()        # Already wrote the actual Simpson's rule part, easier to just do this
-
             if debug: print("Arrays to integrate", angle, rs, vars, file=debugFID)
 
             if len(rs) != len(vars):
-                ValueError( f"rs to integrate over {rs} must be the same length as params {vars}, occured at {angle}" )
-
-            delta = abs(np.diff(rs))                # r/R steps
-
-            la = 0
-            for idx, var in enumerate(vars):
-                coeff = 2 * (2**(idx % 2)) / 3      # Simpson's Rule coefficient
+                raise ValueError( f"rs to integrate over {rs} must be the same length as params {vars}, occured at {angle}" )
                 
-                if idx < len(delta):
-                    if idx > 0:
-                        if delta[idx - 1] == delta[idx]:
-                            S = delta[idx] * coeff * var
-                        else:
-                            coeff = coeff / 2
-                            S = (delta[idx - 1] * coeff * var) + (delta[idx] * coeff * var)
-                    else:
-                        S = delta[idx] * coeff * var
-                else:
-                    S = delta[idx - 1] * coeff * var
-                
-                la = la + S
-            
-            param_r.append(la)
+            try:
+                las.append( integrate.simpson(y=vars, x=rs) )                       # Integrate wrt r
+            except Exception as e:
+                if debug:
+                    print(e)
+                    print(rs, vars)
+            if debug: print("calculated integral:", integrate.simpson(y=vars, x=rs), file=debugFID)
+        if debug: print("Integrated wrt r", las, file=debugFID)
 
-        I = sum(param_r) / 8
-        cond.area_avgs.update({param: I})
+        las = [param for _, param in sorted(zip(angles, las))]
+        angles = sorted(angles)
 
-    elif method == 'legacy_old':
-        # There's definitely a more elegant way to do this, but I just want Talley's data to work for now
+        I = integrate.simpson(y=las, x=angles) / np.pi                              # Integrate wrt theta, divide by normalized area
 
-        I = 0
-        param_r = [] # array for parameter integrated wrt r
-        angles = []
+    elif method == 'talley':
+        # For repeating Talley's Excel area-averaging
         
-        if not cond.mirrored:
-            warnings.warn("Mirroring in area-avg")
-            cond.mirror()
-
         for angle, r_dict in cond.data.items():
             if angle == 360:
                 continue
@@ -173,36 +184,26 @@ def area_avg(cond, param: str, even_opt='first', recalc=True, method=None) -> fl
                         2 * 0.00 * r_dict[0.0][param],             # Might be doubling up
                         )) / 3
 
-            param_r.append(sum((S_1, S_2, S_3)))
+            las.append(sum((S_1, S_2, S_3)))
 
-        I = sum(param_r) / 8
-        cond.area_avgs.update({param: I})
+        I = sum(las) / 8
 
     else:
-        # We have to integrate twice, once with resepect to r, again with respect to phi
-        # Start with r
-        I = 0
-        param_r = [] # array for parameter integrated wrt r
-        angles = []
-        
-        if not cond.mirrored:
-            warnings.warn("Mirroring in area-avg")
-            cond.mirror()
-
         for angle, r_dict in cond.data.items():
+
+            if angle == 360:    # We already have 0
+                continue
 
             rs_temp = []
             vars_temp = []
-            angles.append(angle * np.pi/180) # Convert degrees to radians
+            angles.append(angle * np.pi / 180)
             for rstar, midas_dict in r_dict.items():
-                if rstar >= 0: # This should be unnecessary now with the new mirror, but it's not hurting anyone by being here
+                if rstar >= 0:
                     try:
-                        rs_temp.append( rstar ) # This is proably equivalent to rs = list(r_dict.keys() ), but I'm paranoid about ordering
-                        vars_temp.append( float( midas_dict[param] * rstar)) # Floatify to avoid np inhomogeneous array issues
+                        rs_temp.append(rstar)
+                        vars_temp.append(float(midas_dict[param] * rstar))
                     except:
                         if debug: print('Problem with:', angle, r_dict, param)
-                    #if debug: print(angle, midas_dict, file=debugFID)
-            
             
             vars = [var for _, var in sorted(zip(rs_temp, vars_temp))]
             rs = sorted(rs_temp)
@@ -211,22 +212,15 @@ def area_avg(cond, param: str, even_opt='first', recalc=True, method=None) -> fl
 
             if len(rs) != len(vars):
                 ValueError( f"rs to integrate over {rs} must be the same length as params {vars}, occured at {angle}" )
-                
-            try:
-                param_r.append( integrate.simpson(y=vars, x=rs) ) # Integrate wrt r
-            except Exception as e:
-                if debug:
-                    print(e)
-                    print(rs, vars)
-            if debug: print("calculated integral:", integrate.simpson(y=vars, x=rs), file=debugFID)
-                #I = 2 * np.pi
-        if debug: print("Integrated wrt r", param_r, file=debugFID)
 
-        param_r = [param for _, param in sorted(zip(angles, param_r))]
-        angles = sorted(angles)
+            la = integration(rs, vars, method = method)
+            las.append(la)
 
-        I = integrate.simpson(y=param_r, x=angles) / np.pi # Integrate wrt theta, divide by normalized area
-        cond.area_avgs.update({param: I})
+        # Uniform quadrature approximation
+        # Three line-averages multiplied by two in Excel because line-averages in Excel are done for diameters, not radii
+        I = sum(las) / 8
+
+    cond.area_avgs.update({param: I})
 
     return I
 
@@ -478,7 +472,7 @@ def line_avg_dev(cond, param:str, phi_angle:float, even_opt='first') -> float:
 
     return I
 
-def void_area_avg(cond, param: str, even_opt='first', method = None) -> float:
+def void_area_avg(cond, param: str, even_opt='first', method='simpson') -> float:
     """Method for calculating the void-weighted area-average of a parameter
 
     .. math:: \\langle \\langle \\psi \\rangle \\rangle = \\frac{\iint_A \\alpha \\psi(r,\\varphi) r \,dr\,d\\varphi}{\iint_A \\alpha r \,dr\,d\\varphi} 
@@ -506,17 +500,95 @@ def void_area_avg(cond, param: str, even_opt='first', method = None) -> float:
     # Check that the parameter that the user requested exists
     if not cond.check_param(param):
         raise KeyError(f"Invalid parameter {param} selected. Not present at {cond.check_param_loc(param)}")
+    
+    # Initialize variables
+    I       = 0     # Integral
+    las     = []    # Line-averages
+    angles  = []    # Azimuthal angles
+    
+    if not cond.mirrored:
+        warnings.warn("Mirroring in area-avg")
+        cond.mirror()
 
+    if method == 'simpson':
+        # We have to integrate twice, once with resepect to r, again with respect to phi
+        # Start with r
 
-    if method == 'legacy':
-        I = 0
-        param_r = [] # array for parameter integrated wrt r
-        angles = []
+        for angle, r_dict in cond.data.items():
+
+            rs_temp = []
+            vars_temp = []
+            angles.append(angle * np.pi/180)                                        # Convert degrees to radians
+
+            for rstar, midas_dict in r_dict.items():
+                if rstar >= 0:                                                      # This should be unnecessary now with the new mirror, but it's not hurting anyone by being here
+                    try:
+                        rs_temp.append( rstar )                                     # This is proably equivalent to rs = list(r_dict.keys() ), but I'm paranoid about ordering
+                        vars_temp.append( midas_dict[param] * midas_dict['alpha'] * rstar)
+                    except:
+                        if debug: print('Problem with:', angle, r_dict, param)
+            
+            vars = [var for _, var in sorted(zip(rs_temp, vars_temp))]
+            rs = sorted(rs_temp)
+
+            if debug: print("Arrays to integrate", angle, rs, vars, file=debugFID)
+                
+            las.append( integrate.simpson(y=vars, x=rs) )                           # Integrate wrt r
+            if debug: print("calculated integral:", integrate.simpson(y=vars, x=rs), file=debugFID)
+                #I = 2 * np.pi
+        if debug: print("Integrated wrt r", las, file=debugFID)
+
+        las = [param for _, param in sorted(zip(angles, las))]
+        angles = sorted(angles)
+
+        I = integrate.simpson(y=las, x=angles) / np.pi / area_avg(cond,'alpha')     # Integrate wrt theta, divide by normalized area
+
+    elif method == 'talley':
+        for angle, r_dict in cond.data.items():
+            if angle == 360:
+                continue
+
+            if 0.95 in r_dict:
+                S_1 = 0.05 * sum((1 * 0,
+                        4 * 0.95 * r_dict[0.95][param] * r_dict[0.95]['alpha'],
+                        2 * 0.90 * r_dict[0.90][param] * r_dict[0.90]['alpha'],
+                        4 * 0.85 * r_dict[0.85][param] * r_dict[0.85]['alpha'],
+                        1 * 0.80 * r_dict[0.80][param] * r_dict[0.80]['alpha'],
+                        )) / 3
+                
+                S_2 = 0.10 * sum((1 * 0.80 * r_dict[0.8][param] * r_dict[0.80]['alpha'],
+                        4 * 0.70 * r_dict[0.7][param] * r_dict[0.7]['alpha'],
+                        2 * 0.60 * r_dict[0.6][param] * r_dict[0.6]['alpha'],
+                        4 * 0.50 * r_dict[0.5][param] * r_dict[0.5]['alpha'],
+                        1 * 0.40 * r_dict[0.4][param] * r_dict[0.4]['alpha'],
+                        )) / 3
+                
+                S_3 = 0.20 * sum((1 * 0.40 * r_dict[0.4][param] * r_dict[0.4]['alpha'],
+                        4 * 0.20 * r_dict[0.2][param] * r_dict[0.2]['alpha'],
+                        2 * 0.00 * r_dict[0.0][param] * r_dict[0.0]['alpha'],
+                        )) / 3
+            else:
+                S_1 = 0
+
+                S_2 = 0.10 * sum((1 * 0,
+                        4 * 0.90 * r_dict[0.9][param] * r_dict[0.9]['alpha'],
+                        2 * 0.80 * r_dict[0.8][param] * r_dict[0.8]['alpha'],
+                        4 * 0.70 * r_dict[0.7][param] * r_dict[0.7]['alpha'],
+                        2 * 0.60 * r_dict[0.6][param] * r_dict[0.6]['alpha'],
+                        4 * 0.50 * r_dict[0.5][param] * r_dict[0.5]['alpha'],
+                        1 * 0.40 * r_dict[0.4][param] * r_dict[0.4]['alpha'],
+                        )) / 3
+                
+                S_3 = 0.20 * sum((1 * 0.40 * r_dict[0.4][param] * r_dict[0.4]['alpha'],
+                        4 * 0.20 * r_dict[0.2][param] * r_dict[0.2]['alpha'],
+                        2 * 0.00 * r_dict[0.0][param] * r_dict[0.0]['alpha'],               # Might be doubling up
+                        )) / 3
+
+            las.append(sum((S_1, S_2, S_3)))
+
+        I = sum(las) / 8 / area_avg(cond,'alpha',method=method)
         
-        if not cond.mirrored:
-            warnings.warn("Mirroring in area-avg")
-            cond.mirror()
-
+    else:
         for angle, r_dict in cond.data.items():
 
             if angle == 360:    # We already have 0
@@ -536,138 +608,17 @@ def void_area_avg(cond, param: str, even_opt='first', method = None) -> float:
             vars = [var for _, var in sorted(zip(rs_temp, vars_temp))]
             rs = sorted(rs_temp)
 
-            vars.reverse()      # I noticed too late that the list goes from r/R = 0 to 1, not the other way around
-            rs.reverse()        # Already wrote the actual Simpson's rule part, easier to just do this
-
             if debug: print("Arrays to integrate", angle, rs, vars, file=debugFID)
 
             if len(rs) != len(vars):
                 ValueError( f"rs to integrate over {rs} must be the same length as params {vars}, occured at {angle}" )
 
-            delta = abs(np.diff(rs))                # r/R steps
+            la = integration(rs, vars, method = method)
+            las.append(la)
 
-            la = 0
-            for idx, var in enumerate(vars):
-                coeff = 2 * (2**(idx % 2)) / 3      # Simpson's Rule coefficient
-                
-                if idx < len(delta):
-                    if idx > 0:
-                        if delta[idx - 1] == delta[idx]:
-                            S = delta[idx] * coeff * var
-                        else:
-                            coeff = coeff / 2
-                            S = (delta[idx - 1] * coeff * var) + (delta[idx] * coeff * var)
-                    else:
-                        S = delta[idx] * coeff * var
-                else:
-                    S = delta[idx - 1] * coeff * var
-                
-                la = la + S
-            
-            param_r.append(la)
-
-        I = sum(param_r) / 8 / area_avg(cond,'alpha',method=method)
-
-    elif method == 'legacy_old':
-        # We have to integrate twice, once with resepect to r, again with respect to phi
-        # Start with r
-
-        I = 0
-        param_r = [] # array for parameter integrated wrt r
-        angles = []
-        
-        if not cond.mirrored:
-            warnings.warn("Mirroring in area-avg")
-            cond.mirror()
-
-        for angle, r_dict in cond.data.items():
-            if angle == 360:
-                continue
-
-            try:
-                if 0.95 in r_dict:
-                    S_1 = 0.05 * sum((1 * 0,
-                            4 * 0.95 * r_dict[0.95][param] * r_dict[0.95]['alpha'],
-                            2 * 0.90 * r_dict[0.90][param] * r_dict[0.90]['alpha'],
-                            4 * 0.85 * r_dict[0.85][param] * r_dict[0.85]['alpha'],
-                            1 * 0.80 * r_dict[0.80][param] * r_dict[0.80]['alpha'],
-                            )) / 3
-                    
-                    S_2 = 0.10 * sum((1 * 0.80 * r_dict[0.8][param] * r_dict[0.80]['alpha'],
-                            4 * 0.70 * r_dict[0.7][param] * r_dict[0.7]['alpha'],
-                            2 * 0.60 * r_dict[0.6][param] * r_dict[0.6]['alpha'],
-                            4 * 0.50 * r_dict[0.5][param] * r_dict[0.5]['alpha'],
-                            1 * 0.40 * r_dict[0.4][param] * r_dict[0.4]['alpha'],
-                            )) / 3
-                    
-                    S_3 = 0.20 * sum((1 * 0.40 * r_dict[0.4][param] * r_dict[0.4]['alpha'],
-                            4 * 0.20 * r_dict[0.2][param] * r_dict[0.2]['alpha'],
-                            2 * 0.00 * r_dict[0.0][param] * r_dict[0.0]['alpha'],
-                            )) / 3
-                else:
-                    S_1 = 0
-
-                    S_2 = 0.10 * sum((1 * 0,
-                            4 * 0.90 * r_dict[0.9][param] * r_dict[0.9]['alpha'],
-                            2 * 0.80 * r_dict[0.8][param] * r_dict[0.8]['alpha'],
-                            4 * 0.70 * r_dict[0.7][param] * r_dict[0.7]['alpha'],
-                            2 * 0.60 * r_dict[0.6][param] * r_dict[0.6]['alpha'],
-                            4 * 0.50 * r_dict[0.5][param] * r_dict[0.5]['alpha'],
-                            1 * 0.40 * r_dict[0.4][param] * r_dict[0.4]['alpha'],
-                            )) / 3
-                    
-                    S_3 = 0.20 * sum((1 * 0.40 * r_dict[0.4][param] * r_dict[0.4]['alpha'],
-                            4 * 0.20 * r_dict[0.2][param] * r_dict[0.2]['alpha'],
-                            2 * 0.00 * r_dict[0.0][param] * r_dict[0.0]['alpha'],               # Might be doubling up
-                            )) / 3
-
-                param_r.append(sum((S_1, S_2, S_3)))
-
-            except Exception as e:
-                print(e)
-                
-        I = sum(param_r) / 8 / area_avg(cond,'alpha',method=method)
-
-    else:
-        # We have to integrate twice, once with resepect to r, again with respect to phi
-        # Start with r
-
-        I = 0
-        param_r = [] # array for parameter integrated wrt r
-        angles = []
-        
-        cond.mirror()
-
-
-        for angle, r_dict in cond.data.items():
-
-            rs_temp = []
-            vars_temp = []
-            angles.append(angle * np.pi/180) # Convert degrees to radians
-            for rstar, midas_dict in r_dict.items():
-                if rstar >= 0: # This should be unnecessary now with the new mirror, but it's not hurting anyone by being here
-                    try:
-                        rs_temp.append( rstar ) # This is proably equivalent to rs = list(r_dict.keys() ), but I'm paranoid about ordering
-                        vars_temp.append( midas_dict[param] * midas_dict['alpha'] * rstar)
-                    except:
-                        if debug: print('Problem with:', angle, r_dict, param)
-                    #if debug: print(angle, midas_dict, file=debugFID)
-            
-            
-            vars = [var for _, var in sorted(zip(rs_temp, vars_temp))]
-            rs = sorted(rs_temp)
-
-            if debug: print("Arrays to integrate", angle, rs, vars, file=debugFID)
-                
-            param_r.append( integrate.simpson(y=vars, x=rs) ) # Integrate wrt r
-            if debug: print("calculated integral:", integrate.simpson(y=vars, x=rs), file=debugFID)
-                #I = 2 * np.pi
-        if debug: print("Integrated wrt r", param_r, file=debugFID)
-
-        param_r = [param for _, param in sorted(zip(angles, param_r))]
-        angles = sorted(angles)
-
-        I = integrate.simpson(y=param_r, x=angles) / np.pi / area_avg(cond,'alpha') # Integrate wrt theta, divide by normalized area
+        # Uniform quadrature approximation
+        # Three line-averages multiplied by two in Excel because line-averages in Excel are done for diameters, not radii
+        I = sum(las) / 8 / area_avg(cond,'alpha',method=method)
 
     return I
 
@@ -687,10 +638,13 @@ def interp_area_avg(cond, param:str, interp_type = 'linear', int_error = 10**-6)
         - area-average of param
     """
 
-    def integrand(phi, r): # phi will be in radians from dblquad
+    def integrand(r, phi):  # phi will be in radians from dblquad
         return cond(phi, r, param, interp_method=interp_type) * r
     
-    I = integrate.nquad(integrand, ranges = [(0, 1), (0, np.pi * 2)], opts = {'epsabs': int_error, 'points': list(cond.data[0].keys()), 'points': list(cond.data.keys())})[0] / cond.interp_area_avg('alpha') / np.pi
+    I = integrate.nquad(integrand, ranges = [(0, 1), (0, np.pi * 2)],
+                        opts = [{'epsabs': int_error, 'points': list(cond.data[0].keys())},             # r* values
+                                {'epsabs': int_error, 'points': np.deg2rad(list(cond.data.keys()))}]    # phi values
+                        )[0] / np.pi    # [0] takes the numerical value of the integral, then divide by area of unit circle
     return I
 
 def interp_void_area_avg(cond, param:str, interp_type = 'linear', int_error = 10**-6) -> float:
@@ -709,10 +663,13 @@ def interp_void_area_avg(cond, param:str, interp_type = 'linear', int_error = 10
         - void-weighted area-average of param
     """
 
-    def integrand(phi, r): # phi will be in radians from dblquad
+    def integrand(r, phi):  # phi will be in radians from dblquad
         return cond(phi, r, param, interp_method=interp_type) * cond(phi, r, 'alpha', interp_method=interp_type) * r
     
-    I = integrate.nquad(integrand, ranges = [(0, 1), (0, np.pi * 2)], opts = {'epsabs': int_error, 'points': list(cond.data.keys()), 'points': list(cond.data[0].keys())} )[0] / cond.interp_area_avg('alpha') / np.pi
+    I = integrate.nquad(integrand, ranges = [(0, 1), (0, np.pi * 2)],
+                        opts = [{'epsabs': int_error, 'points': list(cond.data[0].keys())},             # r* values
+                                {'epsabs': int_error, 'points': np.deg2rad(list(cond.data.keys()))}]    # phi values
+                        )[0] / interp_area_avg(cond, 'alpha', interp_type=interp_type, int_error=int_error) / np.pi
     return I
 
 def spline_void_area_avg(cond, param:str, int_error = 10**-6) -> float:

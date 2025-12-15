@@ -10,14 +10,14 @@ This file contains functions related to interacting with raw data files from the
 
 """
 
-def write_inp(roverR, filename, probe_number = 'AM4-5', r01=1.408, r02=1.593, r03=1.597, r12=0.570, r13=0.755, r23=0.343, directory = os.getcwd(), detailedOutput=0, signalOutput=0, inp_name = 'Input.inp', measure_time = 30):
+def write_inp(roverR, filename, probe_number = 'AM4-5', probe_type = 4, r01=1.408, r02=1.593, r03=1.597, r12=0.570, r13=0.755, r23=0.343, directory = os.getcwd(), detailedOutput=0, signalOutput=0, inp_name = 'Input.inp', measure_time = 30):
     """ Write an .inp file for MIDAS
     
     """
     with open(os.path.join(directory, inp_name), 'w') as f:
         f.write(
 f"*PROBE NUMBER: {probe_number}\n\
-probetype=4\n\
+probetype={probe_type}\n\
 r/R={roverR}\n\
 r01={r01}\n\
 r02={r02}\n\
@@ -98,8 +98,8 @@ def tdms_to_dat(infile:str, outfile = None):
 
     return
 
-def process_dir(target_dir:str, probe_number:str, r01:float, r02:float, r03:float, r12:float, r13:float, r23:float, roverR = None, measure_time = 30,
-                signal_output=0, detailed_output=0, multiprocess = False, num_cpus = None, mode = "probe"):
+def process_dir(target_dir:str, probe_number:str, r01:float, r02:float, r03:float, r12:float, r13:float, r23:float, probe_type = 4, roverR = None, measure_time = 30,
+                signal_output=0, detailed_output=0, multiprocess = False, num_cpus = None, mode = "probe", midas = "MIDASv1.14d.exe"):
     """ Runs MIDAS for every dat file in a given directory
 
     Makes a new folder, auto_reprocessed_data_TIMESTAMP, where the .tab files will be put.
@@ -126,9 +126,9 @@ def process_dir(target_dir:str, probe_number:str, r01:float, r02:float, r03:floa
 
     if mode == 'probe':
         try:
-            copy2(os.path.join(target_dir, "MIDASv1.14d.exe"), reprocessed_dir)
+            copy2(os.path.join(target_dir, midas), reprocessed_dir)
         except FileNotFoundError:
-            copy2(os.path.join("Z:\TRSL\PITA", "MIDASv1.14d.exe"), reprocessed_dir)
+            copy2(os.path.join("Z:\TRSL\PITA", midas), reprocessed_dir)
     elif mode == 'pitot':
         try:
             copy2(os.path.join(target_dir, "PPv1.exe"), reprocessed_dir)
@@ -148,11 +148,11 @@ def process_dir(target_dir:str, probe_number:str, r01:float, r02:float, r03:floa
                     roverR = 0.1 * int(file[1])
                 
                 if mode == 'probe':
-                    write_inp(roverR, file.replace('.dat', ''), probe_number = probe_number, 
+                    write_inp(roverR, file.replace('.dat', ''), probe_number = probe_number, probe_type = probe_type,
                               r01=r01, r02=r02, r03=r03, r12=r12, r13=r13, r23=r23, 
                           directory=reprocessed_dir, signalOutput=signal_output, detailedOutput=detailed_output, measure_time=measure_time
                           )
-                    comp_process = run(os.path.join(reprocessed_dir, 'MIDASv1.14d.exe'), cwd = reprocessed_dir, shell=True)
+                    comp_process = run(os.path.join(reprocessed_dir, midas), cwd = reprocessed_dir, shell=True)
                 elif mode == 'pitot':
                     write_pitot_inp(roverR, file.replace('.dat', ''), measure_time=measure_time,
                                     URV = r01, LRV = r02,
@@ -181,10 +181,10 @@ def process_dir(target_dir:str, probe_number:str, r01:float, r02:float, r03:floa
                 roverR = 0.1 * int(file[1])
             
             if mode == 'probe':
-                write_inp(roverR, file.replace('.dat', ''), probe_number = probe_number, 
+                write_inp(roverR, file.replace('.dat', ''), probe_number = probe_number, probe_type = probe_type, 
                           r01=r01, r02=r02, r03=r03, r12=r12, r13=r13, r23=r23, 
                           directory=reprocessed_dir, signalOutput=signal_output, detailedOutput=detailed_output, inp_name=input_name, measure_time=measure_time)
-                p = subprocess.Popen(["MIDASv1.14d.exe", input_name], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                p = subprocess.Popen([midas, input_name], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             elif mode == 'pitot':
                 write_pitot_inp(roverR, file.replace('.dat', ''), 
                                 URV = r01, LRV = r02,

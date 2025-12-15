@@ -56,7 +56,7 @@ class Condition:
         # else:
         #     self.theta = int(90)
 
-        self.name = f"jf={self.jf}_jgloc={self.jgloc:0.2f}_theta={self.theta}_port={self.port}_{self.database}"
+        self.name = f"{self.theta}deg_jf{self.jf}_jgloc{self.jgloc:0.2f}_{self.port}_{self.tag}_{self.database}"
 
         # Data is stored in this phi array. 3 layers of dictionary
         # phi [angle] gives a dictionary with the various r/R
@@ -246,7 +246,7 @@ class Condition:
             try:
                 return self.spline_interp(phi_in, r_in)
             except:
-                self.mirror(uniform_rmesh=True)
+                # self.mirror(uniform_rmesh=True)
                 self.fit_spline(param)
                 return self.spline_interp[param](phi_in, r_in)
         
@@ -437,8 +437,13 @@ class Condition:
 
         if method == 'axisym': 
             # axisymmetric
+            # Initial guess, prioritize 90 (DHK)
+            if 90 in angles_with_data:
+                ref_angle = 90
+            else:
+                ref_angle = angles_with_data[0]
+
             # Find the reference angle with the most data
-            ref_angle = angles_with_data[0] # initial guess
             for angle in angles_with_data:
                 if len(self.data[ref_angle].keys()) < len(self.data[angle].keys()):
                     ref_angle = angle
