@@ -678,7 +678,7 @@ class Condition:
             if debug: print(f"{param} already has a fit spline")
             return
 
-        self.mirror(uniform_rmesh=True)
+        # self.mirror(uniform_rmesh=True)
         rs = []
         phis = []
         vals = []
@@ -1131,7 +1131,252 @@ class Condition:
                 - ``'grad_param_total'``
         """
         
+<<<<<<< HEAD
         if not self.mirrored: self.mirror()
+=======
+        if (param in self.area_avgs.keys()) and (not recalc):
+            return self.area_avgs[param] # why waste time, if we already calculated this don't do it again
+        
+        if method == 'uneven_simpson':
+
+            def simpson_uneven(x, y):
+                """
+                Simpson's rule for uneven spacing using groups of 3 points.
+                x: sorted array of x-values (must be increasing)
+                y: array of f(x)
+                """
+                n = len(x)
+                if n < 3:
+                    return 0.0
+
+                I = 0.0
+                i = 0
+                while i + 2 < n:
+                    h = x[i+1] - x[i]
+                    k = x[i+2] - x[i+1]
+
+                    if h <= 0 or k <= 0:
+                        raise ValueError("x array must be strictly increasing")
+
+                    f0, f1, f2 = y[i], y[i+1], y[i+2]
+
+                    # Shklov formula
+                    term = (h + k) / 6 * (
+                        (2 - k/h) * f0 +
+                        (h/k + k/h) * f1 +
+                        (2 - h/k) * f2
+                    )
+                    I += term
+                    i += 2  # advance by two
+
+                return I
+
+            I = 0
+            param_r = [] # array for parameter integrated wrt r
+            angles = []
+            
+            if not self.mirrored:
+                warnings.warn("Mirroring in area-avg")
+                self.mirror()
+
+            for angle, r_dict in self.data.items():
+
+                if angle == 360:    # We already have 0
+                    continue
+
+                rs_temp = []
+                vars_temp = []
+                angles.append(angle * np.pi / 180)
+                for rstar, midas_dict in r_dict.items():
+                    if rstar >= 0:
+                        try:
+                            rs_temp.append(rstar)
+                            vars_temp.append(float(midas_dict[param] * rstar))
+                        except:
+                            if debug: print('Problem with:', angle, r_dict, param)
+                
+                vars = [var for _, var in sorted(zip(rs_temp, vars_temp))]
+                rs = sorted(rs_temp)
+
+                if debug: print("Arrays to integrate", angle, rs, vars, file=debugFID)
+
+                if len(rs) != len(vars):
+                    ValueError( f"rs to integrate over {rs} must be the same length as params {vars}, occured at {angle}" )
+
+                # Simpson’s rule for uneven intervals
+                la = simpson_uneven(rs, vars)
+
+                param_r.append(la)
+
+            I = sum(param_r) / 8
+            self.area_avgs.update({param: I})
+
+        elif method == 'trapezoid':
+            I = 0
+            param_r = [] # array for parameter integrated wrt r
+            angles = []
+            
+            if not self.mirrored:
+                warnings.warn("Mirroring in area-avg")
+                self.mirror()
+
+            for angle, r_dict in self.data.items():
+
+                if angle == 360:    # We already have 0
+                    continue
+
+                rs_temp = []
+                vars_temp = []
+                angles.append(angle * np.pi / 180)
+                for rstar, midas_dict in r_dict.items():
+                    if rstar >= 0:
+                        try:
+                            rs_temp.append(rstar)
+                            vars_temp.append(float(midas_dict[param] * rstar))
+                        except:
+                            if debug: print('Problem with:', angle, r_dict, param)
+                
+                vars = [var for _, var in sorted(zip(rs_temp, vars_temp))]
+                rs = sorted(rs_temp)
+
+                if debug: print("Arrays to integrate", angle, rs, vars, file=debugFID)
+
+                if len(rs) != len(vars):
+                    ValueError( f"rs to integrate over {rs} must be the same length as params {vars}, occured at {angle}" )
+
+                # Trapezoidal rule
+                la = 0.0
+                for i in range(len(rs) - 1):
+                    dr = rs[i+1] - rs[i]
+                    la += 0.5 * (vars[i] + vars[i+1]) * dr
+
+                param_r.append(la)
+
+            I = sum(param_r) / 8
+            self.area_avgs.update({param: I})
+
+        elif method == 'quadratic_interpolatory':
+            def integrate_quad_interp(x, y):
+                """
+                Integrate using piecewise quadratic interpolation on triples of points.
+                Works for uneven spacing.
+                """
+                n = len(x)
+                if n < 3:
+                    return 0.0
+
+                I = 0.0
+                i = 0
+
+                while i + 2 < n:
+                    x0, x1, x2 = x[i],   x[i+1],   x[i+2]
+                    f0, f1, f2 = y[i],   y[i+1],   y[i+2]
+
+                    # Lagrange basis integrals
+                    def L0(t): return ((t - x1)*(t - x2)) / ((x0 - x1)*(x0 - x2))
+                    def L1(t): return ((t - x0)*(t - x2)) / ((x1 - x0)*(x1 - x2))
+                    def L2(t): return ((t - x0)*(t - x1)) / ((x2 - x0)*(x2 - x1))
+
+                    # Integrate each basis exactly over [x0, x2]
+                    import numpy as np
+                    F0 = np.polyint(np.poly1d(np.polyfit([x0,x1,x2], [1,0,0], 2)))
+                    F1 = np.polyint(np.poly1d(np.polyfit([x0,x1,x2], [0,1,0], 2)))
+                    F2 = np.polyint(np.polyint(np.poly1d(np.polyfit([x0,x1,x2], [0,0,1], 2))))
+
+                    term = f0*(F0(x2)-F0(x0)) + f1*(F1(x2)-F1(x0)) + f2*(F2(x2)-F2(x0))
+                    I += term
+                    i += 2
+
+                return I
+            
+            I = 0
+            param_r = [] # array for parameter integrated wrt r
+            angles = []
+            
+            if not self.mirrored:
+                warnings.warn("Mirroring in area-avg")
+                self.mirror()
+
+            for angle, r_dict in self.data.items():
+
+                if angle == 360:    # We already have 0
+                    continue
+
+                rs_temp = []
+                vars_temp = []
+                angles.append(angle * np.pi / 180)
+                for rstar, midas_dict in r_dict.items():
+                    if rstar >= 0:
+                        try:
+                            rs_temp.append(rstar)
+                            vars_temp.append(float(midas_dict[param] * rstar))
+                        except:
+                            if debug: print('Problem with:', angle, r_dict, param)
+                
+                vars = [var for _, var in sorted(zip(rs_temp, vars_temp))]
+                rs = sorted(rs_temp)
+
+                if debug: print("Arrays to integrate", angle, rs, vars, file=debugFID)
+
+                if len(rs) != len(vars):
+                    ValueError( f"rs to integrate over {rs} must be the same length as params {vars}, occured at {angle}" )
+
+                la = integrate_quad_interp(rs, vars)
+                param_r.append(la)
+
+            I = sum(param_r) / 8
+            self.area_avgs.update({param: I})
+        
+        elif method == 'cubic_spline':
+            from scipy.interpolate import CubicSpline
+
+            I = 0
+            param_r = []
+            angles = []
+
+            if not self.mirrored:
+                warnings.warn("Mirroring in area-avg")
+                self.mirror()
+
+            for angle, r_dict in self.data.items():
+
+                if angle == 360:
+                    continue
+
+                rs_temp = []
+                vars_temp = []
+                angles.append(angle * np.pi / 180)
+
+                for rstar, midas_dict in r_dict.items():
+                    if rstar >= 0:
+                        try:
+                            rs_temp.append(rstar)
+                            vars_temp.append(float(midas_dict[param] * rstar))
+                        except:
+                            if debug: print('Problem with:', angle, r_dict, param)
+
+                rs = np.array(sorted(rs_temp))
+                vars = np.array([v for _, v in sorted(zip(rs_temp, vars_temp))])
+
+                # Spline + exact integral
+                cs = CubicSpline(rs, vars)
+                F = cs.antiderivative()
+                la = F(rs[-1]) - F(rs[0])
+
+                param_r.append(la)
+
+            I = sum(param_r) / 8
+            self.area_avgs.update({param: I})
+
+        elif method == 'legacy':
+            I = 0
+            param_r = [] # array for parameter integrated wrt r
+            angles = []
+            
+            if not self.mirrored:
+                warnings.warn("Mirroring in area-avg")
+                self.mirror()
+>>>>>>> b0bfb57 (lil change)
 
         if param in self._grads_calced and not recalc:
             return
@@ -1150,10 +1395,352 @@ class Condition:
             rs.sort()
             #print(rs)
 
+<<<<<<< HEAD
             for i in range(1, len(rs) ):
                 if rs[i] < 0: 
                     if debug: print(f'Warning: somehow we still have negative data.\n{self}\n{phi_angle=}\t{rs=}')
                 grad_r_param = (r_dict[rs[i]][param] - r_dict[rs[i-1]][param]) / (rs[i] - rs[i-1])
+=======
+        .. math:: \\langle \\psi \\rangle_{L} = \\frac{\int_L (\\psi(r,\\varphi^{*}) - \\langle \\psi \\rangle)^{2} \,dL}{\\langle \\psi \\rangle} 
+
+        **Args**:
+        
+         - ``param``: ``midas_dict`` parameter. See :any:`print_params` for options
+         - ``phi_angle``: angle to calculate line average across
+        
+        **Raises**:
+        
+         - ``KeyError``: If ``param`` not available
+        
+        **Returns**:
+        
+         - Line average deviation
+        """
+
+        self.mirror()
+
+        if phi_angle not in self.data.keys():
+            if debug: print(self.data, file=debugFID)
+            print(f"Could not area-average {param} for condition {self.name}\nData for {phi_angle} not found after mirroring!")
+            return
+
+
+        if not self.check_param(param):
+            raise KeyError(f"Invalid parameter {param} selected. Not present at {self.check_param_loc(param)}")
+
+
+        r_for_int = []
+        var_for_int = []
+
+        for rstar, midas_dict in self.data[phi_angle].items():
+            if rstar not in r_for_int:
+                r_for_int.append(rstar)
+                var_for_int.append((midas_dict[param] - self.area_avg(param))**2)
+
+        if phi_angle <=180:
+            comp_angle = phi_angle+180
+            
+        else:
+            comp_angle = phi_angle - 180
+        
+        for rstar, midas_dict in self.data[comp_angle].items():
+            if rstar not in r_for_int:
+                r_for_int.append(-rstar)
+                var_for_int.append((midas_dict[param] - self.area_avg(param))**2)
+
+        var_for_int = [param for _, param in sorted(zip(r_for_int, var_for_int))]
+        r_for_int = sorted(r_for_int)
+
+        I = integrate.simpson(y=var_for_int, x=r_for_int) / 2 / self.area_avg(param)**2 # Integrate wrt theta, divide by normalized length
+
+        return I
+
+
+    def void_area_avg(self, param: str, even_opt='first', method = None) -> float:
+        """Method for calculating the void-weighted area-average of a parameter
+
+        .. math:: \\langle \\langle \\psi \\rangle \\rangle = \\frac{\iint_A \\alpha \\psi(r,\\varphi) r \,dr\,d\\varphi}{\iint_A \\alpha r \,dr\,d\\varphi} 
+        
+        **Args**:
+        
+         - ``param``: ``midas_dict`` parameter to void-weighted area-average. See :func:`~MARIGOLD.Condition.print_params` for options
+         - ``even_opt``: option for ``scipy.integrate.simpsons``. Defaults to 'first'.
+         - ``recalc``: if true, will recalculate area average. Defaults to True.
+         - ``method``: method to void-weighted area-average. Defaults to None.
+
+             - ``legacy``, using the same method as the Excel spreadsheets
+             - ``legacy_old``, actually what we use in spreadsheets, hardcoded values
+             - None, will use ``scipy.integrate.simpsons``. Recommended option
+        
+        **Raises**:
+        
+         - ``KeyError``: if ``param`` not found
+        
+        **Returns**:
+        
+         - void-weighted area-averaged value
+        """
+
+        # Check that the parameter that the user requested exists
+        if not self.check_param(param):
+            raise KeyError(f"Invalid parameter {param} selected. Not present at {self.check_param_loc(param)}")
+
+        if method == 'uneven_simpson':
+
+            def simpson_uneven(x, y):
+                """
+                Simpson's rule for uneven spacing using groups of 3 points.
+                x: sorted array of x-values (must be increasing)
+                y: array of f(x)
+                """
+                n = len(x)
+                if n < 3:
+                    return 0.0
+
+                I = 0.0
+                i = 0
+                while i + 2 < n:
+                    h = x[i+1] - x[i]
+                    k = x[i+2] - x[i+1]
+
+                    if h <= 0 or k <= 0:
+                        raise ValueError("x array must be strictly increasing")
+
+                    f0, f1, f2 = y[i], y[i+1], y[i+2]
+
+                    # Shklov formula
+                    term = (h + k) / 6 * (
+                        (2 - k/h) * f0 +
+                        (h/k + k/h) * f1 +
+                        (2 - h/k) * f2
+                    )
+                    I += term
+                    i += 2  # advance by two
+
+                return I
+
+            I = 0
+            param_r = [] # array for parameter integrated wrt r
+            angles = []
+            
+            if not self.mirrored:
+                warnings.warn("Mirroring in area-avg")
+                self.mirror()
+
+            for angle, r_dict in self.data.items():
+
+                if angle == 360:    # We already have 0
+                    continue
+
+                rs_temp = []
+                vars_temp = []
+                angles.append(angle * np.pi / 180)
+                for rstar, midas_dict in r_dict.items():
+                    if rstar >= 0:
+                        try:
+                            rs_temp.append(rstar)
+                            vars_temp.append(float(midas_dict[param] * midas_dict['alpha'] * rstar))
+                        except:
+                            if debug: print('Problem with:', angle, r_dict, param)
+                
+                vars = [var for _, var in sorted(zip(rs_temp, vars_temp))]
+                rs = sorted(rs_temp)
+
+                if debug: print("Arrays to integrate", angle, rs, vars, file=debugFID)
+
+                if len(rs) != len(vars):
+                    ValueError( f"rs to integrate over {rs} must be the same length as params {vars}, occured at {angle}" )
+
+                # Simpson’s rule for uneven intervals
+                la = simpson_uneven(rs, vars)
+
+                param_r.append(la)
+
+            I = sum(param_r) / 8 / self.area_avg('alpha',method=method)
+            self.area_avgs.update({param: I})
+
+        elif method == 'trapezoid':
+            I = 0
+            param_r = [] # array for parameter integrated wrt r
+            angles = []
+            
+            if not self.mirrored:
+                warnings.warn("Mirroring in area-avg")
+                self.mirror()
+
+            for angle, r_dict in self.data.items():
+
+                if angle == 360:    # We already have 0
+                    continue
+
+                rs_temp = []
+                vars_temp = []
+                angles.append(angle * np.pi / 180)
+                for rstar, midas_dict in r_dict.items():
+                    if rstar >= 0:
+                        try:
+                            rs_temp.append(rstar)
+                            vars_temp.append(float(midas_dict[param] * midas_dict['alpha'] * rstar))
+                        except:
+                            if debug: print('Problem with:', angle, r_dict, param)
+                
+                vars = [var for _, var in sorted(zip(rs_temp, vars_temp))]
+                rs = sorted(rs_temp)
+
+                if debug: print("Arrays to integrate", angle, rs, vars, file=debugFID)
+
+                if len(rs) != len(vars):
+                    ValueError( f"rs to integrate over {rs} must be the same length as params {vars}, occured at {angle}" )
+
+                # Trapezoidal rule
+                la = 0.0
+                for i in range(len(rs) - 1):
+                    dr = rs[i+1] - rs[i]
+                    la += 0.5 * (vars[i] + vars[i+1]) * dr
+
+                param_r.append(la)
+
+            I = sum(param_r) / 8 / self.area_avg('alpha',method=method)
+            self.area_avgs.update({param: I})
+
+        elif method == 'quadratic_interpolatory':
+            def integrate_quad_interp(x, y):
+                """
+                Integrate using piecewise quadratic interpolation on triples of points.
+                Works for uneven spacing.
+                """
+                n = len(x)
+                if n < 3:
+                    return 0.0
+
+                I = 0.0
+                i = 0
+
+                while i + 2 < n:
+                    x0, x1, x2 = x[i],   x[i+1],   x[i+2]
+                    f0, f1, f2 = y[i],   y[i+1],   y[i+2]
+
+                    # Lagrange basis integrals
+                    def L0(t): return ((t - x1)*(t - x2)) / ((x0 - x1)*(x0 - x2))
+                    def L1(t): return ((t - x0)*(t - x2)) / ((x1 - x0)*(x1 - x2))
+                    def L2(t): return ((t - x0)*(t - x1)) / ((x2 - x0)*(x2 - x1))
+
+                    # Integrate each basis exactly over [x0, x2]
+                    import numpy as np
+                    F0 = np.polyint(np.poly1d(np.polyfit([x0,x1,x2], [1,0,0], 2)))
+                    F1 = np.polyint(np.poly1d(np.polyfit([x0,x1,x2], [0,1,0], 2)))
+                    F2 = np.polyint(np.polyint(np.poly1d(np.polyfit([x0,x1,x2], [0,0,1], 2))))
+
+                    term = f0*(F0(x2)-F0(x0)) + f1*(F1(x2)-F1(x0)) + f2*(F2(x2)-F2(x0))
+                    I += term
+                    i += 2
+
+                return I
+            
+            I = 0
+            param_r = [] # array for parameter integrated wrt r
+            angles = []
+            
+            if not self.mirrored:
+                warnings.warn("Mirroring in area-avg")
+                self.mirror()
+
+            for angle, r_dict in self.data.items():
+
+                if angle == 360:    # We already have 0
+                    continue
+
+                rs_temp = []
+                vars_temp = []
+                angles.append(angle * np.pi / 180)
+                for rstar, midas_dict in r_dict.items():
+                    if rstar >= 0:
+                        try:
+                            rs_temp.append(rstar)
+                            vars_temp.append(float(midas_dict[param] * midas_dict['alpha'] * rstar))
+                        except:
+                            if debug: print('Problem with:', angle, r_dict, param)
+                
+                vars = [var for _, var in sorted(zip(rs_temp, vars_temp))]
+                rs = sorted(rs_temp)
+
+                if debug: print("Arrays to integrate", angle, rs, vars, file=debugFID)
+
+                if len(rs) != len(vars):
+                    ValueError( f"rs to integrate over {rs} must be the same length as params {vars}, occured at {angle}" )
+
+                la = integrate_quad_interp(rs, vars)
+                param_r.append(la)
+
+            I = sum(param_r) / 8 / self.area_avg('alpha',method=method)
+            self.area_avgs.update({param: I})
+        
+        elif method == 'cubic_spline':
+            from scipy.interpolate import CubicSpline
+
+            I = 0
+            param_r = []
+            angles = []
+
+            if not self.mirrored:
+                warnings.warn("Mirroring in area-avg")
+                self.mirror()
+
+            for angle, r_dict in self.data.items():
+
+                if angle == 360:
+                    continue
+
+                rs_temp = []
+                vars_temp = []
+                angles.append(angle * np.pi / 180)
+
+                for rstar, midas_dict in r_dict.items():
+                    if rstar >= 0:
+                        try:
+                            rs_temp.append(rstar)
+                            vars_temp.append(float(midas_dict[param] * midas_dict['alpha'] * rstar))
+                        except:
+                            if debug: print('Problem with:', angle, r_dict, param)
+
+                rs = np.array(sorted(rs_temp))
+                vars = np.array([v for _, v in sorted(zip(rs_temp, vars_temp))])
+
+                # Spline + exact integral
+                cs = CubicSpline(rs, vars)
+                F = cs.antiderivative()
+                la = F(rs[-1]) - F(rs[0])
+
+                param_r.append(la)
+
+            I = sum(param_r) / 8 / self.area_avg('alpha',method=method)
+            self.area_avgs.update({param: I})
+
+        elif method == 'legacy':
+            I = 0
+            param_r = [] # array for parameter integrated wrt r
+            angles = []
+            
+            if not self.mirrored:
+                warnings.warn("Mirroring in area-avg")
+                self.mirror()
+
+            for angle, r_dict in self.data.items():
+
+                if angle == 360:    # We already have 0
+                    continue
+
+                rs_temp = []
+                vars_temp = []
+                angles.append(angle * np.pi / 180)
+                for rstar, midas_dict in r_dict.items():
+                    if rstar >= 0:
+                        try:
+                            rs_temp.append(rstar)
+                            vars_temp.append(float(midas_dict[param] * midas_dict['alpha'] * rstar))
+                        except:
+                            if debug: print('Problem with:', angle, r_dict, param)
+>>>>>>> b0bfb57 (lil change)
                 
                 
                 j = phis.index(phi_angle)
@@ -1244,7 +1831,146 @@ class Condition:
                     r_dict[0.0].update( {grad_param_name+'_total': deepcopy(r_dict[0.0][grad_param_name+'_r'])} )
                     self.data[comp_angle][0.0].update({grad_param_name+'_total': deepcopy(r_dict[0.0][grad_param_name+'_r']) })
                     
+<<<<<<< HEAD
         return area_avg(self,grad_param_name+'_total')
+=======
+                param_r.append( integrate.simpson(y=vars, x=rs) ) # Integrate wrt r
+                if debug: print("calculated integral:", integrate.simpson(y=vars, x=rs), file=debugFID)
+                    #I = 2 * np.pi
+            if debug: print("Integrated wrt r", param_r, file=debugFID)
+
+            param_r = [param for _, param in sorted(zip(angles, param_r))]
+            angles = sorted(angles)
+
+            I = integrate.simpson(y=param_r, x=angles) / np.pi / self.area_avg('alpha') # Integrate wrt theta, divide by normalized area
+
+        return I
+    
+    def interp_area_avg(cond, param:str, interp_type = 'linear', int_error = 10**-6) -> float:
+        """Method for calculating the area-average of a parameter, based on an interpolation of the data
+    
+        *WARNING*: uses ``scipy.integrate.nquad``. May be computationally expensive
+    
+        **Args**:
+    
+            - ``param``: ``midas_dict`` parameter. See :any:`print_params` for options
+            - ``interp_type``: interpolation type. See :any:`__call__`. Defaults to 'linear'.
+            - ``int_error``: acceptable warning for integral error (passed to scipy.integrate.nquad). Defaults to 10**-6.
+    
+        **Returns**:
+    
+            - area-average of param
+        """
+    
+        def integrand(r, phi):  # phi will be in radians from dblquad
+            return cond(phi, r, param, interp_method=interp_type) * r
+    
+        I = integrate.nquad(integrand, ranges = [(0, 1), (0, np.pi * 2)],
+                            opts = [{'epsabs': int_error, 'points': list(cond.data[0].keys())},             # r* values
+                                    {'epsabs': int_error, 'points': np.deg2rad(list(cond.data.keys()))}]    # phi values
+                            )[0] / np.pi    # [0] takes the numerical value of the integral, then divide by area of unit circle
+        return I
+    
+    def interp_void_area_avg(cond, param:str, interp_type = 'linear', int_error = 10**-6) -> float:
+        """Method for calculating the void-weighted area-average of a parameter, based on an interpolation of the data
+    
+        *WARNING*: uses ``scipy.integrate.nquad``. May be computationally expensive
+    
+        **Args**:
+    
+            - ``param``: ``midas_dict`` parameter. See :any:`print_params` for options
+            - ``interp_type``: interpolation type. See :any:`__call__`. Defaults to 'linear'.
+            - ``int_error``: acceptable warning for integral error (passed to scipy.integrate.nquad).. Defaults to 10**-6.
+    
+        **Returns**:
+    
+            - void-weighted area-average of param
+        """
+    
+        def integrand(r, phi):  # phi will be in radians from dblquad
+            return cond(phi, r, param, interp_method=interp_type) * cond(phi, r, 'alpha', interp_method=interp_type) * r
+    
+        I = integrate.nquad(integrand, ranges = [(0, 1), (0, np.pi * 2)],
+                            opts = [{'epsabs': int_error, 'points': list(cond.data[0].keys())},             # r* values
+                                    {'epsabs': int_error, 'points': np.deg2rad(list(cond.data.keys()))}]    # phi values
+                            )[0] / cond.interp_area_avg('alpha', interp_type=interp_type, int_error=int_error) / np.pi
+        return I
+
+    def spline_void_area_avg(self, param:str, int_error = 10**-6) -> float:
+        """Function to void-weighted area-average param based on a spline interpolation
+        
+        *WARNING*: uses ``scipy.integrate.dblquad``. May be computationally expensive
+
+        **Args**:
+        
+         - ``param``: ``midas_dict`` parameter. See :any:`print_params` for options
+         - ``int_error``: acceptable warning for integral error (passed to scipy.integrate.dblquad). Defaults to 10**-6.
+        
+        **Returns**:
+        
+         - integrand result
+        """
+
+        def integrand(phi, r):
+            return self.spline_interp[param](phi * 180/np.pi, r) * self.spline_interp['alpha'](phi * 180/np.pi, r) * r
+        
+        def integrand_denom(phi, r):
+            return self.spline_interp['alpha'](phi * 180/np.pi, r) * r
+        
+        I = integrate.dblquad(integrand, 0, 1, 0, np.pi * 2, epsabs = int_error)[0] / integrate.dblquad(integrand_denom, 0, 1, 0, np.pi * 2, epsabs = int_error)[0]
+        return I
+    
+    def spline_circ_seg_area_avg(self, param:str, hstar:float, int_err = 10**-4) -> float:
+        """Function to area-average over a circular segment using the spline interpolation of param
+
+        *WARNING*: uses ``scipy.integrate.dblquad``. May be computationally expensive
+        
+        **Args**:
+        
+         - ``param``: ``midas_dict`` parameter. See :any:`print_params` for options
+         - ``hstar``: distance from the top of the pipe that defines circular segment
+         - ``int_err``: acceptable warning for integral error (passed to scipy.integrate.dblquad). Defaults to 10**-4.
+        
+        **Returns**:
+        
+         - integrand result
+        """
+        # Function to area-average over a circular segment using the spline interpolation of param
+
+        # Inputs:
+        #  - param, string of local parameter to area-average
+        #  - hstar, distance from the top of the pipe that defines circular segment
+        #  - int_err, acceptable warning for integral error (passed to scipy.integrate.dblquad)
+
+        # Returns:
+        #  - integrand result
+
+        # Uses scipy.integrate.dblquad. May be computationally expensive
+        
+        # 
+
+        def integrand(r, phi):
+            return self.spline_interp[param](phi * 180/np.pi, r) * r
+
+        def integrand_denom(r, phi):
+            return r
+
+        def lower_r_bound_pos(phi):
+            return max((1 - hstar) / np.sin(phi), 0)
+
+        def upper_r_bound_neg(phi):
+            if (phi <= 3*np.pi/2 - np.arccos(hstar-1)) or (phi >= 3*np.pi/2 + np.arccos(hstar-1)):
+                return 1
+            else:
+                return (1 - hstar) / np.sin(phi)
+
+        if hstar <= 1:
+            I = integrate.dblquad(integrand, np.pi/2 - np.arccos(1-hstar), np.pi/2 + np.arccos(1-hstar), lower_r_bound_pos, 1, epsabs=int_err )[0] / integrate.dblquad(integrand_denom, np.pi/2 - np.arccos(1-hstar), np.pi/2 + np.arccos(1-hstar), lower_r_bound_pos, 1, epsabs=int_err )[0]
+        elif hstar > 1:
+            I = integrate.dblquad(integrand, 0, 2*np.pi, 0, upper_r_bound_neg, epsabs=int_err )[0] / integrate.dblquad(integrand_denom, 0, 2*np.pi, 0, upper_r_bound_neg, epsabs=int_err )[0]
+
+        return I
+>>>>>>> b0bfb57 (lil change)
 
     def calc_void_cov(self):
         """Calculates the void covariance
@@ -1808,7 +2534,7 @@ def print_params() -> None:
      - ``'r23'``, distance between sensor 2 and 3 :math:`[mm]`
      - ``'vf'``, liquid velocity :math:`[m/s]`
      - ``'jf_loc'``, local superficial liquid velocity :math:`[m/s]`
-     - ``'jf'``, superficial liquid veloicty :math:`[m/s]`
+     - ``'jf'``, superficial liquid velocity :math:`[m/s]`
      - ``'delta_p'``, pressure difference measured by Pitot-static probe :math:`[psi]`
      - ``'sigma_delta_p'``, standard deviation of pressure difference measured by Pitot-static probe :math:`[psi]`
      - ``'vr'``, relative velocity :math:`[m/s]`
