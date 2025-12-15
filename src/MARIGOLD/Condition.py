@@ -623,7 +623,7 @@ class Condition:
 
         return
     
-    def add_mesh_points(self, r_points:list, suppress=False):
+    def add_mesh_points(self, r_points:list, suppress=False, method='interp'):
         """Method for adding additional r/R points
 
         Data linearly interpolated based on surrounding data (specifically using :any:`__call__` at the :math:`(\\varphi, r)` location in question)
@@ -638,22 +638,30 @@ class Condition:
             for r in r_points:
                 temp_midas_data = []
                 
-                r_keys = list(self.data[angle].keys())
-                r_keys.sort()
+                if method == 'interp':
+                    r_keys = list(self.data[angle].keys())
+                    r_keys.sort()
 
-                params = self.data[angle][r_keys[-2]]
-                
-                for param in params:
+                    params = self.data[angle][r_keys[-2]]
+                    
+                    for param in params:
+                        try:
+                            temp_midas_data.append( float(self(angle*np.pi/180, r, param, interp_method = 'linear' ) ))
+                        except KeyError as e:
+                            if suppress == False:
+                                print(e)
+                            
+                            temp_midas_data.append( 0 )
+                            
+                    self.data[angle].update( {r: dict(zip(tab_keys, temp_midas_data))} )
+
+                elif method == 'zeroes':
                     try:
-                        temp_midas_data.append( float(self(angle*np.pi/180, r, param, interp_method = 'linear' ) ))
-                    except KeyError as e:
-                        if suppress == False:
-                            print(e)
-                        
-                        temp_midas_data.append( 0 )
-                
-                self.data[angle].update( {r: dict(zip(tab_keys, temp_midas_data))} )
-    
+                        dummy = self.data[angle][r]
+                    except:
+                        self.data[angle].update({r: deepcopy(zero_data)})
+                        self.data[angle][r]['roverR'] = r
+
     def fit_spline(self, param: str) -> None:
         """fits a spline to the data of param using ``scipy.interpolate.RectBivariateSpline``
         
@@ -1818,6 +1826,7 @@ def print_params() -> None:
     return
 
 tab_keys = [
+    'signed_roverR',
     'roverR',
     'time',
     'frequency',
