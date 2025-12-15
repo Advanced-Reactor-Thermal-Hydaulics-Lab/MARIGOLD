@@ -694,7 +694,7 @@ def plot_isoline(cond, param:str, iso_axis:str, iso_val:float, fig_size=4, plot_
     return
 
 def plot_contour(cond, param:str, save_dir = '.', show=True, set_max = None, set_min = None, fig_size = 4, colorbar_label = None, suppress_colorbar = False,
-                    rot_angle = 0, ngridr = 50, ngridphi = 50, colormap = 'hot_r', num_levels = 0, level_step = 0.01, title = False, title_str = '', extra_save_text = '',
+                    rot_angle = 0, ngridr = 50, ngridphi = 50, colormap = 'plasma', num_levels = 0, level_step = 0.01, title = False, title_str = '', extra_save_text = '',
                     annotate_h = False, cartesian = False, h_star_kwargs = {'method': 'max_dsm', 'min_void': '0.05'}, plot_measured_points = False, font_size = 12) -> None:
     """Function to create a contour plot of a given param
 
@@ -711,7 +711,7 @@ def plot_contour(cond, param:str, save_dir = '.', show=True, set_max = None, set
         - ``rot_angle``: Rotate the contour plot by a specific angle (in degrees). Defaults to 0.
         - ``ngridr``: the number of interpolation points in the :math:`r` direction. Defaults to 50.
         - ``ngridphi``: the number of interpolation points in the :math:`\\varphi` direction. Defaults to 50.
-        - ``colormap``: colormap to use for the contour plot. Defaults to 'hot_r'.
+        - ``colormap``: colormap to use for the contour plot. Defaults to 'plasma'.
         - ``num_levels``: number of levels for the contours. Defaults to 0.
         - ``level_step``: steps to define the number of contours. Not used if ``num_levels`` specified. Defaults to 0.01.
         - ``title``: title for the top of the plot. Default title is ``cond.name``. Defaults to False.
@@ -1030,7 +1030,7 @@ def plot_surface(cond, param:str, save_dir = '.', show=True, set_max = None, set
     return
 
 def plot_spline_contour(cond, param:str, save_dir = '.', show=True, set_max = None, set_min = None, fig_size = 4,
-                    rot_angle = 0, ngridr = 50, ngridphi = 50, colormap = 'hot_r', num_levels = 100, title = False,
+                    rot_angle = 0, ngridr = 50, ngridphi = 50, colormap = 'plasma', num_levels = 100, title = False,
                     annotate_h = False, cartesian = False, h_star_kwargs = {'method': 'max_dsm', 'min_void': '0.05'},
                     grad = 'None') -> None:
     """Plots a contour from a spline interpolation
