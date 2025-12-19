@@ -10,12 +10,16 @@ This file contains functions related to interacting with raw data files from the
 
 """
 
-def write_inp(roverR, filename, probe_number = 'AM4-5', probe_type = 4, r01=1.408, r02=1.593, r03=1.597, r12=0.570, r13=0.755, r23=0.343, directory = os.getcwd(), detailedOutput=0, signalOutput=0, inp_name = 'Input.inp', measure_time = 30):
+def write_inp(roverR, filename, probe_number = 'Dummy', probe_type = 4, set_vals = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0], directory = os.getcwd(), detailedOutput=0, signalOutput=0, inp_name = 'Input.inp', measure_time = 30):
     """ Write an .inp file for MIDAS
     
     """
+    # Unpack probe dimensions
+    [r01, r02, r03, r12, r13, r23] = set_vals
+
     with open(os.path.join(directory, inp_name), 'w') as f:
         f.write(
+
 f"*PROBE NUMBER: {probe_number}\n\
 probetype={probe_type}\n\
 r/R={roverR}\n\
@@ -51,16 +55,20 @@ SqLocThresh=0.0\n\
 *Filename=r0o\n\
 *\n\
 end"
-        )
+
+)
 
     return
 
-def write_pitot_inp(roverR, filename, URV = 5.248, LRV = 1.054, URP = 10, LRP = 0, directory = os.getcwd(), inp_name = 'Input.inp', measure_time = 30):
+def write_pitot_inp(roverR, filename, set_vals, directory = os.getcwd(), inp_name = 'Input.inp', measure_time = 30):
 
-    # URV = 5.01, LRV = 1.005 reverted to 5.248 and 1.054, respectively, 07JAN25
+    # Unpack pressure bounds
+    [URV, LRV, URP, LRP, _, _] = set_vals
+
     with open(os.path.join(directory, inp_name), 'w') as f:
-        print(f"\
-*Pitot tube\n\
+        print(
+
+f"*Pitot tube\n\
 file={filename}.dat\n\
 r/R={roverR}\n\
 frequency=50000\n\
@@ -68,7 +76,9 @@ measuretime={measure_time}\n\
 URV={URV}\n\
 LRV={LRV}\n\
 URP={URP}\n\
-LRP={LRP}", file = f)
+LRP={LRP}", file = f
+
+)
         
     return
 
@@ -98,8 +108,11 @@ def tdms_to_dat(infile:str, outfile = None):
 
     return
 
-def process_dir(target_dir:str, probe_number:str, r01:float, r02:float, r03:float, r12:float, r13:float, r23:float, probe_type = 4, roverR = None, measure_time = 30,
-                signal_output=0, detailed_output=0, multiprocess = False, num_cpus = None, mode = "probe", midas = "MIDASv1.14d.exe"):
+def process_dir(target_dir:str, probe_number:str, set_vals,
+                probe_type = 4, roverR = None, measure_time = 30,
+                signal_output = 0, detailed_output = 0,
+                multiprocess = False, num_cpus = None,
+                mode = "probe", midas = "MIDASv1.14d.exe"):
     """ Runs MIDAS for every dat file in a given directory
 
     Makes a new folder, auto_reprocessed_data_TIMESTAMP, where the .tab files will be put.
@@ -115,7 +128,11 @@ def process_dir(target_dir:str, probe_number:str, r01:float, r02:float, r03:floa
      - Returns name of directory the reprocessed files are in
     
     """
+
+    # Change directory to target
     os.chdir(target_dir)
+
+    # Make reprocessed directory
     current_time = datetime.now()
     timestamp = f"{current_time.month}-{current_time.day}-{current_time.year}_{current_time.hour}-{current_time.minute}"
 
@@ -124,45 +141,45 @@ def process_dir(target_dir:str, probe_number:str, r01:float, r02:float, r03:floa
     if not os.path.isdir( reprocessed_dir ):
         os.makedirs( reprocessed_dir )
 
+    # Copy executable to reprocessed directory
     if mode == 'probe':
-        try:
-            copy2(os.path.join(target_dir, midas), reprocessed_dir)
-        except FileNotFoundError:
-            copy2(os.path.join("Z:\TRSL\PITA", midas), reprocessed_dir)
+        copy2(os.path.join(target_dir, midas), reprocessed_dir)
+
     elif mode == 'pitot':
-        try:
-            copy2(os.path.join(target_dir, "PPv1.exe"), reprocessed_dir)
-        except FileNotFoundError:
-            copy2(os.path.join("Z:\TRSL\PITA", "PPv1.exe"), reprocessed_dir)
-    
+        copy2(os.path.join(target_dir, "PPv1.exe"), reprocessed_dir)    
 
     os.chdir(reprocessed_dir)
 
+    # Loop through files
     if not multiprocess:
         for file in os.listdir(target_dir):
-            # print(file)
             if file.split('.')[-1] == 'dat':
+                # Copy query file
                 copy2(os.path.join(target_dir, file), reprocessed_dir)
 
+                # Auto-detect radial location
                 if roverR is None:
                     roverR = 0.1 * int(file[1])
                 
+                # Write input and run executable
                 if mode == 'probe':
-                    write_inp(roverR, file.replace('.dat', ''), probe_number = probe_number, probe_type = probe_type,
-                              r01=r01, r02=r02, r03=r03, r12=r12, r13=r13, r23=r23, 
-                          directory=reprocessed_dir, signalOutput=signal_output, detailedOutput=detailed_output, measure_time=measure_time
-                          )
+                    write_inp(roverR, file.replace('.dat', ''), probe_number = probe_number, probe_type = probe_type, set_vals = set_vals, 
+                        directory = reprocessed_dir, signalOutput = signal_output, detailedOutput = detailed_output, measure_time=measure_time
+                        )
+                    
                     comp_process = run(os.path.join(reprocessed_dir, midas), cwd = reprocessed_dir, shell=True)
+                    
                 elif mode == 'pitot':
-                    write_pitot_inp(roverR, file.replace('.dat', ''), measure_time=measure_time,
-                                    URV = r01, LRV = r02,
-                                    URP= r03, LRP = r12,
-                                    directory=reprocessed_dir
-                                    )
+                    write_pitot_inp(roverR, file.replace('.dat', ''), measure_time = measure_time, set_vals = set_vals,
+                        directory = reprocessed_dir
+                        )
+                    
                     comp_process = run(os.path.join(reprocessed_dir, 'PPv1.exe'), cwd = reprocessed_dir, shell=True)
 
                 if comp_process.returncode != 0:
                     print(comp_process)
+                
+                # Delete copied file
                 try:
                     os.remove(os.path.join(reprocessed_dir, file))
                 except OSError as e:
@@ -181,16 +198,17 @@ def process_dir(target_dir:str, probe_number:str, r01:float, r02:float, r03:floa
                 roverR = 0.1 * int(file[1])
             
             if mode == 'probe':
-                write_inp(roverR, file.replace('.dat', ''), probe_number = probe_number, probe_type = probe_type, 
-                          r01=r01, r02=r02, r03=r03, r12=r12, r13=r13, r23=r23, 
-                          directory=reprocessed_dir, signalOutput=signal_output, detailedOutput=detailed_output, inp_name=input_name, measure_time=measure_time)
+                write_inp(roverR, file.replace('.dat', ''), probe_number = probe_number, probe_type = probe_type, set_vals = set_vals, 
+                    directory = reprocessed_dir, signalOutput = signal_output, detailedOutput = detailed_output, inp_name = input_name, measure_time = measure_time
+                    )
+                
                 p = subprocess.Popen([midas, input_name], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
             elif mode == 'pitot':
-                write_pitot_inp(roverR, file.replace('.dat', ''), 
-                                URV = r01, LRV = r02,
-                                URP= r03, LRP = r12,
-                                directory=reprocessed_dir,
-                                inp_name=input_name, measure_time=measure_time)
+                write_pitot_inp(roverR, file.replace('.dat', ''), set_vals = set_vals,
+                    directory = reprocessed_dir, inp_name = input_name, measure_time = measure_time
+                    )
+                
                 p = subprocess.Popen(["PPv1.exe", input_name], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
             out, err = p.communicate()
@@ -198,12 +216,12 @@ def process_dir(target_dir:str, probe_number:str, r01:float, r02:float, r03:floa
         
         if num_cpus is None:
             num_cpus = multiprocessing.cpu_count()
+
         pool = ThreadPool(num_cpus)
         results = []
 
         for file in os.listdir(target_dir):
             if file.split('.')[-1] == 'dat':
-                # print(file)
                 if (mode == 'probe') and ('pitot' not in file):
                     copy2(os.path.join(target_dir, file), reprocessed_dir)
                     
@@ -220,11 +238,5 @@ def process_dir(target_dir:str, probe_number:str, r01:float, r02:float, r03:floa
         for result in results:
             out, err = result.get()
             print("out: {} err: {}".format(out, err))
-
-        # for file in os.listdir(target_dir):
-        #     try:
-        #         os.remove(os.path.join(reprocessed_dir, file))
-        #     except OSError as e:
-        #         print("Failed to remove .dat file, ", e)
 
     return reprocessed_dir
