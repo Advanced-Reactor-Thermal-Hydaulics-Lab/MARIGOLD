@@ -101,6 +101,8 @@ def iate_1d_1g(
     R_spec          = cond.R_spec                               # Specific gas constant for dry air [J/kg-K]
     T               = cond.T                                    # Ambient absolute temperature [K], for calculating air density as a function of pressure along channel
 
+    print("boopa")
+    
     # Starting L/D
     if io == None:
         LoverD      = cond.LoverD                               # Condition L/D
