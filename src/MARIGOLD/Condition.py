@@ -74,7 +74,8 @@ class Condition:
 
         if 'D' in self.port and 'P' not in self.port:
             self.LoverD = int(self.port.strip('D'))
-        else: # Assume it's PITA
+
+        elif self.database == 'quan':
             if self.port == 'P1':
                 self.LoverD = 30
             elif self.port == 'P2':
@@ -94,6 +95,26 @@ class Condition:
             elif self.port == 'P9':
                 self.LoverD = 194.07          
             elif self.port == 'P10':
+                self.LoverD = 230.07
+
+        elif self.database == 'neup':
+            if self.port == 'P1':
+                self.LoverD = 30
+            elif self.port == 'P2':
+                self.LoverD = 66
+            elif self.port == 'P3':
+                self.LoverD = 110
+            elif self.port == 'P4':
+                self.LoverD = 130.04
+            elif self.port == 'P5A':
+                self.LoverD = 144.17
+            elif self.port == 'P5B':
+                self.LoverD = 147.57
+            elif self.port == 'P5C':
+                self.LoverD = 151.84
+            elif self.port == 'P6':
+                self.LoverD = 194.07
+            elif self.port == 'P7':
                 self.LoverD = 230.07
             else:
                 self.LoverD = -1
