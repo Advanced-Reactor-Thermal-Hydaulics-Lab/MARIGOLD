@@ -6,7 +6,6 @@ src/MARIGOLD/CFD.py
 src/MARIGOLD/Condition.py
 src/MARIGOLD/Condition_Archive.py
 src/MARIGOLD/__init__.py
-src/MARIGOLD/calc_vels.py
 src/MARIGOLD/config.py
 src/MARIGOLD/extracts_and_loads.py
 src/MARIGOLD/flow_regime.py

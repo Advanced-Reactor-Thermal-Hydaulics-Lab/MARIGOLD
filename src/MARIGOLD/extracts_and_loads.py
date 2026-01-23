@@ -527,7 +527,7 @@ def extractProbeData(dump_file = 'database.dat', in_dir = [], require_terms = No
     return
 
 def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], require_terms = ['jf'], 
-                            skip_terms = ['CFD', 'Copy'], sheet_type = 'adix_template', append_to_json = None,
+                            skip_terms = ['CFD', 'Copy'], sheet_type = 'quan_template', append_to_json = None,
                             pitot_sheet = False, print_sheets = False,
                             **kwargs) -> None:
     
@@ -538,13 +538,13 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
        Still under construction, but should support sheet types
         - 'adix_template4'
         - 'ryan_template'
-        - 'adix_template' (maybe rename this quan_template)
+        - 'quan_template' (renamed from adix_template)
         - 'bettis_template'
         - 'talley_template'
         - 'yadav_template'
 
        Also can try to infer the sheet type, xlsm will be adix_template4, if it has P5, 6, or 7 it will
-       be classified as an adix_template, different angles ryan, etc. The inference can also be made by 
+       be classified as a quan_template, different angles ryan, etc. The inference can also be made by 
        appending _adix or _quan or _ryan to the excel sheets being processed
 
        Custom sheet types may be supported, but they still have to generally follow the classic template
@@ -1127,9 +1127,9 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                     elif '60deg' in file or '30deg' in file or '80deg' in file or 'Ryan' in file or 'ryan' in file:
                         sheet_type = 'ryan_template'
                     elif 'P4' in file or 'P5' in file or 'P6' in file or 'P7' in file or 'Quan' in file or 'quan' in file:
-                        sheet_type = 'adix_template' # Might rename this Quan template
+                        sheet_type = 'quan_template'
                     else:
-                        sheet_type = 'adix_template'
+                        sheet_type = 'neup_template'
 
                 if sheet_type == 'ryan_template':
                     Q1_ranges = list(zip([90, 67.5, 45, 22.5, 0], [ [i for i in range(8, 33)], [i for i in range(57, 82)], [i for i in range(108, 133)], [i for i in range(157, 182)], [i for i in range(208, 233)] ]))
@@ -1142,7 +1142,7 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                     Q1_check = 'K'
                     Q2_check = 'DA'
                 
-                elif sheet_type == 'adix_template':
+                elif sheet_type == 'quan_template':
                     Q1_ranges = list(zip([90, 67.5, 45, 22.5, 0], [ [i for i in range(8, 29)], [i for i in range(53, 74)], [i for i in range(100, 121)], [i for i in range(145, 166)], [i for i in range(192, 213)] ]))
                     Q2_ranges = list(zip([112.5, 135, 157.5], [ [i for i in range(53, 74)], [i for i in range(100, 121)], [i for i in range(145, 166)] ]))
                     Q2_start = 'CP'
@@ -1175,7 +1175,7 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                     pitot_sheet = True
                     Q1_ranges = list(zip([90, 67.5, 45, 22.5, 0], [ [i for i in range(8, 31)], [i for i in range(55, 78)], [i for i in range(104, 127)], [i for i in range(151, 174)], [i for i in range(200, 223)] ]))
                     Q2_ranges = list(zip([112.5, 135, 157.5], [ [i for i in range(55, 78)], [i for i in range(104, 127)], [i for i in range(151, 174)] ]))
-                    Q2_start = 'CR'
+                    Q2_start = 'CQ'
                     Q2_end = 'ET'
                     Q1_start = 'A'
                     Q1_end = 'BD'
@@ -1198,23 +1198,68 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                 
                 ws = wb['1']
                 
-                jglocs = ['O16', 'O17', 'O18', 'O19', 'O20', 'O21', 'O22', 'O23', 'O24', 'O25'] # Experimental Port 1,2,3,4,5A,5C,5B,6A,6,7 --> Now Port 1,2,3,4,5,6,7,8,9,10. Quan 10/28
-                try:
-                    jgloc = ws[jglocs[int(re.findall(r'\d+', port)[0])-1]].value
-                    #jgloc = ws[jglocs[int(port.strip('P'))]].value
-                except Exception as e:
-                    print(e)
-                    print(f"Warning: Could not identify port # for {file}, setting jgloc = jgref")
-                    jgloc = jgref
+                if sheet_type == 'adix_template4' or sheet_type == 'quan_template':
+                    jglocs = ['O16', 'O17', 'O18', 'O19', 'O20', 'O21', 'O22', 'O23', 'O24', 'O25'] # P1, 2, 3, 4, 5A, 5C, 5B, 6A, 6, 7 --> P1, 2, 3, 4, 5, 6, 7, 8, 9, 10 (Quan 10/28)
 
-                # Above jglocs not implemented for Ryan templates (DHK)
-                if jgloc is None and sheet_type == 'ryan_template':
-                    print(f"Sheet type identified as {sheet_type}, referencing cell U23 for jgloc")
+                    try:
+                        jgloc = ws[jglocs[int(re.findall(r'\d+', port)[0])-1]].value
+                        #jgloc = ws[jglocs[int(port.strip('P'))]].value
+
+                    except Exception as e:
+                        print(e)
+                        print(f"Warning: Could not identify port # for {file}, setting jgloc = jgref")
+                        jgloc = jgref
+
+                elif sheet_type == 'neup_template':
+                    jglocs = ['O16', 'O17', 'O18', 'O19', 'O20', 'O21', 'O22', 'O23', 'O24']    # P1, 2, 3, 4, 5A, 5B, 5C, 6, 7, potential for X in the future(?)
+                    ports  = ['I16', 'I17', 'I18', 'I19', 'I20', 'I21', 'I22', 'I23', 'I24']
+
+                    # Canonicalize filename port
+                    canon = str(port).strip().upper()
+                    canon = re.sub(r"\s+", "", canon)           # Remove spaces
+                    if canon.startswith("P"):
+                        canon = canon[1:]                       # Drop leading P if present
+
+                    # Check that the canon entry matches desired format
+                    m = re.fullmatch(r"(\d+)([A-Z]?)", canon)
+                    if not m:
+                        raise ValueError(f"Could not parse filename port: {port!r}")
+
+                    want = f"P{int(m.group(1))}{m.group(2)}"
+
+                    # Build mapping from sheet ports (I16:I24) to jgloc cells (O16:O24)
+                    port_to_jgloc_cell = {}
+                    for port_cell, jgloc_cell in zip(ports, jglocs):
+                        v = ws[port_cell].value
+                        if v is None:
+                            continue
+
+                        sv = str(v).strip().upper()
+                        sv = re.sub(r"\s+", "", sv)
+                        if sv.startswith("P"):
+                            sv = sv[1:]
+
+                        mv = re.fullmatch(r"(\d+)([A-Z]?)", sv)
+                        if not mv:
+                            continue
+
+                        key = f"P{int(mv.group(1))}{mv.group(2)}"
+                        port_to_jgloc_cell[key] = jgloc_cell
+
+                    if want not in port_to_jgloc_cell:
+                        found = sorted(port_to_jgloc_cell.keys())
+                        raise KeyError(f"Port {want} not found in sheet ports. Found: {found}")
+
+                    jgloc = ws[port_to_jgloc_cell[want]].value
+                
+                elif sheet_type == 'ryan_template':
                     jgloc = ws['U23'].value
-                elif jgloc is None:
+
+                if jgloc is None:
                     print(f"Warning: jgloc could not be found, setting jgloc = jgref")
                     jgloc = jgref
-                # print(theta)
+
+                # Establish condition                    
                 newCond = Condition(jgref, jgloc, jf, theta, port, sheet_type.split('_')[0], tag)
 
                 if newCond not in all_conditions:
@@ -1231,11 +1276,12 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
 
                 ws = wb['2']
                 
+                # Sheet-calculated area-averages
                 if sheet_type == 'ryan_template':
                     cond.area_avg_void_sheet = ws['G266'].value
                     cond.area_avg_ai_sheet = ws['J266'].value
                     
-                elif sheet_type == 'adix_template' or sheet_type == 'adix_template4':
+                elif sheet_type == 'quan_template' or sheet_type == 'adix_template4':
                     cond.area_avg_void_sheet = ws['G246'].value
                     cond.area_avg_ai_sheet = ws['J246'].value
                 
