@@ -1,4 +1,4 @@
-from .config import *
+from ..config import *
 from .operations import *
 
 def calc_fric(cond, method = 'Blasius', m = 0.316, n=0.25):

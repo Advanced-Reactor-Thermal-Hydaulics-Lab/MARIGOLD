@@ -1,4 +1,4 @@
-from .config import *
+from ..config import *
 
 def lineq(x, m, x0, b):
     return float(max(m * (x - x0) + b, 0))

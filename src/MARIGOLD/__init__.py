@@ -1,14 +1,21 @@
 from .config import *
-from .calc_vels import *
-from .cfd import *
-from .Condition_Archive import *
-from .Condition import *
-from .extracts_and_loads import *
-from .flow_regime import *
-from .formulas import *
-from .iate import *
-from .models import *
-from .operations import *
-from .plotting import *
-from .processing import *
-from .utils import *
+
+from .data.cfd import *
+from .data.exotic import *
+from .data.condition import *
+from .data.extracts import *
+from .data.frid import *
+from .data.utils import *
+
+from .iate.iate import *
+from .iate.utils import *
+
+from .math.velocities import *
+from .math.formulas import *
+from .math.models import *
+from .math.operations import *
+
+from .midas.processing import *
+
+from .plotting.legacy import *
+from .plotting.remastered import *

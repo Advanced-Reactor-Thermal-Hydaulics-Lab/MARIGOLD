@@ -14,7 +14,10 @@ import xlrd
 from copy import copy
 from copy import deepcopy
 from datetime import datetime
+from itertools import cycle
 from matplotlib import cm
+from matplotlib.font_manager import FontProperties
+from matplotlib.lines import Line2D
 from scipy import integrate
 from scipy import interpolate
 from scipy.optimize import minimize

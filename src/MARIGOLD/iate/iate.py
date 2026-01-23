@@ -1,6 +1,6 @@
-from .config import *
-from .iate_utils import *
-from .operations import *
+from ..config import *
+from .utils import *
+from ..math.operations import *
 
 ############################################################################################################################
 #                                                                                                                          #

@@ -1,4 +1,4 @@
-from .config import *
+from ..config import *
 
 def integration(rs, vars, method):
         la = 0.0
