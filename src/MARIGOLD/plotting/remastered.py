@@ -103,7 +103,7 @@ def plot_xy_profiles(
             y = _safe_get(midas_out, y_param, np.nan)
 
             # Omit y == 0 points and break line
-            if np.isfinite(y) and y == 0.0:
+            if y == 0.0:
                 xs.append(np.nan)
                 ys.append(np.nan)
             else:
@@ -301,25 +301,33 @@ def plot_matched_xy_profiles_across_databases(
             plt.close(fig)
             continue
 
-        db_leg = ax.legend(
-            db_proxy_handles,
-            db_proxy_labels,
-            loc="upper left",
-            title="Database",
-            title_fontproperties=bold_title,
-            edgecolor="white",
-            bbox_to_anchor=(0.0, 1.0),
-        )
+        # db_leg = ax.legend(
+        #     db_proxy_handles,
+        #     db_proxy_labels,
+        #     loc="lower left",
+        #     title="Database",
+        #     title_fontproperties=bold_title,
+        #     edgecolor="white",
+        #     # bbox_to_anchor=(0.0, 1.0),
+        # )
+
+        # phi_leg = ax.legend(
+        #     loc="upper right",
+        #     title=r"$\varphi$",
+        #     title_fontproperties=bold_title,
+        #     edgecolor="white",
+        #     # bbox_to_anchor=(0.0, 0.72),
+        # )
 
         phi_leg = ax.legend(
-            loc="upper left",
-            title=r"$\varphi$",
+            labels=db_proxy_labels,
+            loc="lower left",
+            title=r"Database",
             title_fontproperties=bold_title,
             edgecolor="white",
-            bbox_to_anchor=(0.0, 0.72),
         )
 
-        ax.add_artist(db_leg)
+        # ax.add_artist(db_leg)
 
         # Save/show
         if save_dir is not None:
