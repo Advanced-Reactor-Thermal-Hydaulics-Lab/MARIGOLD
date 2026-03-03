@@ -134,6 +134,7 @@ def read_CFX_export(csv_path, jf, jgref, theta, port, database, Dh = 0.0254, jgl
     if jgloc is None:
         jgloc = jgref
     cond = Condition(jgref, jgloc, jf, theta, port, database)
+    cond.Dh = Dh
     cond.run_ID = 'CFD'
     cond._angles = [0, 360]
 
@@ -147,9 +148,20 @@ def read_CFX_export(csv_path, jf, jgref, theta, port, database, Dh = 0.0254, jgl
 
         variables = variables.split(",")
         
-        vg_idx = [idx for idx, s in enumerate(variables) if 'gas.Velocity' in s][0]
-        vf_idx = [idx for idx, s in enumerate(variables) if 'liquid.Velocity' in s][0]
+        # vg_idx = [idx for idx, s in enumerate(variables) if 'gas.Velocity' in s][0]
+
+        vgx_idx = [idx for idx, s in enumerate(variables) if 'gas.Velocity u' in s][0]
+        vgy_idx = [idx for idx, s in enumerate(variables) if 'gas.Velocity v' in s][0]
+        vgz_idx = [idx for idx, s in enumerate(variables) if 'gas.Velocity w' in s][0]
+
+        # vf_idx = [idx for idx, s in enumerate(variables) if 'liquid.Velocity' in s][0]
+
+        vfx_idx = [idx for idx, s in enumerate(variables) if 'liquid.Velocity u' in s][0]
+        vfy_idx = [idx for idx, s in enumerate(variables) if 'liquid.Velocity v' in s][0]
+        vfz_idx = [idx for idx, s in enumerate(variables) if 'liquid.Velocity w' in s][0]
+
         alpha_idx = [idx for idx, s in enumerate(variables) if 'gas.Volume' in s][0]
+
         x_idx = [idx for idx, s in enumerate(variables) if 'X [ m ]' in s][0]
         y_idx = [idx for idx, s in enumerate(variables) if 'Y [ m ]' in s][0]
 
@@ -164,18 +176,20 @@ def read_CFX_export(csv_path, jf, jgref, theta, port, database, Dh = 0.0254, jgl
             if data == ['']:
                 break
 
-            try:
-                x = float(data[x_idx])
-                y = float(data[y_idx])
-                vg = float(data[vg_idx])
-                vf = float(data[vf_idx])
-                alpha = float(data[alpha_idx])
-            except Exception as e:
-                print(e)
-                print(variables)
-                print("\nProblem data:")
-                print(data)
-                print(x_idx, y_idx, vg_idx, vf_idx, alpha_idx)
+            x = float(data[x_idx])
+            y = float(data[y_idx])
+            alpha = float(data[alpha_idx])
+
+            vgx = float(data[vgx_idx])
+            vgy = float(data[vgy_idx])
+            vgz = float(data[vgz_idx])
+
+            vfx = float(data[vfx_idx])
+            vfy = float(data[vfy_idx])
+            vfz = float(data[vfz_idx])
+
+            vg = np.sqrt(vgx**2 + vgy**2 + vgz**2)
+            vf = np.sqrt(vfx**2 + vfy**2 + vfz**2)
 
             data_dict = {'ug1': vg, 'vf': vf, 'alpha': alpha}
             

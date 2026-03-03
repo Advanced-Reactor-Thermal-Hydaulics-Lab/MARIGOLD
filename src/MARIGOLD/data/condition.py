@@ -97,7 +97,7 @@ class Condition:
             elif self.port == 'P10':
                 self.LoverD = 230.07
 
-        elif self.database == 'neup':
+        elif self.database == 'neup' or self.database == 'ryan' or self.database == 'adix':
             if self.port == 'P1':
                 self.LoverD = 30
             elif self.port == 'P2':

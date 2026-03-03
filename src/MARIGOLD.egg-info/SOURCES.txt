@@ -2,25 +2,30 @@ LICENSE
 README.md
 pyproject.toml
 setup.cfg
-src/MARIGOLD/CFD.py
-src/MARIGOLD/Condition.py
-src/MARIGOLD/Condition_Archive.py
 src/MARIGOLD/__init__.py
-src/MARIGOLD/calc_vels.py
-src/MARIGOLD/cfd.py
 src/MARIGOLD/config.py
-src/MARIGOLD/extracts_and_loads.py
-src/MARIGOLD/flow_regime.py
-src/MARIGOLD/formulas.py
-src/MARIGOLD/iate.py
-src/MARIGOLD/iate_utils.py
-src/MARIGOLD/models.py
-src/MARIGOLD/operations.py
-src/MARIGOLD/plotting.py
-src/MARIGOLD/processing.py
-src/MARIGOLD/utils.py
 src/MARIGOLD.egg-info/PKG-INFO
 src/MARIGOLD.egg-info/SOURCES.txt
 src/MARIGOLD.egg-info/dependency_links.txt
 src/MARIGOLD.egg-info/requires.txt
 src/MARIGOLD.egg-info/top_level.txt
+src/MARIGOLD/data/cfd.py
+src/MARIGOLD/data/condition.py
+src/MARIGOLD/data/exotic.py
+src/MARIGOLD/data/extracts.py
+src/MARIGOLD/data/flowregimes.py
+src/MARIGOLD/data/utils.py
+src/MARIGOLD/iate/iate.py
+src/MARIGOLD/iate/utils.py
+src/MARIGOLD/math/formulas.py
+src/MARIGOLD/math/models.py
+src/MARIGOLD/math/operations.py
+src/MARIGOLD/math/velocities.py
+src/MARIGOLD/midas/eventscanning copy.py
+src/MARIGOLD/midas/eventscanning to delete.py
+src/MARIGOLD/midas/legacy.py
+src/MARIGOLD/midas/remastered copy.py
+src/MARIGOLD/midas/remastered to delete.py
+src/MARIGOLD/midas/remastered.py
+src/MARIGOLD/plotting/legacy.py
+src/MARIGOLD/plotting/remastered.py
