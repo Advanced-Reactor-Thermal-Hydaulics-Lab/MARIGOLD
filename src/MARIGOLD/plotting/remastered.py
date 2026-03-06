@@ -16,7 +16,7 @@ def _safe_get(midas_dict, key, default=np.nan):
     except Exception:
         return default
 
-def plot_xy_profiles(
+def plot_params(
     cond,
     x_param: str,
     y_param: str,
@@ -27,19 +27,20 @@ def plot_xy_profiles(
     show_lines: bool = True,
     x_label: str | None = None,
     y_label: str | None = None,
-    set_xlim=None,                  # tuple (xmin, xmax) or None
-    set_ylim=None,                  # tuple (ymin, ymax) or None
-    percent_error: float = 0.0,     # e.g. 0.05 => 5% error bars; 0 => none
+    set_xlim=None,
+    set_ylim=None,
+    percent_error: float = 0.0,
     legend_phi: bool = True,
     title: bool = True,
     fig_size=(4, 4),
     fs: int = 10,
-    save_dir: str | None = None,
     show: bool = True,
     close: bool = True,
-    db_label: str | None = None,    # used for overlay legend in multi-db plotting
-    style=None,                     # dict to override color/marker/linestyle per call if desired
+    db_label: str | None = None,    # currently unused
+    style=None,
 ):
+    created_fig = ax is None
+
     if ax is None:
         fig, ax = plt.subplots(figsize=fig_size, dpi=300, layout="compressed")
     else:
@@ -48,6 +49,7 @@ def plot_xy_profiles(
     plt.rcParams.update({"font.size": fs})
     plt.rcParams["font.family"] = "Times New Roman"
     plt.rcParams["mathtext.fontset"] = "cm"
+
     ax.tick_params(direction="in", which="both")
     ax.yaxis.set_ticks_position("left")
     ax.xaxis.set_ticks_position("bottom")
@@ -60,7 +62,6 @@ def plot_xy_profiles(
     style_by_base_phi: dict[float, tuple[str, str, str]] = {}
 
     def _base_phi(phi_val: float) -> float:
-        # Treat complements as the same "family"
         return phi_val if phi_val <= 180 else phi_val - 180
 
     def _resolve_style_for_phi(phi_val: float):
@@ -71,13 +72,11 @@ def plot_xy_profiles(
             marker = next(marker_cyc)
             ls = next(ls_cyc)
 
-            # DB-level overrides: keep constant across all phis in this call if provided
             if style:
                 color = style.get("color", color)
                 marker = style.get("marker", marker)
                 ls = style.get("linestyle", ls)
 
-            # Respect toggles
             if not show_lines:
                 ls = "None"
             if not show_markers:
@@ -87,8 +86,8 @@ def plot_xy_profiles(
 
         return base, style_by_base_phi[base]
 
-    # Collect and plot each azimuth
     plotted_any = False
+
     for phi in phis_to_plot:
         if phi not in cond.data:
             continue
@@ -97,8 +96,9 @@ def plot_xy_profiles(
         rs_sorted = sorted(r_dict.keys())
 
         xs, ys = [], []
+
         for r in rs_sorted:
-            if abs(r - 1.0) < 1e-6:     # r* = 1.0 dummy
+            if abs(r - 1.0) < 1e-6:   # r* = 1.0 dummy
                 continue
 
             midas_out = r_dict[r]
@@ -122,21 +122,29 @@ def plot_xy_profiles(
         phi_label = f"{base}°" if (legend_phi and phi == base) else None
 
         if percent_error and percent_error > 0:
-            xerr = np.abs(xs) * percent_error
             yerr = np.abs(ys) * percent_error
             ax.errorbar(
-                xs, ys,
-                yerr=yerr, #xerr=xerr,
-                capsize=3, ecolor="black",
-                color=color, marker=marker, linestyle=ls,
-                markeredgecolor="black", markeredgewidth=0.8,
+                xs,
+                ys,
+                yerr=yerr,
+                capsize=3,
+                ecolor="black",
+                color=color,
+                marker=marker,
+                linestyle=ls,
+                markeredgecolor="black",
+                markeredgewidth=0.8,
                 label=phi_label,
             )
         else:
             ax.plot(
-                xs, ys,
-                color=color, marker=marker, linestyle=ls,
-                markeredgecolor="black", markeredgewidth=0.8,
+                xs,
+                ys,
+                color=color,
+                marker=marker,
+                linestyle=ls,
+                markeredgecolor="black",
+                markeredgewidth=0.8,
                 label=phi_label,
             )
 
@@ -146,6 +154,7 @@ def plot_xy_profiles(
         x_label = x_param
     if y_label is None:
         y_label = y_param
+
     ax.set_xlabel(x_label)
     ax.set_ylabel(y_label)
 
@@ -160,16 +169,10 @@ def plot_xy_profiles(
             + f", {cond.port}"
         )
 
-    if legend_phi:
+    if legend_phi and plotted_any:
         ax.legend(loc="best", edgecolor="white")
-    
-    # Save/show
-    if save_dir is not None:
-        os.makedirs(save_dir, exist_ok=True)
-        fname = f"{x_param}_vs_{y_param}_theta{cond.theta}_jf{cond.jf}_jg{cond.jgref}_{cond.port}.png"
-        fig.savefig(os.path.join(save_dir, fname))
-        plt.close(fig)
-    else:
+
+    if created_fig:
         if show:
             plt.show()
         elif close:
@@ -177,18 +180,15 @@ def plot_xy_profiles(
 
     return fig, ax, plotted_any
 
-def _cond_match_key(cond):
-    return (cond.theta, cond.jf, cond.jgref, cond.port)
-
-def plot_two_conditions_xy_profiles(
-    cond_a,
-    cond_b,
-    label_a: str,
-    label_b: str,
+def plot_stack(
+    conds,
     x_param: str,
     y_param: str,
+    labels=None,
     phis_to_plot=(90, 270),
     *,
+    styles=None,
+    ax=None,
     show_markers: bool = True,
     show_lines: bool = True,
     x_label: str | None = None,
@@ -196,227 +196,79 @@ def plot_two_conditions_xy_profiles(
     set_xlim=None,
     set_ylim=None,
     percent_error: float = 0.0,
+    legend_phi: bool = False,
+    legend_stack: bool = True,
+    title: bool = True,
     fig_size=(4, 4),
     fs: int = 10,
     show: bool = True,
-    save_path: str | None = None,
-    style_a: dict | None = None,
-    style_b: dict | None = None,
+    close: bool = True,
 ):
-    """
-    """
+    if labels is None:
+        labels = [str(cond) for cond in conds]
+
+    if len(labels) != len(conds):
+        raise ValueError(
+            f"labels must have the same length as conds; got {len(labels)} and {len(conds)}"
+        )
+
+    created_fig = ax is None
+    if ax is None:
+        fig, ax = plt.subplots(figsize=fig_size, dpi=300, layout="compressed")
+    else:
+        fig = ax.figure
 
     plt.rcParams.update({"font.size": fs})
     plt.rcParams["font.family"] = "Times New Roman"
     plt.rcParams["mathtext.fontset"] = "cm"
 
-    fig, ax = plt.subplots(figsize=fig_size, dpi=300, layout="compressed")
     ax.tick_params(direction="in", which="both")
     ax.yaxis.set_ticks_position("left")
     ax.xaxis.set_ticks_position("bottom")
-    
-    # Auto styles if none provided
-    if style_a is None and style_b is None:
+
+    # Build default per-condition styles if none are provided
+    if styles is None:
         color_cyc = cycle(_DEFAULT_COLORS)
         marker_cyc = cycle(_DEFAULT_MARKERS)
         ls_cyc = cycle(_DEFAULT_LINESTYLES)
 
-        style_a = {
-            "color": next(color_cyc),
-            "marker": next(marker_cyc),
-            "linestyle": next(ls_cyc),
-        }
-        style_b = {
-            "color": next(color_cyc),
-            "marker": next(marker_cyc),
-            "linestyle": next(ls_cyc),
-        }
+        styles = []
+        for _ in conds:
+            st = {
+                "color": next(color_cyc),
+                "marker": next(marker_cyc),
+                "linestyle": next(ls_cyc),
+            }
 
-    elif style_a is None:
-        color_cyc = cycle(_DEFAULT_COLORS)
-        marker_cyc = cycle(_DEFAULT_MARKERS)
-        ls_cyc = cycle(_DEFAULT_LINESTYLES)
+            if not show_lines:
+                st["linestyle"] = "None"
+            if not show_markers:
+                st["marker"] = "None"
 
-        style_a = {
-            "color": next(color_cyc),
-            "marker": next(marker_cyc),
-            "linestyle": next(ls_cyc),
-        }
-
-    elif style_b is None:
-        color_cyc = cycle(_DEFAULT_COLORS)
-        marker_cyc = cycle(_DEFAULT_MARKERS)
-        ls_cyc = cycle(_DEFAULT_LINESTYLES)
-
-        style_b = {
-            "color": next(color_cyc),
-            "marker": next(marker_cyc),
-            "linestyle": next(ls_cyc),
-        }
-
-    fig, ax, plotted_a = plot_xy_profiles(
-        cond_a,
-        x_param, y_param,
-        phis_to_plot=phis_to_plot,
-        ax=ax,
-        show_markers=show_markers,
-        show_lines=show_lines,
-        x_label=x_label,
-        y_label=y_label,
-        set_xlim=set_xlim,
-        set_ylim=set_ylim,
-        percent_error=percent_error,
-        legend_phi=True,
-        title=True,
-        fig_size=fig_size,
-        fs=fs,
-        db_label=label_a,
-        style=style_a,
-        show=False,
-        close=False,
-        save_dir=None,
-    )
-
-    fig, ax, plotted_b = plot_xy_profiles(
-        cond_b,
-        x_param, y_param,
-        phis_to_plot=phis_to_plot,
-        ax=ax,
-        show_markers=show_markers,
-        show_lines=show_lines,
-        x_label=x_label,
-        y_label=y_label,
-        set_xlim=set_xlim,
-        set_ylim=set_ylim,
-        percent_error=percent_error,
-        legend_phi=False,
-        title=True,
-        fig_size=fig_size,
-        fs=fs,
-        db_label=label_b,
-        style=style_b,
-        show=False,
-        close=False,
-        save_dir=None,
-    )
-
-    bold_title = FontProperties(weight="bold")
-
-    db_proxy_handles = [
-    Line2D(
-        [0], [0],
-        color=(style_a or {}).get("color", "black"),
-        linestyle=(style_a or {}).get("linestyle", "-"),
-        marker=(style_a or {}).get("marker", "None"),
-        linewidth=1.5,
-        markeredgecolor="black",
-        markeredgewidth=0.8,
-        ),
-        Line2D(
-            [0], [0],
-            color=(style_b or {}).get("color", "black"),
-            linestyle=(style_b or {}).get("linestyle", "-"),
-            marker=(style_b or {}).get("marker", "None"),
-            linewidth=1.5,
-            markeredgecolor="black",
-            markeredgewidth=0.8,
-        ),
-    ]
-    db_proxy_labels = [label_a, label_b]
-
-    ax.legend(
-        db_proxy_handles,
-        db_proxy_labels,
-        loc="lower left",
-        title="Database",
-        title_fontproperties=bold_title,
-        edgecolor="white",
-    )
-
-    if save_path is not None:
-        os.makedirs(os.path.dirname(save_path), exist_ok=True)
-        fig.savefig(save_path)
-        plt.close(fig)
-        return None, None
-
-    if show:
-        plt.show()
-
-    return fig, ax
-
-def plot_matched_xy_profiles_across_databases(
-    databases,
-    db_labels,
-    x_param: str,
-    y_param: str,
-    phis_to_plot=(90, 270),
-    *,
-    show_markers: bool = True,
-    show_lines: bool = True,
-    x_label: str | None = None,
-    y_label: str | None = None,
-    set_xlim=None,
-    set_ylim=None,
-    percent_error: float = 0.0,
-    fig_size=(4, 4),
-    fs: int = 10,
-    save_dir: str | None = None,
-    show: bool = True,
-    db_styles: list[dict] | None = None,
-):
-    """
-    """
-
-    if len(databases) != len(db_labels):
-        raise ValueError("databases and db_labels must have the same length.")
-    if len(databases) != 2:
-        raise ValueError("This function expects exactly two databases.")
-
-    db1, db2 = databases
-    label1, label2 = db_labels
-
-    # Build indexes
-    idx1 = {_cond_match_key(cond): cond for cond in db1}
-    idx2 = {_cond_match_key(cond): cond for cond in db2}
-
-    matched_keys = sorted(set(idx1.keys()) & set(idx2.keys()))
-    if not matched_keys:
-        return []
-    
-    # Styles
-    if db_styles is None:
-        color_cyc = cycle(_DEFAULT_COLORS)
-        marker_cyc = cycle(_DEFAULT_MARKERS)
-        ls_cyc = cycle(_DEFAULT_LINESTYLES)
-        db_styles = [
-            {"color": next(color_cyc), "marker": next(marker_cyc), "linestyle": next(ls_cyc)},
-            {"color": next(color_cyc), "marker": next(marker_cyc), "linestyle": next(ls_cyc)},
-        ]
+            styles.append(st)
     else:
-        if len(db_styles) < 2:
-            raise ValueError("db_styles must have at least two entries for two databases.")
+        if len(styles) != len(conds):
+            raise ValueError(
+                f"styles must have the same length as conds; got {len(styles)} and {len(conds)}"
+            )
 
-    outputs = []
+        styles = [dict(s) if s is not None else {} for s in styles]
+        for st in styles:
+            if not show_lines:
+                st["linestyle"] = "None"
+            if not show_markers:
+                st["marker"] = "None"
 
-    for key in matched_keys:
-        cond_a = idx1[key]
-        cond_b = idx2[key]
+    plotted_any = False
 
-        save_path = None
-        if save_dir is not None:
-            os.makedirs(save_dir, exist_ok=True)
-            theta, jf, jgref, port = key
-            fname = f"{x_param}_vs_{y_param}_theta{theta}_jf{jf}_jg{jgref}_{port}.png"
-            save_path = os.path.join(save_dir, fname)
-
-        fig, ax = plot_two_conditions_xy_profiles(
-            cond_a,
-            cond_b,
-            label1,
-            label2,
-            x_param,
-            y_param,
+    # Plot each condition by delegating to plot_params()
+    for cond, label, style in zip(conds, labels, styles):
+        _, _, cond_plotted = plot_params(
+            cond,
+            x_param=x_param,
+            y_param=y_param,
             phis_to_plot=phis_to_plot,
+            ax=ax,
             show_markers=show_markers,
             show_lines=show_lines,
             x_label=x_label,
@@ -424,33 +276,224 @@ def plot_matched_xy_profiles_across_databases(
             set_xlim=set_xlim,
             set_ylim=set_ylim,
             percent_error=percent_error,
+            legend_phi=legend_phi,
+            title=False,   # stack-level title handled below
             fig_size=fig_size,
             fs=fs,
-            show=show if save_path is None else False,
-            save_path=save_path,
-            style_a=db_styles[0],
-            style_b=db_styles[1],
+            show=False,
+            close=False,
+            style=style,
         )
 
-        # If strict plotting failed, fig/ax will be None and nothing saved/shown
-        if save_path is not None:
-            outputs.append(save_path)
-        else:
-            outputs.append((fig, ax))
+        # Add proxy handle for condition-level legend
+        if cond_plotted and legend_stack:
+            ax.plot([], [], label=label, **style)
 
-    return outputs
+        plotted_any = plotted_any or cond_plotted
 
+    # Labels
+    if x_label is None:
+        x_label = x_param
+    if y_label is None:
+        y_label = y_param
 
-import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.tri as tri
-import os
+    ax.set_xlabel(x_label)
+    ax.set_ylabel(y_label)
+
+    if set_xlim is not None:
+        ax.set_xlim(*set_xlim)
+    if set_ylim is not None:
+        ax.set_ylim(*set_ylim)
+
+    # Title
+    if title and len(conds) > 0:
+        ref = conds[0]
+        ax.set_title(
+            rf"$x = {x_param},\; y = {y_param}$"
+            + "\n"
+            + rf"$\theta = {ref.theta}^\circ,\; j_f = {ref.jf}\,[m/s],\; j_{{gref}} = {ref.jgref}\,[m/s]$"
+        )
+
+    # Legends
+    if legend_phi and legend_stack and plotted_any:
+        handles_all, labels_all = ax.get_legend_handles_labels()
+
+        stack_label_set = set(labels)
+        phi_handles, phi_labels = [], []
+        stack_handles, stack_labels = [], []
+
+        for h, lab in zip(handles_all, labels_all):
+            if lab in stack_label_set:
+                stack_handles.append(h)
+                stack_labels.append(lab)
+            else:
+                phi_handles.append(h)
+                phi_labels.append(lab)
+
+        if phi_handles:
+            leg1 = ax.legend(
+                phi_handles,
+                phi_labels,
+                loc="best",
+                edgecolor="white",
+                title="Phi",
+            )
+            ax.add_artist(leg1)
+
+        if stack_handles:
+            ax.legend(
+                stack_handles,
+                stack_labels,
+                loc="upper right",
+                edgecolor="white",
+                title="Condition",
+            )
+
+    elif legend_phi and plotted_any:
+        ax.legend(loc="best", edgecolor="white")
+
+    elif legend_stack and plotted_any:
+        ax.legend(loc="best", edgecolor="white")
+
+    if created_fig:
+        if show:
+            plt.show()
+        elif close:
+            plt.close(fig)
+
+    return fig, ax, plotted_any
+
+def plot_vary(
+    database,
+    variable: str,
+    x_param: str,
+    y_param: str,
+    phis_to_plot=(90, 270),
+    *,
+    styles=None,
+    ax=None,
+    show_markers: bool = True,
+    show_lines: bool = True,
+    x_label: str | None = None,
+    y_label: str | None = None,
+    set_xlim=None,
+    set_ylim=None,
+    percent_error: float = 0.0,
+    legend_phi: bool = False,
+    legend_stack: bool = True,
+    title: bool = True,
+    fig_size=(4, 4),
+    fs: int = 10,
+    show: bool = True,
+    close: bool = True,
+    sort_vary_values: bool = True,
+):
+    """
+    Group conditions by all tracked attributes except `variable`, and for each group
+    call plot_stack() so that only `variable` changes within a figure.
+
+    Returns
+    -------
+    results : list[tuple]
+        List of (fig, ax, plotted_any, conds_group) for each generated figure.
+    """
+
+    vary_attrs = ["theta", "jf", "jgref", "port", "database"]
+
+    def _format_attr(cond, attr):
+        if attr == "theta":
+            return rf"$\theta = {cond.theta}^\circ$"
+        if attr == "jf":
+            return rf"$j_f = {cond.jf:.2f}\,[m/s]$"
+        if attr == "jgref":
+            return rf"$j_{{gref}} = {cond.jgref:.2f}\,[m/s]$"
+        if attr == "port":
+            return f"{cond.port}"
+        if attr == "database":
+            return f"Author: {cond.database}"
+        return f"{attr}={getattr(cond, attr)}"
+
+    if variable not in vary_attrs:
+        raise ValueError(
+            f"variable must be one of {vary_attrs}; got {variable!r}"
+        )
+
+    if ax is not None:
+        raise ValueError("plot_vary() creates multiple figures, so ax must be None.")
+
+    fixed_attrs = [attr for attr in vary_attrs if attr != variable]
+
+    def _key(cond):
+        return tuple(getattr(cond, attr) for attr in fixed_attrs)
+
+    def _vary_value(cond):
+        return getattr(cond, variable)
+
+    def _sort_key(cond):
+        val = _vary_value(cond)
+        try:
+            return (0, float(val))
+        except Exception:
+            return (1, str(val))
+
+    groups = {}
+    for cond in database:
+        key = _key(cond)
+        if key not in groups:
+            groups[key] = []
+        groups[key].append(cond)
+
+    results = []
+
+    for _, conds_group in groups.items():
+        if sort_vary_values:
+            conds_group = sorted(conds_group, key=_sort_key)
+
+        labels = [_format_attr(cond, variable) for cond in conds_group]
+
+        fig, ax_out, plotted_any = plot_stack(
+            conds=conds_group,
+            x_param=x_param,
+            y_param=y_param,
+            labels=labels,
+            phis_to_plot=phis_to_plot,
+            styles=styles,
+            ax=None,
+            show_markers=show_markers,
+            show_lines=show_lines,
+            x_label=x_label,
+            y_label=y_label,
+            set_xlim=set_xlim,
+            set_ylim=set_ylim,
+            percent_error=percent_error,
+            legend_phi=legend_phi,
+            legend_stack=legend_stack,
+            title=False,
+            fig_size=fig_size,
+            fs=fs,
+            show=False,
+            close=False,
+        )
+
+        if title and len(conds_group) > 0:
+            cond0 = conds_group[0]
+            parts = [_format_attr(cond0, attr) for attr in fixed_attrs]
+            ax_out.set_title(", ".join(parts))
+
+        if show:
+            plt.show()
+        elif close:
+            plt.close(fig)
+
+        results.append((fig, ax_out, plotted_any, conds_group))
+
+    return results
 
 def plot_contour2(
     cond,
     param: str,
-    save_dir='.',
     show=True,
+    close=True,
     set_max=None,
     set_min=None,
     fig_size=4,
@@ -470,15 +513,21 @@ def plot_contour2(
     h_star_kwargs={'method': 'max_dsm', 'min_void': '0.05'},
     plot_measured_points=False,
     font_size=12,
-    # NEW:
     ax=None,
     fig=None,
-    add_colorbar=True,   # grid use-case: usually False, do one shared bar outside
+    add_colorbar=True,
 ):
     """
-    Same as your function, but now can draw on a provided `ax`.
-    Backward compatible: if ax is None, it creates its own fig/ax as before.
-    Returns: ax, mpbl (QuadContourSet), and (optionally) cbar
+    Draw a contour plot for `param` from a condition object.
+
+    If `ax` is None, creates its own figure/axes.
+    If `ax` is provided, draws on that axes and does not show/close the figure.
+
+    Returns
+    -------
+    ax : matplotlib axes
+    mpbl : QuadContourSet
+    cbar : Colorbar or None
     """
     created_fig = False
     cbar = None
@@ -488,8 +537,11 @@ def plot_contour2(
         if cartesian:
             fig, ax = plt.subplots(figsize=(fig_size, fig_size), dpi=300)
         else:
-            fig, ax = plt.subplots(figsize=(fig_size, fig_size), dpi=300,
-                                   subplot_kw=dict(projection='polar'))
+            fig, ax = plt.subplots(
+                figsize=(fig_size, fig_size),
+                dpi=300,
+                subplot_kw=dict(projection='polar')
+            )
     else:
         if fig is None:
             fig = ax.figure
@@ -509,22 +561,17 @@ def plot_contour2(
                     vals.append(midas_output[param])
                 except Exception:
                     vals.append(0.0)
-                    # keep your print if you want:
-                    # print(f"Could not find {param} for φ = {phi_angle}, r = {r}. Substituting 0")
 
-    rs = np.asarray(rs)
-    phis = (np.asarray(phis) + rot_angle) * np.pi / 180
-    vals = np.asarray(vals)
-
-    # Periodic seam fix (highly recommended): duplicate points at ±2π
-    phis0, rs0, vals0 = phis, rs, vals
-    phis = np.concatenate([phis0, phis0 + 2*np.pi, phis0 - 2*np.pi])
-    rs   = np.concatenate([rs0,   rs0,            rs0])
-    vals = np.concatenate([vals0, vals0,          vals0])
+    rs = np.asarray(rs, dtype=float)
+    phis = (np.asarray(phis, dtype=float) + rot_angle) * np.pi / 180.0
+    vals = np.asarray(vals, dtype=float)
 
     ri = np.linspace(0, 1, ngridr)
-    rot = rot_angle * np.pi / 180
-    phii = np.linspace(rot, 2*np.pi + rot, ngridphi, endpoint=False)
+    phii = np.linspace(
+        rot_angle * np.pi / 180.0,
+        2 * np.pi + rot_angle * np.pi / 180.0,
+        ngridphi
+    )
 
     triang = tri.Triangulation(phis, rs)
     interpolator = tri.LinearTriInterpolator(triang, vals)
@@ -532,22 +579,21 @@ def plot_contour2(
     PHII, RI = np.meshgrid(phii, ri)
     XI = RI * np.cos(PHII)
     YI = RI * np.sin(PHII)
-
     parami = interpolator(PHII, RI)
-    # handle masked arrays cleanly
-    if np.ma.isMaskedArray(parami):
-        parami_f = parami.filled(np.nan)
-    else:
-        parami_f = np.asarray(parami)
+
+    # Fill masked -> NaN for nanmin/nanmax logic
+    parami_f = parami.filled(np.nan) if np.ma.isMaskedArray(parami) else np.asarray(parami)
 
     if set_min is None:
         set_min = np.nanmin(parami_f)
+
     if set_max is None:
         pmax = np.nanmax(parami_f)
         set_max = pmax + 0.1 * pmax
 
     extend_min = set_min > np.nanmin(parami_f)
     extend_max = set_max < np.nanmax(parami_f)
+
     if extend_min and extend_max:
         extend_opt = 'both'
     elif extend_min:
@@ -570,8 +616,13 @@ def plot_contour2(
             lvs = np.arange(set_min, set_max + 1e-8, level_step)
 
     if cartesian:
-        mpbl = ax.contourf(XI, YI, parami_f, levels=lvs,
-                           vmin=set_min, vmax=set_max, cmap=colormap)
+        mpbl = ax.contourf(
+            XI, YI, parami_f,
+            levels=lvs,
+            vmin=set_min,
+            vmax=set_max,
+            cmap=colormap
+        )
 
         x = np.linspace(-1, 1, 200)
         ax.plot(x, np.sqrt(1 - x**2), color='black', linewidth=1)
@@ -581,18 +632,36 @@ def plot_contour2(
         ax.set_ylabel(r'$y/R$ [-]')
         ax.grid(False)
     else:
-        mpbl = ax.contourf(PHII, RI, parami_f, levels=lvs,
-                           vmin=set_min, vmax=set_max, cmap=colormap, extend=extend_opt)
+        mpbl = ax.contourf(
+            PHII, RI, parami_f,
+            levels=lvs,
+            vmin=set_min,
+            vmax=set_max,
+            cmap=colormap,
+            extend=extend_opt
+        )
         ax.grid(False)
         ax.set_yticklabels([])
         ax.set_xticklabels([])
 
     if annotate_h:
         hstar = cond.find_hstar_pos(**h_star_kwargs)
-        # your original annotate coordinates assumed cartesian-ish scaling
-        ax.annotate('h', (-1, 1-hstar), (1, 1-hstar),
-                    arrowprops=dict(color='r', width=3, headwidth=3),
-                    color='r', verticalalignment='center')
+        ax.annotate(
+            'h',
+            (-1, 1 - hstar),
+            (1, 1 - hstar),
+            arrowprops=dict(color='r', width=3, headwidth=3),
+            color='r',
+            verticalalignment='center'
+        )
+
+    if plot_measured_points:
+        if cartesian:
+            pts_x = rs * np.cos(phis)
+            pts_y = rs * np.sin(phis)
+            ax.plot(pts_x, pts_y, 'k.', markersize=2)
+        else:
+            ax.plot(phis, rs, 'k.', markersize=2)
 
     if colorbar_label is None:
         colorbar_label = param
@@ -605,39 +674,65 @@ def plot_contour2(
         elif param == 'ug1':
             colorbar_label = r"$v_{g} \ [m/s]$"
 
-    # Only add colorbar when desired (for grids, usually make one shared bar)
     if (not suppress_colorbar) and add_colorbar:
-        # robust ticks
         span = set_max - set_min
         if span > 0:
-            tx_step = span / 5
             tx = np.linspace(set_min, set_max, 6)
         else:
             tx = [set_min]
+
         cbar = fig.colorbar(mpbl, ax=ax, label=colorbar_label, ticks=tx)
 
     if title_str != '':
         title = True
     if title:
-        ax.set_title(title_str if title_str else cond.name)
+        ax.set_title(title_str if title_str else str(cond))
 
     if created_fig:
         fig.tight_layout()
         if show:
             plt.show()
-        else:
-            os.makedirs(save_dir, exist_ok=True)
-            fig.savefig(os.path.join(save_dir, f"{param}_contours_{cond.name + extra_save_text}.png"))
+        elif close:
             plt.close(fig)
 
     return ax, mpbl, cbar
 
+def _make_key_fn(org_spec):
+    """
+    Returns a function cond -> key used to bin into rows/cols.
 
-def plot_contour2_grid(
+    org_spec can be:
+      - "port" (attribute name)
+      - "pair" (special: (jf, jgref))
+      - ("jf","jgref") (tuple/list of attributes)
+      - callable(cond) -> key
+    """
+    if callable(org_spec):
+        return org_spec
+
+    if isinstance(org_spec, str):
+        s = org_spec.lower().strip()
+
+        if s == "pair":
+            attrs = ("jf", "jgref")
+            return lambda cond: tuple(getattr(cond, a) for a in attrs)
+
+        # extend with other shorthands if you want:
+        # if s == "pair_loc": attrs = ("jf","jgref","port")
+
+        return lambda cond: getattr(cond, org_spec)
+
+    if isinstance(org_spec, (tuple, list)):
+        attrs = tuple(org_spec)
+        return lambda cond: tuple(getattr(cond, a) for a in attrs)
+
+    raise TypeError(f"Unsupported org spec: {org_spec!r}")
+
+def plot_contour_grid(
     database,
     param: str,
-    row_org: str,
-    col_org: str,
+    row_org='pair',
+    col_org='port',
     *,
     cartesian=False,
     fig_size=3.0,
@@ -651,96 +746,114 @@ def plot_contour2_grid(
     set_max=None,
     font_size=10,
     show=True,
-    save_path=None,
+    close=True,
     shared_colorbar=True,
     colorbar_label=None,
-    # optional formatting
-    sort_key=None,  # function to sort unique org values; default: numeric then str
+    sort_key=None,
+    on_duplicate="last",   # "last" | "first" | "error"
 ):
-    """
-    Builds a grid where rows are unique getattr(cond, row_org) and columns are unique getattr(cond, col_org).
-    Calls plot_contour2 for each cell that has a matching condition.
-    """
+    row_key = _make_key_fn(row_org)
+    col_key = _make_key_fn(col_org)
 
     def _default_sort(vals):
-        # try numeric sort; fall back to string
         try:
-            return sorted(vals, key=lambda x: float(x))
+            return sorted(vals)
         except Exception:
             return sorted(vals, key=lambda x: str(x))
 
     if sort_key is None:
         sort_key = _default_sort
 
-    # Collect unique row/col values
-    row_vals = sort_key({getattr(c, row_org) for c in database})
-    col_vals = sort_key({getattr(c, col_org) for c in database})
+    row_vals = sort_key({row_key(c) for c in database})
+    col_vals = sort_key({col_key(c) for c in database})
 
-    nrows = len(row_vals)
-    ncols = len(col_vals)
-
+    nrows, ncols = len(row_vals), len(col_vals)
     subplot_kw = {} if cartesian else dict(projection='polar')
+
     fig, axes = plt.subplots(
-        nrows, ncols,
+        nrows,
+        ncols,
         figsize=(fig_size * ncols, fig_size * nrows),
         dpi=300,
         subplot_kw=subplot_kw,
-        squeeze=False
+        squeeze=False,
     )
 
-    # Map conditions to grid cells (if multiple match, last one wins)
+    plt.rcParams.update({'font.size': font_size})
+    plt.rcParams["font.family"] = "Times New Roman"
+    plt.rcParams["mathtext.fontset"] = "cm"
+
+    # Build lookup with duplicate handling
     lookup = {}
     for cond in database:
-        r = getattr(cond, row_org)
-        c = getattr(cond, col_org)
-        lookup[(r, c)] = cond
+        rk = row_key(cond)
+        ck = col_key(cond)
+        key = (rk, ck)
 
-    # If you want consistent scaling across all plots, compute global min/max from data.
-    # This is optional; if you pass set_min/set_max, those are used directly.
-    # Here’s a lightweight strategy: evaluate each cond quickly by using its raw values
-    # rather than re-interpolating; good enough for shared colorbar scaling.
-    if set_min is None or set_max is None:
-        all_vals = []
-        for cond in database:
-            # attempt to collect raw values for param
+        if key in lookup:
+            if on_duplicate == "first":
+                continue
+            if on_duplicate == "error":
+                raise ValueError(f"Duplicate condition for cell {key}: {lookup[key]} and {cond}")
+
+        lookup[key] = cond
+
+    # Determine set_min / set_max from only the plotted conditions
+    conds_to_plot = list(lookup.values())
+
+    if (set_min is None or set_max is None) and conds_to_plot:
+        vals_all = []
+
+        for cond in conds_to_plot:
             for _, r_dict in cond.data.items():
                 for r, midas_output in r_dict.items():
                     if r >= 0:
-                        v = midas_output.get(param, np.nan) if hasattr(midas_output, "get") else midas_output.get(param, np.nan) if isinstance(midas_output, dict) else np.nan
-                        all_vals.append(v)
-        all_vals = np.asarray(all_vals, dtype=float)
-        if set_min is None:
-            set_min = np.nanmin(all_vals)
-        if set_max is None:
-            vmax = np.nanmax(all_vals)
-            set_max = vmax + 0.1 * vmax
+                        try:
+                            vals_all.append(midas_output[param])
+                        except Exception:
+                            pass
+
+        vals_all = np.asarray(vals_all, dtype=float)
+
+        if vals_all.size > 0:
+            if set_min is None:
+                set_min = np.nanmin(vals_all)
+
+            if set_max is None:
+                vmax = np.nanmax(vals_all)
+                set_max = vmax + 0.1 * vmax
 
     mappable = None
 
     for i, rv in enumerate(row_vals):
         for j, cv in enumerate(col_vals):
             ax = axes[i, j]
-            cond = lookup.get((rv, cv), None)
+            cond = lookup.get((rv, cv))
 
-            # label outer edges
             if i == 0:
-                ax.set_title(f"{col_org} = {cv}")
+                ax.set_title(f"{cv}")
+
             if j == 0:
-                # y-label space for leftmost column
-                ax.text(-0.15, 0.5, f"{row_org} = {rv}", transform=ax.transAxes,
-                        rotation=90, va='center', ha='right')
+                ax.text(
+                    -0.15, 0.5, f"{rv}",
+                    transform=ax.transAxes,
+                    rotation=90,
+                    va='center',
+                    ha='right'
+                )
 
             if cond is None:
-                # blank cell
                 ax.axis('off')
                 continue
 
             _, mpbl, _ = plot_contour2(
-                cond, param,
+                cond,
+                param,
                 show=False,
+                close=False,
                 cartesian=cartesian,
                 fig_size=fig_size,
-                suppress_colorbar=True,    # no per-axes bars
+                suppress_colorbar=True,
                 add_colorbar=False,
                 rot_angle=rot_angle,
                 ngridr=ngridr,
@@ -753,24 +866,35 @@ def plot_contour2_grid(
                 font_size=font_size,
                 ax=ax,
                 fig=fig,
-                title=False
+                title=False,
             )
-            mappable = mpbl  # keep last; OK for shared colorbar
+            mappable = mpbl
 
     fig.tight_layout()
 
     if shared_colorbar and (mappable is not None):
         if colorbar_label is None:
             colorbar_label = param
-        fig.colorbar(mappable, ax=axes, fraction=0.02, pad=0.02, label=colorbar_label)
+            if param == 'alpha':
+                colorbar_label = r"$\alpha \ [-]$"
+            elif param == 'ai':
+                colorbar_label = r"$a_{i} \ [m^{-1}]$"
+            elif param == 'Dsm1':
+                colorbar_label = r"$D_{sm,1} \ [mm]$"
+            elif param == 'ug1':
+                colorbar_label = r"$v_{g} \ [m/s]$"
 
-    if save_path is not None:
-        os.makedirs(os.path.dirname(save_path) or ".", exist_ok=True)
-        fig.savefig(save_path, bbox_inches='tight')
+        fig.colorbar(
+            mappable,
+            ax=axes,
+            fraction=0.02,
+            pad=0.02,
+            label=colorbar_label
+        )
 
     if show:
         plt.show()
-    else:
+    elif close:
         plt.close(fig)
 
     return fig, axes
