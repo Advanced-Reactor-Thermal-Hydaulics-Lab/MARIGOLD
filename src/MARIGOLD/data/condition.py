@@ -101,42 +101,41 @@ class Condition:
             self.LoverD = 110
         elif 'D' in self.port and 'P' not in self.port:
             self.LoverD = int(self.port.strip('D'))
-
-        if self.database == 'quan':
-            if self.port == 'P4':
-                self.LoverD = 130.04
-            elif self.port == 'P5':
-                self.LoverD = 144.17
-            elif self.port == 'P6':
-                self.LoverD = 147.57
-            elif self.port == 'P7':
-                self.LoverD = 151.84
-            elif self.port == 'P8':
-                self.LoverD = 165.57
-            elif self.port == 'P9':
-                self.LoverD = 194.07          
-            elif self.port == 'P10':
-                self.LoverD = 230.07
-
         else:
-            exit = np.pi() * self.Rc
-            apex = np.pi() * self.Rc / 2
-
-            if self.port == 'P4':
-                self.LoverD = 115.90 + apex
-            elif self.port == 'P5A':
-                self.LoverD = 115.90 + exit
-            elif self.port == 'P5B':
-                self.LoverD = 118.90 + exit
-            elif self.port == 'P5C':
-                self.LoverD = 123.90 + exit
-            elif self.port == 'P6':
-                self.LoverD = 265.90 + exit
-            elif self.port == 'P7':
-                self.LoverD = 201.90 + exit
+            if self.database == 'quan':
+                if self.port == 'P4':
+                    self.LoverD = 130.04
+                elif self.port == 'P5':
+                    self.LoverD = 144.17
+                elif self.port == 'P6':
+                    self.LoverD = 147.57
+                elif self.port == 'P7':
+                    self.LoverD = 151.84
+                elif self.port == 'P8':
+                    self.LoverD = 165.57
+                elif self.port == 'P9':
+                    self.LoverD = 194.07          
+                elif self.port == 'P10':
+                    self.LoverD = 230.07
             else:
-                self.LoverD = -1
-                print(f"Warning: Could not determine port L/D for {self}")
+                exit = np.pi * self.Rc
+                apex = np.pi * self.Rc / 2
+
+                if self.port == 'P4':
+                    self.LoverD = 115.90 + apex
+                elif self.port == 'P5A':
+                    self.LoverD = 115.90 + exit
+                elif self.port == 'P5B':
+                    self.LoverD = 118.90 + exit
+                elif self.port == 'P5C':
+                    self.LoverD = 123.90 + exit
+                elif self.port == 'P6':
+                    self.LoverD = 165.90 + exit
+                elif self.port == 'P7':
+                    self.LoverD = 201.90 + exit
+                else:
+                    self.LoverD = -1
+                    print(f"Warning: Could not determine port L/D for {self}")
 
         self.vwvg = -1
         self.void_cov = -1
