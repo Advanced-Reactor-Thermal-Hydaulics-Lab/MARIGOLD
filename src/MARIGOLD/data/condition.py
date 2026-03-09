@@ -23,7 +23,7 @@ class Condition:
 
     debugFID = None
     
-    def __init__(self, jgref:float, jgloc:float, jf:float, theta:int, port:str, database:str, tag = '', fluids = 'air-water', g = 9.81, p_atm = 101325, T = 293.15) -> None:
+    def __init__(self, jgref:float, jgloc:float, jf:float, theta:int, port:str, database:str, Rc = None, tag = '', fluids = 'air-water', g = 9.81, p_atm = 101325, T = 293.15) -> None:
         """Initialize condition object
         
         **Args**:
@@ -48,41 +48,62 @@ class Condition:
         self.theta = theta
         self.port = port
         self.database = database
+        self.Rc = Rc
         self.tag = tag
 
-         # Check if port is one of the specified vertical downward ports after U-bend, set theta to -90 degree if true (Quan 10/25)
-        # if self.port in {"P5", "P6", "P7", "P8", "P9", "P10"}:
-        #    self.theta = int(-90)
-        # else:
-        #     self.theta = int(90)
+        # Check if port is one of the specified vertical downward ports after U-bend, set theta to -90 degree if true (Quan 10/25)
+        # Removed hardcoded logic (DHK)
+        if self.theta == 90 and int(re.sub(r'\D', '', self.port)) > 4:
+            self.theta = -90
 
-        self.name = f"{self.theta}deg_jf{self.jf}_jgloc{self.jgloc:0.2f}_{self.port}_{self.tag}_{self.database}"
+        # New condition naming (DHK)
+        fields = [
+            (self.theta,    lambda v: rf"$\theta = {v}^\circ$"),
+            (self.jf,       lambda v: rf"$j_f = {v:.2f}\,[m/s]$"),
+            (self.jgref,    lambda v: rf"$j_{{gref}} = {v:.3f}\,[m/s]"),
+            (self.Rc,       lambda v: rf"$R_c = {v}"),
+            (self.port,     lambda v: v),
+            (self.tag,      lambda v: v if v != "" else None),
+            (self.database, lambda v: rf"Author: {v}" if v != "" else None),
+        ]
+
+        parts = []
+        for value, fmt in fields:
+            if value is None:
+                continue
+            piece = fmt(value)
+            if piece is not None:
+                parts.append(piece)
+
+        self.name = "_".join(parts)
+        # self.name = f"{self.theta}deg_jf{self.jf}_jgloc{self.jgloc:0.2f}_{self.port}_{self.tag}_{self.database}"
 
         # Data is stored in this phi array. 3 layers of dictionary
         # phi [angle] gives a dictionary with the various r/R
         # phi [angle][r/R] gives a dictionary with the MIDAS output
         # So phi[angle][r/R]['alpha'] should give you the void fraction at r/R for phi = angle
         # This structure is initialized with zeros for the MIDAS output at the pipe center and wall
-        self._angles = np.arange(0, 361, 22.5) # HARDCODED 22.5 degree increments
-        #self.phi = deepcopy(dict( zip(angles, deepcopy([ {0.0: dict( zip(tab_keys, [0]*len(tab_keys)) ), 1.0: dict(zip(tab_keys, [0]*len(tab_keys)) ) } ]) * len(angles)) ))
+
+        self._angles = np.arange(0, 361, 22.5)  # HARDCODED 22.5 degree increments
         self.data = {}
 
         self.mirrored = False
-        self.FR = 0 # Flow regime variable. 0 is undefined, 1 is bubbly, etc.
+        self.FR = 0                             # Flow regime variable. 0 is undefined, 1 is bubbly, etc.
 
         self.j = self.jgloc + self.jf
 
-        if 'D' in self.port and 'P' not in self.port:
+        # Basic port and L/D logic
+        if self.port == 'P1':
+            self.LoverD = 30
+        elif self.port == 'P2':
+            self.LoverD = 66
+        elif self.port == 'P3':
+            self.LoverD = 110
+        elif 'D' in self.port and 'P' not in self.port:
             self.LoverD = int(self.port.strip('D'))
 
-        elif self.database == 'quan':
-            if self.port == 'P1':
-                self.LoverD = 30
-            elif self.port == 'P2':
-                self.LoverD = 66
-            elif self.port == 'P3':
-                self.LoverD = 110
-            elif self.port == 'P4':
+        if self.database == 'quan':
+            if self.port == 'P4':
                 self.LoverD = 130.04
             elif self.port == 'P5':
                 self.LoverD = 144.17
@@ -97,25 +118,22 @@ class Condition:
             elif self.port == 'P10':
                 self.LoverD = 230.07
 
-        elif self.database == 'neup' or self.database == 'ryan' or self.database == 'adix':
-            if self.port == 'P1':
-                self.LoverD = 30
-            elif self.port == 'P2':
-                self.LoverD = 66
-            elif self.port == 'P3':
-                self.LoverD = 110
-            elif self.port == 'P4':
-                self.LoverD = 130.04
+        else:
+            exit = np.pi() * self.Rc
+            apex = np.pi() * self.Rc / 2
+
+            if self.port == 'P4':
+                self.LoverD = 115.90 + apex
             elif self.port == 'P5A':
-                self.LoverD = 144.17
+                self.LoverD = 115.90 + exit
             elif self.port == 'P5B':
-                self.LoverD = 147.57
+                self.LoverD = 118.90 + exit
             elif self.port == 'P5C':
-                self.LoverD = 151.84
+                self.LoverD = 123.90 + exit
             elif self.port == 'P6':
-                self.LoverD = 194.07
+                self.LoverD = 265.90 + exit
             elif self.port == 'P7':
-                self.LoverD = 230.07
+                self.LoverD = 201.90 + exit
             else:
                 self.LoverD = -1
                 print(f"Warning: Could not determine port L/D for {self}")

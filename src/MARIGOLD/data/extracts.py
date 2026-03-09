@@ -526,6 +526,42 @@ def extractProbeData(dump_file = 'database.dat', in_dir = [], require_terms = No
         pickle.dump(all_conditions, g)
     return
 
+def parse_fname(file: str):
+    parts = file.split('_')
+    tags = []
+
+    theta = jf = jgref = port = Rc = tag = None
+
+    for part in parts:
+        p = part.strip()
+
+        if "deg" in p.lower():
+            theta = float(p.lower().strip('deg'))
+            continue
+
+        if "jf" in p.lower():
+            jf = float(p.lower().strip('jf'))
+            continue
+
+        if "jg" in p.lower():
+            jgref = float(p.lower().strip('jg'))
+            continue
+
+        if re.fullmatch(r'P\d+[A-Za-z]*', p, re.IGNORECASE):
+            port = p
+            continue
+
+        if "rc" in p.lower():
+            Rc = float(p.lower().strip('rc'))
+            continue
+
+        # Anything unmatched is treated as tag
+        tags.append(p)
+
+    tag = "_".join(tags)
+
+    return theta, jf, jgref, port, Rc, tag
+
 def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], require_terms = ['jf'], 
                             skip_terms = ['CFD', 'Copy'], sheet_type = 'quan_template', append_to_json = None,
                             pitot_sheet = False, print_sheets = False,
@@ -592,18 +628,7 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                 continue
             
             try:
-                parts = file.split('_')
-
-                theta = float(parts[0].strip('deg'))
-                jf = float(parts[1].strip('jf'))
-                jgref = float(parts[2].strip('jg'))
-                port = parts[3].strip('.xlsx').strip('.xlsm')
-                
-                # Extra string (DHK)
-                if len(parts) > 4:
-                    tag = file.split('_')[4].strip('.xlsx').strip('.xlsm')
-                else:
-                    tag = ''
+                theta, jf, jgref, port, Rc, tag = parse_fname(file)
 
             except:
                 print(f'Warning: Non-standard excel file name {file}. Is this Bettis template?')
@@ -1260,7 +1285,7 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                     jgloc = jgref
 
                 # Establish condition                    
-                newCond = Condition(jgref, jgloc, jf, theta, port, sheet_type.split('_')[0], tag)
+                newCond = Condition(jgref, jgloc, jf, theta, port, sheet_type.split('_')[0], Rc, tag)
 
                 if newCond not in all_conditions:
                     all_conditions.append(newCond)
