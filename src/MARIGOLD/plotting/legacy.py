@@ -1,4 +1,4 @@
-from .config import *
+from ..config import *
 
 def plot_profiles2(cond, param, save_dir = '.', show=True, x_axis='vals', errorbars = False, 
                     const_to_plot = [90, 67.5, 45, 22.5, 0], include_complement = True, skip_1_comp = False,
