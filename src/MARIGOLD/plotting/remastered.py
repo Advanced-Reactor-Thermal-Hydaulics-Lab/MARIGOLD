@@ -750,10 +750,22 @@ def plot_contour_grid(
     shared_colorbar=True,
     colorbar_label=None,
     sort_key=None,
-    on_duplicate="last",   # "last" | "first" | "error"
+    on_duplicate="last",
 ):
-    row_key = _make_key_fn(row_org)
-    col_key = _make_key_fn(col_org)
+    import matplotlib.pyplot as plt
+    import numpy as np
+    from collections import defaultdict
+
+    def _format_attr(cond, attr):
+        if attr == "theta":
+            return rf"$\theta = {cond.theta}^\circ$"
+        if attr == "pair":
+            return rf"$j_f = {cond.jf:.2f}\,[m/s], j_{{gref}} = {cond.jgref:.2f}\,[m/s]$"
+        if attr == "port":
+            return f"{cond.port}"
+        if attr == "database":
+            return f"Author: {cond.database}"
+        return f"{attr}={getattr(cond, attr)}"
 
     def _default_sort(vals):
         try:
@@ -761,140 +773,208 @@ def plot_contour_grid(
         except Exception:
             return sorted(vals, key=lambda x: str(x))
 
+    def _coerce_numeric_array(x):
+        """
+        Return x as a 1D float array with only finite numeric values kept.
+        Invalid entries like '#N/A', None, '', etc. are discarded.
+        """
+        if x is None:
+            return np.array([], dtype=float)
+
+        arr = np.asarray(x, dtype=object).ravel()
+        cleaned = []
+
+        for v in arr:
+            try:
+                fv = float(v)
+                if np.isfinite(fv):
+                    cleaned.append(fv)
+            except (TypeError, ValueError):
+                pass
+
+        return np.asarray(cleaned, dtype=float)
+
     if sort_key is None:
         sort_key = _default_sort
 
-    row_vals = sort_key({row_key(c) for c in database})
-    col_vals = sort_key({col_key(c) for c in database})
+    row_key = _make_key_fn(row_org)
+    col_key = _make_key_fn(col_org)
 
-    nrows, ncols = len(row_vals), len(col_vals)
-    subplot_kw = {} if cartesian else dict(projection='polar')
+    vary_attrs = ["theta", "pair", "port", "database"]
 
-    fig, axes = plt.subplots(
-        nrows,
-        ncols,
-        figsize=(fig_size * ncols, fig_size * nrows),
-        dpi=300,
-        subplot_kw=subplot_kw,
-        squeeze=False,
-    )
+    if row_org not in vary_attrs:
+        raise ValueError(f"row_org={row_org!r} is not supported")
+    if col_org not in vary_attrs:
+        raise ValueError(f"col_org={col_org!r} is not supported")
+    if row_org == col_org:
+        raise ValueError("row_org and col_org must be different")
+
+    fixed_attrs = [attr for attr in vary_attrs if attr not in {row_org, col_org}]
+
+    def _fixed_key(cond):
+        vals = []
+        for attr in fixed_attrs:
+            if attr == "pair":
+                vals.append((cond.jf, cond.jgref))
+            else:
+                vals.append(getattr(cond, attr))
+        return tuple(vals)
+
+    grouped = defaultdict(list)
+    for cond in database:
+        grouped[_fixed_key(cond)].append(cond)
 
     plt.rcParams.update({'font.size': font_size})
     plt.rcParams["font.family"] = "Times New Roman"
     plt.rcParams["mathtext.fontset"] = "cm"
 
-    # Build lookup with duplicate handling
-    lookup = {}
-    for cond in database:
-        rk = row_key(cond)
-        ck = col_key(cond)
-        key = (rk, ck)
-
-        if key in lookup:
-            if on_duplicate == "first":
-                continue
-            if on_duplicate == "error":
-                raise ValueError(f"Duplicate condition for cell {key}: {lookup[key]} and {cond}")
-
-        lookup[key] = cond
-
-    # Determine set_min / set_max from only the plotted conditions
-    conds_to_plot = list(lookup.values())
-
-    if (set_min is None or set_max is None) and conds_to_plot:
+    # Compute global limits only from valid numeric entries
+    if set_min is None or set_max is None:
         vals_all = []
 
-        for cond in conds_to_plot:
+        for cond in database:
             for _, r_dict in cond.data.items():
                 for r, midas_output in r_dict.items():
-                    if r >= 0:
-                        try:
-                            vals_all.append(midas_output[param])
-                        except Exception:
-                            pass
+                    if r < 0:
+                        continue
+
+                    try:
+                        vals = _coerce_numeric_array(midas_output[param])
+                        if vals.size > 0:
+                            vals_all.extend(vals.tolist())
+                    except Exception:
+                        pass
 
         vals_all = np.asarray(vals_all, dtype=float)
 
         if vals_all.size > 0:
             if set_min is None:
                 set_min = np.nanmin(vals_all)
-
             if set_max is None:
                 vmax = np.nanmax(vals_all)
                 set_max = vmax + 0.1 * vmax
 
-    mappable = None
+    figures = {}
 
-    for i, rv in enumerate(row_vals):
-        for j, cv in enumerate(col_vals):
-            ax = axes[i, j]
-            cond = lookup.get((rv, cv))
+    for gkey, conds in grouped.items():
+        row_vals = sort_key({row_key(c) for c in conds})
+        col_vals = sort_key({col_key(c) for c in conds})
 
-            if i == 0:
-                ax.set_title(f"{cv}")
+        nrows, ncols = len(row_vals), len(col_vals)
+        subplot_kw = {} if cartesian else dict(projection='polar')
 
-            if j == 0:
-                ax.text(
-                    -0.15, 0.5, f"{rv}",
-                    transform=ax.transAxes,
-                    rotation=90,
-                    va='center',
-                    ha='right'
-                )
-
-            if cond is None:
-                ax.axis('off')
-                continue
-
-            _, mpbl, _ = plot_contour2(
-                cond,
-                param,
-                show=False,
-                close=False,
-                cartesian=cartesian,
-                fig_size=fig_size,
-                suppress_colorbar=True,
-                add_colorbar=False,
-                rot_angle=rot_angle,
-                ngridr=ngridr,
-                ngridphi=ngridphi,
-                colormap=colormap,
-                num_levels=num_levels,
-                level_step=level_step,
-                set_min=set_min,
-                set_max=set_max,
-                font_size=font_size,
-                ax=ax,
-                fig=fig,
-                title=False,
-            )
-            mappable = mpbl
-
-    fig.tight_layout()
-
-    if shared_colorbar and (mappable is not None):
-        if colorbar_label is None:
-            colorbar_label = param
-            if param == 'alpha':
-                colorbar_label = r"$\alpha \ [-]$"
-            elif param == 'ai':
-                colorbar_label = r"$a_{i} \ [m^{-1}]$"
-            elif param == 'Dsm1':
-                colorbar_label = r"$D_{sm,1} \ [mm]$"
-            elif param == 'ug1':
-                colorbar_label = r"$v_{g} \ [m/s]$"
-
-        fig.colorbar(
-            mappable,
-            ax=axes,
-            fraction=0.02,
-            pad=0.02,
-            label=colorbar_label
+        fig, axes = plt.subplots(
+            nrows,
+            ncols,
+            figsize=(fig_size * ncols, fig_size * nrows),
+            dpi=300,
+            subplot_kw=subplot_kw,
+            squeeze=False,
         )
 
-    if show:
-        plt.show()
-    elif close:
-        plt.close(fig)
+        lookup = {}
+        for cond in conds:
+            rk = row_key(cond)
+            ck = col_key(cond)
+            key = (rk, ck)
 
-    return fig, axes
+            if key in lookup:
+                if on_duplicate == "first":
+                    continue
+                if on_duplicate == "error":
+                    raise ValueError(
+                        f"Duplicate condition for cell {key}: {lookup[key]} and {cond}"
+                    )
+
+            lookup[key] = cond
+
+        mappable = None
+
+        for i, rv in enumerate(row_vals):
+            for j, cv in enumerate(col_vals):
+                ax = axes[i, j]
+                cond = lookup.get((rv, cv))
+
+                if i == 0:
+                    ax.set_title(f"{cv}")
+
+                if j == 0:
+                    ax.text(
+                        -0.15, 0.5, f"{rv}",
+                        transform=ax.transAxes,
+                        rotation=90,
+                        va='center',
+                        ha='right'
+                    )
+
+                if cond is None:
+                    ax.axis('off')
+                    continue
+
+                try:
+                    _, mpbl, _ = plot_contour2(
+                        cond,
+                        param,
+                        show=False,
+                        close=False,
+                        cartesian=cartesian,
+                        fig_size=fig_size,
+                        suppress_colorbar=True,
+                        add_colorbar=False,
+                        rot_angle=rot_angle,
+                        ngridr=ngridr,
+                        ngridphi=ngridphi,
+                        colormap=colormap,
+                        num_levels=num_levels,
+                        level_step=level_step,
+                        set_min=set_min,
+                        set_max=set_max,
+                        font_size=font_size,
+                        ax=ax,
+                        fig=fig,
+                        title=False,
+                    )
+                    mappable = mpbl
+
+                except Exception:
+                    # This condition cannot be plotted for this param.
+                    # Leave the cell empty.
+                    ax.axis('off')
+                    continue
+
+        if conds:
+            cond0 = conds[0]
+            parts = [_format_attr(cond0, attr) for attr in fixed_attrs]
+            fig.suptitle(", ".join(parts), y=0.995)
+
+        fig.tight_layout(rect=[0, 0, 1, 0.97])
+
+        if shared_colorbar and (mappable is not None):
+            cbar_label = colorbar_label
+            if cbar_label is None:
+                cbar_label = param
+                if param == 'alpha':
+                    cbar_label = r"$\alpha \ [-]$"
+                elif param == 'ai':
+                    cbar_label = r"$a_{i} \ [m^{-1}]$"
+                elif param == 'Dsm1':
+                    cbar_label = r"$D_{sm,1} \ [mm]$"
+                elif param == 'ug1':
+                    cbar_label = r"$v_{g} \ [m/s]$"
+
+            fig.colorbar(
+                mappable,
+                ax=axes,
+                fraction=0.02,
+                pad=0.02,
+                label=cbar_label
+            )
+
+        figures[gkey] = (fig, axes)
+
+        if show:
+            plt.show()
+        elif close:
+            plt.close(fig)
+
+    return figures

@@ -58,13 +58,13 @@ class Condition:
 
         # New condition naming (DHK)
         fields = [
-            (self.theta,    lambda v: rf"$\theta = {v}^\circ$"),
-            (self.jf,       lambda v: rf"$j_f = {v:.2f}\,[m/s]$"),
-            (self.jgref,    lambda v: rf"$j_{{gref}} = {v:.3f}\,[m/s]"),
-            (self.Rc,       lambda v: rf"$R_c = {v}"),
+            (self.theta,    lambda v: f"{v}deg"),
+            (self.jf,       lambda v: f"jf{v:.2f}"),
+            (self.jgref,    lambda v: f"jgref{v:.2f}"),
+            (self.Rc,       lambda v: f"Rc{v}"),
             (self.port,     lambda v: v),
             (self.tag,      lambda v: v if v != "" else None),
-            (self.database, lambda v: rf"Author: {v}" if v != "" else None),
+            (self.database, lambda v: v if v != "" else None),
         ]
 
         parts = []
@@ -76,7 +76,6 @@ class Condition:
                 parts.append(piece)
 
         self.name = "_".join(parts)
-        # self.name = f"{self.theta}deg_jf{self.jf}_jgloc{self.jgloc:0.2f}_{self.port}_{self.tag}_{self.database}"
 
         # Data is stored in this phi array. 3 layers of dictionary
         # phi [angle] gives a dictionary with the various r/R
@@ -118,21 +117,22 @@ class Condition:
                 elif self.port == 'P10':
                     self.LoverD = 230.07
             else:
-                exit = np.pi * self.Rc
-                apex = np.pi * self.Rc / 2
+                if self.Rc != None:
+                    exit = np.pi * self.Rc
+                    apex = np.pi * self.Rc / 2
 
-                if self.port == 'P4':
-                    self.LoverD = 115.90 + apex
-                elif self.port == 'P5A':
-                    self.LoverD = 115.90 + exit
-                elif self.port == 'P5B':
-                    self.LoverD = 118.90 + exit
-                elif self.port == 'P5C':
-                    self.LoverD = 123.90 + exit
-                elif self.port == 'P6':
-                    self.LoverD = 165.90 + exit
-                elif self.port == 'P7':
-                    self.LoverD = 201.90 + exit
+                    if self.port == 'P4':
+                        self.LoverD = 115.90 + apex
+                    elif self.port == 'P5A':
+                        self.LoverD = 115.90 + exit
+                    elif self.port == 'P5B':
+                        self.LoverD = 118.90 + exit
+                    elif self.port == 'P5C':
+                        self.LoverD = 123.90 + exit
+                    elif self.port == 'P6':
+                        self.LoverD = 165.90 + exit
+                    elif self.port == 'P7':
+                        self.LoverD = 201.90 + exit
                 else:
                     self.LoverD = -1
                     print(f"Warning: Could not determine port L/D for {self}")

@@ -21,11 +21,11 @@ src/MARIGOLD/math/formulas.py
 src/MARIGOLD/math/models.py
 src/MARIGOLD/math/operations.py
 src/MARIGOLD/math/velocities.py
-src/MARIGOLD/midas/eventscanning copy.py
-src/MARIGOLD/midas/eventscanning to delete.py
 src/MARIGOLD/midas/legacy.py
-src/MARIGOLD/midas/remastered copy.py
-src/MARIGOLD/midas/remastered to delete.py
-src/MARIGOLD/midas/remastered.py
+src/MARIGOLD/midas/WIP/eventscanning copy.py
+src/MARIGOLD/midas/WIP/eventscanning to delete.py
+src/MARIGOLD/midas/WIP/remastered copy.py
+src/MARIGOLD/midas/WIP/remastered to delete.py
+src/MARIGOLD/midas/WIP/remastered.py
 src/MARIGOLD/plotting/legacy.py
 src/MARIGOLD/plotting/remastered.py
