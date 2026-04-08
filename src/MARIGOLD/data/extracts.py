@@ -547,7 +547,7 @@ def parse_fname(file: str):
             jgref = float(p.lower().strip('jg'))
             continue
 
-        if re.fullmatch(r'P\d+[A-Za-z]*', p, re.IGNORECASE):
+        if re.fullmatch(r'P\d+[A-Za-z]*', p, re.IGNORECASE) or re.fullmatch(r'Port\d+[A-Za-z]*', p, re.IGNORECASE):
             port = p
             continue
 
@@ -628,7 +628,7 @@ def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], r
                 continue
             
             try:
-                theta, jf, jgref, port, Rc, tag = parse_fname(file)
+                theta, jf, jgref, port, Rc, tag = parse_fname(os.path.splitext(file)[0])
 
             except:
                 print(f'Warning: Non-standard excel file name {file}. Is this Bettis template?')

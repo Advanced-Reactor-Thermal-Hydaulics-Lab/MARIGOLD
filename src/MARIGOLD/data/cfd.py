@@ -1,5 +1,7 @@
 from ..config import *
 from .condition import *
+from ..math.models import *
+from ..math.velocities import *
 
 """ Functions for interfacing with CFX
 
@@ -46,7 +48,7 @@ def write_CFX_BC(cond:Condition, save_dir = ".", z_loc = 'LoverD', angles_to_inc
         z_loc = cond.LoverD
 
     if not cond.check_param('vf'):
-        cond.approx_vf()
+        approx_vf(cond)
 
 
     with open(path_to_csv, "w") as f:
@@ -380,7 +382,7 @@ def make_ICEM_pipe_mesh(cond:Condition, r_divs: int, theta_divs: int, z_divs: in
 
     # Assuming water
 
-    cond.calc_dpdz()
+    calc_dpdz(cond)
     u_tau = np.sqrt(cond.tau_w / cond.rho_f)
 
     if turb_model == 'ke': 
@@ -652,7 +654,7 @@ def make_U_bend_mesh(L_P1:float, D_pipe:float, RoverD:float, L_VU:float, L_VD:fl
     # Assuming water
     if first_layer == None:
         if cond is not None:
-            cond.calc_dpdz()
+            calc_dpdz(cond)
             u_tau = np.sqrt(cond.tau_w / cond.rho_f)
 
             if turb_model == 'ke': 
@@ -666,7 +668,7 @@ def make_U_bend_mesh(L_P1:float, D_pipe:float, RoverD:float, L_VU:float, L_VD:fl
             print("Please specify either a Condition or a first layer thickness")
 
     # if cond is not None:
-    #     cond.calc_dpdz()
+    #     calc_dpdz(cond)
     #     u_tau = np.sqrt(cond.tau_w / cond.rho_f)
 
     #     if turb_model == 'ke': 
@@ -1180,7 +1182,7 @@ def make_ICEM_pipe_mesh2(cond:Condition, dr:int, dt:int, dz:int, o_1:float, L:fl
 
     # Assuming water
 
-    cond.calc_dpdz()
+    calc_dpdz(cond)
     u_tau = np.sqrt(cond.tau_w / cond.rho_f)
 
     if turb_model == 'ke': 
@@ -2382,8 +2384,6 @@ END\n\
     subprocess.check_call(f'rm -rf ./{case_name}_Results', shell=True)
     comp_process = subprocess.run(f'cfx5post -play CFXPost_Commands.cse -line > auto_cfx_run.log', shell=True)
     print(comp_process)
-
-
 
 
 def write_CCL_single_phase(ccl_name = 'auto_setup.ccl',
