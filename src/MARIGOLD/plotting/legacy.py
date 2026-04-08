@@ -1,4 +1,4 @@
-from .config import *
+from ..config import *
 
 def plot_profiles2(cond, param, save_dir = '.', show=True, x_axis='vals', errorbars = False, 
                     const_to_plot = [90, 67.5, 45, 22.5, 0], include_complement = True, skip_1_comp = False,
@@ -1032,7 +1032,7 @@ def plot_surface(cond, param:str, save_dir = '.', show=True, set_max = None, set
 def plot_spline_contour(cond, param:str, save_dir = '.', show=True, set_max = None, set_min = None, fig_size = 4,
                     rot_angle = 0, ngridr = 50, ngridphi = 50, colormap = 'plasma', num_levels = 100, title = False,
                     annotate_h = False, cartesian = False, h_star_kwargs = {'method': 'max_dsm', 'min_void': '0.05'},
-                    grad = 'None') -> None:
+                    grad = 'None', suppress_colorbar = False) -> None:
     """Plots a contour from a spline interpolation
 
     Will fit the spline if necessary. 
@@ -1107,11 +1107,12 @@ def plot_spline_contour(cond, param:str, save_dir = '.', show=True, set_max = No
         ax.set_yticklabels([])
         ax.set_xticklabels([])
 
-    if grad == 'None':
-        param_label = param
-    else:
-        param_label = "grad_" + param + "_" + grad 
-    plt.colorbar(label=param_label)
+    if suppress_colorbar == False:
+        if grad == 'None':
+            param_label = param
+        else:
+            param_label = "grad_" + param + "_" + grad 
+        plt.colorbar(label=param_label)
     
     if title:
         plt.title(cond.name)

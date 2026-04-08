@@ -1,7 +1,7 @@
-from .config import *
-from .formulas import *
-from .models import *
-from .operations import *
+from ..config import *
+from ..math.formulas import *
+from ..math.models import *
+from ..math.operations import *
 
 def apply_preset(preset, cond):
     """Applies hard-coded presets to the condition object and returns overrides."""

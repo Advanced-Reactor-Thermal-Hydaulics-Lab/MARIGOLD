@@ -1,5 +1,5 @@
-from .config import *
-from .Condition import Condition
+from ..config import *
+from .condition import *
 
 class Iskandrani_Condition(Condition):
     

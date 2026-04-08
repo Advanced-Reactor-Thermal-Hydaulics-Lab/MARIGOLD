@@ -1,4 +1,4 @@
-from .config import *
+from ..config import *
 from .operations import *
 
 def approx_vf(cond, n = 7, overwrite_vf = False, verbose = True) -> None:
