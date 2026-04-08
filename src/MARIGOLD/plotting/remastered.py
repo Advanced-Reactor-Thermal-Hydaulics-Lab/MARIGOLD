@@ -91,6 +91,8 @@ def plot_params(
     for phi in phis_to_plot:
         if phi not in cond.data:
             continue
+        
+        base, (color, marker, ls) = _resolve_style_for_phi(phi)
 
         r_dict = cond.data[phi]
         rs_sorted = sorted(r_dict.keys())
@@ -105,6 +107,12 @@ def plot_params(
             x = _safe_get(midas_out, x_param, np.nan)
             y = _safe_get(midas_out, y_param, np.nan)
 
+            if x_param == 'roverR' and phi != base:
+                x = -x
+            
+            if y_param == 'roverR' and phi != base:
+                y = -y
+
             # Omit y == 0 points and break line
             if y == 0.0:
                 xs.append(np.nan)
@@ -115,8 +123,6 @@ def plot_params(
 
         xs = np.asarray(xs, dtype=float)
         ys = np.asarray(ys, dtype=float)
-
-        base, (color, marker, ls) = _resolve_style_for_phi(phi)
 
         # Label only the base angle; omit complements from legend
         phi_label = f"{base}°" if (legend_phi and phi == base) else None
@@ -189,8 +195,8 @@ def plot_stack(
     *,
     styles=None,
     ax=None,
-    show_markers: bool = True,
-    show_lines: bool = True,
+    show_markers: bool | Sequence[bool] = True,
+    show_lines: bool | Sequence[bool] = True,
     x_label: str | None = None,
     y_label: str | None = None,
     set_xlim=None,
@@ -226,6 +232,24 @@ def plot_stack(
     ax.yaxis.set_ticks_position("left")
     ax.xaxis.set_ticks_position("bottom")
 
+    def _normalize_bool_per_cond(value, n, name):
+        if isinstance(value, bool):
+            return [value] * n
+
+        if isinstance(value, Sequence) and not isinstance(value, (str, bytes)):
+            if len(value) != n:
+                raise ValueError(
+                    f"{name} must be a bool or a sequence of length {n}; got length {len(value)}"
+                )
+            if not all(isinstance(v, bool) for v in value):
+                raise TypeError(f"all entries in {name} must be bool")
+            return list(value)
+
+        raise TypeError(f"{name} must be a bool or a sequence of bool")
+
+    show_markers = _normalize_bool_per_cond(show_markers, len(conds), "show_markers")
+    show_lines   = _normalize_bool_per_cond(show_lines,   len(conds), "show_lines")
+
     # Build default per-condition styles if none are provided
     if styles is None:
         color_cyc = cycle(_DEFAULT_COLORS)
@@ -233,16 +257,16 @@ def plot_stack(
         ls_cyc = cycle(_DEFAULT_LINESTYLES)
 
         styles = []
-        for _ in conds:
+        for sm, sl in zip(show_markers, show_lines):
             st = {
                 "color": next(color_cyc),
                 "marker": next(marker_cyc),
                 "linestyle": next(ls_cyc),
             }
 
-            if not show_lines:
+            if not sl:
                 st["linestyle"] = "None"
-            if not show_markers:
+            if not sm:
                 st["marker"] = "None"
 
             styles.append(st)
@@ -253,31 +277,31 @@ def plot_stack(
             )
 
         styles = [dict(s) if s is not None else {} for s in styles]
-        for st in styles:
-            if not show_lines:
+        for st, sm, sl in zip(styles, show_markers, show_lines):
+            if not sl:
                 st["linestyle"] = "None"
-            if not show_markers:
+            if not sm:
                 st["marker"] = "None"
 
     plotted_any = False
 
     # Plot each condition by delegating to plot_params()
-    for cond, label, style in zip(conds, labels, styles):
+    for cond, label, style, sm, sl in zip(conds, labels, styles, show_markers, show_lines):
         _, _, cond_plotted = plot_params(
             cond,
             x_param=x_param,
             y_param=y_param,
             phis_to_plot=phis_to_plot,
             ax=ax,
-            show_markers=show_markers,
-            show_lines=show_lines,
+            show_markers=sm,
+            show_lines=sl,
             x_label=x_label,
             y_label=y_label,
             set_xlim=set_xlim,
             set_ylim=set_ylim,
             percent_error=percent_error,
             legend_phi=legend_phi,
-            title=False,   # stack-level title handled below
+            title=False,
             fig_size=fig_size,
             fs=fs,
             show=False,

@@ -11,6 +11,7 @@ import subprocess
 import warnings
 import xlrd
 
+from collections.abc import Sequence
 from copy import copy
 from copy import deepcopy
 from datetime import datetime
