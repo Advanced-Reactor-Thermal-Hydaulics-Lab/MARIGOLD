@@ -1,4 +1,4 @@
-from .config import *
+from ..config import *
 
 def integration(rs, vars, method):
         la = 0.0
@@ -619,6 +619,158 @@ def void_area_avg(cond, param: str, even_opt='first', method='simpson') -> float
         # Uniform quadrature approximation
         # Three line-averages multiplied by two in Excel because line-averages in Excel are done for diameters, not radii
         I = sum(las) / 8 / area_avg(cond,'alpha',method=method)
+
+    return I
+
+def calc_liquid_frac(cond):
+    """_summary_
+    
+    **Args**:
+    
+     - ``cond``: _description_
+    
+    **Returns**:
+    
+     - _description_
+    """
+    for angle, r_dict in cond.data.items():
+        for rstar, midas_dict in r_dict.items():
+            alpha = midas_dict['alpha']
+            liquid_frac = 1 - alpha
+            
+            midas_dict.update({'liquid_frac': liquid_frac})
+
+    return area_avg(cond,'liquid_frac')
+
+def weighted_area_avg(cond, param: str, weighting: str, even_opt='first', method='simpson') -> float:
+    """Method for calculating the X-weighted area-average of a parameter
+    """
+
+    # Check that the parameter that the user requested exists
+    if not cond.check_param(param):
+        raise KeyError(f"Invalid parameter {param} selected. Not present at {cond.check_param_loc(param)}")
+    
+    if not cond.check_param(weighting):
+        raise KeyError(f"Invalid weighting {weighting} selected. Not present at {cond.check_param_loc(weighting)}")
+    
+    # Initialize variables
+    I       = 0     # Integral
+    las     = []    # Line-averages
+    angles  = []    # Azimuthal angles
+    
+    if not cond.mirrored:
+        warnings.warn("Mirroring in area-avg")
+        cond.mirror()
+
+    if method == 'simpson':
+        # We have to integrate twice, once with resepect to r, again with respect to phi
+        # Start with r
+
+        for angle, r_dict in cond.data.items():
+
+            rs_temp = []
+            vars_temp = []
+            angles.append(angle * np.pi/180)                                        # Convert degrees to radians
+
+            for rstar, midas_dict in r_dict.items():
+                if rstar >= 0:                                                      # This should be unnecessary now with the new mirror, but it's not hurting anyone by being here
+                    try:
+                        rs_temp.append( rstar )                                     # This is proably equivalent to rs = list(r_dict.keys() ), but I'm paranoid about ordering
+                        vars_temp.append( midas_dict[param] * midas_dict[weighting] * rstar)
+                    except:
+                        if debug: print('Problem with:', angle, r_dict, param)
+            
+            vars = [var for _, var in sorted(zip(rs_temp, vars_temp))]
+            rs = sorted(rs_temp)
+
+            if debug: print("Arrays to integrate", angle, rs, vars, file=debugFID)
+                
+            las.append( integrate.simpson(y=vars, x=rs) )                           # Integrate wrt r
+            if debug: print("calculated integral:", integrate.simpson(y=vars, x=rs), file=debugFID)
+                #I = 2 * np.pi
+        if debug: print("Integrated wrt r", las, file=debugFID)
+
+        las = [param for _, param in sorted(zip(angles, las))]
+        angles = sorted(angles)
+
+        I = integrate.simpson(y=las, x=angles) / np.pi / area_avg(cond,weighting)     # Integrate wrt theta, divide by normalized area
+
+    elif method == 'talley':
+        for angle, r_dict in cond.data.items():
+            if angle == 360:
+                continue
+
+            if 0.95 in r_dict:
+                S_1 = 0.05 * sum((1 * 0,
+                        4 * 0.95 * r_dict[0.95][param] * r_dict[0.95][weighting],
+                        2 * 0.90 * r_dict[0.90][param] * r_dict[0.90][weighting],
+                        4 * 0.85 * r_dict[0.85][param] * r_dict[0.85][weighting],
+                        1 * 0.80 * r_dict[0.80][param] * r_dict[0.80][weighting],
+                        )) / 3
+                
+                S_2 = 0.10 * sum((1 * 0.80 * r_dict[0.8][param] * r_dict[0.80][weighting],
+                        4 * 0.70 * r_dict[0.7][param] * r_dict[0.7][weighting],
+                        2 * 0.60 * r_dict[0.6][param] * r_dict[0.6][weighting],
+                        4 * 0.50 * r_dict[0.5][param] * r_dict[0.5][weighting],
+                        1 * 0.40 * r_dict[0.4][param] * r_dict[0.4][weighting],
+                        )) / 3
+                
+                S_3 = 0.20 * sum((1 * 0.40 * r_dict[0.4][param] * r_dict[0.4][weighting],
+                        4 * 0.20 * r_dict[0.2][param] * r_dict[0.2][weighting],
+                        2 * 0.00 * r_dict[0.0][param] * r_dict[0.0][weighting],
+                        )) / 3
+            else:
+                S_1 = 0
+
+                S_2 = 0.10 * sum((1 * 0,
+                        4 * 0.90 * r_dict[0.9][param] * r_dict[0.9][weighting],
+                        2 * 0.80 * r_dict[0.8][param] * r_dict[0.8][weighting],
+                        4 * 0.70 * r_dict[0.7][param] * r_dict[0.7][weighting],
+                        2 * 0.60 * r_dict[0.6][param] * r_dict[0.6][weighting],
+                        4 * 0.50 * r_dict[0.5][param] * r_dict[0.5][weighting],
+                        1 * 0.40 * r_dict[0.4][param] * r_dict[0.4][weighting],
+                        )) / 3
+                
+                S_3 = 0.20 * sum((1 * 0.40 * r_dict[0.4][param] * r_dict[0.4][weighting],
+                        4 * 0.20 * r_dict[0.2][param] * r_dict[0.2][weighting],
+                        2 * 0.00 * r_dict[0.0][param] * r_dict[0.0][weighting],               # Might be doubling up
+                        )) / 3
+
+            las.append(sum((S_1, S_2, S_3)))
+
+        I = sum(las) / 8 / area_avg(cond,weighting,method=method)
+        
+    else:
+        for angle, r_dict in cond.data.items():
+
+            if angle == 360:    # We already have 0
+                continue
+
+            rs_temp = []
+            vars_temp = []
+            angles.append(angle * np.pi / 180)
+            for rstar, midas_dict in r_dict.items():
+                if rstar >= 0:
+                    try:
+                        rs_temp.append(rstar)
+                        vars_temp.append(float(midas_dict[param] * midas_dict[weighting] * rstar))
+                    except:
+                        if debug: print('Problem with:', angle, r_dict, param)
+            
+            vars = [var for _, var in sorted(zip(rs_temp, vars_temp))]
+            rs = sorted(rs_temp)
+
+            if debug: print("Arrays to integrate", angle, rs, vars, file=debugFID)
+
+            if len(rs) != len(vars):
+                ValueError( f"rs to integrate over {rs} must be the same length as params {vars}, occured at {angle}" )
+
+            la = integration(rs, vars, method = method)
+            las.append(la)
+
+        # Uniform quadrature approximation
+        # Three line-averages multiplied by two in Excel because line-averages in Excel are done for diameters, not radii
+        I = sum(las) / 8 / area_avg(cond,weighting,method=method)
 
     return I
 

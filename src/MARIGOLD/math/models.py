@@ -1,4 +1,4 @@
-from .config import *
+from ..config import *
 from .operations import *
 
 def calc_fric(cond, method = 'Blasius', m = 0.316, n=0.25):
@@ -490,6 +490,126 @@ def calc_vr_model(cond, method='km1_simp', kw = 0.654, n=1, Lw = 5, kf = 0.113,
                 else:
                     print(f"{method} not implemented")
                     return -1
+
+                if rstar == 1:
+                    vr = 0
+
+                if vr > 2*cond.jf:
+                    vr = 2*cond.jf
+                elif vr < -2*cond.jf:
+                    vr = -2*cond.jf
+        
+                midas_dict[vr_name] = vr
+                midas_dict['vr_model'] = vr
+
+
+        iterations += 1
+
+        try:
+            area_avg(cond,'vr_model', recalc=True)
+        except:
+            print(f"Error calculating vr" )
+
+        if old_vr == np.inf or old_vr != old_vr or vr == np.inf:
+            print(f"Error calculating vr: {area_avg(cond,'vr_model', recalc=True)}")
+
+        if old_vr == 0:
+            if not quiet:
+                print(f"vr_model calculated as 0 after {iterations} iterations")
+                print(old_vr, area_avg(cond,'vr_model', recalc=True))
+            return
+
+        if abs(old_vr - area_avg(cond,'vr_model', recalc=True)) / abs(old_vr) < iter_tol:
+            if not quiet:
+                print(f"vr_model converged in {iterations} iterations")
+                print(old_vr, area_avg(cond,'vr_model', recalc=True))
+            return area_avg(cond,"vr_model")
+        
+        if iterations > MAX_ITERATIONS:
+            print("Warning, max iterations exceeded in calculating vr_model")
+            print(f"{old_vr}\t{area_avg(cond,'vr_model', recalc=True)}\t{(old_vr - area_avg(cond,'vr_model', recalc=True))/old_vr*100}")
+            return
+        
+    
+    return area_avg(cond,"vr_model")
+
+def model_vr(cond, method='km1_simp', kw = 0.654, n=1, Lw = 5, kf = 0.113, 
+                    iterate_cd = True, initial_vr = None, 
+                    quiet = True, recalc_cd = True, iter_tol = 1e-4, custom_f = None, CC = 1):
+    """
+    Same, but written by David Kang.
+    """
+
+    MAX_ITERATIONS = 100
+    iterations = 0
+    initialize_vr = True
+
+    if initial_vr is None:
+        if cond.theta == 90:
+            initial_vr = 0.5
+        else:
+            initial_vr = -0.5
+
+    while True:
+        if recalc_cd:
+            if iterate_cd:
+                
+                if initialize_vr:
+                    for angle, r_dict in cond.data.items():
+                        for rstar, midas_dict in r_dict.items():
+                            midas_dict.update(
+                                {'vr_model': initial_vr}
+                            )
+                    initialize_vr = False
+
+                calc_cond_cd(cond,vr_cheat=False)
+            else:
+                calc_cond_cd(cond,vr_cheat=True)
+        try:
+            old_vr = area_avg(cond,'vr_model', recalc=True)
+        except KeyError:
+            old_vr = initial_vr # Initialize?
+
+        vr_name = "vr_" + method
+
+        for angle, r_dict in cond.data.items():
+            for rstar, midas_dict in r_dict.items():
+                
+                vr = -kw * midas_dict['alpha'] * midas_dict['vf'] * midas_dict['cd']**(1./3) - kf * midas_dict['vf']
+
+                if method == 'prelim_plus':
+                    if custom_f is None:
+                        ff, fg = calc_fric(cond)
+                    else:
+                        ff = custom_f
+
+                    # if midas_dict['Dsm1'] == 0 and rstar != 1.0:
+                    #     print(cond, angle, rstar)
+
+                    try:
+                        vr = (
+                        +kw * midas_dict['alpha'] * midas_dict['vf'] * midas_dict['cd']**(1./3) - kf * midas_dict['vf'] 
+                        + np.sqrt( 4./3 * void_area_avg(cond,'Dsm1')*0.001/midas_dict['cd'] * ( ff/cond.Dh * cond.jf**2/2 + 
+                                                                                (1 - midas_dict['alpha'])*(1-cond.rho_g/cond.rho_f) * cond.gz ) )
+                        )
+                    except ZeroDivisionError:
+                        vr = 0
+
+                    if vr == np.inf and midas_dict['cd'] == 0:
+                        if not quiet: warnings.warn(f"vr nan for {angle, rstar}, setting to 0")
+                        vr = 0
+                    
+                    if vr != vr:
+                        if not quiet: warnings.warn(f"vr nan for {angle, rstar}, setting to 0")
+                        vr = 0
+
+                elif method == 'final':
+                    try:
+                        vr = (
+                        np.sign(old_vr) * kw * midas_dict['alpha'] * midas_dict['vf'] * midas_dict['cd']**(1./3) - kf * midas_dict['vf'] 
+                        + np.sqrt( 4./3 * void_area_avg(cond,'Dsm1')*0.001/midas_dict['cd'] * (1 - midas_dict['alpha'])*(1-cond.rho_g/cond.rho_f) * cond.gz ) )
+                    except ZeroDivisionError:
+                        vr = 0
 
                 if rstar == 1:
                     vr = 0

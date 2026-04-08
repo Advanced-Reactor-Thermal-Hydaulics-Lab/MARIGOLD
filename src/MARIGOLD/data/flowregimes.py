@@ -1,4 +1,4 @@
-from .config import *
+from ..config import *
 
 def rough_FR_ID(cond) -> None:
     """Identifies the flow regime for the given condition, by some rough methods
