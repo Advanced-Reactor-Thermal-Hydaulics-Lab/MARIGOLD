@@ -1,6 +1,6 @@
 from .config import *
 from .calc_vels import *
-from .cfd import *
+from .CFD import *
 from .Condition_Archive import *
 from .Condition import *
 from .extracts_and_loads import *
