@@ -3,6 +3,7 @@ README.md
 pyproject.toml
 setup.cfg
 src/MARIGOLD/__init__.py
+src/MARIGOLD/calc_vels.py
 src/MARIGOLD/config.py
 src/MARIGOLD.egg-info/PKG-INFO
 src/MARIGOLD.egg-info/SOURCES.txt
