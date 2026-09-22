@@ -345,7 +345,7 @@ class Condition:
                     print("\t\t", midas_output)
         return
 
-    def mirror(self, method = 'sym90', sym90 = False, axisym = False, uniform_rmesh = False, uniform_rmesh_fill = 'interp', force_remirror=False) -> None:
+    def mirror(self, method = 'sym90', sym90 = False, axisym = False, uniform_rmesh = False, uniform_rmesh_fill = 'interp', force_remirror=False, observer=90) -> None:
         """Mirrors data, so we have data for every angle.
 
         Typically, data is only recorded in one or two quadrants of the pipe cross section. This function copies that data across specified lines of symmetry to ensure data is present at every angle
@@ -476,8 +476,8 @@ class Condition:
         if method == 'axisym': 
             # axisymmetric
             # Initial guess, prioritize 90 (DHK)
-            if 90 in angles_with_data:
-                ref_angle = 90
+            if observer in angles_with_data:
+                ref_angle = observer
             else:
                 ref_angle = angles_with_data[0]
 

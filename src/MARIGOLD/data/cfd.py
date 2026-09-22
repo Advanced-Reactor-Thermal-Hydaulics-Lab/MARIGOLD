@@ -193,8 +193,6 @@ def read_CFX_export(csv_path, jf, jgref, theta, port, database, Dh = 0.0254, jgl
             vg = np.sqrt(vgx**2 + vgy**2 + vgz**2)
             vf = np.sqrt(vfx**2 + vfy**2 + vfz**2)
 
-            data_dict = {'ug1': vg, 'vf': vf, 'alpha': alpha}
-            
             roverR = np.sqrt(x**2 + y**2) / (cond.Dh / 2)
             if roverR < 0.00001:
                 roverR = 0
@@ -210,7 +208,9 @@ def read_CFX_export(csv_path, jf, jgref, theta, port, database, Dh = 0.0254, jgl
 
             if phi_angle < 0 or phi_angle > 360:
                 continue
-
+            
+            data_dict = {'roverR': roverR, 'ug1': vg, 'vf': vf, 'alpha': alpha}
+            
             try:
                 cond.data[phi_angle].update({roverR:data_dict})
             except:

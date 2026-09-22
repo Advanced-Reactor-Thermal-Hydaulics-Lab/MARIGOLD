@@ -533,7 +533,7 @@ def calc_vr_model(cond, method='km1_simp', kw = 0.654, n=1, Lw = 5, kf = 0.113,
     
     return area_avg(cond,"vr_model")
 
-def model_vr(cond, method='km1_simp', kw = 0.654, n=1, Lw = 5, kf = 0.113, 
+def model_vr(cond, method='final', vf = 'vf', kw = 0.654, n=1, Lw = 5, kf = 0.113, 
                     iterate_cd = True, initial_vr = None, 
                     quiet = True, recalc_cd = True, iter_tol = 1e-4, custom_f = None, CC = 1):
     """
@@ -570,58 +570,31 @@ def model_vr(cond, method='km1_simp', kw = 0.654, n=1, Lw = 5, kf = 0.113,
         except KeyError:
             old_vr = initial_vr # Initialize?
 
-        vr_name = "vr_" + method
-
         for angle, r_dict in cond.data.items():
             for rstar, midas_dict in r_dict.items():
-                
-                vr = -kw * midas_dict['alpha'] * midas_dict['vf'] * midas_dict['cd']**(1./3) - kf * midas_dict['vf']
 
-                if method == 'prelim_plus':
-                    if custom_f is None:
-                        ff, fg = calc_fric(cond)
-                    else:
-                        ff = custom_f
+                if rstar == 1 or midas_dict['alpha'] == 0:       # Skip filler points
+                    continue
 
-                    # if midas_dict['Dsm1'] == 0 and rstar != 1.0:
-                    #     print(cond, angle, rstar)
-
+                if method == 'final':
                     try:
-                        vr = (
-                        +kw * midas_dict['alpha'] * midas_dict['vf'] * midas_dict['cd']**(1./3) - kf * midas_dict['vf'] 
-                        + np.sqrt( 4./3 * void_area_avg(cond,'Dsm1')*0.001/midas_dict['cd'] * ( ff/cond.Dh * cond.jf**2/2 + 
-                                                                                (1 - midas_dict['alpha'])*(1-cond.rho_g/cond.rho_f) * cond.gz ) )
-                        )
-                    except ZeroDivisionError:
-                        vr = 0
+                        vr_eff = np.sqrt( (4./3) * (void_area_avg(cond,'Dsm1')/1000) / (cond.rho_f * midas_dict['cd']) * (1 - midas_dict['alpha']) * (cond.rho_f - cond.rho_g) * cond.gz )
+                        vr = vr_eff - kf * midas_dict[vf] + np.sign(old_vr) * kw * midas_dict['alpha'] * midas_dict[vf] * midas_dict['cd']**(1./3)
 
-                    if vr == np.inf and midas_dict['cd'] == 0:
-                        if not quiet: warnings.warn(f"vr nan for {angle, rstar}, setting to 0")
+                    except ZeroDivisionError:
                         vr = 0
                     
-                    if vr != vr:
-                        if not quiet: warnings.warn(f"vr nan for {angle, rstar}, setting to 0")
-                        vr = 0
+                    vf_eff = midas_dict[vf] * (1 - kf + np.sign(vr) * kw * midas_dict['alpha'] * midas_dict['cd']**(1./3))
 
-                elif method == 'final':
-                    try:
-                        vr = (
-                        np.sign(old_vr) * kw * midas_dict['alpha'] * midas_dict['vf'] * midas_dict['cd']**(1./3) - kf * midas_dict['vf'] 
-                        + np.sqrt( 4./3 * void_area_avg(cond,'Dsm1')*0.001/midas_dict['cd'] * (1 - midas_dict['alpha'])*(1-cond.rho_g/cond.rho_f) * cond.gz ) )
-                    except ZeroDivisionError:
-                        vr = 0
-
-                if rstar == 1:
-                    vr = 0
+                    midas_dict['vr_eff'] = vr_eff
+                    midas_dict['vf_eff'] = vf_eff
 
                 if vr > 2*cond.jf:
                     vr = 2*cond.jf
                 elif vr < -2*cond.jf:
                     vr = -2*cond.jf
-        
-                midas_dict[vr_name] = vr
+                
                 midas_dict['vr_model'] = vr
-
 
         iterations += 1
 
@@ -649,8 +622,7 @@ def model_vr(cond, method='km1_simp', kw = 0.654, n=1, Lw = 5, kf = 0.113,
             print("Warning, max iterations exceeded in calculating vr_model")
             print(f"{old_vr}\t{area_avg(cond,'vr_model', recalc=True)}\t{(old_vr - area_avg(cond,'vr_model', recalc=True))/old_vr*100}")
             return
-        
-    
+
     return area_avg(cond,"vr_model")
 
 def calc_vgj_model(cond):

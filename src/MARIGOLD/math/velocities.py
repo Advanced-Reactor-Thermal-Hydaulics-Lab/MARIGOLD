@@ -139,6 +139,29 @@ def calc_vf_naive(cond):
 
     return area_avg(cond,'vf_naive')
 
+def calc_vf(cond, method = 'dix', newparam = 'vf_recalc'):
+    """Calculate :math:`v_{f}` based on Pitot-tube equation given by Riemann et al., modified by Dix (Equation 3.1 in 2025 thesis).
+    Function authored by David Kang.
+    """
+
+    cond.mirror()
+
+    for angle, r_dict in cond.data.items():
+        for rstar, midas_dict in r_dict.items():
+            try:
+                vf_recalc = midas_dict[newparam]
+            except KeyError:
+                try:
+                    dp = midas_dict['delta_p'] * 6894.757
+                except:
+                    raise NotImplementedError("Δp needed for calculation of vf_naive")
+                
+                vf_recalc = np.sqrt( 2*dp / ((1-midas_dict['alpha'])*cond.rho_f) )
+            
+            midas_dict.update({newparam: vf_recalc})
+
+    return area_avg(cond,newparam)
+
 def calc_vr(cond, method = None, quiet = False) -> None:
     """Calculate relative velocity
 
@@ -429,7 +452,7 @@ def calc_W(cond):
 
     return area_avg(cond,'W')
 
-def calc_diff(cond, param1, param2, suppress_zero = True):
+def calc_diff(cond, param1, param2, newparam = 'diff', suppress_zero = True):
     """Calculate difference between two parameters. Authored by David Kang 11SEP25 to simplify calc_vr() usage.
     Specifically, I'm not a fan of how vr refers to both vr calculated by measured vf and vr estimated by an approximated vf.
 
@@ -445,11 +468,11 @@ def calc_diff(cond, param1, param2, suppress_zero = True):
             else:
                 diff = midas_dict[param1] - midas_dict[param2]
 
-            midas_dict['diff'] = diff
+            midas_dict[newparam] = diff
 
-    return area_avg(cond,'diff')
+    return area_avg(cond,newparam)
 
-def calc_quot(cond, param1, param2, suppress_zero = True):
+def calc_quot(cond, param1, param2, newparam = 'quot', suppress_zero = True):
     """Calculate quotient between two parameters. Authored by David Kang 26SEP25 to flexibly implement back-calculation of vr from Vgj.
     
     """
@@ -464,6 +487,6 @@ def calc_quot(cond, param1, param2, suppress_zero = True):
             else:
                 quot = midas_dict[param1] / midas_dict[param2]
 
-            midas_dict['quot'] = quot
+            midas_dict[newparam] = quot
 
-    return area_avg(cond,'quot')
+    return area_avg(cond,newparam)

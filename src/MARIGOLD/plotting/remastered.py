@@ -411,6 +411,7 @@ def plot_vary(
     show: bool = True,
     close: bool = True,
     sort_vary_values: bool = True,
+    tol = 0.05
 ):
     """
     Group conditions by all tracked attributes except `variable`, and for each group
@@ -447,8 +448,19 @@ def plot_vary(
 
     fixed_attrs = [attr for attr in vary_attrs if attr != variable]
 
+    def _tol_value(val, tol):
+        try:
+            return round(float(val) / tol) * tol
+        except Exception:
+            return val
+
     def _key(cond):
-        return tuple(getattr(cond, attr) for attr in fixed_attrs)
+        return tuple(
+            _tol_value(getattr(cond, attr), tol)
+            if attr in {"theta", "jf", "jgref"}
+            else getattr(cond, attr)
+            for attr in fixed_attrs
+        )
 
     def _vary_value(cond):
         return getattr(cond, variable)
@@ -512,6 +524,161 @@ def plot_vary(
         results.append((fig, ax_out, plotted_any, conds_group))
 
     return results
+
+def plot_multi(
+    conds,
+    x_param: str,
+    y_params,
+    *,
+    cond_labels=None,
+    y_labels=None,
+    phis_to_plot=(90, 270),
+    styles=None,
+    ax=None,
+    show_markers=True,
+    show_lines=True,
+    x_label: str | None = None,
+    y_label: str | None = None,
+    set_xlim=None,
+    set_ylim=None,
+    percent_error: float = 0.0,
+    legend_phi: bool = False,
+    legend_multi: bool = True,
+    title: bool = True,
+    fig_size=(4, 4),
+    fs: int = 10,
+    show: bool = True,
+    close: bool = True,
+):
+    """
+    Plot multiple y-parameters against one shared x-parameter.
+
+    Delegates to plot_stack(), which delegates to plot_params().
+    """
+
+    if not isinstance(conds, Sequence) or isinstance(conds, (str, bytes)):
+        conds = [conds]
+
+    if isinstance(y_params, str):
+        y_params = [y_params]
+
+    if len(conds) == 0:
+        raise ValueError("conds must contain at least one condition")
+
+    if len(y_params) == 0:
+        raise ValueError("y_params must contain at least one parameter")
+
+    if cond_labels is None:
+        cond_labels = [str(cond) for cond in conds]
+
+    if len(cond_labels) != len(conds):
+        raise ValueError(
+            f"cond_labels must have length {len(conds)}; got {len(cond_labels)}"
+        )
+
+    if y_labels is None:
+        y_labels = list(y_params)
+
+    if len(y_labels) != len(y_params):
+        raise ValueError(
+            f"y_labels must have length {len(y_params)}; got {len(y_labels)}"
+        )
+
+    created_fig = ax is None
+    if ax is None:
+        fig, ax = plt.subplots(figsize=fig_size, dpi=300, layout="compressed")
+    else:
+        fig = ax.figure
+
+    plt.rcParams.update({"font.size": fs})
+    plt.rcParams["font.family"] = "Times New Roman"
+    plt.rcParams["mathtext.fontset"] = "cm"
+
+    if styles is None:
+        color_cyc = cycle(_DEFAULT_COLORS)
+        marker_cyc = cycle(_DEFAULT_MARKERS)
+        ls_cyc = cycle(_DEFAULT_LINESTYLES)
+
+        styles = [
+            {
+                "color": next(color_cyc),
+                "marker": next(marker_cyc),
+                "linestyle": next(ls_cyc),
+            }
+            for _ in y_params
+        ]
+    else:
+        if len(styles) != len(y_params):
+            raise ValueError(
+                f"styles must have length {len(y_params)}; got {len(styles)}"
+            )
+        styles = [dict(s) if s is not None else {} for s in styles]
+
+    plotted_any = False
+
+    for y_param, y_lab, style in zip(y_params, y_labels, styles):
+        if len(conds) == 1:
+            labels = [y_lab]
+        else:
+            labels = [f"{y_lab}: {cond_lab}" for cond_lab in cond_labels]
+
+        pair_styles = [style.copy() for _ in conds]
+
+        _, _, this_plotted = plot_stack(
+            conds=conds,
+            x_param=x_param,
+            y_param=y_param,
+            labels=labels,
+            phis_to_plot=phis_to_plot,
+            styles=pair_styles,
+            ax=ax,
+            show_markers=show_markers,
+            show_lines=show_lines,
+            x_label=x_label if x_label is not None else x_param,
+            y_label=y_label if y_label is not None else "",
+            set_xlim=set_xlim,
+            set_ylim=set_ylim,
+            percent_error=percent_error,
+            legend_phi=legend_phi,
+            legend_stack=legend_multi,
+            title=False,
+            fig_size=fig_size,
+            fs=fs,
+            show=False,
+            close=False,
+        )
+
+        plotted_any = plotted_any or this_plotted
+
+    ax.set_xlabel(x_label if x_label is not None else x_param)
+
+    if y_label is not None:
+        ax.set_ylabel(y_label)
+    else:
+        ax.set_ylabel("")
+
+    if title:
+        if len(conds) == 1:
+            cond = conds[0]
+            ax.set_title(
+                rf"$\theta = {cond.theta}^\circ,\; j_f = {cond.jf}\,[m/s],\; "
+                rf"j_g = {cond.jgref}\,[m/s]$"
+                + f", {cond.port}"
+            )
+        else:
+            ax.set_title(rf"$x = {x_param}$, multiple $y$ parameters")
+
+    if legend_multi and plotted_any:
+        ax.legend(loc="best", edgecolor="white")
+
+    if created_fig:
+        if show:
+            plt.show()
+        elif close:
+            plt.close(fig)
+
+    return fig, ax, plotted_any
+
 
 def plot_contour2(
     cond,
@@ -775,6 +942,7 @@ def plot_contour_grid(
     colorbar_label=None,
     sort_key=None,
     on_duplicate="last",
+    suppress_title=False,
 ):
     import matplotlib.pyplot as plt
     import numpy as np
@@ -969,7 +1137,8 @@ def plot_contour_grid(
         if conds:
             cond0 = conds[0]
             parts = [_format_attr(cond0, attr) for attr in fixed_attrs]
-            fig.suptitle(", ".join(parts), y=0.995)
+            if suppress_title == False:
+                fig.suptitle(", ".join(parts), y=0.995)
 
         fig.tight_layout(rect=[0, 0, 1, 0.97])
 
