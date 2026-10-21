@@ -11,6 +11,7 @@ import subprocess
 import warnings
 import xlrd
 
+from collections.abc import Mapping
 from collections.abc import Sequence
 from copy import copy
 from copy import deepcopy
@@ -22,6 +23,7 @@ from matplotlib.lines import Line2D
 from scipy import integrate
 from scipy import interpolate
 from scipy.optimize import minimize
+from scipy.stats import linregress
 from shutil import copy2
 from subprocess import run
 

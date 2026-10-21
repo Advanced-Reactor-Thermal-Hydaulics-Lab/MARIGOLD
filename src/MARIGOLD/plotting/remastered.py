@@ -1,4 +1,5 @@
 from ..config import *
+from ..math.operations import *
 
 _DEFAULT_COLORS = [
     "#E84393",
@@ -7,7 +8,7 @@ _DEFAULT_COLORS = [
     "#8E44AD",
     "#F39C12",
 ]
-_DEFAULT_MARKERS = ["o"]
+_DEFAULT_MARKERS = ["o", "s", "^", "D", "v"]
 _DEFAULT_LINESTYLES = ["--", "-"]
 
 def _safe_get(midas_dict, key, default=np.nan):
@@ -1350,3 +1351,419 @@ def plot_contour_grid(
             plt.close(fig)
 
     return figures
+
+
+def dfm_analysis(
+    database,
+    mode='vgj',
+    method='legacy',
+    *,
+    styles=None,
+    labels=None,
+    ax=None,
+    regression='global',
+    show_fit=True,
+    show_reference=True,
+    show_equation=True,
+    show_legend=True,
+    marker_size=50,
+    marker_edgecolor='black',
+    x_label=None,
+    y_label=None,
+    title=None,
+    set_xlim=None,
+    set_ylim=None,
+    fig_size=(4, 4),
+    fs=12,
+    show=True,
+    close=True,
+):
+    """
+    Perform drift-flux or alpha-beta analysis.
+
+    Parameters
+    ----------
+    database : Condition, sequence, or dict
+        A single condition, a sequence of conditions, or a
+        dictionary mapping dataset labels to conditions.
+
+    mode : str
+        'vgj' or 'alphabeta'.
+
+    method : str
+        Area integration method.
+
+    styles : dict, optional
+        Per-database style overrides.
+
+    labels : dict, optional
+        Per-database legend label overrides.
+
+    regression : str
+        'global'   : Fit all conditions together.
+        'database' : Fit each database separately.
+        'none'     : Do not perform regression.
+
+    Returns
+    -------
+    fig : matplotlib.figure.Figure
+    ax : matplotlib.axes.Axes
+    results : dict
+        Regression coefficients and statistics.
+    """
+
+    if mode not in ('vgj', 'alphabeta'):
+        raise ValueError("mode must be 'vgj' or 'alphabeta'")
+
+    if regression not in ('global', 'database', 'none'):
+        raise ValueError(
+            "regression must be 'global', 'database', or 'none'"
+        )
+
+    styles = {} if styles is None else styles
+    labels = {} if labels is None else labels
+
+    # Normalize input into labeled groups
+    if isinstance(database, Mapping):
+        groups = {}
+
+        for name, conds in database.items():
+            if hasattr(conds, 'data'):
+                groups[name] = [conds]
+            else:
+                groups[name] = list(conds)
+
+    else:
+        if hasattr(database, 'data'):
+            database = [database]
+        else:
+            database = list(database)
+
+        groups = {}
+
+        for cond in database:
+            name = getattr(cond, 'database', 'Unknown')
+            groups.setdefault(name, []).append(cond)
+
+    if not groups or not any(groups.values()):
+        raise ValueError("No conditions provided")
+
+    created_fig = ax is None
+
+    if ax is None:
+        fig, ax = plt.subplots(
+            figsize=fig_size,
+            dpi=300,
+            layout='compressed'
+        )
+    else:
+        fig = ax.figure
+
+    plt.rcParams.update({'font.size': fs})
+    plt.rcParams['font.family'] = 'Times New Roman'
+    plt.rcParams['mathtext.fontset'] = 'cm'
+
+    ax.tick_params(direction='in', which='both')
+
+    group_styles = {}
+
+    for i, name in enumerate(groups):
+
+        style = {
+            'marker': _DEFAULT_MARKERS[i % len(_DEFAULT_MARKERS)],
+            'color': _DEFAULT_COLORS[i % len(_DEFAULT_COLORS)],
+            'label': str(name),
+        }
+
+        style.update(styles.get(name, {}))
+
+        if name in labels:
+            style['label'] = labels[name]
+
+        group_styles[name] = style
+
+    data = {}
+
+    for name, conds in groups.items():
+
+        xs = []
+        ys = []
+
+        for cond in conds:
+
+            if mode == 'vgj':
+
+                x = cond.j
+                y = void_area_avg(
+                    cond,
+                    'ug1',
+                    method=method
+                )
+
+            elif mode == 'alphabeta':
+
+                x = cond.jgloc / cond.j
+                y = area_avg(
+                    cond,
+                    'alpha',
+                    method=method
+                )
+
+            # Require real, finite scalar values
+            x = np.asarray(x).item()
+            y = np.asarray(y).item()
+
+            if not np.isreal(x) or not np.isreal(y):
+                raise ValueError(
+                    f"Complex value encountered for {cond}"
+                )
+
+            x = float(np.real(x))
+            y = float(np.real(y))
+
+            if not np.isfinite(x) or not np.isfinite(y):
+                continue
+
+            xs.append(x)
+            ys.append(y)
+
+        data[name] = (
+            np.asarray(xs, dtype=float),
+            np.asarray(ys, dtype=float)
+        )
+
+    plotted_any = False
+
+    for name, (xs, ys) in data.items():
+
+        if len(xs) == 0:
+            continue
+
+        style = group_styles[name]
+
+        ax.scatter(
+            xs,
+            ys,
+            s=marker_size,
+            marker=style['marker'],
+            facecolor=style['color'],
+            edgecolor=marker_edgecolor,
+            linewidth=0.8,
+            label=style['label'],
+            zorder=3,
+        )
+
+        plotted_any = True
+
+    def fit_data(xs, ys):
+
+        if len(xs) < 2:
+            return None
+
+        if mode == 'vgj':
+
+            if np.ptp(xs) == 0:
+                return None
+
+            fit = linregress(xs, ys)
+
+            m = fit.slope
+            b = fit.intercept
+            r2 = fit.rvalue**2
+
+        elif mode == 'alphabeta':
+
+            denominator = np.sum(xs**2)
+
+            if denominator == 0:
+                return None
+
+            m = np.sum(xs * ys) / denominator
+            b = 0.0
+
+            y_pred = m * xs
+
+            ss_res = np.sum((ys - y_pred)**2)
+            ss_tot = np.sum((ys - np.mean(ys))**2)
+
+            r2 = (
+                1 - ss_res / ss_tot
+                if ss_tot > 0
+                else np.nan
+            )
+
+        return {
+            'm': m,
+            'b': b,
+            'r2': r2,
+            'n': len(xs),
+        }
+
+    results = {}
+
+    if regression == 'global':
+
+        xs_all = np.concatenate([v[0] for v in data.values()])
+        ys_all = np.concatenate([v[1] for v in data.values()])
+
+        results['global'] = fit_data(xs_all, ys_all)
+
+    elif regression == 'database':
+
+        for name, (xs, ys) in data.items():
+            results[name] = fit_data(xs, ys)
+
+    if set_xlim is not None:
+        xmin, xmax = set_xlim
+
+    else:
+        xs_all = np.concatenate([v[0] for v in data.values()])
+
+        if xs_all.size:
+            xmin = min(0, np.min(xs_all))
+            xmax = np.max(xs_all)
+        else:
+            xmin, xmax = 0, 1
+
+        if xmin == xmax:
+            xmax = xmin + 1
+
+    x_fit = np.linspace(xmin, xmax, 200)
+
+    if show_fit:
+
+        for name, result in results.items():
+
+            if result is None:
+                continue
+
+            m = result['m']
+            b = result['b']
+
+            if name == 'global':
+                color = 'black'
+                label = 'Global fit'
+            else:
+                color = group_styles[name]['color']
+                label = f"{group_styles[name]['label']} fit"
+
+            ax.plot(
+                x_fit,
+                m * x_fit + b,
+                color=color,
+                linestyle='-',
+                linewidth=1.5,
+                label=label,
+                zorder=2,
+            )
+
+    if mode == 'alphabeta' and show_reference:
+
+        ax.plot(
+            x_fit,
+            x_fit,
+            color='black',
+            linestyle='--',
+            linewidth=1,
+            alpha=0.3,
+            label=r'$\langle\alpha\rangle=\langle\beta\rangle$',
+        )
+
+    if show_equation and results:
+
+        equations = []
+
+        for name, result in results.items():
+
+            if result is None:
+                continue
+
+            m = result['m']
+            b = result['b']
+            r2 = result['r2']
+
+            if mode == 'vgj':
+
+                equation = (
+                    rf"$C_0={m:.3f},\ "
+                    rf"V_{{gj}}={b:.3f},\ "
+                    rf"R^2={r2:.3f}$"
+                )
+
+            else:
+
+                equation = (
+                    rf"$m={m:.3f},\ "
+                    rf"R^2={r2:.3f}$"
+                )
+
+            if regression == 'database':
+                equation = f"{group_styles[name]['label']}: " + equation
+
+            equations.append(equation)
+
+        ax.text(
+            0.98,
+            0.02,
+            '\n'.join(equations),
+            transform=ax.transAxes,
+            ha='right',
+            va='bottom',
+            fontsize=fs,
+        )
+
+    if mode == 'vgj':
+
+        default_x = r'$\langle j\rangle$ [m/s]'
+        default_y = r'$\langle\!\langle v_g\rangle\!\rangle$ [m/s]'
+        default_title = 'Drift-Flux Analysis'
+
+    else:
+
+        default_x = r'$\langle\beta\rangle$ [-]'
+        default_y = r'$\langle\alpha\rangle$ [-]'
+        default_title = 'Alpha-Beta Analysis'
+
+    ax.set_xlabel(x_label if x_label is not None else default_x)
+    ax.set_ylabel(y_label if y_label is not None else default_y)
+
+    all_conds = [
+        cond
+        for conds in groups.values()
+        for cond in conds
+    ]
+
+    thetas = {cond.theta for cond in all_conds}
+
+    if title is None:
+
+        title = default_title
+
+        if len(thetas) == 1:
+            theta = next(iter(thetas))
+            title = rf'$\theta={theta:g}^\circ$ ' + title
+
+    if title:
+        ax.set_title(title)
+
+    if set_xlim is not None:
+        ax.set_xlim(*set_xlim)
+
+    if set_ylim is not None:
+        ax.set_ylim(*set_ylim)
+
+    if show_legend and plotted_any:
+        ax.legend(
+            loc='best',
+            edgecolor='white'
+        )
+
+    if created_fig:
+
+        if show:
+            plt.show()
+
+        elif close:
+            plt.close(fig)
+
+    return fig, ax, results
