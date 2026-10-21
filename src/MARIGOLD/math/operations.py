@@ -9,8 +9,8 @@ def integration(rs, vars, method):
                 la += 0.5 * (vars[i] + vars[i+1]) * dr
 
         elif method == 'legacy':
-            vars.reverse()      # I noticed too late that the list goes from r/R = 0 to 1, not the other way around
-            rs.reverse()        # Already wrote the actual Simpson's rule part, easier to just do this
+            vars = vars[::-1]
+            rs = rs[::-1]
 
             delta = abs(np.diff(rs))                # r/R steps
 
@@ -19,7 +19,7 @@ def integration(rs, vars, method):
                 
                 if idx < len(delta):
                     if idx > 0:
-                        if delta[idx - 1] == delta[idx]:
+                        if np.isclose(delta[idx - 1], delta[idx]):
                             S = delta[idx] * coeff * var
                         else:
                             coeff = coeff / 2
@@ -30,6 +30,8 @@ def integration(rs, vars, method):
                     S = delta[idx - 1] * coeff * var
                 
                 la = la + S
+            else:
+                raise ValueError(f"Unknown integration method: {method}")
 
         return la
 
@@ -128,17 +130,27 @@ def area_avg(cond, param: str, even_opt='first', recalc=True, method='simpson') 
                 raise ValueError( f"rs to integrate over {rs} must be the same length as params {vars}, occured at {angle}" )
                 
             try:
-                las.append( integrate.simpson(y=vars, x=rs) )                       # Integrate wrt r
+                la = integrate.simpson(y=vars, x=rs)
             except Exception as e:
-                if debug:
-                    print(e)
-                    print(rs, vars)
+                raise ValueError(
+                    f"Radial integration failed at {angle}° "
+                    f"for parameter '{param}'."
+                ) from e
+
+            las.append(la)
+
             if debug: print("calculated integral:", integrate.simpson(y=vars, x=rs), file=debugFID)
         if debug: print("Integrated wrt r", las, file=debugFID)
 
         las = [param for _, param in sorted(zip(angles, las))]
         angles = sorted(angles)
 
+        if not np.isclose(angles[0], 0):
+            raise ValueError("Azimuthal integration must begin at 0°.")
+
+        if not np.isclose(angles[-1], 2 * np.pi):
+            raise ValueError("Azimuthal integration must end at 360°.")
+        
         I = integrate.simpson(y=las, x=angles) / np.pi                              # Integrate wrt theta, divide by normalized area
 
     elif method == 'talley':

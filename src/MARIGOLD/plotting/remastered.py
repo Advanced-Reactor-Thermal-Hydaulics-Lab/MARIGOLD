@@ -680,6 +680,185 @@ def plot_multi(
     return fig, ax, plotted_any
 
 
+def plot_twin(
+    cond,
+    x_param: str,
+    y_params,
+    *,
+    y_labels=None,
+    phis_to_plot=(90, 270),
+    styles=None,
+    ax=None,
+    show_markers=True,
+    show_lines=True,
+    x_label: str | None = None,
+    set_xlim=None,
+    set_ylim=None,
+    percent_error: float = 0.0,
+    legend_phi: bool = False,
+    legend_twin: bool = True,
+    title: bool = True,
+    fig_size=(4, 4),
+    fs: int = 10,
+    show: bool = True,
+    close: bool = True,
+):
+    """
+    Plot two y-parameters against one shared x-parameter,
+    using separate left and right y-axes.
+
+    Delegates to plot_params().
+
+    Returns
+    -------
+    fig : matplotlib.figure.Figure
+    axes : tuple
+        (ax_left, ax_right)
+    plotted_any : bool
+    """
+
+    if len(y_params) != 2:
+        raise ValueError("y_params must contain exactly two parameters")
+
+    if y_labels is None:
+        y_labels = list(y_params)
+
+    if len(y_labels) != 2:
+        raise ValueError("y_labels must contain exactly two labels")
+
+    created_fig = ax is None
+
+    if ax is None:
+        fig, ax = plt.subplots(
+            figsize=fig_size,
+            dpi=300,
+            layout="compressed"
+        )
+    else:
+        fig = ax.figure
+
+    ax_left = ax
+    ax_right = ax.twinx()
+
+    plt.rcParams.update({"font.size": fs})
+    plt.rcParams["font.family"] = "Times New Roman"
+    plt.rcParams["mathtext.fontset"] = "cm"
+
+    if styles is None:
+        styles = [
+            {
+                "color": _DEFAULT_COLORS[0],
+                "marker": _DEFAULT_MARKERS[0],
+                "linestyle": _DEFAULT_LINESTYLES[0],
+            },
+            {
+                "color": _DEFAULT_COLORS[1],
+                "marker": _DEFAULT_MARKERS[0],
+                "linestyle": _DEFAULT_LINESTYLES[1],
+            },
+        ]
+
+    if len(styles) != 2:
+        raise ValueError("styles must contain exactly two dictionaries")
+
+    plotted_any = False
+
+    for y_param, y_label, axis, style in zip(
+        y_params,
+        y_labels,
+        (ax_left, ax_right),
+        styles
+    ):
+
+        _, _, this_plotted = plot_params(
+            cond,
+            x_param=x_param,
+            y_param=y_param,
+            phis_to_plot=phis_to_plot,
+            ax=axis,
+            show_markers=show_markers,
+            show_lines=show_lines,
+            x_label=x_label,
+            y_label=y_label,
+            set_xlim=set_xlim,
+            percent_error=percent_error,
+            legend_phi=False,
+            title=False,
+            fig_size=fig_size,
+            fs=fs,
+            show=False,
+            close=False,
+            style=style,
+        )
+
+        plotted_any = plotted_any or this_plotted
+
+    # Axis labels
+    ax_left.set_xlabel(x_label if x_label is not None else x_param)
+
+    ax_left.set_ylabel(y_labels[0])
+    ax_right.set_ylabel(y_labels[1])
+
+    # Match axis colors to plotted parameters
+    ax_left.yaxis.label.set_color(styles[0].get("color", _DEFAULT_COLORS[0]))
+    ax_right.yaxis.label.set_color(styles[1].get("color", _DEFAULT_COLORS[1]))
+
+    ax_left.tick_params(
+        axis="y",
+        colors=styles[0].get("color", _DEFAULT_COLORS[0])
+    )
+
+    ax_right.tick_params(
+        axis="y",
+        colors=styles[1].get("color", _DEFAULT_COLORS[1])
+    )
+
+    ax_left.tick_params(axis="x", direction="in")
+    ax_right.tick_params(axis="y", direction="in")
+
+    if set_xlim is not None:
+        ax_left.set_xlim(*set_xlim)
+
+    # Title
+    if title:
+        ax_left.set_title(
+            rf"$\theta = {cond.theta}^\circ,\; "
+            rf"j_f = {cond.jf}\,[m/s],\; "
+            rf"j_g = {cond.jgref}\,[m/s]$"
+            + f", {cond.port}"
+        )
+
+    # Legend
+    if legend_twin and plotted_any:
+
+        from matplotlib.lines import Line2D
+
+        handles = [
+            Line2D(
+                [0], [0],
+                color=styles[i].get("color", _DEFAULT_COLORS[i]),
+                marker=styles[i].get("marker", "o"),
+                linestyle=styles[i].get("linestyle", "-"),
+                label=y_labels[i],
+            )
+            for i in range(2)
+        ]
+
+        ax_left.legend(
+            handles=handles,
+            loc="best",
+            edgecolor="white"
+        )
+
+    if created_fig:
+        if show:
+            plt.show()
+        elif close:
+            plt.close(fig)
+
+    return fig, (ax_left, ax_right), plotted_any
+
+
 def plot_contour2(
     cond,
     param: str,

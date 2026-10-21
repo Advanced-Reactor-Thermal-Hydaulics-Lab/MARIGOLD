@@ -469,11 +469,11 @@ class Condition:
 
         # Now comes the actual mirroring step. Need data for every angle, incremements of 22.5° (self._angles)
         if sym90:
-            method == 'sym90'
+            method = 'sym90'
         elif axisym:
-            method == 'axisym'
+            method = 'axisym'
 
-        if method == 'axisym': 
+        if method == 'axisym':
             # axisymmetric
             # Initial guess, prioritize 90 (DHK)
             if observer in angles_with_data:
