@@ -1,39 +1,39 @@
 from ..config import *
 
 def integration(rs, vars, method):
-        la = 0.0
-        
-        if method == 'trapezoid':
-            for i in range(len(rs) - 1):
-                dr = rs[i+1] - rs[i]
-                la += 0.5 * (vars[i] + vars[i+1]) * dr
+    la = 0.0
+    
+    if method == 'trapezoid':
+        for i in range(len(rs) - 1):
+            dr = rs[i+1] - rs[i]
+            la += 0.5 * (vars[i] + vars[i+1]) * dr
 
-        elif method == 'legacy':
-            vars = vars[::-1]
-            rs = rs[::-1]
+    elif method == 'legacy':
+        vars = vars[::-1]
+        rs = rs[::-1]
 
-            delta = abs(np.diff(rs))                # r/R steps
+        delta = abs(np.diff(rs))                # r/R steps
 
-            for idx, var in enumerate(vars):
-                coeff = 2 * (2**(idx % 2)) / 3      # Simpson's Rule coefficient
-                
-                if idx < len(delta):
-                    if idx > 0:
-                        if np.isclose(delta[idx - 1], delta[idx]):
-                            S = delta[idx] * coeff * var
-                        else:
-                            coeff = coeff / 2
-                            S = (delta[idx - 1] * coeff * var) + (delta[idx] * coeff * var)
-                    else:
+        for idx, var in enumerate(vars):
+            coeff = 2 * (2**(idx % 2)) / 3      # Simpson's Rule coefficient
+            
+            if idx < len(delta):
+                if idx > 0:
+                    if np.isclose(delta[idx - 1], delta[idx]):
                         S = delta[idx] * coeff * var
+                    else:
+                        coeff = coeff / 2
+                        S = (delta[idx - 1] * coeff * var) + (delta[idx] * coeff * var)
                 else:
-                    S = delta[idx - 1] * coeff * var
-                
-                la = la + S
+                    S = delta[idx] * coeff * var
             else:
-                raise ValueError(f"Unknown integration method: {method}")
+                S = delta[idx - 1] * coeff * var
+            
+            la = la + S
+    else:
+        raise ValueError(f"Unknown integration method: {method}")
 
-        return la
+    return la
 
 def avg(cond, param: str, include_zero=True) -> float:
     """Calculates a basic average of a parameter

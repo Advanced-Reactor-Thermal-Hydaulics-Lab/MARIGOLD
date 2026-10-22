@@ -1353,6 +1353,187 @@ def plot_contour_grid(
     return figures
 
 
+def plot_parity(
+    conditions, x, y,
+    *,
+    variable='database',
+    p_err=10,
+    scale='linear',
+    ax=None,
+    x_label='Reference',
+    y_label='Calculated',
+    title=None,
+    marker_size=50,
+    show_legend=True,
+    set_xlim=None,
+    set_ylim=None,
+    fig_size=(4, 4),
+    fs=12,
+    show=True,
+    close=True,
+):
+    """
+    Plot calculated versus reference values, grouped by a Condition attribute.
+
+    Parameters
+    ----------
+    conditions : list[Condition]
+        Conditions corresponding to the reference and calculated values.
+    x, y : array-like
+        Reference and calculated values, respectively.
+    variable : str or None, default 'database'
+        Condition attribute used to group and style points.
+        None plots all points with the same style.
+    p_err : float, default 10
+        Percentage error bounds relative to reference values.
+    scale : {'linear', 'log'}, default 'linear'
+        Axis scaling. 'log' applies to both axes.
+    ax : matplotlib.axes.Axes, optional
+        Existing axes.
+    """
+
+    conditions = list(conditions)
+    x = np.asarray(x, dtype=float).ravel()
+    y = np.asarray(y, dtype=float).ravel()
+
+    if len(conditions) != len(x) or len(x) != len(y):
+        raise ValueError("conditions, x, and y must have matching lengths.")
+
+    vary_attrs = ('theta', 'jf', 'jgref', 'port', 'database')
+
+    if variable is not None and variable not in vary_attrs:
+        raise ValueError(f"variable must be one of {vary_attrs} or None; got {variable!r}")
+
+    if not np.isfinite(p_err) or p_err < 0:
+        raise ValueError("p_err must be finite and nonnegative.")
+
+    if scale not in ('linear', 'log'):
+        raise ValueError("scale must be 'linear' or 'log'.")
+
+    if scale == 'log' and p_err >= 100:
+        raise ValueError("p_err must be less than 100 for logarithmic scaling.")
+
+    def _format_attr(cond, attr):
+        if attr == 'theta':
+            return rf"$\theta = {cond.theta}^\circ$"
+        if attr == 'jf':
+            return rf"$j_f = {cond.jf:.2f}\,[m/s]$"
+        if attr == 'jgref':
+            return rf"$j_{{gref}} = {cond.jgref:.2f}\,[m/s]$"
+        if attr == 'port':
+            return str(cond.port)
+        if attr == 'database':
+            return f"Author: {cond.database}"
+        return f"{attr}={getattr(cond, attr)}"
+
+    valid = np.isfinite(x) & np.isfinite(y)
+
+    if scale == 'log':
+        valid &= (x > 0) & (y > 0)
+
+    x = x[valid]
+    y = y[valid]
+    conditions = [cond for cond, keep in zip(conditions, valid) if keep]
+
+    if not len(x):
+        raise ValueError("No valid data points to plot.")
+
+    if variable is None:
+        groups = {'All data': np.arange(len(x))}
+    else:
+        groups = {}
+
+        for i, cond in enumerate(conditions):
+            key = getattr(cond, variable)
+            groups.setdefault(key, []).append(i)
+
+        groups = {
+            key: np.asarray(indices, dtype=int)
+            for key, indices in groups.items()
+        }
+
+    if ax is None:
+        fig, ax = plt.subplots(figsize=fig_size, dpi=300)
+    else:
+        fig = ax.figure
+
+    error = p_err / 100
+
+    values = np.concatenate((x, y, x * (1 - error), x * (1 + error)))
+
+    vmin = np.min(values)
+    vmax = np.max(values)
+
+    if scale == 'log':
+        lower = vmin / 1.2
+        upper = vmax * 1.2
+        line_x = np.geomspace(lower, upper, 200)
+    else:
+        span = vmax - vmin
+        margin = 0.05 * span if span > 0 else max(abs(vmax) * 0.05, 0.05)
+
+        lower = min(0, vmin - margin)
+        upper = vmax + margin
+        line_x = np.linspace(lower, upper, 200)
+
+    ax.plot(line_x, line_x, color='black', linestyle='-', linewidth=1, label='1:1')
+
+    if p_err > 0:
+        ax.plot(
+            line_x, line_x * (1 + error),
+            color='black', linestyle=':', linewidth=1,
+            label=fr'$\pm${p_err:g}%'
+        )
+        ax.plot(
+            line_x, line_x * (1 - error),
+            color='black', linestyle=':', linewidth=1
+        )
+
+    for i, (key, indices) in enumerate(groups.items()):
+
+        color = _DEFAULT_COLORS[i % len(_DEFAULT_COLORS)]
+        marker = _DEFAULT_MARKERS[i % len(_DEFAULT_MARKERS)]
+
+        label = (
+            'All data' if variable is None
+            else _format_attr(conditions[indices[0]], variable)
+        )
+
+        ax.scatter(
+            x[indices], y[indices],
+            s=marker_size,
+            marker=marker,
+            facecolor=color,
+            edgecolor='black',
+            linewidth=0.7,
+            label=label,
+            zorder=3
+        )
+
+    ax.set_xscale(scale)
+    ax.set_yscale(scale)
+    ax.set_xlim(set_xlim if set_xlim is not None else (lower, upper))
+    ax.set_ylim(set_ylim if set_ylim is not None else (lower, upper))
+    ax.set_xlabel(x_label, fontsize=fs)
+    ax.set_ylabel(y_label, fontsize=fs)
+
+    if title is not None:
+        ax.set_title(title, fontsize=fs)
+
+    ax.tick_params(axis='both', labelsize=fs)
+
+    if show_legend:
+        ax.legend(fontsize=fs - 2)
+
+    if show:
+        plt.show()
+
+    if close:
+        plt.close(fig)
+
+    return fig, ax
+
+
 def dfm_analysis(
     database,
     mode='vgj',
