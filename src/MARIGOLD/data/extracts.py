@@ -563,7 +563,7 @@ def parse_fname(file: str):
     return theta, jf, jgref, port, Rc, tag
 
 def extractLocalDataFromDir(path:str, dump_file = 'database.dat', in_dir = [], require_terms = ['jf'], 
-                            skip_terms = ['CFD', 'Copy'], sheet_type = 'quan_template', append_to_json = None,
+                            skip_terms = ['CFD', 'Copy'], sheet_type = 'adix_template4', append_to_json = None,
                             pitot_sheet = False, print_sheets = False,
                             **kwargs) -> None:
     
