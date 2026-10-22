@@ -494,58 +494,81 @@ class Condition:
                 self.data[angle].update( data )
 
         elif method.lower() == 'avg_axisym':
-            # Find a reference angle with a complement, prioritizing the most data
-            ref_angle = angles_with_data[0]
+            def is_populated(midas_dict):
+                if not midas_dict:
+                    return False
+
+                for param in ('alpha', 'ai', 'ug1'):
+                    val = midas_dict.get(param, 0)
+
+                    if val is not None and np.isfinite(val) and val != 0:
+                        return True
+
+                return False
+
+            # Select the complementary pair with the most populated points
+            # Prioritize the observer angle in the event of a tie
+            ref_angle = None
+            max_points = -1
 
             for angle in angles_with_data:
-                if (angle + 180 in angles_with_data) and len(self.data[ref_angle].keys()) < len(self.data[angle].keys()):
+                if angle + 180 not in angles_with_data:
+                    continue
+
+                n_points = sum(
+                    is_populated(point)
+                    for point in self.data[angle].values()
+                )
+
+                if n_points > max_points or (
+                    n_points == max_points and angle == observer
+                ):
                     ref_angle = angle
+                    max_points = n_points
+
+            if ref_angle is None:
+                raise ValueError("No complementary angle pair found for avg_axisym.")
 
             temp_data = deepcopy(self.data[ref_angle])
             comp_data = deepcopy(self.data[ref_angle + 180])
 
-            # Reconstruct the actual measurement locations after transferring negative radial positions to their complementary angles
-            measured_mesh = set()
-
-            for angle, rstar in self.original_mesh:
-                if rstar < 0:
-                    measured_mesh.add(((angle + 180) % 360, -rstar))
-                else:
-                    measured_mesh.add((angle % 360, rstar))
-
             avg_data = {}
 
-            # Include radial positions from both angles
             all_rs = set(temp_data.keys()) | set(comp_data.keys())
 
             for rstar in all_rs:
-                ref_measured = (ref_angle % 360, rstar) in measured_mesh
-                comp_measured = ((ref_angle + 180) % 360, rstar) in measured_mesh
 
-                if ref_measured and comp_measured:
+                ref_point = temp_data.get(rstar)
+                comp_point = comp_data.get(rstar)
+
+                ref_valid = is_populated(ref_point)
+                comp_valid = is_populated(comp_point)
+
+                if ref_valid and comp_valid:
+
                     avg_data[rstar] = {}
 
-                    for param in set(temp_data[rstar]) | set(comp_data[rstar]):
-                        if param in temp_data[rstar] and param in comp_data[rstar]:
+                    for param in set(ref_point) | set(comp_point):
+
+                        if param in ref_point and param in comp_point:
                             avg_data[rstar][param] = (
-                                temp_data[rstar][param] + comp_data[rstar][param]
+                                ref_point[param] + comp_point[param]
                             ) / 2
-                        elif param in temp_data[rstar]:
-                            avg_data[rstar][param] = temp_data[rstar][param]
+
+                        elif param in ref_point:
+                            avg_data[rstar][param] = ref_point[param]
+
                         else:
-                            avg_data[rstar][param] = comp_data[rstar][param]
+                            avg_data[rstar][param] = comp_point[param]
 
-                elif ref_measured:
-                    avg_data[rstar] = deepcopy(temp_data[rstar])
+                elif ref_valid:
+                    avg_data[rstar] = deepcopy(ref_point)
 
-                elif comp_measured:
-                    avg_data[rstar] = deepcopy(comp_data[rstar])
+                elif comp_valid:
+                    avg_data[rstar] = deepcopy(comp_point)
 
                 else:
-                    # Preserve existing artificial boundary/center points
-                    avg_data[rstar] = deepcopy(
-                        temp_data[rstar] if rstar in temp_data else comp_data[rstar]
-                    )
+                    avg_data[rstar] = deepcopy(zero_data)
 
             for angle in self._angles:
                 self.data[angle] = deepcopy(avg_data)
