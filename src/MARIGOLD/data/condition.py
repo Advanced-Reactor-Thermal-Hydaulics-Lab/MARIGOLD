@@ -494,30 +494,61 @@ class Condition:
                 self.data[angle].update( data )
 
         elif method.lower() == 'avg_axisym':
-            # print('avg_axisym')
-            # Find a reference angle with a complement, replace all the data with the average of the two
-            ref_angle = angles_with_data[0] # initial guess
+            # Find a reference angle with a complement, prioritizing the most data
+            ref_angle = angles_with_data[0]
+
             for angle in angles_with_data:
-                if (angle+180 in angles_with_data) and len(self.data[ref_angle].keys()) < len(self.data[angle].keys()):
+                if (angle + 180 in angles_with_data) and len(self.data[ref_angle].keys()) < len(self.data[angle].keys()):
                     ref_angle = angle
 
             temp_data = deepcopy(self.data[ref_angle])
-            comp_data = deepcopy(self.data[ref_angle+180])
-            avg_data = deepcopy(self.data[ref_angle])
-            # print('comp data', comp_data)
-            for rstar, midas_dict in temp_data.items():
-                avg_data.update({rstar: {} })
-                for param, val in midas_dict.items():
-                    try:
-                        avg_data[rstar][param] = (val + comp_data[rstar][param]) / 2
-                        # print('used avg data')
-                    except:
-                        avg_data[rstar][param] = val
+            comp_data = deepcopy(self.data[ref_angle + 180])
+
+            # Reconstruct the actual measurement locations after transferring negative radial positions to their complementary angles
+            measured_mesh = set()
+
+            for angle, rstar in self.original_mesh:
+                if rstar < 0:
+                    measured_mesh.add(((angle + 180) % 360, -rstar))
+                else:
+                    measured_mesh.add((angle % 360, rstar))
+
+            avg_data = {}
+
+            # Include radial positions from both angles
+            all_rs = set(temp_data.keys()) | set(comp_data.keys())
+
+            for rstar in all_rs:
+                ref_measured = (ref_angle % 360, rstar) in measured_mesh
+                comp_measured = ((ref_angle + 180) % 360, rstar) in measured_mesh
+
+                if ref_measured and comp_measured:
+                    avg_data[rstar] = {}
+
+                    for param in set(temp_data[rstar]) | set(comp_data[rstar]):
+                        if param in temp_data[rstar] and param in comp_data[rstar]:
+                            avg_data[rstar][param] = (
+                                temp_data[rstar][param] + comp_data[rstar][param]
+                            ) / 2
+                        elif param in temp_data[rstar]:
+                            avg_data[rstar][param] = temp_data[rstar][param]
+                        else:
+                            avg_data[rstar][param] = comp_data[rstar][param]
+
+                elif ref_measured:
+                    avg_data[rstar] = deepcopy(temp_data[rstar])
+
+                elif comp_measured:
+                    avg_data[rstar] = deepcopy(comp_data[rstar])
+
+                else:
+                    # Preserve existing artificial boundary/center points
+                    avg_data[rstar] = deepcopy(
+                        temp_data[rstar] if rstar in temp_data else comp_data[rstar]
+                    )
 
             for angle in self._angles:
-                data = deepcopy(avg_data)
-                self.data.update({angle: {}})
-                self.data[angle].update( data )
+                self.data[angle] = deepcopy(avg_data)
 
         elif method.lower() == 'sym90': 
             # symmetric across the 90 degree line
