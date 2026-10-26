@@ -202,6 +202,7 @@ def plot_stack(
     y_label: str | None = None,
     set_xlim=None,
     set_ylim=None,
+    ylim_pad=0.2,
     percent_error: float = 0.0,
     legend_phi: bool = False,
     legend_stack: bool = True,
@@ -298,8 +299,8 @@ def plot_stack(
             show_lines=sl,
             x_label=x_label,
             y_label=y_label,
-            set_xlim=set_xlim,
-            set_ylim=set_ylim,
+            set_xlim=None,
+            set_ylim=None,
             percent_error=percent_error,
             legend_phi=legend_phi,
             title=False,
@@ -327,8 +328,15 @@ def plot_stack(
 
     if set_xlim is not None:
         ax.set_xlim(*set_xlim)
+
     if set_ylim is not None:
-        ax.set_ylim(*set_ylim)
+        ymin, ymax = set_ylim
+
+        if ymax is None:
+            auto_min, auto_max = ax.get_ylim()
+            ymax = auto_max + ylim_pad * (auto_max - auto_min)
+
+        ax.set_ylim(ymin, ymax)
 
     # Title
     if title and len(conds) > 0:
@@ -403,6 +411,7 @@ def plot_vary(
     y_label: str | None = None,
     set_xlim=None,
     set_ylim=None,
+    ylim_pad=0.2,
     percent_error: float = 0.0,
     legend_phi: bool = False,
     legend_stack: bool = True,
@@ -502,6 +511,7 @@ def plot_vary(
             y_label=y_label,
             set_xlim=set_xlim,
             set_ylim=set_ylim,
+            ylim_pad=ylim_pad,
             percent_error=percent_error,
             legend_phi=legend_phi,
             legend_stack=legend_stack,
@@ -542,6 +552,7 @@ def plot_multi(
     y_label: str | None = None,
     set_xlim=None,
     set_ylim=None,
+    ylim_pad=0.2,
     percent_error: float = 0.0,
     legend_phi: bool = False,
     legend_multi: bool = True,
@@ -639,6 +650,7 @@ def plot_multi(
             y_label=y_label if y_label is not None else "",
             set_xlim=set_xlim,
             set_ylim=set_ylim,
+            ylim_pad=ylim_pad,
             percent_error=percent_error,
             legend_phi=legend_phi,
             legend_stack=legend_multi,
@@ -695,6 +707,7 @@ def plot_twin(
     x_label: str | None = None,
     set_xlim=None,
     set_ylim=None,
+    ylim_pad=0.2,
     percent_error: float = 0.0,
     legend_phi: bool = False,
     legend_twin: bool = True,
@@ -794,31 +807,62 @@ def plot_twin(
 
         plotted_any = plotted_any or this_plotted
 
-    # Axis labels
-    ax_left.set_xlabel(x_label if x_label is not None else x_param)
+        # Position y-axes
+        ax_left.yaxis.set_label_position("left")
+        ax_left.yaxis.set_ticks_position("left")
 
-    ax_left.set_ylabel(y_labels[0])
-    ax_right.set_ylabel(y_labels[1])
+        ax_right.yaxis.set_label_position("right")
+        ax_right.yaxis.set_ticks_position("right")
 
-    # Match axis colors to plotted parameters
-    ax_left.yaxis.label.set_color(styles[0].get("color", _DEFAULT_COLORS[0]))
-    ax_right.yaxis.label.set_color(styles[1].get("color", _DEFAULT_COLORS[1]))
+        # Axis labels
+        ax_left.set_xlabel(x_label if x_label is not None else x_param)
+        ax_left.set_ylabel(y_labels[0])
+        ax_right.set_ylabel(y_labels[1])
 
-    ax_left.tick_params(
-        axis="y",
-        colors=styles[0].get("color", _DEFAULT_COLORS[0])
-    )
+        # Black axis labels and ticks
+        for axis in (ax_left, ax_right):
+            axis.yaxis.label.set_color("black")
+            axis.tick_params(
+                axis="y",
+                colors="black",
+                direction="in"
+            )
 
-    ax_right.tick_params(
-        axis="y",
-        colors=styles[1].get("color", _DEFAULT_COLORS[1])
-    )
+        ax_left.tick_params(
+            axis="x",
+            colors="black",
+            direction="in"
+        )
 
-    ax_left.tick_params(axis="x", direction="in")
-    ax_right.tick_params(axis="y", direction="in")
+        # Black axis spines
+        for axis in (ax_left, ax_right):
+            for spine in axis.spines.values():
+                spine.set_color("black")
 
     if set_xlim is not None:
         ax_left.set_xlim(*set_xlim)
+
+    if set_ylim is not None:
+
+        if len(set_ylim) != 2:
+            raise ValueError(
+                "set_ylim must contain two (min, max) tuples, "
+                "one for each y-axis."
+            )
+
+        for axis, limits in zip((ax_left, ax_right), set_ylim):
+
+            if limits is None:
+                continue
+
+            ymin, ymax = limits
+
+            # Add 50% upper padding when upper bound is automatic
+            if ymax is None:
+                auto_min, auto_max = axis.get_ylim()
+                ymax = auto_max + ylim_pad * (auto_max - auto_min)
+
+            axis.set_ylim(ymin, ymax)
 
     # Title
     if title:
@@ -869,6 +913,7 @@ def plot_contour2(
     set_min=None,
     fig_size=4,
     colorbar_label=None,
+    cbar_digits=2,
     suppress_colorbar=False,
     rot_angle=0,
     ngridr=50,
@@ -1052,7 +1097,13 @@ def plot_contour2(
         else:
             tx = [set_min]
 
-        cbar = fig.colorbar(mpbl, ax=ax, label=colorbar_label, ticks=tx)
+        cbar = fig.colorbar(
+            mpbl,
+            ax=ax,
+            label=colorbar_label,
+            ticks=tx,
+            format=FormatStrFormatter(f"%.{cbar_digits}f"),
+        )
 
     if title_str != '':
         title = True
@@ -1120,6 +1171,7 @@ def plot_contour_grid(
     close=True,
     shared_colorbar=True,
     colorbar_label=None,
+    cbar_digits=2,
     sort_key=None,
     on_duplicate="last",
     suppress_title=False,
@@ -1340,7 +1392,8 @@ def plot_contour_grid(
                 ax=axes,
                 fraction=0.02,
                 pad=0.02,
-                label=cbar_label
+                label=cbar_label,
+                format=FormatStrFormatter(f"%.{cbar_digits}f"),
             )
 
         figures[gkey] = (fig, axes)

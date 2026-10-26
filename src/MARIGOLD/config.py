@@ -20,6 +20,7 @@ from itertools import cycle
 from matplotlib import cm
 from matplotlib.font_manager import FontProperties
 from matplotlib.lines import Line2D
+from matplotlib.ticker import FormatStrFormatter
 from scipy import integrate
 from scipy import interpolate
 from scipy.optimize import minimize

@@ -1,42 +1,66 @@
 from ..config import *
 from .operations import *
 
-def approx_vf(cond, n = 7, overwrite_vf = False, verbose = True) -> None:
-    """Method for approximating :math:`v_{f}` with power-law relation. Authored by Adam Dix, modified by David Kang 11SEP25.
-    Original approx_vf() function could still overwrite ``'vf'`` parameter if ``'vf'`` did not exist.
-    Option to overwrite removed entirely, and this quarantined function will only ever assign values to ``'approx_vf'``.
-
-    .. math:: v_{f, approx} = \\frac{(n+1)(2n+1)}{ (2n^{2})}  (j_{f} / (1- \\langle \\alpha \\rangle))  (1 - |r^{*}|)^{1/n}
-    
-    **Args**:
-    
-        - ``n``: power. Defaults to 7.
-        - ``overwrite_vf``: will update ``'vf'`` even if it already exists. Defaults to False.
-    
-    **Returns**:
-    
-        - Area-averaged ``'vf_approx'``
-        - Stores: 
-            - ``'vf_approx'`` in ``midas_dict``
-            - ``'vf'``, if it does not alread exist in ``midas_dict``
+def approx_vf(cond, n=7, overwrite_vf=False, verbose=True, method='nonuniform', avg_method='legacy') -> float:
     """
+    Approximate liquid velocity using a 1/n power-law profile.
+
+    method='uniform':
+        Original formulation using area-averaged void fraction.
+
+    method='nonuniform':
+        Normalize using the measured local void-fraction distribution,
+        enforcing <(1-alpha) * vf_approx> = jf.
+
+    Returns
+    -------
+    Area-averaged 'vf_approx'.
+
+    Stores
+    ------
+    'vf_approx' : Approximated local liquid velocity.
+    'vf_weight' : Liquid-fraction-weighted profile (nonuniform method only).
+    """
+
+    if n <= 0:
+        raise ValueError("n must be positive.")
+
+    if method not in ('uniform', 'nonuniform'):
+        raise ValueError("method must be 'uniform' or 'nonuniform'.")
 
     cond.mirror()
 
+    if method == 'uniform':
+        alpha_avg = area_avg(cond, 'alpha', method=avg_method)
+        denominator = (1 - alpha_avg) * (2*n**2) / ((n+1)*(2*n+1))
+
+    elif method == 'nonuniform':
+        for angle, r_dict in cond.data.items():
+            for rstar, midas_dict in r_dict.items():
+                profile = (1 - abs(rstar))**(1/n)
+                midas_dict['vf_weight'] = (1 - midas_dict['alpha']) * profile
+
+        denominator = area_avg(cond, 'vf_weight', method=avg_method)
+
+    if not np.isfinite(denominator) or denominator <= 0:
+        raise ValueError("Invalid normalization denominator in approx_vf().")
+
+    vf_max = cond.jf / denominator
+
     for angle, r_dict in cond.data.items():
         for rstar, midas_dict in r_dict.items():
-            vf_approx = (n+1)*(2*n+1) / (2*n*n) * (cond.jf / (1-area_avg(cond,'alpha'))) * (1 - abs(rstar))**(1/n)
-            
-            if overwrite_vf and 'vf' in midas_dict.keys():
+            vf_approx = vf_max * (1 - abs(rstar))**(1/n)
+
+            if overwrite_vf and 'vf' in midas_dict:
                 if verbose:
                     print("Warning: Overwriting vf with approximated vf")
                     verbose = False
 
-                midas_dict.update({'vf': vf_approx})
-            
-            midas_dict.update({'vf_approx': vf_approx})
+                midas_dict['vf'] = vf_approx
 
-    return area_avg(cond,'vf_approx')
+            midas_dict['vf_approx'] = vf_approx
+
+    return area_avg(cond, 'vf_approx', method=avg_method)
 
 def approx_vg(cond, method = 'vr', n = 7, update_ug1 = False) -> None:
     """Method for approximating :math:`v_{g}` with power-law relation. I don't think this makes sense

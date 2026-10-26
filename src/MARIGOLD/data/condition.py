@@ -474,7 +474,7 @@ class Condition:
             method = 'axisym'
 
         if method == 'axisym':
-            # axisymmetric
+
             # Initial guess, prioritize 90 (DHK)
             if observer in angles_with_data:
                 ref_angle = observer
@@ -494,6 +494,7 @@ class Condition:
                 self.data[angle].update( data )
 
         elif method.lower() == 'avg_axisym':
+
             def is_populated(midas_dict):
                 if not midas_dict:
                     return False
@@ -508,10 +509,12 @@ class Condition:
 
             # Select the complementary pair with the most populated points
             # Prioritize the observer angle in the event of a tie
+
             ref_angle = None
             max_points = -1
 
             for angle in angles_with_data:
+                
                 if angle + 180 not in angles_with_data:
                     continue
 
@@ -536,6 +539,8 @@ class Condition:
 
             all_rs = set(temp_data.keys()) | set(comp_data.keys())
 
+            coordinate_params = ('roverR', 'signed_roverR')
+
             for rstar in all_rs:
 
                 ref_point = temp_data.get(rstar)
@@ -546,20 +551,21 @@ class Condition:
 
                 if ref_valid and comp_valid:
 
-                    avg_data[rstar] = {}
+                    avg_data[rstar] = deepcopy(ref_point)
 
                     for param in set(ref_point) | set(comp_point):
+
+                        # Do not average coordinate parameters
+                        if param in coordinate_params:
+                            continue
 
                         if param in ref_point and param in comp_point:
                             avg_data[rstar][param] = (
                                 ref_point[param] + comp_point[param]
                             ) / 2
 
-                        elif param in ref_point:
-                            avg_data[rstar][param] = ref_point[param]
-
-                        else:
-                            avg_data[rstar][param] = comp_point[param]
+                        elif param in comp_point:
+                            avg_data[rstar][param] = deepcopy(comp_point[param])
 
                 elif ref_valid:
                     avg_data[rstar] = deepcopy(ref_point)
@@ -568,7 +574,17 @@ class Condition:
                     avg_data[rstar] = deepcopy(comp_point)
 
                 else:
-                    avg_data[rstar] = deepcopy(zero_data)
+                    # Preserve existing artificial points and their parameters
+                    if ref_point is not None:
+                        avg_data[rstar] = deepcopy(ref_point)
+                    elif comp_point is not None:
+                        avg_data[rstar] = deepcopy(comp_point)
+                    else:
+                        avg_data[rstar] = deepcopy(zero_data)
+
+                # Preserve radial coordinates independently of averaging
+                avg_data[rstar]['roverR'] = rstar
+                avg_data[rstar]['signed_roverR'] = rstar
 
             for angle in self._angles:
                 self.data[angle] = deepcopy(avg_data)
